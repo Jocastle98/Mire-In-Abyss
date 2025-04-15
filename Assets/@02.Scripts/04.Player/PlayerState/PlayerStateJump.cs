@@ -4,20 +4,22 @@ using UnityEngine;
 
 public class PlayerStateJump : MonoBehaviour, IPlayerState
 {
-    private PlayerController _playerController;
+    private PlayerController mPlayerController;
     
     public void OnEnter(PlayerController playerController)
     {
-        _playerController = playerController;
+        mPlayerController = playerController;
+        mPlayerController.PlayerAnimator.SetTrigger("Jump");
+        mPlayerController.Jump();
     }
 
     public void OnUpdate()
     {
-        
+        mPlayerController.PlayerAnimator.SetFloat("GroundDistance", mPlayerController.GetDistanceToGround());
     }
 
     public void OnExit()
     {
-        
+        mPlayerController = null;
     }
 }

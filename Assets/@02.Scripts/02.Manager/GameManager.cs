@@ -1,25 +1,26 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.PlayerLoop;
 using UnityEngine.SceneManagement;
 
 public class GameManager : Singleton<GameManager>
 {
+    private InputManager minput = new InputManager();
+    public InputManager Input { get { return Instance.minput; } }
+    
     private void Start()
     {
-        // 커서 설정
-        Cursor.visible = false;
-        Cursor.lockState = CursorLockMode.Locked;
+
     }
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Escape))
-        {
-            Cursor.visible = !Cursor.visible;
-            Cursor.lockState = Cursor.visible ? CursorLockMode.Locked : CursorLockMode.None;
-        }
+        minput.OnInputUpdate();
     }
     
-    protected override void OnSceneLoaded(Scene scene, LoadSceneMode mode) { }
+    protected override void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        
+    }
 }
