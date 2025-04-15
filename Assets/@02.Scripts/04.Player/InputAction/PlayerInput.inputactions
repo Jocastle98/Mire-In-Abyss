@@ -24,15 +24,6 @@
                     "initialStateCheck": true
                 },
                 {
-                    "name": "Sprint",
-                    "type": "Button",
-                    "id": "4c5b2aa7-26c2-4722-81f7-e578fd0517a2",
-                    "expectedControlType": "",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": true
-                },
-                {
                     "name": "Jump",
                     "type": "Button",
                     "id": "f605c945-7300-4ab2-8b1c-944ada24cf6c",
@@ -313,7 +304,7 @@
                 {
                     "name": "",
                     "id": "af84a68a-b6ce-4181-92c1-6dc4ee83d8f2",
-                    "path": "<Keyboard>/f",
+                    "path": "<Keyboard>/space",
                     "interactions": "",
                     "processors": "",
                     "groups": ";Keyboard&Mouse",
@@ -324,7 +315,7 @@
                 {
                     "name": "",
                     "id": "03143c8b-fe8a-4c5f-9862-0d234f14125e",
-                    "path": "<Keyboard>/space",
+                    "path": "<Keyboard>/leftShift",
                     "interactions": "",
                     "processors": "",
                     "groups": ";Keyboard&Mouse",
@@ -364,17 +355,6 @@
                     "action": "Parry",
                     "isComposite": false,
                     "isPartOfComposite": true
-                },
-                {
-                    "name": "",
-                    "id": "f01e63d2-eed2-47e6-b9a2-6a72106c6e6e",
-                    "path": "<Keyboard>/leftShift",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Sprint",
-                    "isComposite": false,
-                    "isPartOfComposite": false
                 }
             ]
         },

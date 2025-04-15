@@ -8,7 +8,6 @@ public class InputManager
 {
     public Vector2 LookInput { get; private set; }
     public Vector2 MoveInput { get; private set; }
-    public bool SprintInput { get; private set; }
     public bool JumpInput { get; private set; }
     public bool RollInput { get; private set; }
     public bool AttackInput { get; private set; }
@@ -17,7 +16,6 @@ public class InputManager
 
     private InputAction mLookAction;
     private InputAction mMoveAction;
-    private InputAction mSprintAction;
     private InputAction mJumpAction;
     private InputAction mRollAction;
     private InputAction mAttackAction;
@@ -32,7 +30,6 @@ public class InputManager
         
         mLookAction = playerInput.actions["Look"];
         mMoveAction = playerInput.actions["Move"];
-        mSprintAction = playerInput.actions["Sprint"];
         mJumpAction = playerInput.actions["Jump"];
         mRollAction = playerInput.actions["Roll"];
         mAttackAction = playerInput.actions["Attack"];
@@ -49,7 +46,6 @@ public class InputManager
         
         LookInput = mLookAction.ReadValue<Vector2>();
         MoveInput = mMoveAction.ReadValue<Vector2>();
-        SprintInput = mSprintAction.IsPressed();
         JumpInput = mJumpAction.WasPressedThisFrame();
         RollInput = mRollAction.WasPressedThisFrame();
         AttackInput = mAttackAction.WasPressedThisFrame();

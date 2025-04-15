@@ -21,8 +21,9 @@ public class PlayerController : MonoBehaviour
     [Header("Action")] 
     [SerializeField] private float mMoveSpeed = 5.0f;
     public float MoveSpeed => mMoveSpeed;
-    [SerializeField] private float mTurnSpeed = 100.0f;
-    [SerializeField] private float mJumpForce = 5.0f;
+    [SerializeField] private float mTurnSpeed = 5.0f;
+    [SerializeField] private float mJumpForce = 10.0f;
+    [SerializeField] private float mRollForce = 10.0f;
     [SerializeField] private LayerMask mGroundLayer;
     [SerializeField] private float mMaxGroundCheckDistance = 10.0f;
 
@@ -47,7 +48,7 @@ public class PlayerController : MonoBehaviour
     
     // 외부에서 접근 가능한 변수
     public Animator PlayerAnimator { get; private set; }
-    public bool IsGrounded { get { return GetDistanceToGround() < 0.1f; } }
+    public bool bIsGrounded { get { return GetDistanceToGround() < 0.1f; } }
     
     // 내부에서만 사용되는 변수
     private Rigidbody mRigidbody;
@@ -101,10 +102,9 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
-        Debug.Log(mMoveSpeed);
         if (CurrentPlayerState != PlayerState.None)
         {
-            mPlayerStates[CurrentPlayerState]?.OnUpdate();
+            mPlayerStates[CurrentPlayerState].OnUpdate();
         }
     }
     
@@ -149,25 +149,13 @@ public class PlayerController : MonoBehaviour
         
     }
 
+    #region 회전/이동 관련
+
     public void SetPlayerMoveSpeed(float moveSpeed)
     {
         mMoveSpeed = moveSpeed;
     }
-
-    public float GetDistanceToGround()
-    {
-        // 너무 바닥에 딱 붙으면 오히려 감지 못하는 경우가 있음
-        Vector3 rayOrigin = transform.position + Vector3.up * 0.001f;
-        if (Physics.Raycast(rayOrigin, Vector3.down, out RaycastHit hit, mMaxGroundCheckDistance, mGroundLayer))
-        {
-            return hit.distance;
-        }
-        else
-        {
-            return mMaxGroundCheckDistance;
-        }
-    }
-
+    
     public void Movement(float vertical, float horizontal)
     {
         // 카메라 설정
@@ -185,31 +173,172 @@ public class PlayerController : MonoBehaviour
         // 이동 방향이 있을 경우에만 회전
         if (moveDirection != Vector3.zero)
         {
-            if (vertical > 0)
-            {
-                transform.rotation = Quaternion.LookRotation(moveDirection);
-            }
-            else if (vertical < 0)
-            {
-                transform.rotation = Quaternion.LookRotation(-moveDirection);
-            }
+            // 현재 방향
+            Quaternion currentRotation = transform.rotation;
+            Quaternion targetRotation = default;
             
-            transform.position += moveDirection * (mMoveSpeed * Time.deltaTime);
+            if (vertical >= 0)
+            {
+                // 목표 방향
+                targetRotation = Quaternion.LookRotation(moveDirection);
+            }
+            else
+            {
+                // 목표 방향
+                targetRotation = Quaternion.LookRotation(-moveDirection);
+            }
+
+            // 부드럽게 회전
+            transform.rotation = Quaternion.Slerp(currentRotation, targetRotation, mTurnSpeed * Time.deltaTime);
+
+            if (!CheckJumping() && !CheckRolling() && !mPlayerStateAttack.bIsAttacking)
+            {
+                transform.position += moveDirection * (mMoveSpeed * Time.deltaTime);
+            }
         }
     }
 
+    #endregion
+
+    #region 점프 관련
+
+    public float GetDistanceToGround()
+    {
+        // 너무 바닥에 딱 붙으면 오히려 감지 못하는 경우가 있음
+        Vector3 rayOrigin = transform.position + Vector3.up * 0.001f;
+        if (Physics.Raycast(rayOrigin, Vector3.down, out RaycastHit hit, mMaxGroundCheckDistance, mGroundLayer))
+        {
+            return hit.distance;
+        }
+        else
+        {
+            return mMaxGroundCheckDistance;
+        }
+    }
+    
     public void Jump()
     {
         Vector2 moveInput = GameManager.Instance.Input.MoveInput;
         
+        // 카메라 설정
+        var cameraTransform = Camera.main.transform;
+        var cameraForward = cameraTransform.forward;
+        var cameraRight = cameraTransform.right;
+        
+        // Y값을 0으로 설정해서 수평 방향만 고려
+        cameraForward.y = 0;
+        cameraRight.y = 0;
+        
+        // 입력 방향에 따라 카메라 기준으로 이동 방향 계산
+        var moveDirection = ((cameraForward * moveInput.y) + (cameraRight * moveInput.x)).normalized;
+        
         mRigidbody.AddForce(Vector3.up * mJumpForce, ForceMode.Impulse);
-        if (moveInput.y >= 0.0f)
+        
+        if (moveInput != Vector2.zero)
         {
-            mRigidbody.AddForce(transform.forward * mJumpForce, ForceMode.Impulse);
-        }
-        else if (moveInput.y < 0.0f)
-        {
-            mRigidbody.AddForce(-transform.forward * mJumpForce, ForceMode.Impulse);
+            mRigidbody.AddForce(moveDirection * mJumpForce, ForceMode.Impulse);
         }
     }
+
+    public bool CheckJumping()
+    {
+        return mPlayerStateJump.bIsJumping;
+    }
+
+    #endregion
+
+    #region 구르기 관련
+
+    public void Roll()
+    {
+        StartCoroutine(RollCoroutine());
+    }
+
+    private IEnumerator RollCoroutine()
+    {
+        Vector2 moveInput = GameManager.Instance.Input.MoveInput;
+
+        yield return new WaitForSeconds(0.2f);
+        
+        // 카메라 설정
+        var cameraTransform = Camera.main.transform;
+        var cameraForward = cameraTransform.forward;
+        var cameraRight = cameraTransform.right;
+        
+        // Y값을 0으로 설정해서 수평 방향만 고려
+        cameraForward.y = 0;
+        cameraRight.y = 0;
+        
+        // 입력 방향에 따라 카메라 기준으로 이동 방향 계산
+        var moveDirection = ((cameraForward * moveInput.y) + (cameraRight * moveInput.x)).normalized;
+        
+        if (moveInput != Vector2.zero)
+        {
+            mRigidbody.AddForce(moveDirection * mRollForce, ForceMode.Impulse);
+        }
+        else
+        {
+            // 방향 입력이 없을 때는 정면 기준으로 구르기
+            mRigidbody.AddForce(transform.forward * mRollForce, ForceMode.Impulse);
+        }
+        
+        yield return new WaitForSeconds(1.3f);
+        mRigidbody.velocity = Vector3.zero;
+    }
+    
+    public void RollStart()
+    {
+        if (CurrentPlayerState == PlayerState.Roll)
+        {
+            mPlayerStateRoll.bIsRolling = true;
+        }
+    }
+
+    public void RollEnd()
+    {
+        if (CurrentPlayerState == PlayerState.Roll)
+        {
+            mPlayerStateRoll.bIsRolling = false;
+        }
+    }
+
+    public bool CheckRolling()
+    {
+        return mPlayerStateRoll.bIsRolling;
+    }
+
+    #endregion
+
+    #region 공격 관련
+
+    public void MeleeAttackStart()
+    {
+        if (CurrentPlayerState == PlayerState.Attack)
+        {
+            mPlayerStateAttack.bIsAttacking = true;
+            // mWeaponController.AttackStart();
+        }
+    }
+
+    public void MeleeAttackEnd()
+    {
+        if (CurrentPlayerState == PlayerState.Attack)
+        {
+            mPlayerStateAttack.bIsAttacking = false;
+            mPlayerStateAttack.bIsComboEnable = true;
+            // mWeaponController.AttackEnd();
+        }
+    }
+    
+    public void ComboEnd()
+    {
+        mPlayerStateAttack.bIsComboEnable = false;
+    }
+    
+    public bool CheckEnableCombo()
+    {
+        return mPlayerStateAttack.bIsComboEnable;
+    }
+
+    #endregion
 }

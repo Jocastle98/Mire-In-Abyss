@@ -1,6 +1,7 @@
 using UnityEditor;
 using UnityEngine;
 using PlayerEnums;
+using Unity.VisualScripting;
 
 [CustomEditor(typeof(PlayerController))]
 public class PlayerControllerEditor : Editor
@@ -56,7 +57,7 @@ public class PlayerControllerEditor : Editor
         
         EditorGUILayout.BeginVertical(EditorStyles.helpBox);
         GUI.enabled = false;
-        EditorGUILayout.Toggle("지면 접촉", playerController.IsGrounded);
+        EditorGUILayout.Toggle("지면 접촉", playerController.bIsGrounded);
         GUI.enabled = true;
         EditorGUILayout.EndVertical();
         

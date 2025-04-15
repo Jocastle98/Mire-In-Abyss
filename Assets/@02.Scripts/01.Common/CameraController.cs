@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class CameraController : MonoBehaviour
 {
-    [SerializeField] private float mRotationSpeed = 100.0f;
+    [SerializeField] private float mRotationSpeed = 5.0f;
     [SerializeField] private float mDistance = 5.0f;
     [SerializeField] private LayerMask mObstacleLayerMask;
     

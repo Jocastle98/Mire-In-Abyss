@@ -3,16 +3,16 @@ using System.Collections.Generic;
 using PlayerEnums;
 using UnityEngine;
 
-public class PlayerAnimatorStateJump : StateMachineBehaviour
+public class PlayerAnimatorStateAttack : StateMachineBehaviour
 {
     // OnStateExit is called before OnStateExit is called on any state inside this state machine
     override public void OnStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
         PlayerController playerController = animator.GetComponent<PlayerController>();
-
-        if (playerController.bIsGrounded)
+        
+        if (!GameManager.Instance.Input.AttackInput && !playerController.CheckEnableCombo())
         {
-            playerController.SetPlayerState(PlayerState.Idle);
+            playerController.SetPlayerStateDelayed(PlayerState.Idle, 0.3f);
         }
     }
 }

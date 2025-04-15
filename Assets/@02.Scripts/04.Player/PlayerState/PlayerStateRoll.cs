@@ -1,14 +1,18 @@
 using System.Collections;
 using System.Collections.Generic;
+using PlayerEnums;
 using UnityEngine;
 
-public class PlayerStateRoll : MonoBehaviour, IPlayerState
+public class PlayerStateRoll : IPlayerState
 {
-    private PlayerController _playerController;
+    private PlayerController mPlayerController;
+    public bool bIsRolling = false;
     
     public void OnEnter(PlayerController playerController)
     {
-        _playerController = playerController;
+        mPlayerController = playerController;
+        mPlayerController?.PlayerAnimator.SetTrigger("Roll");
+        mPlayerController?.Roll();
     }
 
     public void OnUpdate()
@@ -18,6 +22,6 @@ public class PlayerStateRoll : MonoBehaviour, IPlayerState
 
     public void OnExit()
     {
-        
+        mPlayerController = null;
     }
 }

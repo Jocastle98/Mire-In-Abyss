@@ -2,13 +2,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerStateParry : MonoBehaviour, IPlayerState
+public class PlayerStateParry : IPlayerState
 {
-    private PlayerController _playerController;
+    private PlayerController mPlayerController;
     
     public void OnEnter(PlayerController playerController)
     {
-        _playerController = playerController;
+        mPlayerController = playerController;
     }
 
     public void OnUpdate()

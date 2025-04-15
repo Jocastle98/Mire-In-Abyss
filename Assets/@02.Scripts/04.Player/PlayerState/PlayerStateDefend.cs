@@ -2,13 +2,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerStateDefend : MonoBehaviour, IPlayerState
+public class PlayerStateDefend : IPlayerState
 {
-    private PlayerController _playerController;
+    private PlayerController mPlayerController;
     
     public void OnEnter(PlayerController playerController)
     {
-        _playerController = playerController;
+        mPlayerController = playerController;
     }
 
     public void OnUpdate()
