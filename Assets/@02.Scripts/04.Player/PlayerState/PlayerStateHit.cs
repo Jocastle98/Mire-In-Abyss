@@ -9,6 +9,7 @@ public class PlayerStateHit : IPlayerState
     public void OnEnter(PlayerController playerController)
     {
         mPlayerController = playerController;
+        mPlayerController.PlayerAnimator.SetTrigger("Hit");
     }
 
     public void OnUpdate()
@@ -18,6 +19,6 @@ public class PlayerStateHit : IPlayerState
 
     public void OnExit()
     {
-        
+        mPlayerController = null;
     }
 }

@@ -6,11 +6,12 @@ using UnityEngine;
 public class PlayerStateJump : IPlayerState
 {
     private PlayerController mPlayerController;
-    public bool bIsJumping = false;
+    public bool bIsJumping { get; set; }
     
     public void OnEnter(PlayerController playerController)
     {
         mPlayerController = playerController;
+        bIsJumping = false;
         mPlayerController.PlayerAnimator.SetTrigger("Jump");
         mPlayerController.Jump();
     }

@@ -67,6 +67,15 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "Dash",
+                    "type": "Button",
+                    "id": "87c1e1f8-4665-4644-8c46-4895bfad4057",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -324,37 +333,26 @@
                     "isPartOfComposite": false
                 },
                 {
-                    "name": "One Modifier",
-                    "id": "7f45a149-5c97-4713-9cfb-02a6d2dc6448",
-                    "path": "OneModifier",
+                    "name": "",
+                    "id": "cc7c9b84-28ef-45c9-ac51-84cd26dbb9fa",
+                    "path": "<Keyboard>/f",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "Parry",
-                    "isComposite": true,
+                    "action": "Dash",
+                    "isComposite": false,
                     "isPartOfComposite": false
                 },
                 {
-                    "name": "modifier",
-                    "id": "43061040-4180-4768-a72e-e5b8a4e136d5",
-                    "path": "<Keyboard>/leftShift",
+                    "name": "",
+                    "id": "cb7a5c5d-4b9c-427c-932e-06cf97a2c412",
+                    "path": "<Keyboard>/q",
                     "interactions": "",
                     "processors": "",
                     "groups": ";Keyboard&Mouse",
                     "action": "Parry",
                     "isComposite": false,
-                    "isPartOfComposite": true
-                },
-                {
-                    "name": "binding",
-                    "id": "17273af8-492a-4a8f-92f3-ad27d45a38d1",
-                    "path": "<Mouse>/rightButton",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": ";Keyboard&Mouse",
-                    "action": "Parry",
-                    "isComposite": false,
-                    "isPartOfComposite": true
+                    "isPartOfComposite": false
                 }
             ]
         },

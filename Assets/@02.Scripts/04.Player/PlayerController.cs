@@ -21,7 +21,8 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private LayerMask mGroundLayer;
     [SerializeField] private float mMaxGroundCheckDistance = 10.0f;
     public float MoveSpeed => mMoveSpeed;
-    [SerializeField] private float mMoveSpeed;
+    [SerializeField] private float mMoveSpeed = 2.0f;
+    public float TurnSpeed => mTurnSpeed;
     [SerializeField] private float mTurnSpeed = 10.0f;
     [SerializeField] private float mJumpForce = 10.0f;
     [SerializeField] private float mRollForce = 10.0f;
@@ -147,9 +148,29 @@ public class PlayerController : MonoBehaviour
         bool isJump = mPlayerStateJump.bIsJumping;
         bool isRoll = mPlayerStateRoll.bIsRolling;
         bool isAttack = mPlayerStateAttack.bIsAttacking;
+        bool isDefend = mPlayerStateDefend.bIsDefending;
+        bool isParry = mPlayerStateParry.bIsParrying;
 
-        // 땅의 바로 위에 있으면서 3가지 중 아무 행동도 하지 않을 경우 행동 가능
-        if (bIsGrounded && !isJump && !isRoll && !isAttack)
+        // 땅의 바로 위에 있으면서 5가지 중 아무 행동도 하지 않을 경우 다른 행동 가능
+        if (bIsGrounded && !isJump && !isRoll && !isAttack && !isDefend && !isParry)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    public bool ComboAttackCheck()
+    {
+        bool isComboEnable = mPlayerStateAttack.bIsComboEnable;
+        bool isJump = mPlayerStateJump.bIsJumping;
+        bool isRoll = mPlayerStateRoll.bIsRolling;
+        bool isDefend = mPlayerStateDefend.bIsDefending;
+        bool isParry = mPlayerStateParry.bIsParrying;
+        
+        if (bIsGrounded && isComboEnable && !isJump && !isRoll && !isDefend && !isParry)
         {
             return true;
         }
@@ -257,18 +278,37 @@ public class PlayerController : MonoBehaviour
     {
         Vector2 moveInput = GameManager.Instance.Input.MoveInput;
         
+        // 카메라 설정
+        var cameraTransform = Camera.main.transform;
+        var cameraForward = cameraTransform.forward;
+        var cameraRight = cameraTransform.right;
+        
+        // Y값을 0으로 설정해서 수평 방향만 고려
+        cameraForward.y = 0;
+        cameraRight.y = 0;
+        
+        // 입력 방향에 따라 카메라 기준으로 이동 방향 계산
+        var moveDirection = ((cameraForward * moveInput.y) + (cameraRight * moveInput.x)).normalized;
+        
         mRigidbody.AddForce(Vector3.up * mJumpForce, ForceMode.Impulse);
         
         if (moveInput != Vector2.zero)
         {
+            mRigidbody.AddForce(moveDirection * mJumpForce, ForceMode.Impulse);
+            
             if (moveInput.y >= 0)
             {
-                mRigidbody.AddForce(transform.forward * mJumpForce, ForceMode.Impulse);
+                transform.rotation = Quaternion.LookRotation(moveDirection);
             }
             else
             {
-                mRigidbody.AddForce(-transform.forward * mJumpForce, ForceMode.Impulse);
+                transform.rotation = Quaternion.LookRotation(-moveDirection);
             }
+        }
+        else
+        {
+            // 제자리 점프는 카메라 방향의 정면으로 점프
+            transform.rotation = Quaternion.LookRotation(cameraForward);
         }
     }
 
@@ -280,11 +320,6 @@ public class PlayerController : MonoBehaviour
     public void JumpEnd()
     {
         mPlayerStateJump.bIsJumping = false;
-    }
-
-    public bool CheckJumping()
-    {
-        return mPlayerStateJump.bIsJumping;
     }
 
     #endregion
@@ -300,24 +335,39 @@ public class PlayerController : MonoBehaviour
     {
         Vector2 moveInput = GameManager.Instance.Input.MoveInput;
 
+        // 카메라 설정
+        var cameraTransform = Camera.main.transform;
+        var cameraForward = cameraTransform.forward;
+        var cameraRight = cameraTransform.right;
+        
+        // Y값을 0으로 설정해서 수평 방향만 고려
+        cameraForward.y = 0;
+        cameraRight.y = 0;
+        
+        // 입력 방향에 따라 카메라 기준으로 이동 방향 계산
+        var moveDirection = ((cameraForward * moveInput.y) + (cameraRight * moveInput.x)).normalized;
+        
         // 애니메이션의 선 딜레이
         yield return new WaitForSeconds(0.2f);
         
         if (moveInput != Vector2.zero)
         {
+            mRigidbody.AddForce(moveDirection * mRollForce, ForceMode.Impulse);
+           
             if (moveInput.y >= 0)
             {
-                mRigidbody.AddForce(transform.forward * mRollForce, ForceMode.Impulse);
+                transform.rotation = Quaternion.LookRotation(moveDirection);
             }
             else
             {
-                mRigidbody.AddForce(-transform.forward * mRollForce, ForceMode.Impulse);
+                transform.rotation = Quaternion.LookRotation(-moveDirection);
             }
         }
         else
         {
-            // 방향 입력이 없을 때는 정면 기준으로 구르기
-            mRigidbody.AddForce(transform.forward * mRollForce, ForceMode.Impulse);
+            // 방향 입력이 없을 때는 카메라 방향의 정면으로 구르기
+            mRigidbody.AddForce(cameraForward * mRollForce, ForceMode.Impulse);
+            transform.rotation = Quaternion.LookRotation(cameraForward);
         }
         
         yield return new WaitForSeconds(1.3f);
@@ -340,11 +390,6 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    public bool CheckRolling()
-    {
-        return mPlayerStateRoll.bIsRolling;
-    }
-
     #endregion
 
     #region 공격 관련
@@ -354,6 +399,7 @@ public class PlayerController : MonoBehaviour
         if (CurrentPlayerState == PlayerState.Attack)
         {
             mPlayerStateAttack.bIsAttacking = true;
+            mPlayerStateAttack.bIsComboEnable = true;
             // mWeaponController.AttackStart();
         }
     }
@@ -363,7 +409,6 @@ public class PlayerController : MonoBehaviour
         if (CurrentPlayerState == PlayerState.Attack)
         {
             mPlayerStateAttack.bIsAttacking = false;
-            mPlayerStateAttack.bIsComboEnable = true;
             // mWeaponController.AttackEnd();
         }
     }
@@ -372,10 +417,15 @@ public class PlayerController : MonoBehaviour
     {
         mPlayerStateAttack.bIsComboEnable = false;
     }
-    
-    public bool CheckEnableCombo()
+
+    public void ParryStart()
     {
-        return mPlayerStateAttack.bIsComboEnable;
+        mPlayerStateParry.bIsParrying = true;
+    }
+
+    public void ParryEnd()
+    {
+        mPlayerStateParry.bIsParrying = false;
     }
 
     #endregion

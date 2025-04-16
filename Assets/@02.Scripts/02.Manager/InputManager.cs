@@ -9,8 +9,9 @@ public class BufferedInput
     private float bufferTime;
     private float timer;
     private bool isBuffered;
+    private bool isHolding;
 
-    public BufferedInput(float bufferTime = 0.2f)
+    public BufferedInput(float bufferTime = 0.5f)
     {
         this.bufferTime = bufferTime;
     }
@@ -19,6 +20,11 @@ public class BufferedInput
     {
         this.isBuffered = true;
         timer = bufferTime;
+    }
+
+    public void SetHold(bool isPressed)
+    {
+        isHolding = isPressed;
     }
 
     public void OnBufferUpdate(float deltaTime)
@@ -45,6 +51,7 @@ public class BufferedInput
     }
     
     public bool IsBuffered => isBuffered;
+    public bool IsHolding => isHolding;
 }
 
 public class InputManager
@@ -54,7 +61,8 @@ public class InputManager
     public bool JumpInput => mJumpBuffer.ConsumeInput();
     public bool RollInput => mRollBuffer.ConsumeInput();
     public bool AttackInput => mAttackBuffer.ConsumeInput();
-    public bool DefendInput => mDefendBuffer.ConsumeInput();
+    public bool DefendInput => mDefendBuffer.ConsumeInput(); // 단발성
+    public bool IsDefending => mDefendBuffer.IsHolding; // 지속 입력
     public bool ParryInput => mParryBuffer.ConsumeInput();
 
     private BufferedInput mJumpBuffer = new BufferedInput();
@@ -119,6 +127,7 @@ public class InputManager
         {
             mDefendBuffer.SetBuffer();
         }
+        mDefendBuffer.SetHold(mDefendAction.IsPressed());
         mDefendBuffer.OnBufferUpdate(deltaTime);
 
         if (mParryAction.WasPressedThisFrame())

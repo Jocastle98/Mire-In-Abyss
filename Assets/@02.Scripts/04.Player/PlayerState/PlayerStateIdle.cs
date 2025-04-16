@@ -24,6 +24,8 @@ public class PlayerStateIdle : IPlayerState
         JumpCheck();
         RollCheck();
         AttackCheck();
+        DefendCheck();
+        ParryCheck();
     }
 
     public void OnExit()
@@ -99,6 +101,34 @@ public class PlayerStateIdle : IPlayerState
         if (GameManager.Instance.Input.AttackInput && mPlayerController.ActionCheck())
         {
             mPlayerController.SetPlayerState(PlayerState.Attack);
+            return;
+        }
+    }
+
+    private void DefendCheck()
+    {
+        if (mPlayerController == null)
+        {
+            return;
+        }
+
+        if (GameManager.Instance.Input.DefendInput && mPlayerController.ActionCheck())
+        {
+            mPlayerController.SetPlayerState(PlayerState.Defend);
+            return;
+        }
+    }
+
+    private void ParryCheck()
+    {
+        if (mPlayerController == null)
+        {
+            return;
+        }
+
+        if (GameManager.Instance.Input.ParryInput && mPlayerController.ActionCheck())
+        {
+            mPlayerController.SetPlayerState(PlayerState.Parry);
             return;
         }
     }
