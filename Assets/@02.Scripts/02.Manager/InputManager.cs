@@ -4,16 +4,65 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 
+public class BufferedInput
+{
+    private float bufferTime;
+    private float timer;
+    private bool isBuffered;
+
+    public BufferedInput(float bufferTime = 0.2f)
+    {
+        this.bufferTime = bufferTime;
+    }
+
+    public void SetBuffer()
+    {
+        this.isBuffered = true;
+        timer = bufferTime;
+    }
+
+    public void OnBufferUpdate(float deltaTime)
+    {
+        if (isBuffered)
+        {
+            timer -= deltaTime;
+            if (timer <= 0.0f)
+            {
+                isBuffered = false;
+            }
+        }
+    }
+
+    public bool ConsumeInput()
+    {
+        if (isBuffered)
+        {
+            isBuffered = false;
+            return true;
+        }
+        
+        return false;
+    }
+    
+    public bool IsBuffered => isBuffered;
+}
+
 public class InputManager
 {
     public Vector2 LookInput { get; private set; }
     public Vector2 MoveInput { get; private set; }
-    public bool JumpInput { get; private set; }
-    public bool RollInput { get; private set; }
-    public bool AttackInput { get; private set; }
-    public bool DefendInput { get; private set; }
-    public bool ParryInput { get; private set; }
+    public bool JumpInput => mJumpBuffer.ConsumeInput();
+    public bool RollInput => mRollBuffer.ConsumeInput();
+    public bool AttackInput => mAttackBuffer.ConsumeInput();
+    public bool DefendInput => mDefendBuffer.ConsumeInput();
+    public bool ParryInput => mParryBuffer.ConsumeInput();
 
+    private BufferedInput mJumpBuffer = new BufferedInput();
+    private BufferedInput mRollBuffer = new BufferedInput();
+    private BufferedInput mAttackBuffer = new BufferedInput();
+    private BufferedInput mDefendBuffer = new BufferedInput();
+    private BufferedInput mParryBuffer = new BufferedInput();
+    
     private InputAction mLookAction;
     private InputAction mMoveAction;
     private InputAction mJumpAction;
@@ -46,10 +95,36 @@ public class InputManager
         
         LookInput = mLookAction.ReadValue<Vector2>();
         MoveInput = mMoveAction.ReadValue<Vector2>();
-        JumpInput = mJumpAction.WasPressedThisFrame();
-        RollInput = mRollAction.WasPressedThisFrame();
-        AttackInput = mAttackAction.WasPressedThisFrame();
-        DefendInput = mDefendAction.WasPressedThisFrame();
-        ParryInput = mParryAction.WasPressedThisFrame();
+
+        float deltaTime = Time.deltaTime;
+        if (mJumpAction.WasPressedThisFrame())
+        {
+            mJumpBuffer.SetBuffer();
+        }
+        mJumpBuffer.OnBufferUpdate(deltaTime);
+
+        if (mRollAction.WasPressedThisFrame())
+        {
+            mRollBuffer.SetBuffer();
+        }
+        mRollBuffer.OnBufferUpdate(deltaTime);
+
+        if (mAttackAction.WasPressedThisFrame())
+        {
+            mAttackBuffer.SetBuffer();
+        }
+        mAttackBuffer.OnBufferUpdate(deltaTime);
+
+        if (mDefendAction.WasPressedThisFrame())
+        {
+            mDefendBuffer.SetBuffer();
+        }
+        mDefendBuffer.OnBufferUpdate(deltaTime);
+
+        if (mParryAction.WasPressedThisFrame())
+        {
+            mParryBuffer.SetBuffer();
+        }
+        mParryBuffer.OnBufferUpdate(deltaTime);
     }
 }

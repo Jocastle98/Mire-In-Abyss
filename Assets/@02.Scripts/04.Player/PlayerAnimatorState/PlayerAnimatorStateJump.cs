@@ -8,11 +8,6 @@ public class PlayerAnimatorStateJump : StateMachineBehaviour
     // OnStateExit is called before OnStateExit is called on any state inside this state machine
     override public void OnStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
-        PlayerController playerController = animator.GetComponent<PlayerController>();
-
-        if (playerController.bIsGrounded)
-        {
-            playerController.SetPlayerState(PlayerState.Idle);
-        }
+        animator.GetComponent<PlayerController>().SetPlayerState(PlayerState.Idle);
     }
 }

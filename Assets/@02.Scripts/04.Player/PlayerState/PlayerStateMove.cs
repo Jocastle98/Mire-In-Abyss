@@ -6,14 +6,12 @@ using UnityEngine;
 public class PlayerStateMove : IPlayerState
 {
     private PlayerController mPlayerController;
-    private float mSpeed; // 0 = 걷기, 1 = 달리기
     private float originMoveSpeed;
     
     public void OnEnter(PlayerController playerController)
     {
         mPlayerController = playerController;
         mPlayerController?.PlayerAnimator.SetBool("Move", true);
-        mSpeed = 0.0f;
         originMoveSpeed = mPlayerController.MoveSpeed;
     }
 
@@ -36,18 +34,19 @@ public class PlayerStateMove : IPlayerState
     {
         Vector2 moveInput = GameManager.Instance.Input.MoveInput;
         
-        if ((moveInput.x != 0 || moveInput.y != 0) && mPlayerController.bIsGrounded)
+        if ((moveInput.x != 0 || moveInput.y != 0) && mPlayerController.ActionCheck())
         {
             mPlayerController?.Movement(moveInput.y, moveInput.x);
-            
+
+            float mSpeed = mPlayerController.walkAndRunSpeed;
             if (mSpeed < 1.0f)
             {
                 mSpeed += Time.deltaTime * 0.5f;
                 mSpeed = Mathf.Clamp01(mSpeed);
-                mPlayerController?.SetPlayerMoveSpeed(originMoveSpeed + (originMoveSpeed * 2.0f * (mSpeed / 1.0f)));
+                mPlayerController.SetWalkAndRunSpeed(mSpeed);
             }
             
-            mPlayerController?.PlayerAnimator.SetFloat("Horizontal", moveInput.x);
+            mPlayerController?.SetPlayerMoveSpeed(mPlayerController.AddMoveSpeed(originMoveSpeed, mSpeed));
             mPlayerController?.PlayerAnimator.SetFloat("Vertical", moveInput.y);
             mPlayerController?.PlayerAnimator.SetFloat("Speed", mSpeed);
         }
@@ -61,7 +60,7 @@ public class PlayerStateMove : IPlayerState
     
     private void JumpCheck()
     {
-        if (GameManager.Instance.Input.JumpInput && mPlayerController.bIsGrounded && !mPlayerController.CheckJumping())
+        if (GameManager.Instance.Input.JumpInput && mPlayerController.ActionCheck())
         {
             mPlayerController?.SetPlayerState(PlayerState.Jump);
             return;
@@ -70,7 +69,7 @@ public class PlayerStateMove : IPlayerState
     
     private void RollCheck()
     {
-        if (GameManager.Instance.Input.RollInput && mPlayerController.bIsGrounded && !mPlayerController.CheckRolling())
+        if (GameManager.Instance.Input.RollInput && mPlayerController.ActionCheck())
         {
             mPlayerController?.SetPlayerState(PlayerState.Roll);
             return;
@@ -79,7 +78,7 @@ public class PlayerStateMove : IPlayerState
     
     private void AttackCheck()
     {
-        if (GameManager.Instance.Input.AttackInput && mPlayerController.bIsGrounded)
+        if (GameManager.Instance.Input.AttackInput && mPlayerController.ActionCheck())
         {
             mPlayerController?.SetPlayerState(PlayerState.Attack);
             return;

@@ -1,4 +1,3 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using PlayerEnums;
@@ -13,19 +12,19 @@ public class PlayerController : MonoBehaviour
 {
     [Header("Stat")]
     [SerializeField] private int mMaxHealth = 100;
-    [SerializeField] private int mAttackPower = 10;
     public int AttackPower => mAttackPower;
-    [SerializeField] private int mDefensePower = 5;
+    [SerializeField] private int mAttackPower = 10;
     public int DefensePower => mDefensePower;
+    [SerializeField] private int mDefensePower = 5;
 
     [Header("Action")] 
-    [SerializeField] private float mMoveSpeed = 5.0f;
+    [SerializeField] private LayerMask mGroundLayer;
+    [SerializeField] private float mMaxGroundCheckDistance = 10.0f;
     public float MoveSpeed => mMoveSpeed;
+    [SerializeField] private float mMoveSpeed;
     [SerializeField] private float mTurnSpeed = 5.0f;
     [SerializeField] private float mJumpForce = 10.0f;
     [SerializeField] private float mRollForce = 10.0f;
-    [SerializeField] private LayerMask mGroundLayer;
-    [SerializeField] private float mMaxGroundCheckDistance = 10.0f;
 
     [Header("Attach Point")] 
     [SerializeField] private Transform mHeadTransform;
@@ -49,6 +48,7 @@ public class PlayerController : MonoBehaviour
     // 외부에서 접근 가능한 변수
     public Animator PlayerAnimator { get; private set; }
     public bool bIsGrounded { get { return GetDistanceToGround() < 0.1f; } }
+    public float walkAndRunSpeed { get; private set; } = 0.0f;
     
     // 내부에서만 사용되는 변수
     private Rigidbody mRigidbody;
@@ -102,6 +102,7 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
+        Debug.Log(mMoveSpeed);
         if (CurrentPlayerState != PlayerState.None)
         {
             mPlayerStates[CurrentPlayerState].OnUpdate();
@@ -133,6 +134,24 @@ public class PlayerController : MonoBehaviour
         mPlayerStates[CurrentPlayerState].OnEnter(this);
     }
 
+    public bool ActionCheck()
+    {
+        bool isJump = mPlayerStateJump.bIsJumping;
+        bool isRoll = mPlayerStateRoll.bIsRolling;
+        bool isAttack = mPlayerStateAttack.bIsAttacking;
+
+        // 땅의 바로 위에 있으면서 3가지 중 아무 행동도 하지 않을 경우 행동 가능
+        if (bIsGrounded && !isJump && !isRoll && !isAttack)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    // todo: 혹시 몰라 만들어 둠, 나중에도 사용 안하면 삭제 예정
     public void SetPlayerStateDelayed(PlayerState newPlayerState, float delay)
     {
         StartCoroutine(DelayedStateCoroutine(newPlayerState, delay));
@@ -151,9 +170,19 @@ public class PlayerController : MonoBehaviour
 
     #region 회전/이동 관련
 
-    public void SetPlayerMoveSpeed(float moveSpeed)
+    public void SetWalkAndRunSpeed(float newWalkAndRunSpeed)
     {
-        mMoveSpeed = moveSpeed;
+        walkAndRunSpeed = Mathf.Clamp01(newWalkAndRunSpeed);
+    }
+
+    public void SetPlayerMoveSpeed(float newPlayerMoveSpeed)
+    {
+        mMoveSpeed = newPlayerMoveSpeed;
+    }
+
+    public float AddMoveSpeed(float originMoveSpeed, float mSpeed)
+    {
+        return originMoveSpeed + (originMoveSpeed * 2.0f * (mSpeed / 1.0f));
     }
     
     public void Movement(float vertical, float horizontal)
@@ -182,7 +211,7 @@ public class PlayerController : MonoBehaviour
                 // 목표 방향
                 targetRotation = Quaternion.LookRotation(moveDirection);
             }
-            else
+            else if (vertical < 0)
             {
                 // 목표 방향
                 targetRotation = Quaternion.LookRotation(-moveDirection);
@@ -191,7 +220,7 @@ public class PlayerController : MonoBehaviour
             // 부드럽게 회전
             transform.rotation = Quaternion.Slerp(currentRotation, targetRotation, mTurnSpeed * Time.deltaTime);
 
-            if (!CheckJumping() && !CheckRolling() && !mPlayerStateAttack.bIsAttacking)
+            if (ActionCheck())
             {
                 transform.position += moveDirection * (mMoveSpeed * Time.deltaTime);
             }
@@ -238,6 +267,16 @@ public class PlayerController : MonoBehaviour
         {
             mRigidbody.AddForce(moveDirection * mJumpForce, ForceMode.Impulse);
         }
+    }
+
+    public void JumpStart()
+    {
+        mPlayerStateJump.bIsJumping = true;
+    }
+
+    public void JumpEnd()
+    {
+        mPlayerStateJump.bIsJumping = false;
     }
 
     public bool CheckJumping()

@@ -16,7 +16,7 @@ public class PlayerStateAttack : IPlayerState
 
     public void OnUpdate()
     {
-        if (GameManager.Instance.Input.AttackInput && mPlayerController.bIsGrounded && !bIsAttacking && bIsComboEnable)
+        if (GameManager.Instance.Input.AttackInput && mPlayerController.ActionCheck() && bIsComboEnable)
         {
             mPlayerController?.PlayerAnimator.SetTrigger("Attack");
             return;

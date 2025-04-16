@@ -13,13 +13,14 @@ public class PlayerStateIdle : IPlayerState
         mPlayerController = playerController;
         mPlayerController?.PlayerAnimator.SetBool("Idle", true);
         
-        mPlayerController?.PlayerAnimator.SetFloat("Horizontal", 0.0f);
+        mPlayerController.GetComponent<Rigidbody>().velocity = Vector3.zero;
         mPlayerController?.PlayerAnimator.SetFloat("Vertical", 0.0f);
     }
 
     public void OnUpdate()
     {
         MoveCheck();
+        WalkAndRunSpeedLess();
         JumpCheck();
         RollCheck();
         AttackCheck();
@@ -34,7 +35,7 @@ public class PlayerStateIdle : IPlayerState
     private void MoveCheck()
     {
         Vector2 moveInput = GameManager.Instance.Input.MoveInput;
-        if ((moveInput.x != 0 || moveInput.y != 0) && mPlayerController.bIsGrounded)
+        if ((moveInput.x != 0 || moveInput.y != 0) && mPlayerController.ActionCheck())
         {
             mPlayerController?.Movement(moveInput.x, moveInput.y);
             mPlayerController?.SetPlayerState(PlayerState.Move);
@@ -42,9 +43,27 @@ public class PlayerStateIdle : IPlayerState
         }
     }
 
+    private void WalkAndRunSpeedLess()
+    {
+        if (mPlayerController == null)
+        {
+            return;
+        }
+        
+        float mSpeed = mPlayerController.walkAndRunSpeed;
+        if (mSpeed > 0.0f)
+        {
+            mSpeed -= Time.deltaTime * 0.5f;
+            mSpeed = Mathf.Clamp01(mSpeed);
+            
+            mPlayerController?.SetWalkAndRunSpeed(mSpeed);
+            mPlayerController?.PlayerAnimator.SetFloat("Speed", mSpeed);
+        }
+    }
+
     private void JumpCheck()
     {
-        if (GameManager.Instance.Input.JumpInput && mPlayerController.bIsGrounded && !mPlayerController.CheckJumping())
+        if (GameManager.Instance.Input.JumpInput && mPlayerController.ActionCheck())
         {
             mPlayerController?.SetPlayerState(PlayerState.Jump);
             return;
@@ -53,7 +72,7 @@ public class PlayerStateIdle : IPlayerState
 
     private void RollCheck()
     {
-        if (GameManager.Instance.Input.RollInput && mPlayerController.bIsGrounded && !mPlayerController.CheckRolling())
+        if (GameManager.Instance.Input.RollInput && mPlayerController.ActionCheck())
         {
             mPlayerController?.SetPlayerState(PlayerState.Roll);
             return;
@@ -62,7 +81,7 @@ public class PlayerStateIdle : IPlayerState
 
     private void AttackCheck()
     {
-        if (GameManager.Instance.Input.AttackInput && mPlayerController.bIsGrounded)
+        if (GameManager.Instance.Input.AttackInput && mPlayerController.ActionCheck())
         {
             mPlayerController?.SetPlayerState(PlayerState.Attack);
             return;

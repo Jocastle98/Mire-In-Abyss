@@ -12,16 +12,10 @@ public class PlayerStateJump : IPlayerState
         mPlayerController = playerController;
         mPlayerController?.PlayerAnimator.SetTrigger("Jump");
         mPlayerController?.Jump();
-        bIsJumping = true;
     }
 
     public void OnUpdate()
     {
-        if (mPlayerController.bIsGrounded)
-        {
-            bIsJumping = false;
-        }
-        
         mPlayerController?.PlayerAnimator.SetFloat("GroundDistance", mPlayerController.GetDistanceToGround());
     }
 
