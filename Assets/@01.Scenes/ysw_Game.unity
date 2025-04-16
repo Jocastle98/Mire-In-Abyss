@@ -328,7 +328,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3455177064640499784, guid: f1062d26fdeb01b4ab5fd41cbaf09aea, type: 3}
       propertyPath: mJumpForce
-      value: 5
+      value: 7.5
       objectReference: {fileID: 0}
     - target: {fileID: 3455177064640499784, guid: f1062d26fdeb01b4ab5fd41cbaf09aea, type: 3}
       propertyPath: mMoveSpeed
@@ -340,12 +340,16 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3455177064640499784, guid: f1062d26fdeb01b4ab5fd41cbaf09aea, type: 3}
       propertyPath: mTurnSpeed
-      value: 5
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 3455177064640499784, guid: f1062d26fdeb01b4ab5fd41cbaf09aea, type: 3}
       propertyPath: mHeadTransform
       value: 
       objectReference: {fileID: 209318265}
+    - target: {fileID: 3455177064640499784, guid: f1062d26fdeb01b4ab5fd41cbaf09aea, type: 3}
+      propertyPath: mCurrentMoveSpeed
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 3455177064640499784, guid: f1062d26fdeb01b4ab5fd41cbaf09aea, type: 3}
       propertyPath: mLeftHandTransform
       value: 

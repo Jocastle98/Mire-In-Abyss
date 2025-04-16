@@ -3,21 +3,21 @@ using System.Collections.Generic;
 using PlayerEnums;
 using UnityEngine;
 
-public class PlayerStateRoll : IPlayerState
+public class PlayerStateLand : IPlayerState
 {
     private PlayerController mPlayerController;
-    public bool bIsRolling = false;
     
     public void OnEnter(PlayerController playerController)
     {
         mPlayerController = playerController;
-        mPlayerController.PlayerAnimator.SetTrigger("Roll");
-        mPlayerController.Roll();
     }
 
     public void OnUpdate()
     {
-        
+        if (mPlayerController.ActionCheck())
+        {
+            mPlayerController.SetPlayerState(PlayerState.Idle);
+        }
     }
 
     public void OnExit()

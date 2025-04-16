@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using PlayerEnums;
 using UnityEngine;
 
 public class PlayerStateJump : IPlayerState
@@ -10,13 +11,16 @@ public class PlayerStateJump : IPlayerState
     public void OnEnter(PlayerController playerController)
     {
         mPlayerController = playerController;
-        mPlayerController?.PlayerAnimator.SetTrigger("Jump");
-        mPlayerController?.Jump();
+        mPlayerController.PlayerAnimator.SetTrigger("Jump");
+        mPlayerController.Jump();
     }
 
     public void OnUpdate()
     {
-        mPlayerController?.PlayerAnimator.SetFloat("GroundDistance", mPlayerController.GetDistanceToGround());
+        if (mPlayerController.GetComponent<Rigidbody>().velocity.y < 0)
+        {
+            mPlayerController.SetPlayerState(PlayerState.Fall);
+        }
     }
 
     public void OnExit()

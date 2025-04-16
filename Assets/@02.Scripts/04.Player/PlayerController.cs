@@ -22,7 +22,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float mMaxGroundCheckDistance = 10.0f;
     public float MoveSpeed => mMoveSpeed;
     [SerializeField] private float mMoveSpeed;
-    [SerializeField] private float mTurnSpeed = 5.0f;
+    [SerializeField] private float mTurnSpeed = 10.0f;
     [SerializeField] private float mJumpForce = 10.0f;
     [SerializeField] private float mRollForce = 10.0f;
 
@@ -35,6 +35,8 @@ public class PlayerController : MonoBehaviour
     private PlayerStateIdle mPlayerStateIdle;
     private PlayerStateMove mPlayerStateMove;
     private PlayerStateJump mPlayerStateJump;
+    private PlayerStateFall mPlayerStateFall;
+    private PlayerStateLand mPlayerStateLand;
     private PlayerStateRoll mPlayerStateRoll;
     private PlayerStateAttack mPlayerStateAttack;
     private PlayerStateDefend mPlayerStateDefend;
@@ -70,6 +72,8 @@ public class PlayerController : MonoBehaviour
         mPlayerStateIdle = new PlayerStateIdle();
         mPlayerStateMove = new PlayerStateMove();
         mPlayerStateJump = new PlayerStateJump();
+        mPlayerStateFall = new PlayerStateFall();
+        mPlayerStateLand = new PlayerStateLand();
         mPlayerStateRoll = new PlayerStateRoll();
         mPlayerStateAttack = new PlayerStateAttack();
         mPlayerStateDefend = new PlayerStateDefend();
@@ -82,6 +86,8 @@ public class PlayerController : MonoBehaviour
             { PlayerState.Idle, mPlayerStateIdle },
             { PlayerState.Move, mPlayerStateMove },
             { PlayerState.Jump, mPlayerStateJump },
+            { PlayerState.Fall, mPlayerStateFall },
+            { PlayerState.Land, mPlayerStateLand },
             { PlayerState.Roll, mPlayerStateRoll },
             { PlayerState.Attack, mPlayerStateAttack },
             { PlayerState.Defend, mPlayerStateDefend },
@@ -102,10 +108,12 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
-        Debug.Log(mMoveSpeed);
         if (CurrentPlayerState != PlayerState.None)
         {
             mPlayerStates[CurrentPlayerState].OnUpdate();
+            
+            // 짦은 거리의 확인은 성능 문제가 크지 않다고 해서 Jump 상태에서 옮겨옴
+            PlayerAnimator.SetFloat("GroundDistance", GetDistanceToGround());
         }
     }
     
@@ -249,23 +257,18 @@ public class PlayerController : MonoBehaviour
     {
         Vector2 moveInput = GameManager.Instance.Input.MoveInput;
         
-        // 카메라 설정
-        var cameraTransform = Camera.main.transform;
-        var cameraForward = cameraTransform.forward;
-        var cameraRight = cameraTransform.right;
-        
-        // Y값을 0으로 설정해서 수평 방향만 고려
-        cameraForward.y = 0;
-        cameraRight.y = 0;
-        
-        // 입력 방향에 따라 카메라 기준으로 이동 방향 계산
-        var moveDirection = ((cameraForward * moveInput.y) + (cameraRight * moveInput.x)).normalized;
-        
         mRigidbody.AddForce(Vector3.up * mJumpForce, ForceMode.Impulse);
         
         if (moveInput != Vector2.zero)
         {
-            mRigidbody.AddForce(moveDirection * mJumpForce, ForceMode.Impulse);
+            if (moveInput.y >= 0)
+            {
+                mRigidbody.AddForce(transform.forward * mJumpForce, ForceMode.Impulse);
+            }
+            else
+            {
+                mRigidbody.AddForce(-transform.forward * mJumpForce, ForceMode.Impulse);
+            }
         }
     }
 
@@ -297,23 +300,19 @@ public class PlayerController : MonoBehaviour
     {
         Vector2 moveInput = GameManager.Instance.Input.MoveInput;
 
+        // 애니메이션의 선 딜레이
         yield return new WaitForSeconds(0.2f);
-        
-        // 카메라 설정
-        var cameraTransform = Camera.main.transform;
-        var cameraForward = cameraTransform.forward;
-        var cameraRight = cameraTransform.right;
-        
-        // Y값을 0으로 설정해서 수평 방향만 고려
-        cameraForward.y = 0;
-        cameraRight.y = 0;
-        
-        // 입력 방향에 따라 카메라 기준으로 이동 방향 계산
-        var moveDirection = ((cameraForward * moveInput.y) + (cameraRight * moveInput.x)).normalized;
         
         if (moveInput != Vector2.zero)
         {
-            mRigidbody.AddForce(moveDirection * mRollForce, ForceMode.Impulse);
+            if (moveInput.y >= 0)
+            {
+                mRigidbody.AddForce(transform.forward * mRollForce, ForceMode.Impulse);
+            }
+            else
+            {
+                mRigidbody.AddForce(-transform.forward * mRollForce, ForceMode.Impulse);
+            }
         }
         else
         {

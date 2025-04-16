@@ -8,6 +8,8 @@ namespace PlayerEnums
         Idle,
         Move,
         Jump,
+        Fall,
+        Land,
         Roll,
         Attack,
         Defend,

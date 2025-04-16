@@ -3,25 +3,27 @@ using System.Collections.Generic;
 using PlayerEnums;
 using UnityEngine;
 
-public class PlayerStateRoll : IPlayerState
+public class PlayerStateFall : IPlayerState
 {
     private PlayerController mPlayerController;
-    public bool bIsRolling = false;
     
     public void OnEnter(PlayerController playerController)
     {
         mPlayerController = playerController;
-        mPlayerController.PlayerAnimator.SetTrigger("Roll");
-        mPlayerController.Roll();
+        mPlayerController.PlayerAnimator.SetBool("Fall", true);
     }
 
     public void OnUpdate()
     {
-        
+        if (mPlayerController.ActionCheck())
+        {
+            mPlayerController.SetPlayerState(PlayerState.Land);
+        }
     }
 
     public void OnExit()
     {
+        mPlayerController.PlayerAnimator.SetBool("Fall", false);
         mPlayerController = null;
     }
 }

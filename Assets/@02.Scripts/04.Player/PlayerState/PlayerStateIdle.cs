@@ -11,10 +11,10 @@ public class PlayerStateIdle : IPlayerState
     public void OnEnter(PlayerController playerController)
     {
         mPlayerController = playerController;
-        mPlayerController?.PlayerAnimator.SetBool("Idle", true);
+        mPlayerController.PlayerAnimator.SetBool("Idle", true);
         
         mPlayerController.GetComponent<Rigidbody>().velocity = Vector3.zero;
-        mPlayerController?.PlayerAnimator.SetFloat("Vertical", 0.0f);
+        mPlayerController.PlayerAnimator.SetFloat("Vertical", 0.0f);
     }
 
     public void OnUpdate()
@@ -28,7 +28,7 @@ public class PlayerStateIdle : IPlayerState
 
     public void OnExit()
     {
-        mPlayerController?.PlayerAnimator.SetBool("Idle", false);
+        mPlayerController.PlayerAnimator.SetBool("Idle", false);
         mPlayerController = null;
     }
 
@@ -37,8 +37,8 @@ public class PlayerStateIdle : IPlayerState
         Vector2 moveInput = GameManager.Instance.Input.MoveInput;
         if ((moveInput.x != 0 || moveInput.y != 0) && mPlayerController.ActionCheck())
         {
-            mPlayerController?.Movement(moveInput.x, moveInput.y);
-            mPlayerController?.SetPlayerState(PlayerState.Move);
+            mPlayerController.Movement(moveInput.x, moveInput.y);
+            mPlayerController.SetPlayerState(PlayerState.Move);
             return;
         }
     }
@@ -56,34 +56,49 @@ public class PlayerStateIdle : IPlayerState
             mSpeed -= Time.deltaTime * 0.5f;
             mSpeed = Mathf.Clamp01(mSpeed);
             
-            mPlayerController?.SetWalkAndRunSpeed(mSpeed);
-            mPlayerController?.PlayerAnimator.SetFloat("Speed", mSpeed);
+            mPlayerController.SetWalkAndRunSpeed(mSpeed);
+            mPlayerController.PlayerAnimator.SetFloat("Speed", mSpeed);
         }
     }
 
     private void JumpCheck()
     {
+        if (mPlayerController == null)
+        {
+            return;
+        }
+        
         if (GameManager.Instance.Input.JumpInput && mPlayerController.ActionCheck())
         {
-            mPlayerController?.SetPlayerState(PlayerState.Jump);
+            mPlayerController.SetPlayerState(PlayerState.Jump);
             return;
         }
     }
 
     private void RollCheck()
     {
+        if (mPlayerController == null)
+        {
+            return;
+        }
+        
         if (GameManager.Instance.Input.RollInput && mPlayerController.ActionCheck())
         {
-            mPlayerController?.SetPlayerState(PlayerState.Roll);
+            mPlayerController.SetPlayerState(PlayerState.Roll);
             return;
         }
     }
 
     private void AttackCheck()
     {
+        if (mPlayerController == null)
+        {
+            return;
+        }
+        
         if (GameManager.Instance.Input.AttackInput && mPlayerController.ActionCheck())
         {
-            mPlayerController?.SetPlayerState(PlayerState.Attack);
+            mPlayerController.SetPlayerState(PlayerState.Attack);
             return;
         }
     }
