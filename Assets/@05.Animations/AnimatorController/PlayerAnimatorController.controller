@@ -90,7 +90,7 @@ BlendTree:
   m_Name: BlendTree
   m_Childs:
   - serializedVersion: 2
-    m_Motion: {fileID: -6026334587202174773, guid: 344ee3a74cd1d5a47a288b881d7e59e1, type: 3}
+    m_Motion: {fileID: -203655887218126122, guid: 9d6116016eb652c44a8422a0304473e1, type: 3}
     m_Threshold: 0
     m_Position: {x: 0, y: 0}
     m_TimeScale: 1
@@ -312,7 +312,7 @@ BlendTree:
   m_Name: BlendTree
   m_Childs:
   - serializedVersion: 2
-    m_Motion: {fileID: 6536522707908897095, guid: 5eb532550a80bbf45bf031b3d9918a1b, type: 3}
+    m_Motion: {fileID: -203655887218126122, guid: d19d8753a4bb05f4c9ad26d4c56f7b10, type: 3}
     m_Threshold: 0
     m_Position: {x: 0, y: 0}
     m_TimeScale: 1
@@ -979,12 +979,12 @@ AnimatorStateMachine:
   - {fileID: 3838796406088823889}
   m_EntryTransitions: []
   m_StateMachineTransitions:
-  - first: {fileID: 2181894456874488227}
-    second:
-    - {fileID: 1981475078520248677}
   - first: {fileID: 1106275369555944203}
     second:
     - {fileID: -4852159802336956621}
+  - first: {fileID: 2181894456874488227}
+    second:
+    - {fileID: 1981475078520248677}
   m_StateMachineBehaviours: []
   m_AnyStatePosition: {x: 50, y: 250, z: 0}
   m_EntryPosition: {x: 50, y: 120, z: 0}
