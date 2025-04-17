@@ -23,22 +23,31 @@ public class PlayerControllerEditor : Editor
         switch (playerController.CurrentPlayerState)
         {
             case PlayerState.None:
-                GUI.backgroundColor = new Color(1.0f, 1.0f, 1.0f);
+                GUI.backgroundColor = new Color(0.0f, 0.0f, 0.0f);
                 break;
             case PlayerState.Idle:
-                GUI.backgroundColor = new Color(0.0f, 0.0f, 1.0f);
+                GUI.backgroundColor = new Color(1.0f, 1.0f, 1.0f);
                 break;
             case PlayerState.Move:
-                GUI.backgroundColor = new Color(0.0f, 1.0f, 0.0f);
+                GUI.backgroundColor = new Color(1.0f, 0.0f, 0.0f);
                 break;
             case PlayerState.Jump:
+                GUI.backgroundColor = new Color(1.0f, 0.5f, 0.0f);
+                break;
+            case PlayerState.Roll:
                 GUI.backgroundColor = new Color(1.0f, 1.0f, 0.0f);
                 break;
             case PlayerState.Attack:
-                GUI.backgroundColor = new Color(0.0f, 1.0f, 1.0f);
+                GUI.backgroundColor = new Color(0.0f, 1.0f, 0.0f);
+                break;
+            case PlayerState.Defend:
+                GUI.backgroundColor = new Color(0.0f, 0.0f, 1.0f);
+                break;
+            case PlayerState.Parry:
+                GUI.backgroundColor = new Color(0.0f, 0.0f, 0.5f);
                 break;
             case PlayerState.Hit:
-                GUI.backgroundColor = new Color(1.0f, 0.0f, 0.0f);
+                GUI.backgroundColor = new Color(0.5f, 0.0f, 1.0f);
                 break;
             case PlayerState.Dead:
                 GUI.backgroundColor = new Color(0.0f, 0.0f, 0.0f);
@@ -57,7 +66,7 @@ public class PlayerControllerEditor : Editor
         
         EditorGUILayout.BeginVertical(EditorStyles.helpBox);
         GUI.enabled = false;
-        EditorGUILayout.Toggle("지면 접촉", playerController.bIsGrounded);
+        EditorGUILayout.Toggle("지면 접촉", playerController.mGroundChecker.bIsGrounded);
         GUI.enabled = true;
         EditorGUILayout.EndVertical();
         
@@ -78,9 +87,21 @@ public class PlayerControllerEditor : Editor
         {
             playerController.SetPlayerState(PlayerState.Jump);
         }
+        if (GUILayout.Button("Roll"))
+        {
+            playerController.SetPlayerState(PlayerState.Roll);
+        }
         if (GUILayout.Button("Attack"))
         {
             playerController.SetPlayerState(PlayerState.Attack);
+        }
+        if (GUILayout.Button("Defend"))
+        {
+            playerController.SetPlayerState(PlayerState.Defend);
+        }
+        if (GUILayout.Button("Parry"))
+        {
+            playerController.SetPlayerState(PlayerState.Parry);
         }
         if (GUILayout.Button("Hit"))
         {

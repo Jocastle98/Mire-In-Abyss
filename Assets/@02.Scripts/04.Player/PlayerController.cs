@@ -19,7 +19,6 @@ public class PlayerController : MonoBehaviour
 
     [Header("Action")] 
     [SerializeField] private LayerMask mGroundLayer;
-    [SerializeField] private float mMaxGroundCheckDistance = 10.0f;
     public float MoveSpeed => mMoveSpeed;
     [SerializeField] private float mMoveSpeed = 2.0f;
     public float TurnSpeed => mTurnSpeed;
@@ -50,7 +49,7 @@ public class PlayerController : MonoBehaviour
     
     // 외부에서 접근 가능한 변수
     public Animator PlayerAnimator { get; private set; }
-    public bool bIsGrounded { get { return GetDistanceToGround() < 0.1f; } }
+    public PlayerGroundChecker mGroundChecker;
     public float walkAndRunSpeed { get; private set; } = 0.0f;
     
     // 내부에서만 사용되는 변수
@@ -112,10 +111,9 @@ public class PlayerController : MonoBehaviour
         if (CurrentPlayerState != PlayerState.None)
         {
             mPlayerStates[CurrentPlayerState].OnUpdate();
-            
-            // 짦은 거리의 확인은 성능 문제가 크지 않다고 해서 Jump 상태에서 옮겨옴
-            PlayerAnimator.SetFloat("GroundDistance", GetDistanceToGround());
         }
+
+        CheckGrounded();
     }
     
     public void Init()
@@ -145,6 +143,7 @@ public class PlayerController : MonoBehaviour
 
     public bool ActionCheck()
     {
+        bool isGrounded = mGroundChecker.bIsGrounded;
         bool isJump = mPlayerStateJump.bIsJumping;
         bool isRoll = mPlayerStateRoll.bIsRolling;
         bool isAttack = mPlayerStateAttack.bIsAttacking;
@@ -152,7 +151,7 @@ public class PlayerController : MonoBehaviour
         bool isParry = mPlayerStateParry.bIsParrying;
 
         // 땅의 바로 위에 있으면서 5가지 중 아무 행동도 하지 않을 경우 다른 행동 가능
-        if (bIsGrounded && !isJump && !isRoll && !isAttack && !isDefend && !isParry)
+        if (isGrounded && !isJump && !isRoll && !isAttack && !isDefend && !isParry)
         {
             return true;
         }
@@ -160,18 +159,6 @@ public class PlayerController : MonoBehaviour
         {
             return false;
         }
-    }
-    
-    // todo: 혹시 몰라 만들어 둠, 나중에도 사용 안하면 삭제 예정
-    public void SetPlayerStateDelayed(PlayerState newPlayerState, float delay)
-    {
-        StartCoroutine(DelayedStateCoroutine(newPlayerState, delay));
-    }
-
-    private IEnumerator DelayedStateCoroutine(PlayerState newPlayerState, float delay)
-    {
-        yield return new WaitForSeconds(delay);
-        SetPlayerState(newPlayerState);
     }
 
     public void SetHit()
@@ -262,18 +249,9 @@ public class PlayerController : MonoBehaviour
 
     #region 점프 관련
 
-    public float GetDistanceToGround()
+    public void CheckGrounded()
     {
-        // 너무 바닥에 딱 붙으면 오히려 감지 못하는 경우가 있음
-        Vector3 rayOrigin = transform.position + Vector3.up * 0.001f;
-        if (Physics.Raycast(rayOrigin, Vector3.down, out RaycastHit hit, mMaxGroundCheckDistance, mGroundLayer))
-        {
-            return hit.distance;
-        }
-        else
-        {
-            return mMaxGroundCheckDistance;
-        }
+        PlayerAnimator.SetBool("IsGrounded", mGroundChecker.bIsGrounded);
     }
     
     public void Jump()
@@ -433,7 +411,6 @@ public class PlayerController : MonoBehaviour
     public void DefendEnd()
     {
         mPlayerStateDefend.bIsDefending = false;
-        //SetPlayerState(PlayerState.Idle);
     }
     
     public void ParryStart()
