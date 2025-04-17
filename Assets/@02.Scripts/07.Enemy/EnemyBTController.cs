@@ -42,10 +42,8 @@ public class EnemyBTController : MonoBehaviour
         // 2) 피격
         var hitSeq = new BTSequence(
             new BTCondition(() => _isHit),
-            new BTAction(() =>
-            {
+            new BTAction(() => {
                 _anim.SetTrigger("Hit");
-                _isHit = false;
                 _agent.isStopped = true;
                 _agent.ResetPath();
             })
@@ -170,6 +168,18 @@ public class EnemyBTController : MonoBehaviour
     public void OnAttackAnimationExit()
     {
         _isAttacking = false;
+    }
+    public void OnHitAnimationExit() {
+        _isHit = false;
+
+        // 바로 플레이어 추격으로 복귀
+        if (_target != null)
+        {
+            ClearAllBools();
+            _anim.SetBool("Trace", true);
+            _agent.isStopped = false;
+            _agent.SetDestination(_target.position);
+        }
     }
     
     public void SetHit()

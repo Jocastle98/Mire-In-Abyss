@@ -792,7 +792,7 @@ MonoBehaviour:
   detectAngle: 360
   playerMask:
     serializedVersion: 2
-    m_Bits: 64
+    m_Bits: 256
   patrolRadius: 5
   attackBehaviorAsset: {fileID: 11400000, guid: 8c90e2cfcd24a564ab2eb6e5bb9874bf, type: 2}
 --- !u!95 &6354803296981084445
