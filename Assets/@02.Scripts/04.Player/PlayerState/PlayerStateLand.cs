@@ -6,6 +6,7 @@ using UnityEngine;
 public class PlayerStateLand : IPlayerState
 {
     private PlayerController mPlayerController;
+    //public bool bIsLandEnd { get; set; }
     
     public void OnEnter(PlayerController playerController)
     {
@@ -14,10 +15,10 @@ public class PlayerStateLand : IPlayerState
 
     public void OnUpdate()
     {
-        if (mPlayerController.ActionCheck())
+        /*if (mPlayerController.ActionCheck())
         {
             mPlayerController.SetPlayerState(PlayerState.Idle);
-        }
+        }*/
     }
 
     public void OnExit()
