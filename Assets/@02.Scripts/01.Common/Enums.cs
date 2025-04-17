@@ -17,6 +17,12 @@ namespace PlayerEnums
         Hit,
         Dead
     }
+
+    public enum WeaponSwingDirection
+    {
+        LeftToRight,
+        RightToLeft
+    }
 }
 
 namespace ItemEnums

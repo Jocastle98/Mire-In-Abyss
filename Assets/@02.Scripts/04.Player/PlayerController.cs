@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using PlayerEnums;
@@ -8,7 +9,7 @@ using UnityEngine.Serialization;
 [RequireComponent(typeof(Rigidbody))]
 [RequireComponent(typeof(CapsuleCollider))]
 [RequireComponent(typeof(Animator))]
-public class PlayerController : MonoBehaviour
+public class PlayerController : MonoBehaviour, IObserver<GameObject>
 {
     [Header("Stat")]
     [SerializeField] private int mMaxHealth = 100;
@@ -57,6 +58,7 @@ public class PlayerController : MonoBehaviour
     private CapsuleCollider mCapsuleCollider;
     private PlayerInput mPlayerInput;
     private CameraController mCameraController;
+    private WeaponController mWeaponController;
     private int mCurrentHealth = 0;
 
     private void Awake()
@@ -103,7 +105,8 @@ public class PlayerController : MonoBehaviour
         mCurrentHealth = mMaxHealth;
         
         // 무기 할당
-        
+        SetPlayerWeapon(mRightHandTransform, "Longsword", 
+            mLeftHandTransform, "Shield");
     }
 
     private void Update()
@@ -161,9 +164,27 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    public void SetHit()
+    public void SetHit(TestEnemyController enemyController/*, Vector3 direction*/)
     {
-        
+        if (CurrentPlayerState != PlayerState.Hit)
+        {
+            //var enemyPower = enemyController.AttackPower;
+            //mCurrentHealth -= enemyPower;
+            
+            // 체력바 감소
+            //GameManager.Instance.SetHP((float)mCurrentHealth / mMaxHealth);
+
+            if (mCurrentHealth <= 0)
+            {
+                SetPlayerState(PlayerState.Dead);
+            }
+            else
+            {
+                SetPlayerState(PlayerState.Hit);
+                //PlayerAnimator.SetFloat("HitPosX", -direction.x);
+                //PlayerAnimator.SetFloat("HitPosY", -direction.z);
+            }
+        }
     }
 
     #region 회전/이동 관련
@@ -222,6 +243,8 @@ public class PlayerController : MonoBehaviour
             {
                 transform.position += moveDirection * (mMoveSpeed * Time.deltaTime);
             }
+            
+            //GetGroundAngle();
         }
     }
     
@@ -243,6 +266,18 @@ public class PlayerController : MonoBehaviour
         Vector3 correctionRotation = Quaternion.Euler(0.0f, angle, 0.0f) * cameraForwardDirection;
         Quaternion targetRotation = Quaternion.LookRotation(correctionRotation);
         transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, TurnSpeed * Time.deltaTime);
+    }
+
+    // 땅의 경사로에 따라 캐릭터의 수직 기울기 설정, 사용할지 몰라 나둠-> 미사용시 삭제
+    public void GetGroundAngle()
+    {
+        Ray ray = new Ray(transform.position + Vector3.up * 0.1f, Vector3.down);
+        if (Physics.Raycast(ray, out RaycastHit hit, 2.0f))
+        {
+            Vector3 surfaceNormal = hit.normal;
+            Quaternion targetRotation = Quaternion.FromToRotation(transform.up, surfaceNormal) * transform.rotation;
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime);
+        }
     }
 
     #endregion
@@ -308,11 +343,12 @@ public class PlayerController : MonoBehaviour
 
     public void FallCheck()
     {
-        if (!mPlayerGroundChecker.bIsGrounded && mRigidbody.velocity.y < 0)
+        if (!mPlayerGroundChecker.bIsGrounded && mRigidbody.velocity.y < -0.1f)
         {
             SetPlayerState(PlayerState.Fall);
         }
     }
+    
     #endregion
 
     #region 구르기 관련
@@ -385,13 +421,30 @@ public class PlayerController : MonoBehaviour
 
     #region 공격 관련
 
+    private void SetPlayerWeapon(Transform rightHandTransform, string rightWeaponName,
+        Transform leftHandTransform = null, string leftWeaponName = null)
+    {
+        var rightWeaponObject = Resources.Load<GameObject>($"Player/Weapons/{rightWeaponName}");
+        var rightWeapon = Instantiate(rightWeaponObject, rightHandTransform).GetComponent<WeaponController>();
+        rightWeapon.Subscribe(this);
+
+        mWeaponController = rightWeapon;
+
+        if (leftHandTransform != null)
+        {
+            var leftWeaponObject = Resources.Load<GameObject>($"Player/Weapons/{leftWeaponName}");
+            var leftWeapon = Instantiate(leftWeaponObject, leftHandTransform);
+        }
+    }
+    
     public void MeleeAttackStart()
     {
         if (CurrentPlayerState == PlayerState.Attack)
         {
             mPlayerStateAttack.bIsAttacking = true;
             mPlayerStateAttack.bIsComboEnable = true;
-            // mWeaponController.AttackStart();
+            
+            mWeaponController.AttackStart();
         }
     }
 
@@ -400,7 +453,8 @@ public class PlayerController : MonoBehaviour
         if (CurrentPlayerState == PlayerState.Attack)
         {
             mPlayerStateAttack.bIsAttacking = false;
-            // mWeaponController.AttackEnd();
+            
+            mWeaponController.AttackEnd();
         }
     }
     
@@ -435,4 +489,23 @@ public class PlayerController : MonoBehaviour
     }
 
     #endregion
+
+    public void OnNext(GameObject value)
+    {
+        var enemyController = value.GetComponent<TestEnemyController>();
+        if (enemyController)
+        {
+            enemyController.SetHit(this);
+        }
+    }
+
+    public void OnError(Exception error)
+    {
+        
+    }
+
+    public void OnCompleted()
+    {
+        mWeaponController.Unsubscribe(this);
+    }
 }
