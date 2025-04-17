@@ -6,23 +6,33 @@ using UnityEngine;
 public class PlayerStateAttack : IPlayerState
 {
     private PlayerController mPlayerController;
-    public bool bIsAttacking { get; set; }
+    private Vector3 mCameraForward;
     public bool bIsComboEnable { get; set; }
+    public bool bIsComboInputCheck { get; set; }
+    public bool bIsAttacking { get; set; }
     
     public void OnEnter(PlayerController playerController)
     {
         mPlayerController = playerController;
+        mCameraForward = mPlayerController.GetCameraForwardDirection();
+        
+        bIsComboEnable = true;
+        bIsComboInputCheck = false;
         bIsAttacking = false;
-        bIsComboEnable = false;
+        
         mPlayerController.PlayerAnimator.SetTrigger("Attack");
     }
 
     public void OnUpdate()
     {
-        AttackRotate();
+        mPlayerController.SetCameraForwardRotate(mCameraForward, 0.0f);
         
         if (GameManager.Instance.Input.AttackInput && bIsComboEnable)
         {
+            mCameraForward = mPlayerController.GetCameraForwardDirection();
+            
+            bIsComboInputCheck = true;
+            
             mPlayerController.PlayerAnimator.SetTrigger("Attack");
             return;
         }
@@ -31,20 +41,5 @@ public class PlayerStateAttack : IPlayerState
     public void OnExit()
     {
         mPlayerController = null;
-    }
-    
-    private void AttackRotate()
-    {
-        // 카메라 설정
-        var cameraTransform = Camera.main.transform;
-        var cameraForward = cameraTransform.forward;
-        
-        // Y값을 0으로 설정해서 수평 방향만 고려
-        cameraForward.y = 0;
-        cameraForward.Normalize();
-        
-        Quaternion targetRotation = Quaternion.LookRotation(cameraForward);
-        mPlayerController.transform.rotation = Quaternion.Slerp(mPlayerController.transform.rotation, 
-            targetRotation, mPlayerController.TurnSpeed * Time.deltaTime);
     }
 }

@@ -940,19 +940,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0ddcd4a207e3fd544be43345cd4807de, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHealth: 100
-  attackPower: 10
-  defensePower: 5
-  moveSpeed: 5
-  turnSpeed: 100
-  jumpForce: 5
-  groundLayer:
+  mMaxHealth: 100
+  mAttackPower: 10
+  mDefensePower: 5
+  mGroundLayer:
     serializedVersion: 2
     m_Bits: 8
-  maxGroundCheckDistance: 10
-  headTransform: {fileID: 1724516167043575813}
-  rightHandTransform: {fileID: 4296091698391587436}
-  leftHandTransform: {fileID: 3627862843991566497}
+  mMaxGroundCheckDistance: 10
+  mMoveSpeed: 2
+  mTurnSpeed: 10
+  mJumpForce: 10
+  mRollForce: 10
+  mHeadTransform: {fileID: 1724516167043575813}
+  mRightHandTransform: {fileID: 4296091698391587436}
+  mLeftHandTransform: {fileID: 3627862843991566497}
 --- !u!1 &1895257474821353830
 GameObject:
   m_ObjectHideFlags: 0

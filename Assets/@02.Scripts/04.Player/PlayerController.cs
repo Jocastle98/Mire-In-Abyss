@@ -161,25 +161,7 @@ public class PlayerController : MonoBehaviour
             return false;
         }
     }
-
-    public bool ComboAttackCheck()
-    {
-        bool isComboEnable = mPlayerStateAttack.bIsComboEnable;
-        bool isJump = mPlayerStateJump.bIsJumping;
-        bool isRoll = mPlayerStateRoll.bIsRolling;
-        bool isDefend = mPlayerStateDefend.bIsDefending;
-        bool isParry = mPlayerStateParry.bIsParrying;
-        
-        if (bIsGrounded && isComboEnable && !isJump && !isRoll && !isDefend && !isParry)
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
-
+    
     // todo: 혹시 몰라 만들어 둠, 나중에도 사용 안하면 삭제 예정
     public void SetPlayerStateDelayed(PlayerState newPlayerState, float delay)
     {
@@ -198,7 +180,7 @@ public class PlayerController : MonoBehaviour
     }
 
     #region 회전/이동 관련
-
+    
     public void SetWalkAndRunSpeed(float newWalkAndRunSpeed)
     {
         walkAndRunSpeed = Mathf.Clamp01(newWalkAndRunSpeed);
@@ -254,6 +236,26 @@ public class PlayerController : MonoBehaviour
                 transform.position += moveDirection * (mMoveSpeed * Time.deltaTime);
             }
         }
+    }
+    
+    public Vector3 GetCameraForwardDirection()
+    {
+        // 카메라 설정
+        var cameraTransform = Camera.main.transform;
+        var cameraForward = cameraTransform.forward;
+        
+        // Y값을 0으로 설정해서 수평 방향만 고려
+        cameraForward.y = 0;
+        cameraForward.Normalize();
+        
+        return cameraForward;
+    }
+    
+    public void SetCameraForwardRotate(Vector3 cameraForwardDirection, float angle)
+    {
+        Vector3 correctionRotation = Quaternion.Euler(0.0f, angle, 0.0f) * cameraForwardDirection;
+        Quaternion targetRotation = Quaternion.LookRotation(correctionRotation);
+        transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, TurnSpeed * Time.deltaTime);
     }
 
     #endregion
@@ -418,6 +420,16 @@ public class PlayerController : MonoBehaviour
         mPlayerStateAttack.bIsComboEnable = false;
     }
 
+    public bool ComboAttackCheck()
+    {
+        return mPlayerStateAttack.bIsComboInputCheck;
+    }
+
+    public void SetComboInputFalse()
+    {
+        mPlayerStateAttack.bIsComboInputCheck = false;
+    }
+    
     public void ParryStart()
     {
         mPlayerStateParry.bIsParrying = true;
