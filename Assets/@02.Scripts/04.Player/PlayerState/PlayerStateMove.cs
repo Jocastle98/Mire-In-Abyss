@@ -19,7 +19,6 @@ public class PlayerStateMove : IPlayerState
     {
         Moving();
         JumpCheck();
-        mPlayerController?.FallCheck();
         RollCheck();
         AttackCheck();
         DefendCheck();

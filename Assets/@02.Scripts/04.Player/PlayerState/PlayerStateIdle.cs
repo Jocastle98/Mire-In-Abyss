@@ -22,7 +22,6 @@ public class PlayerStateIdle : IPlayerState
         MoveCheck();
         WalkAndRunSpeedLess();
         JumpCheck();
-        mPlayerController?.FallCheck();
         RollCheck();
         AttackCheck();
         DefendCheck();

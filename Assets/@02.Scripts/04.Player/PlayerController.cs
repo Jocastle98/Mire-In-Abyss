@@ -300,19 +300,8 @@ public class PlayerController : MonoBehaviour
     public void JumpEnd()
     {
         mPlayerStateJump.bIsJumping = false;
-        if (ActionCheck())
-        {
-            SetPlayerState(PlayerState.Idle);
-        }
     }
 
-    public void FallCheck()
-    {
-        if (!mGroundChecker.bIsGrounded && mRigidbody.velocity.y < 0)
-        {
-            SetPlayerState(PlayerState.Fall);
-        }
-    }
     #endregion
 
     #region 구르기 관련
