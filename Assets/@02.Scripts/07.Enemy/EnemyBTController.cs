@@ -22,6 +22,7 @@ public class EnemyBTController : MonoBehaviour
     private BTNode       _root;
 
     private bool _isAttacking = false;
+    private bool _isHit       = false;
 
     void Awake()
     {
@@ -40,8 +41,14 @@ public class EnemyBTController : MonoBehaviour
 
         // 2) 피격
         var hitSeq = new BTSequence(
-            new BTCondition(() => false),                    
-            new BTAction(() => _anim.SetTrigger("Hit"))
+            new BTCondition(() => _isHit),
+            new BTAction(() =>
+            {
+                _anim.SetTrigger("Hit");
+                _isHit = false;
+                _agent.isStopped = true;
+                _agent.ResetPath();
+            })
         );
 
         // 3) 플레이어 감지
@@ -163,5 +170,10 @@ public class EnemyBTController : MonoBehaviour
     public void OnAttackAnimationExit()
     {
         _isAttacking = false;
+    }
+    
+    public void SetHit()
+    {
+        _isHit = true;
     }
 }

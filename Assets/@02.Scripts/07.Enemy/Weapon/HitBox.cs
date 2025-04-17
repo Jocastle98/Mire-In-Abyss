@@ -24,7 +24,14 @@ public class HitBox : MonoBehaviour
         // {
         //     health.ApplyDamage(damage);
         // }
-             Debug.Log("무기 히트! 데미지 적용");
+        // 몬스터 컨트롤러 찾아서 SetHit 호출
+        var enemy = other.GetComponent<EnemyBTController>();
+        if (enemy != null)
+        {
+            enemy.SetHit();
+            Debug.Log("무기 히트! 데미지 적용");
+
+        }
 
     }
 }

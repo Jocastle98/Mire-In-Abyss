@@ -44,7 +44,6 @@ public class PlayerController : MonoBehaviour
     private PlayerStateParry mPlayerStateParry;
     private PlayerStateHit mPlayerStateHit;
     private PlayerStateDead mPlayerStateDead;
-    
     public PlayerState CurrentPlayerState { get; private set; }
     private Dictionary<PlayerState, IPlayerState> mPlayerStates;
     
@@ -59,6 +58,10 @@ public class PlayerController : MonoBehaviour
     private PlayerInput mPlayerInput;
     private CameraController mCameraController;
     private int mCurrentHealth = 0;
+
+    
+    // 몬스터 타격 실험 지워도됨    
+    [SerializeField] private WeaponHitboxController weaponHitbox;
 
     private void Awake()
     {
@@ -401,6 +404,9 @@ public class PlayerController : MonoBehaviour
             mPlayerStateAttack.bIsAttacking = true;
             mPlayerStateAttack.bIsComboEnable = true;
             // mWeaponController.AttackStart();
+            
+            // 몬스터 타격 실험 공격 애니메이션인데 이부분 이름 통일시켜도 될듯
+            weaponHitbox.EnableHitbox(); 
         }
     }
 
@@ -410,6 +416,9 @@ public class PlayerController : MonoBehaviour
         {
             mPlayerStateAttack.bIsAttacking = false;
             // mWeaponController.AttackEnd();
+            
+            //몬스터 타격 실험
+            weaponHitbox.DisableHitbox();
         }
     }
     
