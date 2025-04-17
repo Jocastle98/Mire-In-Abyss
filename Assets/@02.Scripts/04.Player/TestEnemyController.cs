@@ -1,18 +1,21 @@
 using System;
 using UnityEngine;
 
+[RequireComponent(typeof(Animator))]
 [RequireComponent(typeof(Rigidbody))]
 [RequireComponent(typeof(CapsuleCollider))]
 public class TestEnemyController : MonoBehaviour
 {
     [SerializeField] private int maxHealth = 100;
-    private int _currentHealth;
+    [SerializeField] private int _currentHealth;
 
+    private Animator _animator;
     private Rigidbody _rigidbody;
     private CapsuleCollider _capsuleCollider;
 
     private void Awake()
     {
+        _animator = GetComponent<Animator>();
         _rigidbody = GetComponent<Rigidbody>();
         _capsuleCollider = GetComponent<CapsuleCollider>();
 
@@ -31,13 +34,15 @@ public class TestEnemyController : MonoBehaviour
         if (_currentHealth <= 0) return;
 
         Debug.Log("허수아비 히트!");
-
+        _animator.SetTrigger("Hit");
+        
         _currentHealth -= playerController.AttackPower;
         Debug.Log($"현재 체력: {_currentHealth}/{maxHealth}");
 
         if (_currentHealth <= 0)
         {
             Debug.Log("허수아비 파괴됨!");
+            _animator.SetTrigger("Dead");
 
             _rigidbody.isKinematic = false;
             _rigidbody.useGravity = true;

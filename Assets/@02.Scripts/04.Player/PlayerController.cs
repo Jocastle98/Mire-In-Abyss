@@ -421,6 +421,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
 
     #region 공격 관련
 
+    // 장비 세팅 메서드
     private void SetPlayerWeapon(Transform rightHandTransform, string rightWeaponName,
         Transform leftHandTransform = null, string leftWeaponName = null)
     {
@@ -437,6 +438,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         }
     }
     
+    // 공격 애니메이션의 공격 모션 시작 시 호출 메서드
     public void MeleeAttackStart()
     {
         if (CurrentPlayerState == PlayerState.Attack)
@@ -448,6 +450,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         }
     }
 
+    // 공격 애니메이션의 공격 모션 종료 시 호출되는 메서드
     public void MeleeAttackEnd()
     {
         if (CurrentPlayerState == PlayerState.Attack)
@@ -458,6 +461,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         }
     }
     
+    // 공격 애니메이션의 모션이 끝나기 직전 호출되는 메서드
     public void ComboEnd()
     {
         mPlayerStateAttack.bIsComboEnable = false;
@@ -488,8 +492,6 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         mPlayerStateParry.bIsParrying = false;
     }
 
-    #endregion
-
     public void OnNext(GameObject value)
     {
         var enemyController = value.GetComponent<TestEnemyController>();
@@ -508,4 +510,6 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     {
         mWeaponController.Unsubscribe(this);
     }
+
+    #endregion
 }
