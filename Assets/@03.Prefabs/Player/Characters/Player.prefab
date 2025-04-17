@@ -3150,7 +3150,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4111894529820190306}
   - component: {fileID: 4938245654693393536}
-  - component: {fileID: 8621452415389371179}
+  - component: {fileID: 3290143487192683570}
   m_Layer: 8
   m_Name: PlayerGroundChecker
   m_TagString: Untagged
@@ -3185,8 +3185,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0830df5e0d7cdff468cb690350c6328a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!135 &8621452415389371179
-SphereCollider:
+--- !u!136 &3290143487192683570
+CapsuleCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -3203,8 +3203,10 @@ SphereCollider:
   m_IsTrigger: 1
   m_ProvidesContacts: 0
   m_Enabled: 1
-  serializedVersion: 3
-  m_Radius: 0.4
+  serializedVersion: 2
+  m_Radius: 0.3
+  m_Height: 1
+  m_Direction: 2
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &6015604379782204916
 GameObject:
