@@ -16,7 +16,6 @@ public class HitBox : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        // 플레이어 레이어에만 반응
         if ((hitLayer.value & (1 << other.gameObject.layer)) == 0)
             return;
 

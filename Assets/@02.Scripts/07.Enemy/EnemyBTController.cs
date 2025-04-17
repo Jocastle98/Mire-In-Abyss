@@ -5,15 +5,15 @@ using UnityEngine.AI;
 public class EnemyBTController : MonoBehaviour
 {
     [Header("감지 설정")]
-    public float      detectRadius        = 10f;   // 감지 반경
-    public float      detectAngle         = 360f;  // 감지 시야각
-    public LayerMask  playerMask;                  // 플레이어 레이어 마스크
+    public float      detectRadius        = 10f;  
+    public float      detectAngle         = 360f;  
+    public LayerMask  playerMask;                 
 
     [Header("순찰 설정")]
-    public float      patrolRadius        = 5f;    // 순찰 범위
+    public float      patrolRadius        = 5f;    
 
     [Header("공격 전략")]
-    public ScriptableObject attackBehaviorAsset;   // 공격 전략 ScriptableObject
+    public ScriptableObject attackBehaviorAsset;   
     private IAttackBehavior  attackBehavior;
 
     private NavMeshAgent _agent;
@@ -21,7 +21,6 @@ public class EnemyBTController : MonoBehaviour
     private Transform    _target;
     private BTNode       _root;
 
-    // --- 새로 추가된 플래그 ---
     private bool _isAttacking = false;
 
     void Awake()
@@ -35,13 +34,13 @@ public class EnemyBTController : MonoBehaviour
     {
         // 1) 사망
         var deadSeq = new BTSequence(
-            new BTCondition(() => false),                     // 체력<=0 체크 로직으로 대체
+            new BTCondition(() => false),                    
             new BTAction(() => _anim.SetTrigger("Dead"))
         );
 
         // 2) 피격
         var hitSeq = new BTSequence(
-            new BTCondition(() => false),                     // 히트 플래그 체크 로직으로 대체
+            new BTCondition(() => false),                    
             new BTAction(() => _anim.SetTrigger("Hit"))
         );
 
@@ -50,7 +49,6 @@ public class EnemyBTController : MonoBehaviour
 
         // 4) 공격 시퀀스
         var attackSeq = new BTSequence(
-            // 4-1) 범위 내에 있고, 아직 공격 중이 아닐 때만 실행
             new BTCondition(() =>
                 !_isAttacking
                 && attackBehavior != null
@@ -92,7 +90,7 @@ public class EnemyBTController : MonoBehaviour
         // 6) 순찰
         var patrolAction = new BTAction(() =>
         {
-            if (_isAttacking) return;       // 공격 중엔 순찰하지 않는다
+            if (_isAttacking) return;      
             ClearAllBools();
             _anim.SetBool("Patrol", true);
             _agent.isStopped = false;
@@ -104,7 +102,7 @@ public class EnemyBTController : MonoBehaviour
             }
         });
 
-        // 7) 대기(Idle)
+        // 7) 대기
         var idle = new BTAction(() =>
         {
             if (_isAttacking) return;
@@ -128,7 +126,6 @@ public class EnemyBTController : MonoBehaviour
         _root.Tick();
     }
 
-    // 플레이어 감지: 단순 OverlapSphere
     private bool DetectPlayer()
     {
         var hits = Physics.OverlapSphere(transform.position, detectRadius, playerMask);
@@ -144,7 +141,6 @@ public class EnemyBTController : MonoBehaviour
         }
     }
 
-    // 애니메이터 Bool 초기화
     private void ClearAllBools()
     {
         _anim.SetBool("Patrol", false);
@@ -152,7 +148,6 @@ public class EnemyBTController : MonoBehaviour
         _anim.SetBool("Idle",   false);
     }
 
-    // 기즈모: 감지/공격 범위 시각화
     void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.yellow;
@@ -165,9 +160,6 @@ public class EnemyBTController : MonoBehaviour
         }
     }
 
-    // --- 공격 애니메이션 종료 콜백 ---
-    // Attack 애니메이션 스테이트 MachineBehaviour 에서 호출하거나,
-    // Animator 이벤트로 이 함수를 부르면 공격 플래그를 꺼줍니다.
     public void OnAttackAnimationExit()
     {
         _isAttacking = false;
