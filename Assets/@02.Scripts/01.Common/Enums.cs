@@ -2,17 +2,20 @@
 
 namespace PlayerEnums
 {
-    
-    
-    
-    
-    //Example
-    public enum WarriorSkillType
+    public enum PlayerState
     {
-        ShieldBash,
-        RicochetShield,
-        BladeWave,
-        PhantomBlades
+        None,
+        Idle,
+        Move,
+        Jump,
+        Fall,
+        Land,
+        Roll,
+        Attack,
+        Defend,
+        Parry,
+        Hit,
+        Dead
     }
 }
 
