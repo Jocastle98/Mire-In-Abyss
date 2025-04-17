@@ -8,7 +8,7 @@ public class PlayerAnimatorStateAttack : StateMachineBehaviour
     // OnStateExit is called before OnStateExit is called on any state inside this state machine
     override public void OnStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
-        PlayerController playerController = animator.gameObject.GetComponent<PlayerController>();
+        PlayerController playerController = animator.GetComponent<PlayerController>();
 
         if (!playerController.ComboAttackCheck())
         {

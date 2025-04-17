@@ -429,6 +429,12 @@ public class PlayerController : MonoBehaviour
     {
         mPlayerStateAttack.bIsComboInputCheck = false;
     }
+
+    public void DefendEnd()
+    {
+        mPlayerStateDefend.bIsDefending = false;
+        //SetPlayerState(PlayerState.Idle);
+    }
     
     public void ParryStart()
     {
