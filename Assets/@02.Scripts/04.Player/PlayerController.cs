@@ -23,7 +23,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float mMoveSpeed = 2.0f;
     public float TurnSpeed => mTurnSpeed;
     [SerializeField] private float mTurnSpeed = 10.0f;
-    [SerializeField] private float mJumpForce = 10.0f;
+    [SerializeField] private float mJumpForce = 7.5f;
     [SerializeField] private float mRollForce = 10.0f;
 
     [Header("Attach Point")] 
@@ -49,7 +49,7 @@ public class PlayerController : MonoBehaviour
     
     // 외부에서 접근 가능한 변수
     public Animator PlayerAnimator { get; private set; }
-    public PlayerGroundChecker mGroundChecker;
+    public PlayerGroundChecker mPlayerGroundChecker;
     public float walkAndRunSpeed { get; private set; } = 0.0f;
     
     // 내부에서만 사용되는 변수
@@ -143,7 +143,7 @@ public class PlayerController : MonoBehaviour
 
     public bool ActionCheck()
     {
-        bool isGrounded = mGroundChecker.bIsGrounded;
+        bool isGrounded = mPlayerGroundChecker.bIsGrounded;
         bool isJump = mPlayerStateJump.bIsJumping;
         bool isRoll = mPlayerStateRoll.bIsRolling;
         bool isAttack = mPlayerStateAttack.bIsAttacking;
@@ -251,7 +251,7 @@ public class PlayerController : MonoBehaviour
 
     public void CheckGrounded()
     {
-        PlayerAnimator.SetBool("IsGrounded", mGroundChecker.bIsGrounded);
+        PlayerAnimator.SetBool("IsGrounded", mPlayerGroundChecker.bIsGrounded);
     }
     
     public void Jump()
@@ -300,8 +300,19 @@ public class PlayerController : MonoBehaviour
     public void JumpEnd()
     {
         mPlayerStateJump.bIsJumping = false;
+        if (ActionCheck())
+        {
+            SetPlayerState(PlayerState.Idle);
+        }
     }
 
+    public void FallCheck()
+    {
+        if (!mPlayerGroundChecker.bIsGrounded && mRigidbody.velocity.y < 0)
+        {
+            SetPlayerState(PlayerState.Fall);
+        }
+    }
     #endregion
 
     #region 구르기 관련

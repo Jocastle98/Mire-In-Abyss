@@ -11,7 +11,9 @@ public class PlayerStateRoll : IPlayerState
     public void OnEnter(PlayerController playerController)
     {
         mPlayerController = playerController;
+        
         bIsRolling = false;
+        
         mPlayerController.PlayerAnimator.SetTrigger("Roll");
         mPlayerController.Roll();
     }

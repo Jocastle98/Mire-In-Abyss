@@ -14,9 +14,9 @@ public class PlayerStateLand : IPlayerState
 
     public void OnUpdate()
     {
-        if (mPlayerController.ActionCheck())
+        if (mPlayerController.mPlayerGroundChecker.bIsGrounded)
         {
-            mPlayerController.SetPlayerState(PlayerState.Idle);
+            mPlayerController.SetPlayerState(PlayerState.Fall);
         }
     }
 

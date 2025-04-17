@@ -29,10 +29,10 @@ public class CameraController : MonoBehaviour
         mPolarAngle = Mathf.Clamp(mPolarAngle, 10.0f, 45.0f);
         
         // 벽 감지 처리
-        //var currentDistance = AdjustCameraDistance();
+        var currentDistance = AdjustCameraDistance();
         
         // 구면좌표계 -> _polarAngle 수직 회전 각도, _azimuthAngle 수평 회전 각도
-        var cartesianPosition = GetCameraPosition(mDistance, mPolarAngle, mAzimuthAngle);
+        var cartesianPosition = GetCameraPosition(currentDistance, mPolarAngle, mAzimuthAngle);
         var cameraPosition = mTarget.position - cartesianPosition;
         
         transform.position = cameraPosition;

@@ -11,7 +11,9 @@ public class PlayerStateJump : IPlayerState
     public void OnEnter(PlayerController playerController)
     {
         mPlayerController = playerController;
+        
         bIsJumping = false;
+        
         mPlayerController.PlayerAnimator.SetTrigger("Jump");
         mPlayerController.Jump();
     }
@@ -21,6 +23,7 @@ public class PlayerStateJump : IPlayerState
         if (mPlayerController.GetComponent<Rigidbody>().velocity.y < 0)
         {
             mPlayerController.SetPlayerState(PlayerState.Fall);
+            return;
         }
     }
 

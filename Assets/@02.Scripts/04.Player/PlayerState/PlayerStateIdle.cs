@@ -11,6 +11,7 @@ public class PlayerStateIdle : IPlayerState
     public void OnEnter(PlayerController playerController)
     {
         mPlayerController = playerController;
+        
         mPlayerController.PlayerAnimator.SetBool("Idle", true);
         
         mPlayerController.GetComponent<Rigidbody>().velocity = Vector3.zero;
@@ -22,6 +23,7 @@ public class PlayerStateIdle : IPlayerState
         MoveCheck();
         WalkAndRunSpeedLess();
         JumpCheck();
+        mPlayerController?.FallCheck();
         RollCheck();
         AttackCheck();
         DefendCheck();
@@ -37,9 +39,9 @@ public class PlayerStateIdle : IPlayerState
     private void MoveCheck()
     {
         Vector2 moveInput = GameManager.Instance.Input.MoveInput;
+        
         if ((moveInput.x != 0 || moveInput.y != 0) && mPlayerController.ActionCheck())
         {
-            mPlayerController.Movement(moveInput.x, moveInput.y);
             mPlayerController.SetPlayerState(PlayerState.Move);
             return;
         }

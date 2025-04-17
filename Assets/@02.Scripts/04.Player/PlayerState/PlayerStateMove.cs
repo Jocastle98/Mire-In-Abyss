@@ -11,6 +11,7 @@ public class PlayerStateMove : IPlayerState
     public void OnEnter(PlayerController playerController)
     {
         mPlayerController = playerController;
+        
         mPlayerController.PlayerAnimator.SetBool("Move", true);
         originMoveSpeed = mPlayerController.MoveSpeed;
     }
@@ -19,6 +20,7 @@ public class PlayerStateMove : IPlayerState
     {
         Moving();
         JumpCheck();
+        mPlayerController?.FallCheck();
         RollCheck();
         AttackCheck();
         DefendCheck();
