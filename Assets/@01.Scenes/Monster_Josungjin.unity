@@ -708,10 +708,6 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 9
       objectReference: {fileID: 0}
-    - target: {fileID: 6415084959073460890, guid: c50f9a2b1fa1d6c48a35949eef4060a0, type: 3}
-      propertyPath: playerMask.m_Bits
-      value: 256
-      objectReference: {fileID: 0}
     - target: {fileID: 7193883471718664908, guid: c50f9a2b1fa1d6c48a35949eef4060a0, type: 3}
       propertyPath: m_Layer
       value: 9
