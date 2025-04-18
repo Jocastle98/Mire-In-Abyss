@@ -44,7 +44,6 @@ public class PlayerController : MonoBehaviour
     private PlayerStateParry mPlayerStateParry;
     private PlayerStateHit mPlayerStateHit;
     private PlayerStateDead mPlayerStateDead;
-    
     public PlayerState CurrentPlayerState { get; private set; }
     private Dictionary<PlayerState, IPlayerState> mPlayerStates;
     
@@ -59,6 +58,8 @@ public class PlayerController : MonoBehaviour
     private PlayerInput mPlayerInput;
     private CameraController mCameraController;
     private int mCurrentHealth = 0;
+
+    
 
     private void Awake()
     {
@@ -401,6 +402,7 @@ public class PlayerController : MonoBehaviour
             mPlayerStateAttack.bIsAttacking = true;
             mPlayerStateAttack.bIsComboEnable = true;
             // mWeaponController.AttackStart();
+            
         }
     }
 
@@ -410,6 +412,7 @@ public class PlayerController : MonoBehaviour
         {
             mPlayerStateAttack.bIsAttacking = false;
             // mWeaponController.AttackEnd();
+            
         }
     }
     
