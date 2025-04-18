@@ -272,7 +272,7 @@ MonoBehaviour:
   hitLayer:
     serializedVersion: 2
     m_Bits: 512
-  damage: 10
+  damage: 50
 --- !u!1 &1558360960 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1697954221707968061, guid: f1062d26fdeb01b4ab5fd41cbaf09aea, type: 3}
@@ -555,6 +555,10 @@ PrefabInstance:
     - target: {fileID: 8966919714915043, guid: c50f9a2b1fa1d6c48a35949eef4060a0, type: 3}
       propertyPath: m_Layer
       value: 9
+      objectReference: {fileID: 0}
+    - target: {fileID: 22493401646877056, guid: c50f9a2b1fa1d6c48a35949eef4060a0, type: 3}
+      propertyPath: m_StoppingDistance
+      value: 1.5
       objectReference: {fileID: 0}
     - target: {fileID: 142768097966630548, guid: c50f9a2b1fa1d6c48a35949eef4060a0, type: 3}
       propertyPath: m_Layer

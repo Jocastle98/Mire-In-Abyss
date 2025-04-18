@@ -1,9 +1,15 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using UnityEngine;
 using UnityEngine.AI;
 
 [RequireComponent(typeof(NavMeshAgent))]
 public class EnemyBTController : MonoBehaviour
 {
+    [Header("체력 설정")]
+    [SerializeField] private int maxHealth = 100;
+    private int _currentHealth;
+    private bool _isDead = false;
+    
     [Header("감지 설정")]
     public float      detectRadius        = 10f;  
     public float      detectAngle         = 360f;  
@@ -23,20 +29,37 @@ public class EnemyBTController : MonoBehaviour
 
     private bool _isAttacking = false;
     private bool _isHit       = false;
+    [Header("렌더러 설정")]
+    [SerializeField] private Renderer[] mRenderer;
 
     void Awake()
     {
         _agent         = GetComponent<NavMeshAgent>();
         _anim          = GetComponent<Animator>();
         attackBehavior = attackBehaviorAsset as IAttackBehavior;
+        mRenderer = GetComponentsInChildren<Renderer>();
     }
 
     void Start()
     {
+        // 체력 초기화
+        _currentHealth = maxHealth;
+        
         // 1) 사망
         var deadSeq = new BTSequence(
-            new BTCondition(() => false),                    
-            new BTAction(() => _anim.SetTrigger("Dead"))
+            new BTCondition(() => _isDead),
+            new BTAction(() =>
+            {
+                ClearAllBools();
+                _anim.SetTrigger("Dead");
+
+                if (_agent.enabled && _agent.isOnNavMesh)
+                {
+                    _agent.isStopped = true;
+                    _agent.enabled = false;
+                }
+                _isDead = false;
+            })
         );
 
         // 2) 피격
@@ -44,8 +67,12 @@ public class EnemyBTController : MonoBehaviour
             new BTCondition(() => _isHit),
             new BTAction(() => {
                 _anim.SetTrigger("Hit");
-                _agent.isStopped = true;
-                _agent.ResetPath();
+                StartCoroutine(HitColorChange());
+                if (_agent.enabled && _agent.isOnNavMesh)
+                {
+                    _agent.isStopped = true;
+                    _agent.ResetPath();
+                }
             })
         );
 
@@ -63,9 +90,12 @@ public class EnemyBTController : MonoBehaviour
             // 4-2) 이동 멈추고, 파라미터 초기화
             new BTAction(() =>
             {
-                _agent.isStopped = true;
-                _agent.velocity  = Vector3.zero;
-                _agent.ResetPath();
+                if (_agent.enabled && _agent.isOnNavMesh)
+                {
+                    _agent.isStopped = true;
+                    _agent.velocity  = Vector3.zero;
+                    _agent.ResetPath();
+                }
                 ClearAllBools();
             }),
             // 4-3) 실제 공격 트리거 + 플래그 세팅
@@ -131,6 +161,28 @@ public class EnemyBTController : MonoBehaviour
         _root.Tick();
     }
 
+   
+
+    private void ClearAllBools()
+    {
+        _anim.SetBool("Patrol", false);
+        _anim.SetBool("Trace",  false);
+        _anim.SetBool("Idle",   false);
+    }
+
+    #region 몬스터 공격 관련
+
+    // Attack 애니메이션 스크립트에서 호출되는 함수
+    public void OnAttackAnimationExit()
+    {
+        _isAttacking = false;
+    }
+    
+
+    #endregion
+
+    #region 플레이어 감지 관련
+
     private bool DetectPlayer()
     {
         var hits = Physics.OverlapSphere(transform.position, detectRadius, playerMask);
@@ -146,13 +198,101 @@ public class EnemyBTController : MonoBehaviour
         }
     }
 
-    private void ClearAllBools()
+    #endregion
+
+    #region Dead 시 실행
+
+    public void OnDeadAnimationExit()
     {
-        _anim.SetBool("Patrol", false);
-        _anim.SetBool("Trace",  false);
-        _anim.SetBool("Idle",   false);
+        StartCoroutine(Dissolve());
+    }
+    private IEnumerator Dissolve()
+    {
+        var block = new MaterialPropertyBlock();
+        float alpha = 1f;
+        while (alpha > 0f)
+        {
+            alpha -= Time.deltaTime;               
+            float clamped = Mathf.Clamp01(alpha);
+            foreach (var rend in mRenderer)
+            {
+                rend.GetPropertyBlock(block);
+                Color c = block.GetColor("_Color");
+                c.a = clamped;
+                block.SetColor("_Color", c);
+                rend.SetPropertyBlock(block);
+            }
+            yield return null;
+        }
+        Destroy(gameObject);
     }
 
+    #endregion
+
+    #region Hit 시 실행
+
+    public void SetHit(int damage)
+    {
+        if (_isDead) return;       
+        _currentHealth -= damage;  
+        Debug.Log("현재 체력: "+_currentHealth);
+
+        if (_currentHealth <= 0)
+        {
+            _isDead = true;
+        }
+        else
+        {
+            _isHit = true;
+        }
+    }
+    // Hit 애니메이션 스크립트에서 호출하는 함수
+    public void OnHitAnimationExit() {
+        _isHit = false;
+
+        // 바로 플레이어 추격으로 복귀
+        if (_agent.enabled && _agent.isOnNavMesh && _target != null) {
+            _anim.SetBool("Trace", true);
+            _agent.isStopped = false;
+            _agent.SetDestination(_target.position);
+        }
+    }
+    // Hit 상태에서 호출할 코루틴
+    private IEnumerator HitColorChange()
+    {
+        var block = new MaterialPropertyBlock();
+        float duration = 0.5f;           
+        float elapsed  = 0f;
+
+        ChangeColorRenderer(Color.red, block);
+
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+            float t = Mathf.Clamp01(elapsed / duration);
+            Color c = Color.Lerp(Color.red, Color.white, t);
+            ChangeColorRenderer(c, block);
+            yield return null;
+        }
+
+        ChangeColorRenderer(Color.white, block);
+    }
+
+    private void ChangeColorRenderer(Color color, MaterialPropertyBlock block)
+    {
+        foreach (var rend in mRenderer)
+        {
+            rend.GetPropertyBlock(block);
+            block.SetColor("_Color", color);
+            rend.SetPropertyBlock(block);
+        }
+    }
+
+    #endregion
+
+    #region 디버깅
+
+    // 감지범위
     void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.yellow;
@@ -165,25 +305,6 @@ public class EnemyBTController : MonoBehaviour
         }
     }
 
-    public void OnAttackAnimationExit()
-    {
-        _isAttacking = false;
-    }
-    public void OnHitAnimationExit() {
-        _isHit = false;
+    #endregion
 
-        // 바로 플레이어 추격으로 복귀
-        if (_target != null)
-        {
-            ClearAllBools();
-            _anim.SetBool("Trace", true);
-            _agent.isStopped = false;
-            _agent.SetDestination(_target.position);
-        }
-    }
-    
-    public void SetHit()
-    {
-        _isHit = true;
-    }
 }

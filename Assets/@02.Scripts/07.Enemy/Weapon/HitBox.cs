@@ -28,7 +28,7 @@ public class HitBox : MonoBehaviour
         var enemy = other.GetComponent<EnemyBTController>();
         if (enemy != null)
         {
-            enemy.SetHit();
+            enemy.SetHit(damage);
             Debug.Log("무기 히트! 데미지 적용");
 
         }
