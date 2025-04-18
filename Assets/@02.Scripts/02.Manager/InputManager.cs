@@ -64,12 +64,24 @@ public class InputManager
     public bool DefendInput => mDefendBuffer.ConsumeInput(); // 단발성
     public bool IsDefending => mDefendBuffer.IsHolding; // 지속 입력
     public bool ParryInput => mParryBuffer.ConsumeInput();
+    public bool DashInput => mDashBuffer.ConsumeInput();
+    public bool Skill_1Input => mSkill_1Buffer.ConsumeInput();
+    public bool Skill_2Input => mSkill_2Buffer.ConsumeInput();
+    public bool Skill_3Input => mSkill_3Buffer.ConsumeInput();
+    public bool Skill_4Input => mSkill_4Buffer.ConsumeInput();
+    public bool InteractionInput => mInteractionBuffer.ConsumeInput();
 
     private BufferedInput mJumpBuffer = new BufferedInput();
     private BufferedInput mRollBuffer = new BufferedInput();
     private BufferedInput mAttackBuffer = new BufferedInput();
     private BufferedInput mDefendBuffer = new BufferedInput();
     private BufferedInput mParryBuffer = new BufferedInput();
+    private BufferedInput mDashBuffer = new BufferedInput();
+    private BufferedInput mSkill_1Buffer = new BufferedInput();
+    private BufferedInput mSkill_2Buffer = new BufferedInput();
+    private BufferedInput mSkill_3Buffer = new BufferedInput();
+    private BufferedInput mSkill_4Buffer = new BufferedInput();
+    private BufferedInput mInteractionBuffer = new BufferedInput();
     
     private InputAction mLookAction;
     private InputAction mMoveAction;
@@ -78,6 +90,12 @@ public class InputManager
     private InputAction mAttackAction;
     private InputAction mDefendAction;
     private InputAction mParryAction;
+    private InputAction mDashAction;
+    private InputAction mSkill_1Action;
+    private InputAction mSkill_2Action;
+    private InputAction mSkill_3Action;
+    private InputAction mSkill_4Action;
+    private InputAction mInteractionAction;
     
     private PlayerInput mPlayerInput;
     
@@ -92,6 +110,12 @@ public class InputManager
         mAttackAction = playerInput.actions["Attack"];
         mDefendAction = playerInput.actions["Defend"];
         mParryAction = playerInput.actions["Parry"];
+        mDashAction = playerInput.actions["Dash"];
+        mSkill_1Action = playerInput.actions["Skill_1"];
+        mSkill_2Action = playerInput.actions["Skill_2"];
+        mSkill_3Action = playerInput.actions["Skill_3"];
+        mSkill_4Action = playerInput.actions["Skill_4"];
+        mInteractionAction = playerInput.actions["Interaction"];
     }
 
     public void OnInputUpdate()
@@ -104,36 +128,26 @@ public class InputManager
         LookInput = mLookAction.ReadValue<Vector2>();
         MoveInput = mMoveAction.ReadValue<Vector2>();
 
-        float deltaTime = Time.deltaTime;
-        if (mJumpAction.WasPressedThisFrame())
-        {
-            mJumpBuffer.SetBuffer();
-        }
-        mJumpBuffer.OnBufferUpdate(deltaTime);
-
-        if (mRollAction.WasPressedThisFrame())
-        {
-            mRollBuffer.SetBuffer();
-        }
-        mRollBuffer.OnBufferUpdate(deltaTime);
-
-        if (mAttackAction.WasPressedThisFrame())
-        {
-            mAttackBuffer.SetBuffer();
-        }
-        mAttackBuffer.OnBufferUpdate(deltaTime);
-
-        if (mDefendAction.WasPressedThisFrame())
-        {
-            mDefendBuffer.SetBuffer();
-        }
+        SetInputBuffer(mJumpAction, mJumpBuffer);
+        SetInputBuffer(mRollAction, mRollBuffer);
+        SetInputBuffer(mAttackAction, mAttackBuffer);
+        SetInputBuffer(mDefendAction, mDefendBuffer);
         mDefendBuffer.SetHold(mDefendAction.IsPressed());
-        mDefendBuffer.OnBufferUpdate(deltaTime);
+        SetInputBuffer(mParryAction, mParryBuffer);
+        SetInputBuffer(mDashAction, mDashBuffer);
+        SetInputBuffer(mSkill_1Action, mSkill_1Buffer);
+        SetInputBuffer(mSkill_2Action, mSkill_2Buffer);
+        SetInputBuffer(mSkill_3Action, mSkill_3Buffer);
+        SetInputBuffer(mSkill_4Action, mSkill_4Buffer);
+        SetInputBuffer(mInteractionAction, mInteractionBuffer);
+    }
 
-        if (mParryAction.WasPressedThisFrame())
+    private void SetInputBuffer(InputAction inputAction, BufferedInput bufferedInput)
+    {
+        if (inputAction.WasPressedThisFrame())
         {
-            mParryBuffer.SetBuffer();
+            bufferedInput.SetBuffer();
         }
-        mParryBuffer.OnBufferUpdate(deltaTime);
+        bufferedInput.OnBufferUpdate(Time.deltaTime);
     }
 }

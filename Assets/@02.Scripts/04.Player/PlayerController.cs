@@ -26,6 +26,8 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     [SerializeField] private float mTurnSpeed = 10.0f;
     [SerializeField] private float mJumpForce = 7.5f;
     [SerializeField] private float mRollForce = 10.0f;
+    public float DashForce => mDashForce;
+    [SerializeField] private float mDashForce = 100.0f;
 
     [Header("Attach Point")] 
     [SerializeField] private Transform mHeadTransform;
@@ -42,6 +44,12 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     private PlayerStateAttack mPlayerStateAttack;
     private PlayerStateDefend mPlayerStateDefend;
     private PlayerStateParry mPlayerStateParry;
+    private PlayerStateDash mPlayerStateDash;
+    private PlayerStateSkill_1 mPlayerStateSkill_1;
+    private PlayerStateSkill_2 mPlayerStateSkill_2;
+    private PlayerStateSkill_3 mPlayerStateSkill_3;
+    private PlayerStateSkill_4 mPlayerStateSkill_4;
+    private PlayerStateInteraction mPlayerStateInteraction;
     private PlayerStateHit mPlayerStateHit;
     private PlayerStateDead mPlayerStateDead;
     
@@ -54,7 +62,9 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     public float walkAndRunSpeed { get; private set; } = 0.0f;
     
     // 내부에서만 사용되는 변수
+    public Rigidbody Rigidbody => mRigidbody;
     private Rigidbody mRigidbody;
+    public CapsuleCollider CapsuleCollider => mCapsuleCollider;
     private CapsuleCollider mCapsuleCollider;
     private PlayerInput mPlayerInput;
     private CameraController mCameraController;
@@ -80,6 +90,12 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         mPlayerStateAttack = new PlayerStateAttack();
         mPlayerStateDefend = new PlayerStateDefend();
         mPlayerStateParry = new PlayerStateParry();
+        mPlayerStateDash = new PlayerStateDash();
+        mPlayerStateSkill_1 = new PlayerStateSkill_1();
+        mPlayerStateSkill_2 = new PlayerStateSkill_2();
+        mPlayerStateSkill_3 = new PlayerStateSkill_3();
+        mPlayerStateSkill_4 = new PlayerStateSkill_4();
+        mPlayerStateInteraction = new PlayerStateInteraction();
         mPlayerStateHit = new PlayerStateHit();
         mPlayerStateDead = new PlayerStateDead();
 
@@ -94,6 +110,12 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             { PlayerState.Attack, mPlayerStateAttack },
             { PlayerState.Defend, mPlayerStateDefend },
             { PlayerState.Parry, mPlayerStateParry },
+            { PlayerState.Dash, mPlayerStateDash },
+            { PlayerState.Skill_1, mPlayerStateSkill_1 },
+            { PlayerState.Skill_2, mPlayerStateSkill_2 },
+            { PlayerState.Skill_3, mPlayerStateSkill_3 },
+            { PlayerState.Skill_4, mPlayerStateSkill_4 },
+            { PlayerState.Interaction, mPlayerStateInteraction },
             { PlayerState.Hit, mPlayerStateHit },
             { PlayerState.Dead, mPlayerStateDead },
         };
@@ -509,6 +531,30 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     public void OnCompleted()
     {
         mWeaponController.Unsubscribe(this);
+    }
+
+    #endregion
+
+    #region 대시 관련
+
+    public void Dash()
+    {
+        StartCoroutine(DashCoroutine());
+    }
+
+    private IEnumerator DashCoroutine()
+    {
+        var cameraForwardDirection = GetCameraForwardDirection();
+        var dashDirection = (cameraForwardDirection + Vector3.up * 0.3f).normalized;
+
+        Vector3 dashVelocity = dashDirection * DashForce;
+        dashVelocity.y = mRigidbody.velocity.y; // 중력 유지
+        mRigidbody.velocity = dashVelocity;
+
+        yield return new WaitForSeconds(0.2f); // 대시 유지 시간
+
+        // 감속 혹은 정지
+        mRigidbody.velocity = new Vector3(0, mRigidbody.velocity.y, 0);
     }
 
     #endregion

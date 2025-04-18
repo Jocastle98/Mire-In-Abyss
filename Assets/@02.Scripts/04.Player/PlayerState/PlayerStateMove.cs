@@ -25,6 +25,7 @@ public class PlayerStateMove : IPlayerState
         AttackCheck();
         DefendCheck();
         ParryCheck();
+        DashCheck();
     }
 
     public void OnExit()
@@ -128,6 +129,20 @@ public class PlayerStateMove : IPlayerState
         if (GameManager.Instance.Input.ParryInput && mPlayerController.ActionCheck())
         {
             mPlayerController.SetPlayerState(PlayerState.Parry);
+            return;
+        }
+    }
+    
+    private void DashCheck()
+    {
+        if (mPlayerController == null)
+        {
+            return;
+        }
+
+        if (GameManager.Instance.Input.DashInput)
+        {
+            mPlayerController.SetPlayerState(PlayerState.Dash);
             return;
         }
     }

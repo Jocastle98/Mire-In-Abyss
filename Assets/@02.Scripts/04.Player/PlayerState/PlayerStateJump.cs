@@ -41,11 +41,29 @@ public class PlayerStateJump : IPlayerState
             {
                 mPlayerController.SetPlayerState(PlayerState.Fall);
             }
+            else
+            {
+                DashCheck();
+            }
         }
     }
 
     public void OnExit()
     {
         mPlayerController = null;
+    }
+    
+    private void DashCheck()
+    {
+        if (mPlayerController == null)
+        {
+            return;
+        }
+
+        if (GameManager.Instance.Input.DashInput)
+        {
+            mPlayerController.SetPlayerState(PlayerState.Dash);
+            return;
+        }
     }
 }
