@@ -31,6 +31,10 @@ public class EnemyBTController : MonoBehaviour
     private bool _isHit       = false;
     [Header("렌더러 설정")]
     [SerializeField] private Renderer[] mRenderer;
+    
+    [Header("원거리 발사 위치")]
+    [SerializeField] private Transform firePoint;
+    public Transform FirePoint => firePoint;
 
     void Awake()
     {
@@ -303,6 +307,12 @@ public class EnemyBTController : MonoBehaviour
             Gizmos.color = Color.red;
             Gizmos.DrawWireSphere(transform.position, melee.range);
         }
+        else if (attackBehaviorAsset is RangedAttackBehavior ranged)
+        {
+            Gizmos.color = Color.blue;  // 색깔은 마음대로
+            Gizmos.DrawWireSphere(transform.position, ranged.range);
+        }
+        
     }
 
     #endregion
