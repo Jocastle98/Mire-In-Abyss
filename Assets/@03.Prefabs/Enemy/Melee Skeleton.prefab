@@ -788,6 +788,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a1087477150a4c19a5dbc15b48a07acc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  maxHealth: 100
   detectRadius: 10
   detectAngle: 360
   playerMask:
@@ -795,6 +796,11 @@ MonoBehaviour:
     m_Bits: 256
   patrolRadius: 5
   attackBehaviorAsset: {fileID: 11400000, guid: 8c90e2cfcd24a564ab2eb6e5bb9874bf, type: 2}
+  mRenderer:
+  - {fileID: 7986256973236227083}
+  - {fileID: 4009753674306402108}
+  - {fileID: 8425103675733317816}
+  - {fileID: 8453473589168831972}
 --- !u!95 &6354803296981084445
 Animator:
   serializedVersion: 5
