@@ -52,7 +52,6 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     private PlayerStateInteraction mPlayerStateInteraction;
     private PlayerStateHit mPlayerStateHit;
     private PlayerStateDead mPlayerStateDead;
-    
     public PlayerState CurrentPlayerState { get; private set; }
     private Dictionary<PlayerState, IPlayerState> mPlayerStates;
     
@@ -70,6 +69,8 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     private CameraController mCameraController;
     private WeaponController mWeaponController;
     private int mCurrentHealth = 0;
+
+    
 
     private void Awake()
     {
