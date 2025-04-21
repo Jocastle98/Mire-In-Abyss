@@ -25,6 +25,8 @@ public class EnemyBTController : MonoBehaviour
     private NavMeshAgent _agent;
     private Animator _anim;
     private Transform _target;
+    public Transform Target => _target;
+
     private BTNode _root;
 
     private bool _isAttacking = false;
@@ -134,7 +136,10 @@ public class EnemyBTController : MonoBehaviour
                     ClearAllBools();
                     Vector3 lookPos = _target.position;
                     lookPos.y = transform.position.y;
-                    transform.LookAt(lookPos);
+                    Vector3 lookDir = (lookPos - transform.position).normalized;
+                    Quaternion lookRot = Quaternion.LookRotation(lookDir);
+                    transform.rotation = lookRot;
+
                     _anim.SetTrigger("Attack");
                     attackBehavior.Attack(transform, _target);
                 })
@@ -195,6 +200,7 @@ public class EnemyBTController : MonoBehaviour
     void Update()
     {
         _root.Tick();
+        
     }
 
     private void ClearAllBools()
@@ -209,6 +215,13 @@ public class EnemyBTController : MonoBehaviour
     public void OnAttackAnimationExit()
     {
         _isAttacking = false;
+    }
+    public void FireProjectile()
+    {
+        if (attackBehaviorAsset is RangedAttackBehavior ranged)
+        {
+            ranged.FireProjectileFrom(this.transform);
+        }
     }
 
     #endregion

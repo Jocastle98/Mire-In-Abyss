@@ -19,3 +19,5 @@ MonoBehaviour:
     m_Bits: 256
   damage: 5
   cooldown: 1
+  useRaycastTracer: 0
+  projectileSpeed: 25
