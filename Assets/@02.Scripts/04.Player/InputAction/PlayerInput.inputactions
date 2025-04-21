@@ -6,6 +6,15 @@
             "id": "cf8a3d0c-67f3-4f39-b77c-fba4700f2d43",
             "actions": [
                 {
+                    "name": "CursorToggleAction",
+                    "type": "Button",
+                    "id": "c6d0950d-b15c-4f62-8426-cd07129e0d21",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
                     "name": "Look",
                     "type": "Value",
                     "id": "33d9674e-c464-45f9-aa57-f52bdd542cff",
@@ -22,6 +31,15 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": true
+                },
+                {
+                    "name": "Sprint",
+                    "type": "Button",
+                    "id": "4a56b178-459f-42b2-b45c-a2db97126800",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 },
                 {
                     "name": "Jump",
@@ -451,6 +469,28 @@
                     "processors": "",
                     "groups": ";Keyboard&Mouse",
                     "action": "Interaction",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "dafc98c4-5178-49e8-8285-f737d1ca4f19",
+                    "path": "<Keyboard>/escape",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "CursorToggleAction",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "dac67dc9-6be3-4689-a416-f1b345045194",
+                    "path": "<Keyboard>/leftCtrl",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard&Mouse",
+                    "action": "Sprint",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

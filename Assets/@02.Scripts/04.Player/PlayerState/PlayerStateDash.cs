@@ -6,12 +6,12 @@ using UnityEngine;
 public class PlayerStateDash : IPlayerState
 {
     private PlayerController mPlayerController;
+    public bool bIsDashing { get; set; }
     
     public void OnEnter(PlayerController playerController)
     {
         mPlayerController = playerController;
         mPlayerController.PlayerAnimator.SetTrigger("Dash");
-        mPlayerController.Dash();
     }
 
     public void OnUpdate()

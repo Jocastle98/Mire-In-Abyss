@@ -4,9 +4,11 @@ using UnityEngine;
 
 public class PlayerStateInteraction : IPlayerState
 {
+    private PlayerController mPlayerController;
+    
     public void OnEnter(PlayerController playerController)
     {
-        
+        mPlayerController = playerController;
     }
 
     public void OnUpdate()
@@ -16,6 +18,6 @@ public class PlayerStateInteraction : IPlayerState
 
     public void OnExit()
     {
-        
+        mPlayerController = null;
     }
 }

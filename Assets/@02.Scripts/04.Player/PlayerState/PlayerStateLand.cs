@@ -14,9 +14,21 @@ public class PlayerStateLand : IPlayerState
 
     public void OnUpdate()
     {
-        if (mPlayerController.ActionCheck())
+        if (mPlayerController == null)
         {
-            mPlayerController.SetPlayerState(PlayerState.Fall);
+            return;
+        }
+        
+        if (mPlayerController.IsGrounded)
+        {
+            if (GameManager.Instance.Input.MoveInput != Vector2.zero)
+            {
+                mPlayerController.SetPlayerState(PlayerState.Move);
+            }
+            else
+            {
+                mPlayerController.SetPlayerState(PlayerState.Idle);
+            }
         }
     }
 

@@ -1,90 +1,45 @@
-using System;
-using PlayerEnums;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 
-public class BufferedInput
+public class InputManager : MonoBehaviour
 {
-    private float bufferTime;
-    private float timer;
-    private bool isBuffered;
-    private bool isHolding;
-
-    public BufferedInput(float bufferTime = 0.5f)
-    {
-        this.bufferTime = bufferTime;
-    }
-
-    public void SetBuffer()
-    {
-        this.isBuffered = true;
-        timer = bufferTime;
-    }
-
-    public void SetHold(bool isPressed)
-    {
-        isHolding = isPressed;
-    }
-
-    public void OnBufferUpdate(float deltaTime)
-    {
-        if (isBuffered)
-        {
-            timer -= deltaTime;
-            if (timer <= 0.0f)
-            {
-                isBuffered = false;
-            }
-        }
-    }
-
-    public bool ConsumeInput()
-    {
-        if (isBuffered)
-        {
-            isBuffered = false;
-            return true;
-        }
-        
-        return false;
-    }
-    
-    public bool IsBuffered => isBuffered;
-    public bool IsHolding => isHolding;
-}
-
-public class InputManager
-{
+    public bool CursorToggleInput => mCursorToggleBuffer.ConsumeInputBuffer();
     public Vector2 LookInput { get; private set; }
     public Vector2 MoveInput { get; private set; }
-    public bool JumpInput => mJumpBuffer.ConsumeInput();
-    public bool RollInput => mRollBuffer.ConsumeInput();
-    public bool AttackInput => mAttackBuffer.ConsumeInput();
-    public bool DefendInput => mDefendBuffer.ConsumeInput(); // 단발성
-    public bool IsDefending => mDefendBuffer.IsHolding; // 지속 입력
-    public bool ParryInput => mParryBuffer.ConsumeInput();
-    public bool DashInput => mDashBuffer.ConsumeInput();
-    public bool Skill_1Input => mSkill_1Buffer.ConsumeInput();
-    public bool Skill_2Input => mSkill_2Buffer.ConsumeInput();
-    public bool Skill_3Input => mSkill_3Buffer.ConsumeInput();
-    public bool Skill_4Input => mSkill_4Buffer.ConsumeInput();
-    public bool InteractionInput => mInteractionBuffer.ConsumeInput();
-
-    private BufferedInput mJumpBuffer = new BufferedInput();
-    private BufferedInput mRollBuffer = new BufferedInput();
-    private BufferedInput mAttackBuffer = new BufferedInput();
-    private BufferedInput mDefendBuffer = new BufferedInput();
-    private BufferedInput mParryBuffer = new BufferedInput();
-    private BufferedInput mDashBuffer = new BufferedInput();
-    private BufferedInput mSkill_1Buffer = new BufferedInput();
-    private BufferedInput mSkill_2Buffer = new BufferedInput();
-    private BufferedInput mSkill_3Buffer = new BufferedInput();
-    private BufferedInput mSkill_4Buffer = new BufferedInput();
-    private BufferedInput mInteractionBuffer = new BufferedInput();
+    public bool SprintInput => mSprintBuffer.IsHolding;
+    private bool mSprintToggled = false;
+    public bool JumpInput => mJumpBuffer.ConsumeInputBuffer();
+    public bool RollInput => mRollBuffer.ConsumeInputBuffer();
+    public bool AttackInput => mAttackBuffer.ConsumeInputBuffer();
+    public bool IsAttacking => mAttackBuffer.IsHolding;
+    public bool DefendInput => mDefendBuffer.ConsumeInputBuffer();  // 단발성
+    public bool IsDefending => mDefendBuffer.IsHolding;             // 지속 입력
+    public bool ParryInput => mParryBuffer.ConsumeInputBuffer();
+    public bool DashInput => mDashBuffer.ConsumeInputBuffer();
+    public bool Skill_1Input => mSkill_1Buffer.ConsumeInputBuffer();
+    public bool Skill_2Input => mSkill_2Buffer.ConsumeInputBuffer();
+    public bool Skill_3Input => mSkill_3Buffer.ConsumeInputBuffer();
+    public bool Skill_4Input => mSkill_4Buffer.ConsumeInputBuffer();
+    public bool InteractionInput => mInteractionBuffer.ConsumeInputBuffer();
     
+    private InputBuffer mCursorToggleBuffer = new InputBuffer();
+    private InputBuffer mSprintBuffer = new InputBuffer();
+    private InputBuffer mJumpBuffer = new InputBuffer();
+    private InputBuffer mRollBuffer = new InputBuffer();
+    private InputBuffer mAttackBuffer = new InputBuffer();
+    private InputBuffer mDefendBuffer = new InputBuffer();
+    private InputBuffer mParryBuffer = new InputBuffer();
+    private InputBuffer mDashBuffer = new InputBuffer();
+    private InputBuffer mSkill_1Buffer = new InputBuffer();
+    private InputBuffer mSkill_2Buffer = new InputBuffer();
+    private InputBuffer mSkill_3Buffer = new InputBuffer();
+    private InputBuffer mSkill_4Buffer = new InputBuffer();
+    private InputBuffer mInteractionBuffer = new InputBuffer();
+
+    private InputAction mCursorToggleAction;
     private InputAction mLookAction;
     private InputAction mMoveAction;
+    private InputAction mSprintAction;
     private InputAction mJumpAction;
     private InputAction mRollAction;
     private InputAction mAttackAction;
@@ -102,9 +57,11 @@ public class InputManager
     public void Init(PlayerInput playerInput)
     {
         mPlayerInput = playerInput;
-        
+
+        mCursorToggleAction = playerInput.actions["CursorToggleAction"];
         mLookAction = playerInput.actions["Look"];
         mMoveAction = playerInput.actions["Move"];
+        mSprintAction = playerInput.actions["Sprint"];
         mJumpAction = playerInput.actions["Jump"];
         mRollAction = playerInput.actions["Roll"];
         mAttackAction = playerInput.actions["Attack"];
@@ -125,12 +82,20 @@ public class InputManager
             return;
         }
         
+        SetInputBuffer(mCursorToggleAction, mCursorToggleBuffer);
         LookInput = mLookAction.ReadValue<Vector2>();
         MoveInput = mMoveAction.ReadValue<Vector2>();
 
+        if (mSprintAction.WasPressedThisFrame())
+        {
+            mSprintToggled = !mSprintToggled;
+        }
+        mSprintBuffer.SetHold(mSprintToggled);
+        
         SetInputBuffer(mJumpAction, mJumpBuffer);
         SetInputBuffer(mRollAction, mRollBuffer);
         SetInputBuffer(mAttackAction, mAttackBuffer);
+        mAttackBuffer.SetHold(mAttackAction.IsPressed());
         SetInputBuffer(mDefendAction, mDefendBuffer);
         mDefendBuffer.SetHold(mDefendAction.IsPressed());
         SetInputBuffer(mParryAction, mParryBuffer);
@@ -142,12 +107,19 @@ public class InputManager
         SetInputBuffer(mInteractionAction, mInteractionBuffer);
     }
 
-    private void SetInputBuffer(InputAction inputAction, BufferedInput bufferedInput)
+    private void SetInputBuffer(InputAction inputAction, InputBuffer inputBuffer)
     {
         if (inputAction.WasPressedThisFrame())
         {
-            bufferedInput.SetBuffer();
+            inputBuffer.SetBuffer();
         }
-        bufferedInput.OnBufferUpdate(Time.deltaTime);
+        inputBuffer.OnBufferUpdate(Time.deltaTime);
+    }
+
+    // 상태전환 후 스플린터 해제를 위한 메서드
+    public void SprintOff()
+    {
+        mSprintToggled = false;
+        mSprintBuffer.SetHold(false);
     }
 }

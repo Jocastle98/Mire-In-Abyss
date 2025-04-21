@@ -66,7 +66,7 @@ public class PlayerControllerEditor : Editor
         
         EditorGUILayout.BeginVertical(EditorStyles.helpBox);
         GUI.enabled = false;
-        EditorGUILayout.Toggle("지면 접촉", playerController.mPlayerGroundChecker.bIsGrounded);
+        EditorGUILayout.Toggle("지면 접촉", playerController.IsGrounded);
         GUI.enabled = true;
         EditorGUILayout.EndVertical();
         

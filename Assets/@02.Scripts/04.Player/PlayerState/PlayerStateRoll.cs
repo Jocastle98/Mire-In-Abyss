@@ -6,21 +6,16 @@ using UnityEngine;
 public class PlayerStateRoll : IPlayerState
 {
     private PlayerController mPlayerController;
-    public bool bIsRolling { get; set; }
     
     public void OnEnter(PlayerController playerController)
     {
         mPlayerController = playerController;
-        
-        bIsRolling = false;
-        
         mPlayerController.PlayerAnimator.SetTrigger("Roll");
-        mPlayerController.Roll();
     }
 
     public void OnUpdate()
     {
-        
+        //mPlayerController.Roll();
     }
 
     public void OnExit()

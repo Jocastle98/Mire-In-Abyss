@@ -15,13 +15,23 @@ public class PlayerStateFall : IPlayerState
 
     public void OnUpdate()
     {
-        if (mPlayerController.ActionCheck())
+        if (mPlayerController == null)
+        {
+            return;
+        }
+        
+        if (mPlayerController.IsGrounded)
         {
             mPlayerController.SetPlayerState(PlayerState.Land);
         }
         else
         {
-            DashCheck();
+            /*if (GameManager.Instance.Input.AttackInput)
+            {
+                mPlayerController.SetPlayerState(Enums.PlayerState.Attack);
+            }*/
+            
+            mPlayerController.Fall();
         }
     }
 
@@ -29,19 +39,5 @@ public class PlayerStateFall : IPlayerState
     {
         mPlayerController.PlayerAnimator.SetBool("Fall", false);
         mPlayerController = null;
-    }
-    
-    private void DashCheck()
-    {
-        if (mPlayerController == null)
-        {
-            return;
-        }
-
-        if (GameManager.Instance.Input.DashInput)
-        {
-            mPlayerController.SetPlayerState(PlayerState.Dash);
-            return;
-        }
     }
 }
