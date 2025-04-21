@@ -1,6 +1,6 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
-using Cinemachine;
 using PlayerEnums;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -18,7 +18,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     
     [Space(10)]
     [Header("Player Move Stat")]
-    [SerializeField] private float mMoveSpeed = 2.0f;
+    [SerializeField] private float mMoveSpeed = 4.0f;
     [SerializeField] private float mSprintSpeed = 6.0f;
     [SerializeField] private float mRotationSmoothTime = 0.12f;
     [SerializeField] private float mSpeedChangeRate = 10.0f;
@@ -31,6 +31,10 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     public float JumpTimeout => mJumpTimeout;
     [SerializeField] private float mFallTimeout = 0.15f;
     public float FallTimeout => mFallTimeout;
+    
+    [Space(10)]
+    [Header("Player Roll Stat")]
+    [SerializeField] private float mRollDistance = 10.0f;
     
     [Space(10)]
     [Header("Player Grouned Check")]
@@ -46,13 +50,14 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     [SerializeField] private Transform mLeftHandTransform;
 
     // Player Stat
-    private float mCurrentHealth;
-    private float mSpeed;
-    private float mAnimationBlend;
+    [SerializeField]
+    private float mVerticalVelocity;
+    private float mRotationVelocity;
     private float mTerminalVelocity = 53.0f;
     private float mTargetRotation;
-    private float mRotationVelocity;
-    private float mVerticalVelocity;
+    private float mAnimationBlend;
+    private float mSpeed;
+    private float mCurrentHealth;
     
     // Timeout Deltatime
     private float mJumpTimeoutDelta;
@@ -219,7 +224,10 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             }
             else
             {
-                SetPlayerState(PlayerState.Fall);
+                if (CurrentPlayerState != PlayerState.Attack)
+                {
+                    SetPlayerState(PlayerState.Fall);
+                }
             }
         }
         
@@ -232,6 +240,25 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     #endregion
     
     #region 회전/이동 관련 기능
+    
+    public Vector3 GetCameraForwardDirection()
+    {
+        // 카메라 설정
+        var cameraForward = mMainCamera.transform.forward;
+        
+        // Y값을 0으로 설정해서 수평 방향만 고려
+        cameraForward.y = 0;
+        cameraForward.Normalize();
+        
+        return cameraForward;
+    }
+    
+    public void SetCameraForwardRotate(Vector3 cameraForwardDirection, float angle)
+    {
+        Vector3 correctionRotation = Quaternion.Euler(0.0f, angle, 0.0f) * cameraForwardDirection;
+        Quaternion targetRotation = Quaternion.LookRotation(correctionRotation);
+        transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, mSpeedChangeRate * Time.deltaTime);
+    }
     
     public void Idle()
     {
@@ -248,14 +275,30 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         
         if (mHasAnimator)
         {
-            PlayerAnimator.SetFloat("Speed", mAnimationBlend);
+            PlayerAnimator.SetFloat("Speed", 0.0f);
             PlayerAnimator.SetFloat("MotionSpeed", inputMagnitude);
         }
     }
 
     public void Move()
     {
-        float targetSpeed = GameManager.Instance.Input.SprintInput ? mSprintSpeed : mMoveSpeed;
+        float targetSpeed;
+        if (CurrentPlayerState != PlayerState.Defend)
+        {
+            if (GameManager.Instance.Input.SprintInput)
+            {
+                targetSpeed = mSprintSpeed;
+            }
+            else
+            {
+                targetSpeed = mMoveSpeed;
+            }
+        }
+        else
+        {
+            targetSpeed = 2.0f;
+        }
+        
         float currentHorizontalSpeed = new Vector3(mCharacterController.velocity.x, 0.0f, mCharacterController.velocity.z).magnitude;
 
         float speedOffset = 0.1f;
@@ -293,6 +336,62 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         }
     }
 
+    private void BattleMove()
+    {
+        float targetSpeed;
+        if (CurrentPlayerState != PlayerState.Defend)
+        {
+            if (GameManager.Instance.Input.SprintInput)
+            {
+                targetSpeed = mSprintSpeed;
+            }
+            else
+            {
+                targetSpeed = mMoveSpeed;
+            }
+        }
+        else
+        {
+            targetSpeed = 2.0f;
+        }
+        
+        float currentHorizontalSpeed = new Vector3(mCharacterController.velocity.x, 0.0f, mCharacterController.velocity.z).magnitude;
+
+        float speedOffset = 0.1f;
+        float inputMagnitude = 1.0f;
+        
+        if (currentHorizontalSpeed < targetSpeed - speedOffset || currentHorizontalSpeed > targetSpeed + speedOffset)
+        {
+            mSpeed = Mathf.Lerp(currentHorizontalSpeed, targetSpeed * inputMagnitude, Time.deltaTime * mSpeedChangeRate);
+            mSpeed = Mathf.Round(mSpeed * 1000f) / 1000f;
+        }
+        else
+        {
+            mSpeed = targetSpeed;
+        }
+
+        mAnimationBlend = Mathf.Lerp(mAnimationBlend, targetSpeed, Time.deltaTime * mSpeedChangeRate);
+        if (mAnimationBlend < 0.01f)
+        {
+            mAnimationBlend = 0f;
+        }
+        
+        Vector3 inputDirection = new Vector3(GameManager.Instance.Input.MoveInput.x, 0.0f, GameManager.Instance.Input.MoveInput.y).normalized;
+        
+        mTargetRotation = Mathf.Atan2(inputDirection.x, inputDirection.z) * Mathf.Rad2Deg + mMainCamera.transform.eulerAngles.y;
+        float rotation = Mathf.SmoothDampAngle(transform.eulerAngles.y, mTargetRotation, ref mRotationVelocity, mRotationSmoothTime);
+        transform.rotation = Quaternion.Euler(0.0f, rotation, 0.0f);
+        
+        Vector3 targetDirection = Quaternion.Euler(0.0f, mTargetRotation, 0.0f) * Vector3.forward;
+        mCharacterController.Move(targetDirection.normalized * (mSpeed * Time.deltaTime));
+        
+        if (mHasAnimator)
+        {
+            PlayerAnimator.SetFloat("Speed", mAnimationBlend);
+            PlayerAnimator.SetFloat("MotionSpeed", inputMagnitude);
+        }
+    }
+
     #endregion
 
     #region 점프 관련 기능
@@ -301,7 +400,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     {
         if (mJumpTimeoutDelta < 0.0f)
         {
-            mVerticalVelocity = -2.0f;
+            mVerticalVelocity = 0.0f;
             mVerticalVelocity = Mathf.Sqrt(mJumpHeight * -2.0f * mGravity);
 
             Vector3 targetDirection = Quaternion.Euler(0.0f, mTargetRotation, 0.0f) * Vector3.forward;
@@ -317,13 +416,37 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
                                   + new Vector3(0.0f, mVerticalVelocity, 0.0f) * Time.deltaTime);
     }
     
-    public void EndLand()
+    #endregion
+
+    #region 구르기 관련 기능
+    
+    public void Roll()
     {
-        //mPlayerStateLand.bIsLand = false;
+        StartCoroutine(RollCoroutine());
+    }
+
+    private IEnumerator RollCoroutine()
+    {
+        yield return new WaitForSeconds(0.15f); // 애니메이션 초기 구간 기다림
+        
+        // 구르기 이동 처리
+        float rollTime = 0f;
+        float rollDuration = 1.4f; // 실제 이동이 발생할 시간
+
+        while (rollTime < rollDuration)
+        {
+            rollTime += Time.deltaTime;
+            
+            // 이동 속도 계산 (점점 감속)
+            // float currentSpeed = Mathf.Lerp(mRollDistance, 0.0f, rollTime / rollDuration);
+        
+            // 이동 적용
+            mCharacterController.Move(transform.forward * (mRollDistance * Time.deltaTime * 0.03f));
+        }
     }
     
     #endregion
-
+    
     #region 공격 관련 기능
 
     private void SetPlayerWeapon(Transform rightHandTransform, string rightWeaponName,
@@ -344,7 +467,32 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     
     public void Attack()
     {
+        GameManager.Instance.Input.SprintOff();
         
+        Vector3 targetDirection = Quaternion.Euler(0.0f, mTargetRotation, 0.0f) * Vector3.forward;
+        mCharacterController.Move(targetDirection.normalized * (mSpeed * Time.deltaTime) 
+                                  + new Vector3(0.0f, mVerticalVelocity, 0.0f) * Time.deltaTime);
+        
+        if (GameManager.Instance.Input.MoveInput == Vector2.zero)
+        {
+            Idle();
+            PlayerAnimator.SetBool("Idle", true);
+            PlayerAnimator.SetBool("Move", false);
+        }
+        else
+        {
+            if (mbIsGrounded)
+            {
+                Move();
+                PlayerAnimator.SetBool("Idle", false);
+                PlayerAnimator.SetBool("Move", true);
+            }
+            else
+            {
+                PlayerAnimator.SetBool("Idle", false);
+                PlayerAnimator.SetBool("Move", false);
+            }
+        }
     }
 
     // 공격 애니메이션의 공격 모션 시작 시 호출 메서드
@@ -352,6 +500,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     {
         if (CurrentPlayerState == PlayerState.Attack)
         {
+            mPlayerStateAttack.bIsAttacking = true;
             mWeaponController.AttackStart();
         }
     }
@@ -361,8 +510,14 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     {
         if (CurrentPlayerState == PlayerState.Attack)
         {
+            mPlayerStateAttack.bIsAttacking = false;
             mWeaponController.AttackEnd();
         }
+    }
+
+    public void EndCombo()
+    {
+        mPlayerStateAttack.bIsCombo = false;
     }
     
     public void OnNext(GameObject value)
@@ -384,6 +539,36 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         mWeaponController.Unsubscribe(this);
     }
     
+    #endregion
+
+    #region 방어 관련
+
+    public void Defend()
+    {
+        if (!GameManager.Instance.Input.IsDefending)
+        {
+            PlayerAnimator.SetBool("Idle", false);
+            PlayerAnimator.SetBool("Move", false);
+            PlayerAnimator.SetBool("Defend", false);
+            SetPlayerState(PlayerState.Idle);
+        }
+        else
+        {
+            if (GameManager.Instance.Input.MoveInput == Vector2.zero)
+            {
+                Idle();
+                PlayerAnimator.SetBool("Idle", true);
+                PlayerAnimator.SetBool("Move", false);
+            }
+            else
+            {
+                Move();
+                PlayerAnimator.SetBool("Idle", false);
+                PlayerAnimator.SetBool("Move", true);
+            }
+        }
+    }
+
     #endregion
     
     #region 디버깅 관련

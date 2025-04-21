@@ -26,12 +26,12 @@ public class PlayerStateFall : IPlayerState
         }
         else
         {
-            /*if (GameManager.Instance.Input.AttackInput)
-            {
-                mPlayerController.SetPlayerState(Enums.PlayerState.Attack);
-            }*/
+            mPlayerController?.Fall();
             
-            mPlayerController.Fall();
+            if (GameManager.Instance.Input.AttackInput)
+            {
+                mPlayerController?.SetPlayerState(PlayerState.Attack);
+            }
         }
     }
 

@@ -18,7 +18,15 @@ public class PlayerStateDefend : IPlayerState
 
     public void OnUpdate()
     {
-        
+        if (mPlayerController == null)
+        {
+            return;
+        }
+
+        if (mPlayerController.IsGrounded)
+        {
+            mPlayerController.Defend();
+        }
     }
 
     public void OnExit()

@@ -15,7 +15,12 @@ public class PlayerStateRoll : IPlayerState
 
     public void OnUpdate()
     {
-        //mPlayerController.Roll();
+        if (mPlayerController == null)
+        {
+            return;
+        }
+        
+        mPlayerController.Roll();
     }
 
     public void OnExit()

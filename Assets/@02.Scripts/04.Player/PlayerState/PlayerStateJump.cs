@@ -21,6 +21,11 @@ public class PlayerStateJump : IPlayerState
         }
         
         mPlayerController.Jump();
+        
+        if (GameManager.Instance.Input.AttackInput)
+        {
+            mPlayerController?.SetPlayerState(PlayerState.Attack);
+        }
     }
 
     public void OnExit()

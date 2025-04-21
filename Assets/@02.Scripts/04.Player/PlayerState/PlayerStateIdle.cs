@@ -26,13 +26,28 @@ public class PlayerStateIdle : IPlayerState
             }
             else
             {
-                mPlayerController.SetPlayerState(PlayerState.Move);
+                mPlayerController?.SetPlayerState(PlayerState.Move);
             }
 
             if (GameManager.Instance.Input.JumpInput)
             {
-                mPlayerController.SetPlayerState(PlayerState.Jump);
+                mPlayerController?.SetPlayerState(PlayerState.Jump);
             }
+
+            if (GameManager.Instance.Input.RollInput)
+            {
+                mPlayerController?.SetPlayerState(PlayerState.Roll);
+            }
+
+            if (GameManager.Instance.Input.DefendInput)
+            {
+                mPlayerController?.SetPlayerState(PlayerState.Defend);
+            }
+        }
+
+        if (GameManager.Instance.Input.AttackInput)
+        {
+            mPlayerController?.SetPlayerState(PlayerState.Attack);
         }
     }
 
