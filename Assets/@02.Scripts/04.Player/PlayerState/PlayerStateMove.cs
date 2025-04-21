@@ -25,32 +25,42 @@ public class PlayerStateMove : IPlayerState
         {
             if (GameManager.Instance.Input.MoveInput != Vector2.zero)
             {
-                mPlayerController.Move();
+                mPlayerController?.Move();
             }
             else
             {
-                mPlayerController.SetPlayerState(PlayerState.Idle);
+                mPlayerController?.SetPlayerState(PlayerState.Idle);
             }
 
             if (GameManager.Instance.Input.JumpInput)
             {
-                mPlayerController.SetPlayerState(PlayerState.Jump);
+                mPlayerController?.SetPlayerState(PlayerState.Jump);
             }
             
             if (GameManager.Instance.Input.RollInput)
             {
-                mPlayerController.SetPlayerState(PlayerState.Roll);
+                mPlayerController?.SetPlayerState(PlayerState.Roll);
             }
             
             if (GameManager.Instance.Input.DefendInput)
             {
                 mPlayerController?.SetPlayerState(PlayerState.Defend);
             }
+            
+            if (GameManager.Instance.Input.ParryInput)
+            {
+                mPlayerController?.SetPlayerState(PlayerState.Parry);
+            }
         }
         
         if (GameManager.Instance.Input.AttackInput)
         {
             mPlayerController?.SetPlayerState(PlayerState.Attack);
+        }
+        
+        if (GameManager.Instance.Input.DashInput)
+        {
+            mPlayerController?.SetPlayerState(PlayerState.Dash);
         }
     }
 

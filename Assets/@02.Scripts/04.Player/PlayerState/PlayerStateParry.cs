@@ -5,27 +5,30 @@ using UnityEngine;
 public class PlayerStateParry : IPlayerState
 {
     private PlayerController mPlayerController;
-    public bool bIsParrying { get; set; }
     
     public void OnEnter(PlayerController playerController)
     {
         mPlayerController = playerController;
-        
-        bIsParrying = false;
-        
         mPlayerController.PlayerAnimator.SetTrigger("Parry");
     }
 
     public void OnUpdate()
     {
-        if (bIsParrying)
+        if (mPlayerController == null)
         {
-            // if (공격 받으면) { 강한 공격으로 반격; }
+            return;
+        }
+
+        if (mPlayerController.IsGrounded)
+        {
+            mPlayerController?.Parry();
         }
     }
 
     public void OnExit()
     {
+        mPlayerController.PlayerAnimator.SetBool("Idle", false);
+        mPlayerController.PlayerAnimator.SetBool("Move", false);
         mPlayerController = null;
     }
 }

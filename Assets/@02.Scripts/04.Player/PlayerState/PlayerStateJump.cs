@@ -26,6 +26,11 @@ public class PlayerStateJump : IPlayerState
         {
             mPlayerController?.SetPlayerState(PlayerState.Attack);
         }
+        
+        if (GameManager.Instance.Input.DashInput)
+        {
+            mPlayerController?.SetPlayerState(PlayerState.Dash);
+        }
     }
 
     public void OnExit()

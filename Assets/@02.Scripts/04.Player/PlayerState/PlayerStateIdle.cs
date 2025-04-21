@@ -22,7 +22,7 @@ public class PlayerStateIdle : IPlayerState
         {
             if (GameManager.Instance.Input.MoveInput == Vector2.zero)
             {
-                mPlayerController.Idle();
+                mPlayerController?.Idle();
             }
             else
             {
@@ -43,11 +43,21 @@ public class PlayerStateIdle : IPlayerState
             {
                 mPlayerController?.SetPlayerState(PlayerState.Defend);
             }
+
+            if (GameManager.Instance.Input.ParryInput)
+            {
+                mPlayerController?.SetPlayerState(PlayerState.Parry);
+            }
         }
 
         if (GameManager.Instance.Input.AttackInput)
         {
             mPlayerController?.SetPlayerState(PlayerState.Attack);
+        }
+
+        if (GameManager.Instance.Input.DashInput)
+        {
+            mPlayerController?.SetPlayerState(PlayerState.Dash);
         }
     }
 

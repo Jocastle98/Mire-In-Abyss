@@ -34,7 +34,11 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     
     [Space(10)]
     [Header("Player Roll Stat")]
-    [SerializeField] private float mRollDistance = 10.0f;
+    [SerializeField] private float mRollDistance = 5.0f;
+    
+    [Space(10)]
+    [Header("Player Dash Stat")]
+    [SerializeField] private float mDashDistance = 10.0f;
     
     [Space(10)]
     [Header("Player Grouned Check")]
@@ -224,7 +228,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             }
             else
             {
-                if (CurrentPlayerState != PlayerState.Attack)
+                if (CurrentPlayerState != PlayerState.Attack && CurrentPlayerState != PlayerState.Dash)
                 {
                     SetPlayerState(PlayerState.Fall);
                 }
@@ -252,14 +256,13 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         
         return cameraForward;
     }
-    
-    public void SetCameraForwardRotate(Vector3 cameraForwardDirection, float angle)
+
+    public Vector3 SetTargetDirection()
     {
-        Vector3 correctionRotation = Quaternion.Euler(0.0f, angle, 0.0f) * cameraForwardDirection;
-        Quaternion targetRotation = Quaternion.LookRotation(correctionRotation);
-        transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, mSpeedChangeRate * Time.deltaTime);
+        Vector3 targetDirection = Quaternion.Euler(0.0f, mTargetRotation, 0.0f) * Vector3.forward;
+        return targetDirection;
     }
-    
+
     public void Idle()
     {
         float inputMagnitude = 1.0f;
@@ -270,8 +273,15 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         {
             mAnimationBlend = 0f;
         }
-        
-        mCharacterController.Move(new Vector3(0.0f, mGravity, 0.0f) * Time.deltaTime);
+
+        if (CurrentPlayerState == PlayerState.Idle)
+        {
+            mCharacterController.Move(new Vector3(0.0f, mGravity, 0.0f) * Time.deltaTime);
+        }
+        else
+        {
+            mCharacterController.Move(new Vector3(0.0f, mVerticalVelocity, 0.0f) * Time.deltaTime);
+        }
         
         if (mHasAnimator)
         {
@@ -327,7 +337,15 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         transform.rotation = Quaternion.Euler(0.0f, rotation, 0.0f);
         
         Vector3 targetDirection = Quaternion.Euler(0.0f, mTargetRotation, 0.0f) * Vector3.forward;
-        mCharacterController.Move(targetDirection.normalized * (mSpeed * Time.deltaTime) + new Vector3(0.0f, mGravity, 0.0f) * Time.deltaTime);
+
+        if (CurrentPlayerState == PlayerState.Move)
+        {
+            mCharacterController.Move(targetDirection.normalized * (mSpeed * Time.deltaTime) + new Vector3(0.0f, mGravity, 0.0f) * Time.deltaTime);
+        }
+        else
+        {
+            mCharacterController.Move(targetDirection.normalized * (mSpeed * Time.deltaTime) + new Vector3(0.0f, mVerticalVelocity, 0.0f) * Time.deltaTime);
+        }
         
         if (mHasAnimator)
         {
@@ -335,63 +353,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             PlayerAnimator.SetFloat("MotionSpeed", inputMagnitude);
         }
     }
-
-    private void BattleMove()
-    {
-        float targetSpeed;
-        if (CurrentPlayerState != PlayerState.Defend)
-        {
-            if (GameManager.Instance.Input.SprintInput)
-            {
-                targetSpeed = mSprintSpeed;
-            }
-            else
-            {
-                targetSpeed = mMoveSpeed;
-            }
-        }
-        else
-        {
-            targetSpeed = 2.0f;
-        }
-        
-        float currentHorizontalSpeed = new Vector3(mCharacterController.velocity.x, 0.0f, mCharacterController.velocity.z).magnitude;
-
-        float speedOffset = 0.1f;
-        float inputMagnitude = 1.0f;
-        
-        if (currentHorizontalSpeed < targetSpeed - speedOffset || currentHorizontalSpeed > targetSpeed + speedOffset)
-        {
-            mSpeed = Mathf.Lerp(currentHorizontalSpeed, targetSpeed * inputMagnitude, Time.deltaTime * mSpeedChangeRate);
-            mSpeed = Mathf.Round(mSpeed * 1000f) / 1000f;
-        }
-        else
-        {
-            mSpeed = targetSpeed;
-        }
-
-        mAnimationBlend = Mathf.Lerp(mAnimationBlend, targetSpeed, Time.deltaTime * mSpeedChangeRate);
-        if (mAnimationBlend < 0.01f)
-        {
-            mAnimationBlend = 0f;
-        }
-        
-        Vector3 inputDirection = new Vector3(GameManager.Instance.Input.MoveInput.x, 0.0f, GameManager.Instance.Input.MoveInput.y).normalized;
-        
-        mTargetRotation = Mathf.Atan2(inputDirection.x, inputDirection.z) * Mathf.Rad2Deg + mMainCamera.transform.eulerAngles.y;
-        float rotation = Mathf.SmoothDampAngle(transform.eulerAngles.y, mTargetRotation, ref mRotationVelocity, mRotationSmoothTime);
-        transform.rotation = Quaternion.Euler(0.0f, rotation, 0.0f);
-        
-        Vector3 targetDirection = Quaternion.Euler(0.0f, mTargetRotation, 0.0f) * Vector3.forward;
-        mCharacterController.Move(targetDirection.normalized * (mSpeed * Time.deltaTime));
-        
-        if (mHasAnimator)
-        {
-            PlayerAnimator.SetFloat("Speed", mAnimationBlend);
-            PlayerAnimator.SetFloat("MotionSpeed", inputMagnitude);
-        }
-    }
-
+    
     #endregion
 
     #region 점프 관련 기능
@@ -420,28 +382,25 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
 
     #region 구르기 관련 기능
     
-    public void Roll()
+    public void Roll(Vector3 targetDirection)
     {
-        StartCoroutine(RollCoroutine());
+        StartCoroutine(RollCoroutine(targetDirection));
     }
 
-    private IEnumerator RollCoroutine()
+    private IEnumerator RollCoroutine(Vector3 targetDirection)
     {
         yield return new WaitForSeconds(0.15f); // 애니메이션 초기 구간 기다림
         
-        // 구르기 이동 처리
-        float rollTime = 0f;
-        float rollDuration = 1.4f; // 실제 이동이 발생할 시간
-
-        while (rollTime < rollDuration)
+        float distanceCovered = 0f;
+        float maxDistance = mRollDistance;
+        float speed = 20f; // 초기 속도 조정
+    
+        while (distanceCovered < maxDistance)
         {
-            rollTime += Time.deltaTime;
-            
-            // 이동 속도 계산 (점점 감속)
-            // float currentSpeed = Mathf.Lerp(mRollDistance, 0.0f, rollTime / rollDuration);
-        
-            // 이동 적용
-            mCharacterController.Move(transform.forward * (mRollDistance * Time.deltaTime * 0.03f));
+            float moveAmount = speed * Time.deltaTime;
+            mCharacterController.Move(targetDirection * (moveAmount * Time.deltaTime));
+            distanceCovered += moveAmount;
+            yield return null;
         }
     }
     
@@ -469,10 +428,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     {
         GameManager.Instance.Input.SprintOff();
         
-        Vector3 targetDirection = Quaternion.Euler(0.0f, mTargetRotation, 0.0f) * Vector3.forward;
-        mCharacterController.Move(targetDirection.normalized * (mSpeed * Time.deltaTime) 
-                                  + new Vector3(0.0f, mVerticalVelocity, 0.0f) * Time.deltaTime);
-        
+        // 이동 공격시 하반신(Base Layer) 애니메이션
         if (GameManager.Instance.Input.MoveInput == Vector2.zero)
         {
             Idle();
@@ -481,9 +437,9 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         }
         else
         {
+            Move();
             if (mbIsGrounded)
             {
-                Move();
                 PlayerAnimator.SetBool("Idle", false);
                 PlayerAnimator.SetBool("Move", true);
             }
@@ -541,10 +497,12 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     
     #endregion
 
-    #region 방어 관련
+    #region 방어 관련 기능
 
     public void Defend()
     {
+        GameManager.Instance.Input.SprintOff();
+        
         if (!GameManager.Instance.Input.IsDefending)
         {
             PlayerAnimator.SetBool("Idle", false);
@@ -554,6 +512,10 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         }
         else
         {
+            // 방어감소 or 방어력 증가 기능 메서드
+            Defending();
+            
+            // 이동 방어시 하반신(Base Layer) 애니메이션
             if (GameManager.Instance.Input.MoveInput == Vector2.zero)
             {
                 Idle();
@@ -566,6 +528,67 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
                 PlayerAnimator.SetBool("Idle", false);
                 PlayerAnimator.SetBool("Move", true);
             }
+        }
+    }
+
+    private void Defending()
+    {
+        
+    }
+
+    #endregion
+
+    #region 패리 관련 기능
+
+    public void Parry()
+    {
+        GameManager.Instance.Input.SprintOff();
+
+        // 패리 성공 시 행동 메서드
+        ParrySuccess();
+        
+        // 이동 방어시 하반신(Base Layer) 애니메이션
+        if (GameManager.Instance.Input.MoveInput == Vector2.zero)
+        {
+            Idle();
+            PlayerAnimator.SetBool("Idle", true);
+            PlayerAnimator.SetBool("Move", false);
+        }
+        else
+        {
+            Move();
+            PlayerAnimator.SetBool("Idle", false);
+            PlayerAnimator.SetBool("Move", true);
+        }
+    }
+
+    private void ParrySuccess()
+    {
+        
+    }
+    
+    #endregion
+
+    #region 대시 기능 관련
+
+    public void Dash(Vector3 cameraForwardDirection)
+    {
+        StartCoroutine(DashCoroutine(cameraForwardDirection));
+    }
+    
+    private IEnumerator DashCoroutine(Vector3 cameraForwardDirection)
+    {
+        float distanceCovered = 0f;
+        float maxDistance = mDashDistance;
+        float speed = 50f; // 초기 속도 조정
+
+        while (distanceCovered < maxDistance)
+        {
+            float moveAmount = speed * Time.deltaTime;
+            transform.rotation = Quaternion.LookRotation(cameraForwardDirection);
+            mCharacterController.Move(cameraForwardDirection * (moveAmount * Time.deltaTime));
+            distanceCovered += moveAmount;
+            yield return null;
         }
     }
 

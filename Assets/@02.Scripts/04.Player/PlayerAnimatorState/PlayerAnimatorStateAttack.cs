@@ -1,7 +1,5 @@
-using System.Collections;
-using System.Collections.Generic;
-using PlayerEnums;
 using UnityEngine;
+using PlayerEnums;
 
 public class PlayerAnimatorStateAttack : StateMachineBehaviour
 {

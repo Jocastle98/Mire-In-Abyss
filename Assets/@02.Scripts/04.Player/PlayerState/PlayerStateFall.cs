@@ -32,6 +32,11 @@ public class PlayerStateFall : IPlayerState
             {
                 mPlayerController?.SetPlayerState(PlayerState.Attack);
             }
+            
+            if (GameManager.Instance.Input.DashInput)
+            {
+                mPlayerController?.SetPlayerState(PlayerState.Dash);
+            }
         }
     }
 
