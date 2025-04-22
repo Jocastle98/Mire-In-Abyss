@@ -6,26 +6,36 @@ using UnityEngine;
 public class PlayerStateJump : IPlayerState
 {
     private PlayerController mPlayerController;
-    public bool bIsJumping { get; set; }
     
     public void OnEnter(PlayerController playerController)
     {
         mPlayerController = playerController;
-        bIsJumping = false;
-        mPlayerController.PlayerAnimator.SetTrigger("Jump");
-        mPlayerController.Jump();
+        mPlayerController.PlayerAnimator.SetBool("Jump", true);
     }
 
     public void OnUpdate()
     {
-        if (mPlayerController.GetComponent<Rigidbody>().velocity.y < 0)
+        if (mPlayerController == null)
         {
-            mPlayerController.SetPlayerState(PlayerState.Fall);
+            return;
+        }
+        
+        mPlayerController.Jump();
+        
+        if (GameManager.Instance.Input.AttackInput)
+        {
+            mPlayerController?.SetPlayerState(PlayerState.Attack);
+        }
+        
+        if (GameManager.Instance.Input.DashInput)
+        {
+            mPlayerController?.SetPlayerState(PlayerState.Dash);
         }
     }
 
     public void OnExit()
     {
+        mPlayerController.PlayerAnimator.SetBool("Jump", false);
         mPlayerController = null;
     }
 }

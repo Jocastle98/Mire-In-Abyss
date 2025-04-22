@@ -1,81 +1,65 @@
-using System.Collections;
-using System.Collections.Generic;
+using Cinemachine;
 using UnityEngine;
 
+[RequireComponent(typeof(Camera))]
+[RequireComponent(typeof(CinemachineBrain))]
+[RequireComponent(typeof(CinemachineVirtualCamera))]
 public class CameraController : MonoBehaviour
 {
-    [SerializeField] private float mRotationSpeed = 5.0f;
-    [SerializeField] private float mDistance = 5.0f;
-    [SerializeField] private LayerMask mObstacleLayerMask;
+    [SerializeField] private float mRotationSensitivity = 1.0f;
+    [SerializeField] private GameObject mCinemachineCameraTarget;
+    [SerializeField] private float mTopClamp = 70.0f;
+    [SerializeField] private float mBottomClamp = -30.0f;
+    [SerializeField] private float mCameraAngleOverride = 0.0f;
     
-    private Transform mTarget;
-    
-    private float mAzimuthAngle;
-    private float mPolarAngle = 45.0f;
+    // cinemachine
+    private float mCinemachineTargetYaw;
+    private float mCinemachineTargetPitch;
 
-    private void Start()
+    private void Awake()
     {
-        // 커서 설정
         Cursor.visible = false;
         Cursor.lockState = CursorLockMode.Locked;
+        
+        mCinemachineCameraTarget = GetComponent<CinemachineVirtualCamera>().Follow.gameObject;
+        mCinemachineTargetYaw = mCinemachineCameraTarget.transform.rotation.eulerAngles.y;
     }
     
     private void LateUpdate()
     {
-        Vector2 lookInput = GameManager.Instance.Input.LookInput;
-        
-        mAzimuthAngle += lookInput.x * mRotationSpeed * Time.deltaTime;
-        mPolarAngle -= lookInput.y * mRotationSpeed * Time.deltaTime;
-        mPolarAngle = Mathf.Clamp(mPolarAngle, 10.0f, 45.0f);
-        
-        // 벽 감지 처리
-        var currentDistance = AdjustCameraDistance();
-        
-        // 구면좌표계 -> _polarAngle 수직 회전 각도, _azimuthAngle 수평 회전 각도
-        var cartesianPosition = GetCameraPosition(currentDistance, mPolarAngle, mAzimuthAngle);
-        var cameraPosition = mTarget.position - cartesianPosition;
-        
-        transform.position = cameraPosition;
-        transform.LookAt(mTarget);
+        SetCursor();
+        CameraRotation();
     }
-    
-    private Vector3 GetCameraPosition(float r, float polarAngle, float azimuthAngle)
+
+    private void SetCursor()
     {
-        float b = r * Mathf.Cos(polarAngle * Mathf.Deg2Rad);
-        float z = b * Mathf.Cos(azimuthAngle * Mathf.Deg2Rad);
-        float y = r * - Mathf.Sin(polarAngle * Mathf.Deg2Rad);
-        float x = b * Mathf.Sin(azimuthAngle * Mathf.Deg2Rad);
-        
-        return new Vector3(x, y, z);
-    }
-    
-    // 카메라와 타겟 사이에 장애물이 있을 때 카메라와 타겟간의 거리를 조절하는 메서드
-    private float AdjustCameraDistance()
-    {
-        var currentDistance = mDistance;
-        
-        // 타켓에서 카메라 방향으로 레이저 발사
-        Vector3 direction = GetCameraPosition(1.0f, mPolarAngle, mAzimuthAngle).normalized;
-        RaycastHit hit;
-        
-        // 타겟에서 카메라 예정 위치까지 레이케스트 발사
-        if (Physics.Raycast(mTarget.position, -direction, out hit, mDistance, mObstacleLayerMask))
+        if (GameManager.Instance.Input.CursorToggleInput)
         {
-            float offset = 0.3f;
-            currentDistance = hit.distance - offset;
-            currentDistance = Mathf.Max(currentDistance, 0.5f);
+            Cursor.visible = !Cursor.visible;
+            Cursor.lockState = Cursor.visible ? CursorLockMode.None : CursorLockMode.Locked;
         }
-        return currentDistance;
     }
     
-    public void SetTarget(Transform target)
+    private void CameraRotation()
     {
-        mTarget = target;
+        if (GameManager.Instance.Input.LookInput.sqrMagnitude >= 
+                                        mCinemachineCameraTarget.GetComponentInParent<PlayerController>().Threshold)
+        {
+            mCinemachineTargetYaw += GameManager.Instance.Input.LookInput.x * mRotationSensitivity;
+            mCinemachineTargetPitch -= GameManager.Instance.Input.LookInput.y * mRotationSensitivity;
+        }
+    
+        mCinemachineTargetYaw = ClampAngle(mCinemachineTargetYaw, float.MinValue, float.MaxValue);
+        mCinemachineTargetPitch = ClampAngle(mCinemachineTargetPitch, mBottomClamp, mTopClamp);
         
-        var cartesianPosition = GetCameraPosition(mDistance, mPolarAngle, mAzimuthAngle);
-        var cameraPosition = mTarget.position - cartesianPosition;
-        
-        transform.position = cameraPosition;
-        transform.LookAt(mTarget);
+        mCinemachineCameraTarget.transform.rotation = Quaternion.Euler(mCinemachineTargetPitch + mCameraAngleOverride,
+            mCinemachineTargetYaw, 0.0f);
+    }
+
+    private static float ClampAngle(float localFloatAngle, float localFloatMin, float localFloatMax)
+    {
+        if (localFloatAngle < -360f) localFloatAngle += 360f;
+        if (localFloatAngle > 360f) localFloatAngle -= 360f;
+        return Mathf.Clamp(localFloatAngle, localFloatMin, localFloatMax);
     }
 }
