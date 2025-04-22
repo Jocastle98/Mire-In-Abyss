@@ -291,6 +291,8 @@ public class EnemyBTController : MonoBehaviour
     public void OnHitAnimationExit()
     {
         _isHit = false;
+        if (_target == null)
+            DetectPlayer();
         if (_agent.enabled && _agent.isOnNavMesh && _target != null)
         {
             _anim.SetBool("Trace", true);
