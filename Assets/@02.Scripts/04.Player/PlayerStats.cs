@@ -1,6 +1,8 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -18,9 +20,9 @@ public class PlayerStats : MonoBehaviour
     private float moveSpeed;
     private float attackPower;
     private float defence;
-    private float damagedReduction;
+    private float damageReduction;
     private float critChance;
-    private float critDamamgeMultiplier = 1.5f;
+    private float critDamageMultiplier = 1.5f;
 
     private bool hasReviveAbility = false;
     private bool reviveUsed = false;
@@ -53,6 +55,8 @@ public class PlayerStats : MonoBehaviour
     private List<(float value, string type)> critChanceModifiers = new List<(float, string)>();
     private List<(float value, string type)> damageReductionModifiers = new List<(float, string)>();
 
+    private CancellationTokenSource reviveCts;
+
     private void Start()
     {
         ResetStats();
@@ -64,6 +68,12 @@ public class PlayerStats : MonoBehaviour
         UpdateAoeDamageTimer();
     }
 
+    private void OnDestroy()
+    {
+        reviveCts?.Cancel();
+        reviveCts?.Dispose();
+    }
+
     private void ResetStats()
     {
         maxHP = baseMaxHP;
@@ -72,7 +82,7 @@ public class PlayerStats : MonoBehaviour
         attackPower = baseAttackPower;
         defence = baseDefence;
         critChance = baseCritChance;
-        damagedReduction = 0f;
+        damageReduction = 0f;
 
         RecalculateAllStats();
     }
@@ -84,7 +94,7 @@ public class PlayerStats : MonoBehaviour
         RecalculateStat(ref attackPower, baseAttackPower, attackPowerModifiers);
         RecalculateStat(ref defence, baseDefence, defenceModifiers);
         RecalculateStat(ref critChance, baseCritChance, critChanceModifiers);
-        RecalculateStat(ref damagedReduction, 0f, damageReductionModifiers);
+        RecalculateStat(ref damageReduction, 0f, damageReductionModifiers);
         
         // 현재 체력이 최대 체력을 넘지 않도록
         if (currentHP > maxHP)
@@ -102,7 +112,7 @@ public class PlayerStats : MonoBehaviour
             {
                 addSum += modifier.value;
             }
-            else if (modifier.type == "mul")
+            else if (modifier.type == "mul" || modifier.type == "multiply")
             {
                 mulSum *= (1f + modifier.value);
             }
@@ -193,7 +203,7 @@ public class PlayerStats : MonoBehaviour
             return;
         }
 
-        float finalDamage = damage * (1f - damagedReduction);
+        float finalDamage = damage * (1f - damageReduction);
 
         if (hasLastStand && !lastStandActive && currentHP - finalDamage <= maxHP * 0.3f)
         {
@@ -226,7 +236,7 @@ public class PlayerStats : MonoBehaviour
 
         if (isCritical)
         {
-            damage *= critDamamgeMultiplier;
+            damage *= critDamageMultiplier;
             Debug.Log("치명타 발동");
         }
 
@@ -292,90 +302,199 @@ public class PlayerStats : MonoBehaviour
     {
         reviveUsed = true;
         currentHP = maxHP;
-        StartCoroutine(InvincibleAfterRevive());
+        InvincibleAfterReviveAsync().Forget();
     }
 
-    private IEnumerator InvincibleAfterRevive()
+    private async UniTaskVoid InvincibleAfterReviveAsync()
     {
         Debug.Log("부활하여 10초간 무적 상태");
+
+        reviveCts?.Cancel();
+        reviveCts?.Dispose();
+
+        reviveCts = new CancellationTokenSource();
+        
         bool oldDefenceBuff = defenceBuff;
         defenceBuff = true;
 
-        yield return new WaitForSeconds(10f);
 
-        defenceBuff = oldDefenceBuff;
-        Debug.Log("무적 종료");
+        try
+        {
+            await UniTask.Delay(TimeSpan.FromSeconds(10), cancellationToken: reviveCts.Token);
+            defenceBuff = oldDefenceBuff;
+            Debug.Log("무적 종료");
+        }
+        catch (OperationCanceledException)
+        {
+            Debug.Log("무적 효과가 취소되었습니다.");
+            defenceBuff = oldDefenceBuff;
+        }
+        
     }
 
     private void Die()
     {
-        
+        Debug.Log("플레이어 사망!");
+    }
+    
+    public async UniTaskVoid ApplyBuffAfterDelayAsync(Action buffAction, float delaySeconds, CancellationToken cancellationToken)
+    {
+        try
+        {
+            await UniTask.Delay(TimeSpan.FromSeconds(delaySeconds), cancellationToken: cancellationToken);
+            buffAction?.Invoke();
+        }
+        catch (OperationCanceledException)
+        {
+            Debug.Log("버프 적용이 취소되었습니다.");
+        }
     }
 
+    #region 스탯 수정 메서드
+    /// <summary>
+    /// 최대 체력 수정
+    /// </summary>
     public void ModifyMaxHP(float value, string type)
     {
         maxHPModifiers.Add((value, type));
         RecalculateAllStats();
     }
     
+    /// <summary>
+    /// 이동 속도 수정
+    /// </summary>
     public void ModifyMoveSpeed(float value, string type)
     {
         moveSpeedModifiers.Add((value, type));
         RecalculateAllStats();
     }
     
+    /// <summary>
+    /// 공격력 수정
+    /// </summary>
     public void ModifyAttackPower(float value, string type)
     {
         attackPowerModifiers.Add((value, type));
         RecalculateAllStats();
     }
     
+    /// <summary>
+    /// 방어력 수정
+    /// </summary>
     public void ModifyDefence(float value, string type)
     {
         defenceModifiers.Add((value, type));
         RecalculateAllStats();
     }
     
+    /// <summary>
+    /// 치명타 확률 수정
+    /// </summary>
     public void ModifyCritChance(float value, string type)
     {
         critChanceModifiers.Add((value, type));
         RecalculateAllStats();
     }
     
+    /// <summary>
+    /// 데미지 감소율 수정
+    /// </summary>
     public void ModifyDamageReduction(float value, string type)
     {
         damageReductionModifiers.Add((value, type));
         RecalculateAllStats();
     }
+    #endregion
 
+    #region 특수 효과 활성화/비활성화 메서드
+    /// <summary>
+    /// 흡혈 설정
+    /// </summary>
     public void SetLifeSteal(float percentage)
     {
         lifeStealPercentage = percentage;
     }
 
+    /// <summary>
+    /// 흡혈 효과 초기화
+    /// </summary>
+    public void ResetLifeSteal()
+    {
+        lifeStealPercentage = 0f;
+    }
+
+    /// <summary>
+    /// 부활 능력 활성화
+    /// </summary>
     public void EnableRevive()
     {
         hasReviveAbility = true;
         reviveUsed = false;
     }
+    
+    /// <summary>
+    /// 부활 능력 비활성화
+    /// </summary>
+    public void DisableRevive()
+    {
+        hasReviveAbility = false;
+    }
 
+    /// <summary>
+    /// 방어 버프 활성화
+    /// </summary>
     public void EnableDefenceBuff(float value)
     {
         defenceBuffValue = value;
     }
     
+    /// <summary>
+    /// 방어 버프 비활성화
+    /// </summary>
+    public void DisableDefenceBuff()
+    {
+        defenceBuffValue = 0f;
+        defenceBuff = false;
+    }
+    
+    /// <summary>
+    /// 이동 속도 버프 활성화
+    /// </summary>
     public void EnableMoveSpeedBuff(float value)
     {
         moveSpeedBuffValue = value;
         Debug.Log($"이동 속도 버프 능력 설정: {value * 100}%");
     }
     
+    /// <summary>
+    /// 이동 속도 버프 비활성화
+    /// </summary>
+    public void DisableMoveSpeedBuff()
+    {
+        moveSpeedBuffValue = 0f;
+        moveSpeedBuff = false;
+    }
+    
+    /// <summary>
+    /// 치명타 데미지 배율 설정
+    /// </summary>
     public void SetCritDamageMultiplier(float multiplier)
     {
-        critDamamgeMultiplier = multiplier;
+        critDamageMultiplier = multiplier;
         Debug.Log($"치명타 피해 배율 설정: {multiplier}배");
     }
     
+    /// <summary>
+    /// 치명타 데미지 배율 초기화
+    /// </summary>
+    public void ResetCritDamageMultiplier()
+    {
+        critDamageMultiplier = 1.5f; // 기본값으로 초기화
+    }
+    
+    /// <summary>
+    /// 스킬 쿨타임 초기화 능력 활성화
+    /// </summary>
     public void EnableSkillReset(float chance)
     {
         hasSkillReset = true;
@@ -383,6 +502,18 @@ public class PlayerStats : MonoBehaviour
         Debug.Log($"스킬 쿨타임 초기화 능력 설정: {chance * 100}% 확률");
     }
     
+    /// <summary>
+    /// 스킬 쿨타임 초기화 능력 비활성화
+    /// </summary>
+    public void DisableSkillReset()
+    {
+        hasSkillReset = false;
+        skillResetChance = 0f;
+    }
+    
+    /// <summary>
+    /// AoE 데미지 능력 활성화
+    /// </summary>
     public void EnableAoeDamage(float damage)
     {
         hasAoeDamage = true;
@@ -391,6 +522,18 @@ public class PlayerStats : MonoBehaviour
         Debug.Log($"주변 데미지 능력 설정: {damage} 데미지");
     }
     
+    /// <summary>
+    /// AoE 데미지 능력 비활성화
+    /// </summary>
+    public void DisableAoeDamage()
+    {
+        hasAoeDamage = false;
+        aoeDamageValue = 0f;
+    }
+    
+    /// <summary>
+    /// 라스트 스탠드 능력 활성화
+    /// </summary>
     public void EnableLastStand(float value)
     {
         hasLastStand = true;
@@ -398,11 +541,24 @@ public class PlayerStats : MonoBehaviour
         Debug.Log("Last Stand 능력 활성화");
     }
     
+    /// <summary>
+    /// 라스트 스탠드 능력 비활성화
+    /// </summary>
+    public void DisableLastStand()
+    {
+        hasLastStand = false;
+        lastStandValue = 0f;
+        lastStandActive = false;
+    }
+    #endregion
+
+    #region 스탯 가져오기 메서드
     public float GetCurrentHP() => currentHP;
     public float GetMaxHP() => maxHP;
     public float GetMoveSpeed() => moveSpeed;
     public float GetAttackPower() => attackPower;
     public float GetDefence() => defence;
     public float GetCritChance() => critChance;
-    public float GetDamageReduction() => damagedReduction;
+    public float GetDamageReduction() => damageReduction;
+    #endregion
 }
