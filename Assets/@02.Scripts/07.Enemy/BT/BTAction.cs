@@ -2,11 +2,11 @@
 
 public class BTAction : BTNode
 {
-    private Action _action;
-    public BTAction(Action action) => _action = action;
+    private readonly Action mAction;
+    public BTAction(Action action) => mAction = action;
     public override bool Tick()
     {
-        _action();
+        mAction();
         return true;
     }
 }
