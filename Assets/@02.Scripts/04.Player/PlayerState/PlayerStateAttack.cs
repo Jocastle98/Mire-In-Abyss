@@ -6,6 +6,7 @@ using UnityEngine;
 public class PlayerStateAttack : IPlayerState
 {
     private PlayerController mPlayerController;
+    private Vector3 mAttackDirection;
     public bool bIsAttacking { get; set; }
     public bool bIsCombo { get; set; }
 
@@ -15,6 +16,9 @@ public class PlayerStateAttack : IPlayerState
         mPlayerController.PlayerAnimator.SetTrigger("Attack");
         
         bIsCombo = true;
+        
+        mAttackDirection = mPlayerController.GetCameraForwardDirection();
+        mPlayerController.transform.rotation = Quaternion.LookRotation(mAttackDirection);
     }
 
     public void OnUpdate()
