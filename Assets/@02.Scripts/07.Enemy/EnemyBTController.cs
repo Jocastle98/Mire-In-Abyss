@@ -198,22 +198,7 @@ public class EnemyBTController : MonoBehaviour
         mAnim.SetBool("Idle", false);
     }
 
-    public void OnAttackAnimationExit()
-    {
-        mbIsAttacking = false;
-        if (mAgent.enabled && mAgent.isOnNavMesh)
-        {
-            mAgent.isStopped = false;
-        }
-    }
-
-    public void FireProjectile()
-    {
-        if (mAttackBehaviorAsset is RangedAttackBehavior ranged)
-        {
-            ranged.FireProjectileFrom(transform);
-        }
-    }
+    #region 플레이어 감지하기
 
     private bool DetectPlayer()
     {
@@ -227,31 +212,9 @@ public class EnemyBTController : MonoBehaviour
         return false;
     }
 
-    public void OnDeadAnimationExit()
-    {
-        StartCoroutine(Dissolve());
-    }
-
-    private IEnumerator Dissolve()
-    {
-        var block = new MaterialPropertyBlock();
-        float alpha = 1f;
-        while (alpha > 0f)
-        {
-            alpha -= Time.deltaTime;
-            float clamped = Mathf.Clamp01(alpha);
-            foreach (var renderer in mRenderers)
-            {
-                renderer.GetPropertyBlock(block);
-                var color = block.GetColor("_Color");
-                color.a = clamped;
-                block.SetColor("_Color", color);
-                renderer.SetPropertyBlock(block);
-            }
-            yield return null;
-        }
-        Destroy(gameObject);
-    }
+    #endregion
+    
+    #region 몬스터 Hit
 
     public void SetHit(int damage)
     {
@@ -269,7 +232,6 @@ public class EnemyBTController : MonoBehaviour
             mbIsHit = true;
         }
     }
-
     public void OnHitAnimationExit()
     {
         mbIsHit = false;
@@ -302,7 +264,6 @@ public class EnemyBTController : MonoBehaviour
         }
         ChangeColorRenderer(Color.white, block);
     }
-
     private void ChangeColorRenderer(Color color, MaterialPropertyBlock block)
     {
         foreach (var renderer in mRenderers)
@@ -312,6 +273,57 @@ public class EnemyBTController : MonoBehaviour
             renderer.SetPropertyBlock(block);
         }
     }
+    
+    public void OnDeadAnimationExit()
+    {
+        StartCoroutine(Dissolve());
+    }
+
+    private IEnumerator Dissolve()
+    {
+        var block = new MaterialPropertyBlock();
+        float alpha = 1f;
+        while (alpha > 0f)
+        {
+            alpha -= Time.deltaTime;
+            float clamped = Mathf.Clamp01(alpha);
+            foreach (var renderer in mRenderers)
+            {
+                renderer.GetPropertyBlock(block);
+                var color = block.GetColor("_Color");
+                color.a = clamped;
+                block.SetColor("_Color", color);
+                renderer.SetPropertyBlock(block);
+            }
+            yield return null;
+        }
+        Destroy(gameObject);
+    }
+
+    #endregion
+    
+    #region 몬스터 공격
+
+    public void OnAttackAnimationExit()
+    {
+        mbIsAttacking = false;
+        if (mAgent.enabled && mAgent.isOnNavMesh)
+        {
+            mAgent.isStopped = false;
+        }
+    }
+
+    public void FireProjectile()
+    {
+        if (mAttackBehaviorAsset is RangedAttackBehavior ranged)
+        {
+            ranged.FireProjectileFrom(transform);
+        }
+    }
+
+    #endregion
+
+    #region 디버깅
 
     private void OnDrawGizmosSelected()
     {
@@ -328,4 +340,7 @@ public class EnemyBTController : MonoBehaviour
             Gizmos.DrawWireSphere(transform.position, ranged.Range);
         }
     }
+
+    #endregion
+    
 }
