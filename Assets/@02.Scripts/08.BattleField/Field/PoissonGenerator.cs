@@ -9,12 +9,23 @@ public class PoissonGenerator
     private int cellSize;
     int radius;
 
+    /// <summary>
+    /// 맵 크기, 오브젝트끼리의 최소 소환 방지 거리
+    /// </summary>
+    /// <param name="mapSize"></param>
+    /// <param name="radius"></param>
     public PoissonGenerator(Vector2 mapSize,int radius)
     {
         this.mapSize = mapSize;
         this.radius = radius;
     }
 
+    /// <summary>
+    /// 맵의 중앙에 포인트를 두고 해당 포인트의 주위로 새로운 포인트를 놔둔 후, 최소 거리를 비교함
+    /// 최소 거리 이상인 포인트 끼리만 리스트에 추가 시켜 반환
+    /// </summary>
+    /// <param name="searchLimit"></param>
+    /// <returns></returns>
     public List<Vector2> GeneratePoissonList(int searchLimit)
     {
         cellSize = (int)(radius / Mathf.Sqrt(2));
@@ -56,6 +67,14 @@ public class PoissonGenerator
         return points;
     }
 
+    /// <summary>
+    /// 새로 둔 포인트 주위로 기존의 놓여진 포인터를 확인
+    /// 두 포인트의 거리가 최소거리에 못 미친다면 false를 반환
+    /// 이상이면 true후 리스트에 추가
+    /// </summary>
+    /// <param name="candidate"></param>
+    /// <param name="points"></param>
+    /// <returns></returns>
     bool IsPoissonValid(Vector2 candidate,List<Vector2> points)
     {
         if (candidate.x < 0 | candidate.y < 0 | candidate.x > mapSize.x | candidate.y > mapSize.y) return false;

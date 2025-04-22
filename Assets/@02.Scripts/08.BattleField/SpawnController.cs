@@ -9,6 +9,11 @@ public class SpawnController : MonoBehaviour
 
     private Color gizmoColor = Color.white;
 
+    /// <summary>
+    /// 컨트롤러를 컴포넌트로 둔 게임오브젝트의 주위로 랜덤하게 오브젝트를 생성
+    /// </summary>
+    /// <param name="obj"></param>
+    /// <param name="parent"></param>
     public void SpawnObj(GameObject obj, GameObject parent)
     {
         Vector3 randomPointOnCircle = Random.insideUnitSphere;
@@ -23,6 +28,9 @@ public class SpawnController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 구역 가시화
+    /// </summary>
     void OnDrawGizmos()
     {
         Gizmos.color = gizmoColor;
