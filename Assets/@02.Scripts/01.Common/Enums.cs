@@ -27,8 +27,5 @@ namespace PlayerEnums
 
 namespace ItemEnums
 {
-    public enum ItemType
-    {
-        
-    }
+    
 }
