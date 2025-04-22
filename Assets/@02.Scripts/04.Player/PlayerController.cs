@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using PlayerEnums;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.Serialization;
 
 [RequireComponent(typeof(Animator))]
 [RequireComponent(typeof(CharacterController))]
@@ -12,9 +13,8 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
 {
     [Header("Player Basic Stat")]
     [SerializeField] private int mMaxHealth = 100;
-    [SerializeField] private int mAttackPower = 10;
-    public int AttackPower => mAttackPower;
-    [SerializeField] private int mDefendPower = 5;
+    [SerializeField] private int mBaseAttackPower = 10;
+    [SerializeField] private int mBaseDefendPower = 5;
     
     [Space(10)]
     [Header("Player Move Stat")]
@@ -54,28 +54,27 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     [SerializeField] private Transform mLeftHandTransform;
 
     // Player Stat
-    [SerializeField]
+    public int mCurrentAttackPower;
+    private int mCurrentDefendPower;
+    private int mCurrentHealth;
     private float mVerticalVelocity;
     private float mRotationVelocity;
     private float mTerminalVelocity = 53.0f;
     private float mTargetRotation;
     private float mAnimationBlend;
     private float mSpeed;
-    private float mCurrentHealth;
     
     // Timeout Deltatime
     private float mJumpTimeoutDelta;
     private float mFallTimeoutDelta;
     
     // Componenet
-    public Animator PlayerAnimator;
+    private Animator mPlayerAnimator;
+    public Animator PlayerAnimator => mPlayerAnimator;
     private CharacterController mCharacterController;
     private PlayerInput mPlayerInput;
     private GameObject mMainCamera;
     private WeaponController mWeaponController;
-    private const float mThreshold = 0.01f;
-    public float Threshold => mThreshold;
-    private bool mHasAnimator;
     
     // State
     private PlayerStateIdle mPlayerStateIdle;
@@ -100,8 +99,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     
     private void Awake()
     {
-        PlayerAnimator = GetComponent<Animator>();
-        mHasAnimator = TryGetComponent(out PlayerAnimator);
+        mPlayerAnimator = GetComponent<Animator>();
         mCharacterController = GetComponent<CharacterController>();
         mPlayerInput = GetComponent<PlayerInput>();
         if (Camera.main != null)
@@ -173,7 +171,9 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         
         SetPlayerState(PlayerState.Idle);
         
-        // 체력 초기화
+        // 스탯 초기화
+        mCurrentAttackPower = mBaseAttackPower;
+        mCurrentDefendPower = mBaseDefendPower;
         mCurrentHealth = mMaxHealth;
         
         // 무기 할당
@@ -283,11 +283,8 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             mCharacterController.Move(new Vector3(0.0f, mVerticalVelocity, 0.0f) * Time.deltaTime);
         }
         
-        if (mHasAnimator)
-        {
-            PlayerAnimator.SetFloat("Speed", 0.0f);
-            PlayerAnimator.SetFloat("MotionSpeed", inputMagnitude);
-        }
+        mPlayerAnimator.SetFloat("Speed", 0.0f);
+        mPlayerAnimator.SetFloat("MotionSpeed", inputMagnitude);
     }
 
     public void Move()
@@ -347,11 +344,8 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             mCharacterController.Move(targetDirection.normalized * (mSpeed * Time.deltaTime) + new Vector3(0.0f, mVerticalVelocity, 0.0f) * Time.deltaTime);
         }
         
-        if (mHasAnimator)
-        {
-            PlayerAnimator.SetFloat("Speed", mAnimationBlend);
-            PlayerAnimator.SetFloat("MotionSpeed", inputMagnitude);
-        }
+        mPlayerAnimator.SetFloat("Speed", mAnimationBlend);
+        mPlayerAnimator.SetFloat("MotionSpeed", inputMagnitude);
     }
     
     #endregion
@@ -389,7 +383,11 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
 
     private IEnumerator RollCoroutine(Vector3 targetDirection)
     {
-        yield return new WaitForSeconds(0.15f); // 애니메이션 초기 구간 기다림
+        // 애니메이션 초기 구간 기다림
+        yield return new WaitForSeconds(0.2f);
+        
+        // 일정시간 무적?
+        Rolling();
         
         float distanceCovered = 0f;
         float maxDistance = mRollDistance;
@@ -403,11 +401,17 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             yield return null;
         }
     }
+
+    private void Rolling()
+    {
+        
+    }
     
     #endregion
     
     #region 공격 관련 기능
 
+    // 검방 캐릭에 대한 무기 세팅 메서드(오른쪽 한손 검만 무기라는 전제의 메서드)
     private void SetPlayerWeapon(Transform rightHandTransform, string rightWeaponName,
         Transform leftHandTransform = null, string leftWeaponName = null)
     {
@@ -416,12 +420,20 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         rightWeapon.Subscribe(this);
 
         mWeaponController = rightWeapon;
+        mWeaponController.SetPlayer(this);
+        int weaponPower = mWeaponController.GetWeaponPower();
+        AddItemAttack(weaponPower);
 
         if (leftHandTransform != null)
         {
             var leftWeaponObject = Resources.Load<GameObject>($"Player/Weapons/{leftWeaponName}");
             var leftWeapon = Instantiate(leftWeaponObject, leftHandTransform);
         }
+    }
+
+    public void AddItemAttack(int itemAttackPower)
+    {
+        mCurrentAttackPower += itemAttackPower;
     }
     
     public void Attack()
@@ -432,21 +444,21 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         if (GameManager.Instance.Input.MoveInput == Vector2.zero)
         {
             Idle();
-            PlayerAnimator.SetBool("Idle", true);
-            PlayerAnimator.SetBool("Move", false);
+            mPlayerAnimator.SetBool("Idle", true);
+            mPlayerAnimator.SetBool("Move", false);
         }
         else
         {
             Move();
             if (mbIsGrounded)
             {
-                PlayerAnimator.SetBool("Idle", false);
-                PlayerAnimator.SetBool("Move", true);
+                mPlayerAnimator.SetBool("Idle", false);
+                mPlayerAnimator.SetBool("Move", true);
             }
             else
             {
-                PlayerAnimator.SetBool("Idle", false);
-                PlayerAnimator.SetBool("Move", false);
+                mPlayerAnimator.SetBool("Idle", false);
+                mPlayerAnimator.SetBool("Move", false);
             }
         }
     }
@@ -456,7 +468,6 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     {
         if (CurrentPlayerState == PlayerState.Attack)
         {
-            mPlayerStateAttack.bIsAttacking = true;
             mWeaponController.AttackStart();
         }
     }
@@ -466,7 +477,6 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     {
         if (CurrentPlayerState == PlayerState.Attack)
         {
-            mPlayerStateAttack.bIsAttacking = false;
             mWeaponController.AttackEnd();
         }
     }
@@ -505,35 +515,40 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         
         if (!GameManager.Instance.Input.IsDefending)
         {
-            PlayerAnimator.SetBool("Idle", false);
-            PlayerAnimator.SetBool("Move", false);
-            PlayerAnimator.SetBool("Defend", false);
+            mPlayerAnimator.SetBool("Idle", false);
+            mPlayerAnimator.SetBool("Move", false);
+            mPlayerAnimator.SetBool("Defend", false);
             SetPlayerState(PlayerState.Idle);
         }
         else
         {
-            // 방어감소 or 방어력 증가 기능 메서드
+            // 피해감소 or 방어력 증가 기능 메서드
             Defending();
             
             // 이동 방어시 하반신(Base Layer) 애니메이션
             if (GameManager.Instance.Input.MoveInput == Vector2.zero)
             {
                 Idle();
-                PlayerAnimator.SetBool("Idle", true);
-                PlayerAnimator.SetBool("Move", false);
+                mPlayerAnimator.SetBool("Idle", true);
+                mPlayerAnimator.SetBool("Move", false);
             }
             else
             {
                 Move();
-                PlayerAnimator.SetBool("Idle", false);
-                PlayerAnimator.SetBool("Move", true);
+                mPlayerAnimator.SetBool("Idle", false);
+                mPlayerAnimator.SetBool("Move", true);
             }
         }
     }
-
+    
     private void Defending()
     {
         
+    }
+
+    public void AddItemDefend(int itemDefendPower)
+    {
+        mCurrentDefendPower += itemDefendPower;
     }
 
     #endregion
@@ -551,14 +566,14 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         if (GameManager.Instance.Input.MoveInput == Vector2.zero)
         {
             Idle();
-            PlayerAnimator.SetBool("Idle", true);
-            PlayerAnimator.SetBool("Move", false);
+            mPlayerAnimator.SetBool("Idle", true);
+            mPlayerAnimator.SetBool("Move", false);
         }
         else
         {
             Move();
-            PlayerAnimator.SetBool("Idle", false);
-            PlayerAnimator.SetBool("Move", true);
+            mPlayerAnimator.SetBool("Idle", false);
+            mPlayerAnimator.SetBool("Move", true);
         }
     }
 
@@ -569,7 +584,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     
     #endregion
 
-    #region 대시 기능 관련
+    #region 대시 관련 기능
 
     public void Dash(Vector3 cameraForwardDirection)
     {
@@ -589,6 +604,36 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             mCharacterController.Move(cameraForwardDirection * (moveAmount * Time.deltaTime));
             distanceCovered += moveAmount;
             yield return null;
+        }
+    }
+
+    #endregion
+
+    #region 피격/사망 관련 기능
+
+    public void SetHit(TestEnemyController enemyController, Vector3 direction)
+    {
+        if (CurrentPlayerState != PlayerState.Hit)
+        {
+            var enemyPower = enemyController.EnemyAttackPower;
+            var damage = Mathf.Max(enemyPower - mCurrentDefendPower, 1);
+            mCurrentHealth -= damage;
+        }
+        
+        // 체력 UI 업데이트
+        // GameManager.Instance.SetHP((float)mCurrentHealth / mMaxHealth);
+        
+        if (mCurrentHealth <= 0)
+        {
+            SetPlayerState(PlayerState.Dead);
+        }
+        else
+        {
+            SetPlayerState(PlayerState.Hit);
+            // 방향에 따라 맞는 애니메이션이 없으므로 현재는 효과가 없는 것이나 마찬가지인 상태, 일단 대기
+            // 플레이어 캐릭터의 방향을 회전시켜주는 수동적인 방식을 사용하거나?
+            mPlayerAnimator.SetFloat("HitPosX", -direction.x);
+            mPlayerAnimator.SetFloat("HitPosY", -direction.z);
         }
     }
 

@@ -7,8 +7,6 @@ public class PlayerStateDefend : IPlayerState
 {
     private PlayerController mPlayerController;
     private Vector3 mCameraForward;
-    public bool bIsDefending { get; set; }
-    public bool bIsDefendEnd { get; set; }
     
     public void OnEnter(PlayerController playerController)
     {
