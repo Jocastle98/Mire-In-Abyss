@@ -679,11 +679,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 41fc9940aabc7c24d9a0b8391d7f7e80, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  baseMaxHP: 100
-  baseMoveSpeed: 5
-  baseAttackPower: 10
-  baseDefence: 0
-  baseCritChance: 0.05
+  mBaseMaxHP: 100
+  mBaseMoveSpeed: 5
+  mBaseAttackPower: 10
+  mBaseDefence: 0
+  mBaseCritChance: 0.05
 --- !u!4 &244351049
 Transform:
   m_ObjectHideFlags: 0
@@ -1322,8 +1322,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3dbd2ae177fbaea468b460ab78542a51, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  itemDatabase: {fileID: 753696569}
-  playerStats: {fileID: 244351048}
+  mItemDatabase: {fileID: 753696569}
+  mPlayerStats: {fileID: 244351048}
 --- !u!1 &791098554
 GameObject:
   m_ObjectHideFlags: 0
