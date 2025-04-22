@@ -2361,7 +2361,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxHealth: 100
-  detectRadius: 10
+  detectRadius: 12
   detectAngle: 360
   playerMask:
     serializedVersion: 2

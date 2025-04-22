@@ -84,47 +84,55 @@ public class EnemyBTController : MonoBehaviour
         // 3) 플레이어 감지
         var detectCond = new BTCondition(DetectPlayer);
 
-        // 4) 근거리 공격 시퀀스
-        var attackSeq = new BTSequence(
-            new BTCondition(() => !_isAttacking && attackBehavior != null && _target != null && attackBehavior.IsInRange(transform, _target)),
-            new BTAction(() =>
-            {
-                if (_agent.enabled && _agent.isOnNavMesh)
-                {
-                    _agent.isStopped = true;
-                    _agent.velocity = Vector3.zero;
-                    _agent.ResetPath();
-                }
-                ClearAllBools();
-            }),
-            new BTAction(() =>
-            {
-                _isAttacking = true;
-                attackBehavior.Attack(transform, _target);
-            })
-        );
-
-        // 5) 근거리 추적
-        var traceAction = new BTAction(() =>
-        {
-            if (_isAttacking) return;
-            if (_target == null) return;
-            if (!attackBehavior.IsInRange(transform, _target))
-            {
-                ClearAllBools();
-                _anim.SetBool("Trace", true);
-                _agent.isStopped = false;
-                _agent.SetDestination(_target.position);
-            }
-        });
-
-        // 6) 원거리 전용  공격/추적
+        BTNode attackSeq = null;
+        BTNode traceAction = null;
         BTNode engage;
+        if (attackBehaviorAsset is MeleeAttackBehavior)
+        {
+            // 4) 근거리 공격 시퀀스
+            attackSeq = new BTSequence(
+                new BTCondition(() => 
+                    !_isAttacking && attackBehavior != null &&
+                    _target != null && attackBehavior.IsInRange(transform, _target)),
+                new BTAction(() =>
+                {
+                    if (_agent.enabled && _agent.isOnNavMesh)
+                    {
+                        _agent.isStopped = true;
+                        _agent.velocity = Vector3.zero;
+                        _agent.ResetPath();
+                    }
+                    ClearAllBools();
+                }),
+                new BTAction(() =>
+                {
+                    _isAttacking = true;
+                    attackBehavior.Attack(transform, _target);
+                })
+            );
+
+            // 5) 근거리 추적
+            traceAction = new BTAction(() =>
+            {
+                if (_isAttacking) return;
+                if (_target == null) return;
+                if (!attackBehavior.IsInRange(transform, _target))
+                {
+                    ClearAllBools();
+                    _anim.SetBool("Trace", true);
+                    _agent.isStopped = false;
+                    _agent.SetDestination(_target.position);
+                }
+            });
+        }
+        // 6) 원거리 전용  공격/추적
         if (attackBehaviorAsset is RangedAttackBehavior)
         {
             // 플레이어가 공격 범위 내에 있으면 계속 공격
             var rangedAttackSeq = new BTSequence(
-                new BTCondition(() => _target != null && attackBehavior.IsInRange(transform, _target)),
+                new BTCondition(() => 
+                    !_isAttacking && attackBehavior != null &&
+                    _target != null && attackBehavior.IsInRange(transform, _target)),
                 new BTAction(() =>
                 {
                     if (_agent.enabled && _agent.isOnNavMesh)
@@ -147,13 +155,19 @@ public class EnemyBTController : MonoBehaviour
             // 공격 범위 밖이면 추적
             var rangedTrace = new BTAction(() =>
             {
+                if (_isAttacking) return;
                 if (_target == null) return;
                 if (!attackBehavior.IsInRange(transform, _target))
                 {
                     ClearAllBools();
                     _anim.SetBool("Trace", true);
-                    _agent.isStopped = false;
-                    _agent.SetDestination(_target.position);
+
+                    if (_agent.enabled && _agent.isOnNavMesh)
+                    {
+                        _agent.isStopped = false;
+                        _agent.SetDestination(_target.position);
+                    }
+                   
                 }
             });
             engage = new BTSelector(rangedAttackSeq, rangedTrace);
