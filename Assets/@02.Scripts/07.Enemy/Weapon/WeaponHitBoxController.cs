@@ -1,22 +1,22 @@
 ﻿using UnityEngine;
 
-public class WeaponHitboxController : MonoBehaviour
+public class WeaponHitBoxController : MonoBehaviour
 {
-    private Collider _hitCollider;
+    private Collider mHitCollider;
 
-    void Awake()
+    private void Awake()
     {
         var hitbox = GetComponentInChildren<HitBox>();
-        _hitCollider = hitbox.GetComponent<Collider>();
+        mHitCollider = hitbox.GetComponent<Collider>();
     }
 
     public void EnableHitbox()
     {
-        _hitCollider.enabled = true;
+        mHitCollider.enabled = true;
     }
 
     public void DisableHitbox()
     {
-        _hitCollider.enabled = false;
+        mHitCollider.enabled = false;
     }
 }
