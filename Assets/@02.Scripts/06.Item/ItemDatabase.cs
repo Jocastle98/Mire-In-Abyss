@@ -7,11 +7,11 @@ using Random = UnityEngine.Random;
 public class ItemDatabase : MonoBehaviour
 {
     public TextAsset itemCsvFile;//item_list.csv를 인스펙터에 할당
-    private string itemCsvFilePath = "Item/item_list"; //Resources 폴더 내 경로
+    private string mItemCsvFilePath = "Item/item_list"; //Resources 폴더 내 경로
 
-    private Dictionary<string, Item> itemDatabase = new Dictionary<string, Item>();
-    public int ItemCount => itemDatabase.Count;
-    public List<string> ItemNames => itemDatabase.Keys.ToList();
+    private Dictionary<string, Item> mItemDatabase = new Dictionary<string, Item>();
+    public int ItemCount => mItemDatabase.Count;
+    public List<string> ItemNames => mItemDatabase.Keys.ToList();
     
     private void Awake()
     {
@@ -32,7 +32,7 @@ public class ItemDatabase : MonoBehaviour
     /// </summary>
     private void LoadItemsFromResources()
     {
-        TextAsset csvAsset = Resources.Load<TextAsset>(itemCsvFilePath);
+        TextAsset csvAsset = Resources.Load<TextAsset>(mItemCsvFilePath);
 
         if (csvAsset == null)
         {
@@ -68,7 +68,7 @@ public class ItemDatabase : MonoBehaviour
             Item newItem = ParseItemFromCSV(line);
             if (newItem != null)
             {
-                itemDatabase[newItem.name] = newItem;
+                mItemDatabase[newItem.ItemName] = newItem;
             }
         }
     }
@@ -92,12 +92,12 @@ public class ItemDatabase : MonoBehaviour
 
             Item item = new Item
             {
-                name = values[0],
-                tier = values[1],
-                description = values[2],
-                effectType = values[3],
-                value = float.Parse(values[4]),
-                valueType = values[5]
+                ItemName = values[0],
+                Tier = values[1],
+                Description = values[2],
+                EffectType = values[3],
+                Value = float.Parse(values[4]),
+                ValueType = values[5]
             };
 
             string dropSourcesStr = values[6].Replace(" ", "");
@@ -106,12 +106,12 @@ public class ItemDatabase : MonoBehaviour
                 string[] sources = dropSourcesStr.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
                 foreach (var source in sources)
                 {
-                    item.dropSources.Add(source);
+                    item.DropSources.Add(source);
                 }
             }
 
-            item.dropRateMonster = float.Parse(values[7]);
-            item.dropRateShop = float.Parse(values[8]);
+            item.DropRateMonster = float.Parse(values[7]);
+            item.DropRateShop = float.Parse(values[8]);
 
             return item;
         }
@@ -167,7 +167,7 @@ public class ItemDatabase : MonoBehaviour
     /// <returns></returns>
     public Item GetItemByName(string itemName)
     {
-        if (itemDatabase.TryGetValue(itemName, out Item item))
+        if (mItemDatabase.TryGetValue(itemName, out Item item))
         {
             return item;
         }
@@ -185,9 +185,9 @@ public class ItemDatabase : MonoBehaviour
     {
         List<Item> result = new List<Item>();
 
-        foreach (var item in itemDatabase.Values)
+        foreach (var item in mItemDatabase.Values)
         {
-            if (item.tier.Equals(tier, StringComparison.OrdinalIgnoreCase))
+            if (item.Tier.Equals(tier, StringComparison.OrdinalIgnoreCase))
             {
                 result.Add(item);
             }
@@ -204,9 +204,9 @@ public class ItemDatabase : MonoBehaviour
     public List<Item> GetItemsByDropSource(string source)
     {
         List<Item> result = new List<Item>();
-        foreach (var item in itemDatabase.Values)
+        foreach (var item in mItemDatabase.Values)
         {
-            if (item.dropSources.Contains(source))
+            if (item.DropSources.Contains(source))
             {
                 result.Add(item);
             }
@@ -225,7 +225,7 @@ public class ItemDatabase : MonoBehaviour
     /// <returns></returns>
     public Item GetRandomItemFromMonster()
     {
-        return GetRandomItem(item => item.dropSources.Contains("monster"), item => item.dropRateMonster);
+        return GetRandomItem(item => item.DropSources.Contains("monster"), item => item.DropRateMonster);
     }
 
     /// <summary>
@@ -234,7 +234,7 @@ public class ItemDatabase : MonoBehaviour
     /// <returns></returns>
     public Item GetRandomItemFromShop()
     {
-        return GetRandomItem(item => item.dropSources.Contains("shop"), item => item.dropRateShop);
+        return GetRandomItem(item => item.DropSources.Contains("shop"), item => item.DropRateShop);
     }
 
     /// <summary>
@@ -249,7 +249,7 @@ public class ItemDatabase : MonoBehaviour
         List<float> dropRates = new List<float>();
         float totalWeight = 0f;
 
-        foreach (var item in itemDatabase.Values)
+        foreach (var item in mItemDatabase.Values)
         {
             if (filter(item))
             {
@@ -283,12 +283,12 @@ public class ItemDatabase : MonoBehaviour
     // 디버깅이 필요할 때만 사용하는 메서드
     public void DebugPrintAllItems()
     {
-        Debug.Log($"===== 아이템 데이터베이스 총 {itemDatabase.Count}개 아이템 =====");
-        foreach (var item in itemDatabase.Values)
+        Debug.Log($"===== 아이템 데이터베이스 총 {mItemDatabase.Count}개 아이템 =====");
+        foreach (var item in mItemDatabase.Values)
         {
-            Debug.Log($"이름: {item.name}, 티어: {item.tier}, 효과: {item.effectType}, 값: {item.value}, 유형: {item.valueType}");
-            Debug.Log($"드롭소스: {string.Join(", ", item.dropSources)}, 몬스터확률: {item.dropRateMonster}, 상점확률: {item.dropRateShop}");
-            Debug.Log($"설명: {item.description}");
+            Debug.Log($"이름: {item.ItemName}, 티어: {item.Tier}, 효과: {item.EffectType}, 값: {item.Value}, 유형: {item.ValueType}");
+            Debug.Log($"드롭소스: {string.Join(", ", item.DropSources)}, 몬스터확률: {item.DropRateMonster}, 상점확률: {item.DropRateShop}");
+            Debug.Log($"설명: {item.Description}");
             Debug.Log("-------------------------------------");
         }
     }
