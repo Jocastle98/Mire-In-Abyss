@@ -15,9 +15,28 @@ public class PlayerStateFall : IPlayerState
 
     public void OnUpdate()
     {
-        if (mPlayerController.ActionCheck())
+        if (mPlayerController == null)
+        {
+            return;
+        }
+        
+        if (mPlayerController.IsGrounded)
         {
             mPlayerController.SetPlayerState(PlayerState.Land);
+        }
+        else
+        {
+            mPlayerController?.Fall();
+            
+            if (GameManager.Instance.Input.AttackInput)
+            {
+                mPlayerController?.SetPlayerState(PlayerState.Attack);
+            }
+            
+            if (GameManager.Instance.Input.DashInput)
+            {
+                mPlayerController?.SetPlayerState(PlayerState.Dash);
+            }
         }
     }
 

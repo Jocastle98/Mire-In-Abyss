@@ -9,6 +9,7 @@ public class PlayerStateDead : IPlayerState
     public void OnEnter(PlayerController playerController)
     {
         mPlayerController = playerController;
+        
         mPlayerController.PlayerAnimator.SetTrigger("Dead");
     }
 
