@@ -4,60 +4,54 @@
 [RequireComponent(typeof(Collider))]
 public class ProjectileSkeleton : MonoBehaviour
 {
-    public float speed = 15f;
+    [SerializeField] private float mSpeed = 15f;
 
-    private Rigidbody _rb;
-    private Collider _col;
-    private LayerMask _hitLayer;
-    private int _damage;
+    private Rigidbody mRb;
+    private Collider mCol;
+    private LayerMask mHitLayer;
+    private int mDamage;
 
-    void Awake()
+    private void Awake()
     {
-        // Rigidbody와 Collider 컴포넌트 초기화
-        _rb = GetComponent<Rigidbody>();
-        _col = GetComponent<Collider>();
+        mRb = GetComponent<Rigidbody>();
+        mCol = GetComponent<Collider>();
 
-        // 물리 정확도 향상을 위한 설정
-        _rb.collisionDetectionMode = CollisionDetectionMode.Continuous;
-        _rb.useGravity = false;     // 중력 필요 시 true로 변경
-
-        // 트리거 사용
-        _col.isTrigger = true;
+        mRb.collisionDetectionMode = CollisionDetectionMode.Continuous;
+        mRb.useGravity = false;
+        mCol.isTrigger = true;
     }
 
     /// <summary>
     /// RangedAttackBehavior에서 호출하세요.
     /// </summary>
-    /// <param name="direction">발사 방향 (normalized)</param>
-    /// <param name="speed">초기 속도</param>
     public void Initialize(Vector3 direction, float speed, LayerMask hitLayer, int damage)
     {
-        _rb.velocity = direction.normalized * speed;
-        _hitLayer = hitLayer;
-        _damage = damage;
+        mRb.velocity = direction.normalized * speed;
+        mHitLayer = hitLayer;
+        mDamage = damage;
 
-        Destroy(gameObject, 5f); // 수명
+        Destroy(gameObject, 5f);
     }
 
-    void FixedUpdate()
+    private void FixedUpdate()
     {
-        // 날아가는 방향으로 회전
-        if (_rb.velocity.sqrMagnitude > 0.1f)
+        if (mRb.velocity.sqrMagnitude > 0.1f)
         {
-            Quaternion forwardRotation = Quaternion.LookRotation(_rb.velocity);
-            transform.rotation = forwardRotation * Quaternion.Euler(90f, 0f, 0f); // X축 90도 회전 보정
+            var forwardRotation = Quaternion.LookRotation(mRb.velocity);
+            transform.rotation = forwardRotation * Quaternion.Euler(90f, 0f, 0f);
         }
     }
 
-    void OnTriggerEnter(Collider other)
+    private void OnTriggerEnter(Collider other)
     {
-        // 목표 레이어 체크
-        if ((_hitLayer.value & (1 << other.gameObject.layer)) == 0)
+        if ((mHitLayer.value & (1 << other.gameObject.layer)) == 0)
+        {
             return;
+        }
 
         if (other.TryGetComponent<EnemyBTController>(out var enemy))
         {
-            enemy.SetHit(_damage);
+            enemy.SetHit(mDamage);
         }
 
         Destroy(gameObject);

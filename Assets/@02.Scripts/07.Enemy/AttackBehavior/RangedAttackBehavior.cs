@@ -5,46 +5,42 @@ using UnityEngine;
 public class RangedAttackBehavior : ScriptableObject, IAttackBehavior
 {
     [Header("원거리 공격 설정")]
-    public float  range            = 10f;
-    public GameObject projectilePrefab;
-    public LayerMask hitLayer;
-    public int damage               = 5;
-    public float cooldown           = 1f;
+    public float Range = 10f;
+    public GameObject ProjectilePrefab;
+    public LayerMask HitLayer;
+    public int Damage = 5;
+    public float Cooldown = 1f;
     [Tooltip("트리거 대신 레이캐스트 즉발 궤적 사용 시 true")]
-    public bool useRaycastTracer    = false;
+    public bool UseRaycastTracer = false;
 
     [Tooltip("투사체 초기 속도")]
-    public float projectileSpeed    = 25f;
+    public float ProjectileSpeed = 25f;
 
-    private bool _ready = true;
-    private Transform _self, _target;
-    private EnemyBTController _controller;
+    private bool mbReady = true;
+    private Transform mSelf;
+    private Transform mTarget;
+    private EnemyBTController mController;
 
     public bool IsInRange(Transform self, Transform target)
-        => Vector3.Distance(self.position, target.position) <= range;
+        => Vector3.Distance(self.position, target.position) <= Range;
 
     public void Attack(Transform self, Transform target)
     {
-        if (!_ready || projectilePrefab == null) return;
-        _ready = false;
+        if (!mbReady || ProjectilePrefab == null) return;
+        mbReady = false;
 
-        // 캐싱
-        _self       = self;
-        _target     = target;
-        _controller = self.GetComponent<EnemyBTController>();
+        mSelf = self;
+        mTarget = target;
+        mController = self.GetComponent<EnemyBTController>();
 
-        // 애니메이션만 트리거
         self.GetComponent<Animator>()?.SetTrigger("Attack");
-
-        // 쿨다운 준비
-        self.GetComponent<MonoBehaviour>()
-            .StartCoroutine(ResetReady());
+        self.GetComponent<MonoBehaviour>().StartCoroutine(ResetReady());
     }
 
     private IEnumerator ResetReady()
     {
-        yield return new WaitForSeconds(cooldown);
-        _ready = true;
+        yield return new WaitForSeconds(Cooldown);
+        mbReady = true;
     }
 
     public void FireProjectileFrom(Transform self)
@@ -54,35 +50,36 @@ public class RangedAttackBehavior : ScriptableObject, IAttackBehavior
         var fp = controller?.FirePoint;
         if (fp == null || target == null) return;
 
-        Vector3 dir = target.position - fp.position;
+        var dir = target.position - fp.position;
         dir.y = 0;
         if (dir.sqrMagnitude < 0.01f) dir = self.forward;
         dir.Normalize();
 
-        if (useRaycastTracer)
+        if (UseRaycastTracer)
         {
-            if (Physics.Raycast(fp.position, dir, out var hit, range, hitLayer))
+            if (Physics.Raycast(fp.position, dir, out var hit, Range, HitLayer))
             {
                 if (hit.collider.TryGetComponent<EnemyBTController>(out var e))
-                    e.SetHit(damage);
+                {
+                    e.SetHit(Damage);
+                }
                 SpawnTracer(fp.position, hit.point);
             }
             else
             {
-                SpawnTracer(fp.position, fp.position + dir * range);
+                SpawnTracer(fp.position, fp.position + dir * Range);
             }
         }
         else
         {
-            var proj = Object.Instantiate(projectilePrefab, fp.position, Quaternion.LookRotation(dir));
+            var proj = Instantiate(ProjectilePrefab, fp.position, Quaternion.LookRotation(dir));
             if (proj.TryGetComponent<ProjectileSkeleton>(out var ps))
-                ps.Initialize(dir, projectileSpeed, hitLayer, damage);
+            {
+                ps.Initialize(dir, ProjectileSpeed, HitLayer, Damage);
+            }
         }
     }
 
-
-
-    // 간단한 LineRenderer 트레이서 생성 예시
     private void SpawnTracer(Vector3 from, Vector3 to)
     {
         var go = new GameObject("Tracer");
@@ -90,7 +87,6 @@ public class RangedAttackBehavior : ScriptableObject, IAttackBehavior
         lr.positionCount = 2;
         lr.SetPositions(new[] { from, to });
         lr.startWidth = lr.endWidth = 0.05f;
-        // 원하는 머터리얼/색상 세팅
-        Object.Destroy(go, 0.1f); // 짧게 보여주고 제거
+        Destroy(go, 0.1f);
     }
 }
