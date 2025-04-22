@@ -2360,21 +2360,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a1087477150a4c19a5dbc15b48a07acc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHealth: 100
-  detectRadius: 12
-  detectAngle: 360
-  playerMask:
+  mMaxHealth: 100
+  mDetectRadius: 12
+  mDetectAngle: 360
+  mPlayerMask:
     serializedVersion: 2
     m_Bits: 256
-  patrolRadius: 5
-  attackBehaviorAsset: {fileID: 11400000, guid: d4421d88b302c33418aaa05ef814bf6a, type: 2}
-  mRenderer:
+  mPatrolRadius: 5
+  mAttackBehaviorAsset: {fileID: 11400000, guid: d4421d88b302c33418aaa05ef814bf6a, type: 2}
+  mRenderers:
   - {fileID: 2942382354358912345}
   - {fileID: 440465701352641795}
   - {fileID: 290773638512855979}
   - {fileID: 4733082580195370033}
   - {fileID: 2378559692502613522}
-  firePoint: {fileID: 5811797329913469919}
+  mFirePoint: {fileID: 5811797329913469919}
 --- !u!1 &6768917661509904439
 GameObject:
   m_ObjectHideFlags: 0
