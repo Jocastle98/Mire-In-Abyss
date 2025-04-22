@@ -462,7 +462,7 @@ ModelImporter:
         intParameter: 0
         messageOptions: 0
       - time: 1
-        functionName: ComboEnd
+        functionName: EndCombo
         data: 
         objectReferenceParameter: {instanceID: 0}
         floatParameter: 0

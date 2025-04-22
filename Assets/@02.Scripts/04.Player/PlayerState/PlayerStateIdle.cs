@@ -1,7 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
 using PlayerEnums;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class PlayerStateIdle : IPlayerState
@@ -12,124 +9,61 @@ public class PlayerStateIdle : IPlayerState
     {
         mPlayerController = playerController;
         mPlayerController.PlayerAnimator.SetBool("Idle", true);
-        
-        mPlayerController.GetComponent<Rigidbody>().velocity = Vector3.zero;
-        mPlayerController.PlayerAnimator.SetFloat("Vertical", 0.0f);
     }
 
     public void OnUpdate()
     {
-        MoveCheck();
-        WalkAndRunSpeedLess();
-        JumpCheck();
-        RollCheck();
-        AttackCheck();
-        DefendCheck();
-        ParryCheck();
+        if (mPlayerController == null)
+        {
+            return;
+        }
+
+        if (mPlayerController.IsGrounded)
+        {
+            if (GameManager.Instance.Input.MoveInput == Vector2.zero)
+            {
+                mPlayerController?.Idle();
+            }
+            else
+            {
+                mPlayerController?.SetPlayerState(PlayerState.Move);
+            }
+
+            if (GameManager.Instance.Input.JumpInput)
+            {
+                mPlayerController?.SetPlayerState(PlayerState.Jump);
+            }
+
+            if (GameManager.Instance.Input.RollInput)
+            {
+                mPlayerController?.SetPlayerState(PlayerState.Roll);
+            }
+
+            if (GameManager.Instance.Input.DefendInput)
+            {
+                mPlayerController?.SetPlayerState(PlayerState.Defend);
+            }
+
+            if (GameManager.Instance.Input.ParryInput)
+            {
+                mPlayerController?.SetPlayerState(PlayerState.Parry);
+            }
+        }
+
+        if (GameManager.Instance.Input.AttackInput)
+        {
+            mPlayerController?.SetPlayerState(PlayerState.Attack);
+        }
+
+        if (GameManager.Instance.Input.DashInput)
+        {
+            mPlayerController?.SetPlayerState(PlayerState.Dash);
+        }
     }
 
     public void OnExit()
     {
         mPlayerController.PlayerAnimator.SetBool("Idle", false);
         mPlayerController = null;
-    }
-
-    private void MoveCheck()
-    {
-        Vector2 moveInput = GameManager.Instance.Input.MoveInput;
-        if ((moveInput.x != 0 || moveInput.y != 0) && mPlayerController.ActionCheck())
-        {
-            mPlayerController.Movement(moveInput.x, moveInput.y);
-            mPlayerController.SetPlayerState(PlayerState.Move);
-            return;
-        }
-    }
-
-    private void WalkAndRunSpeedLess()
-    {
-        if (mPlayerController == null)
-        {
-            return;
-        }
-        
-        float mSpeed = mPlayerController.walkAndRunSpeed;
-        if (mSpeed > 0.0f)
-        {
-            mSpeed -= Time.deltaTime * 0.5f;
-            mSpeed = Mathf.Clamp01(mSpeed);
-            
-            mPlayerController.SetWalkAndRunSpeed(mSpeed);
-            mPlayerController.PlayerAnimator.SetFloat("Speed", mSpeed);
-        }
-    }
-
-    private void JumpCheck()
-    {
-        if (mPlayerController == null)
-        {
-            return;
-        }
-        
-        if (GameManager.Instance.Input.JumpInput && mPlayerController.ActionCheck())
-        {
-            mPlayerController.SetPlayerState(PlayerState.Jump);
-            return;
-        }
-    }
-
-    private void RollCheck()
-    {
-        if (mPlayerController == null)
-        {
-            return;
-        }
-        
-        if (GameManager.Instance.Input.RollInput && mPlayerController.ActionCheck())
-        {
-            mPlayerController.SetPlayerState(PlayerState.Roll);
-            return;
-        }
-    }
-
-    private void AttackCheck()
-    {
-        if (mPlayerController == null)
-        {
-            return;
-        }
-        
-        if (GameManager.Instance.Input.AttackInput && mPlayerController.ActionCheck())
-        {
-            mPlayerController.SetPlayerState(PlayerState.Attack);
-            return;
-        }
-    }
-
-    private void DefendCheck()
-    {
-        if (mPlayerController == null)
-        {
-            return;
-        }
-
-        if (GameManager.Instance.Input.DefendInput && mPlayerController.ActionCheck())
-        {
-            mPlayerController.SetPlayerState(PlayerState.Defend);
-            return;
-        }
-    }
-
-    private void ParryCheck()
-    {
-        if (mPlayerController == null)
-        {
-            return;
-        }
-
-        if (GameManager.Instance.Input.ParryInput && mPlayerController.ActionCheck())
-        {
-            mPlayerController.SetPlayerState(PlayerState.Parry);
-            return;
-        }
     }
 }
