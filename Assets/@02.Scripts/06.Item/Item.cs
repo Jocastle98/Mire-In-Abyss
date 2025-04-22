@@ -4,15 +4,20 @@ using ItemEnums;
 using UnityEngine;
 
 [System.Serializable]
-public class ItemData
+public class Item
 {
     public string name;
-    public ItemTier tier;
+    public string tier;
     public string description;
     public string effectType;
     public float value;
-    public ValueType valueType;
-    public string[] dropSources;
+    public string valueType;
+    public List<string> dropSources = new List<string>();
     public float dropRateMonster;
     public float dropRateShop;
+
+    public override string ToString()
+    {
+        return $"{name}({tier}):{description}";
+    }
 }

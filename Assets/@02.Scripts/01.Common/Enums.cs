@@ -21,6 +21,5 @@ namespace PlayerEnums
 
 namespace ItemEnums
 {
-    public enum ItemTier {Common, Special, Epic }
-    public enum ValueType{Add, Mul, Fixed, Unique}
+    
 }
