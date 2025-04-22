@@ -1,5 +1,3 @@
-
-
 namespace PlayerEnums
 {
     public enum PlayerState

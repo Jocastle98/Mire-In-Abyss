@@ -121,10 +121,10 @@ public class WeaponController : MonoBehaviour, IObservable<GameObject>
                 var worldPosition = transform.position + transform.TransformVector(mTriggerZones[i].position);
                 var direction = (worldPosition - mPreviousPositions[i]);
                 
-                Gizmos.color = Color.green;
+                Gizmos.color = Color.red;
                 Gizmos.DrawWireSphere(worldPosition, mTriggerZones[i].radius);
                 
-                Gizmos.color = Color.red;
+                Gizmos.color = Color.blue;
                 Gizmos.DrawWireSphere(worldPosition + direction, mTriggerZones[i].radius);
             }
         }
