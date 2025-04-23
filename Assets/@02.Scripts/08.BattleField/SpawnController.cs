@@ -18,7 +18,7 @@ public class SpawnController : MonoBehaviour
     {
         GameObject spawnObj = null;
         int whileLimit = 10;
-        while (spawnObj == null ||whileLimit <=0)
+        while (spawnObj == null)
         {
             Vector3 randomPointOnCircle = Random.insideUnitSphere;
             randomPointOnCircle.Normalize(); // 방향만 남김 (길이 1)
