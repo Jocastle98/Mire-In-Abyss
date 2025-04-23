@@ -17,6 +17,13 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     [SerializeField] private int mBaseDefendPower = 5;
     
     [Space(10)]
+    [Header("Player Current Changed Stat")]
+    [SerializeField] private int mCurrentHealth;
+    public int mCurrentAttackPower;
+    public int mCurrentDefendPower;
+    public float mSpeed;
+    
+    [Space(10)]
     [Header("Player Move Stat")]
     [SerializeField] private float mMoveSpeed = 4.0f;
     [SerializeField] private float mSprintSpeed = 6.0f;
@@ -53,20 +60,20 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     [SerializeField] private Transform mRightHandTransform;
     [SerializeField] private Transform mLeftHandTransform;
 
-    // Player Stat
-    public int mCurrentAttackPower;
-    private int mCurrentDefendPower;
-    private int mCurrentHealth;
+    // Player Calculation Stat
     private float mVerticalVelocity;
     private float mRotationVelocity;
     private float mTerminalVelocity = 53.0f;
     private float mTargetRotation;
     private float mAnimationBlend;
-    private float mSpeed;
+    private bool mbInCombat = false;
+    private float mInCombatTimeout = 5.0f;
     
     // Timeout Deltatime
     private float mJumpTimeoutDelta;
     private float mFallTimeoutDelta;
+    private float mInCombatTimeoutDelta;
+    
     
     // Componenet
     private Animator mPlayerAnimator;
@@ -161,6 +168,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         
         GroundedCheck();
         ApplyGravity();
+        InCombatCheck();
     }
 
     public void Init()
@@ -238,6 +246,18 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         if (mVerticalVelocity < mTerminalVelocity)
         {
             mVerticalVelocity += mGravity * Time.deltaTime;
+        }
+    }
+
+    private void InCombatCheck()
+    {
+        if (mbInCombat)
+        {
+            mInCombatTimeout -= Time.deltaTime;
+            if (mInCombatTimeout <= 0.0f)
+            {
+                mbInCombat = false;
+            }
         }
     }
     
@@ -332,6 +352,8 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         }
         
         mPlayerAnimator.SetFloat("Speed", mAnimationBlend);
+        mPlayerAnimator.SetFloat("Vertical", GameManager.Instance.Input.MoveInput.y); // 임시
+        mPlayerAnimator.SetFloat("Horizontal", GameManager.Instance.Input.MoveInput.x); //임시
         mPlayerAnimator.SetFloat("MotionSpeed", inputMagnitude);
     }
     
@@ -446,6 +468,12 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         }
     }
 
+    public void EnterCombat()
+    {
+        mbInCombat = true;
+        mInCombatTimeout = mInCombatTimeoutDelta;
+    }
+
     public void AddItemAttack(int itemAttackPower)
     {
         mCurrentAttackPower += itemAttackPower;
@@ -462,6 +490,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             
             mPlayerAnimator.SetBool("Idle", true);
             mPlayerAnimator.SetBool("Move", false);
+            mPlayerAnimator.SetBool("Jump", false);
         }
         else
         {
@@ -469,13 +498,29 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             
             if (mbIsGrounded)
             {
+                // 공격 중 이동 상태
                 mPlayerAnimator.SetBool("Idle", false);
                 mPlayerAnimator.SetBool("Move", true);
+                mPlayerAnimator.SetBool("Jump", false);
+
+                // 공격 중 점프 상태
+                if (GameManager.Instance.Input.JumpInput)
+                {
+                    if (mJumpTimeoutDelta < 0.0f)
+                    {
+                        mVerticalVelocity = 0.0f;
+                        mVerticalVelocity = Mathf.Sqrt(mJumpHeight * -2.0f * mGravity);
+                        
+                        mPlayerAnimator.SetBool("Jump", false);
+                    }
+                }
             }
             else
             {
+                // 공격 중 낙하 상태
                 mPlayerAnimator.SetBool("Idle", false);
                 mPlayerAnimator.SetBool("Move", false);
+                mPlayerAnimator.SetBool("Jump", false);
             }
         }
     }
