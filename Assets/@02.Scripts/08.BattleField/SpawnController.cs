@@ -16,15 +16,23 @@ public class SpawnController : MonoBehaviour
     /// <param name="parent"></param>
     public void SpawnObj(GameObject obj, GameObject parent)
     {
-        Vector3 randomPointOnCircle = Random.insideUnitSphere;
-        randomPointOnCircle.Normalize(); // 방향만 남김 (길이 1)
-        randomPointOnCircle *= Random.Range(5,radius);   // 원하는 반지름으로 스케일 조정
-        
-        RaycastHit hit;
-        if (Physics.Raycast(transform.position + randomPointOnCircle, Vector3.down, out hit))
+        GameObject spawnObj = null;
+        int whileLimit = 10;
+        while (spawnObj == null ||whileLimit <=0)
         {
-            GameObject spawnObj = Instantiate(obj, hit.point, Quaternion.identity);
-            spawnObj.transform.parent = parent.transform;
+            Vector3 randomPointOnCircle = Random.insideUnitSphere;
+            randomPointOnCircle.Normalize(); // 방향만 남김 (길이 1)
+            randomPointOnCircle *= Random.Range(5, radius); // 원하는 반지름으로 스케일 조정
+
+            RaycastHit hit;
+            if (Physics.Raycast(transform.position + randomPointOnCircle, Vector3.down, out hit))
+            {
+                spawnObj = Instantiate(obj, hit.point, Quaternion.identity);
+                spawnObj.transform.parent = parent.transform;
+            }
+
+            whileLimit--;
+            if(whileLimit <= 0) Debug.Log("SpawnObj Function did not return any objects");
         }
     }
 

@@ -10,7 +10,7 @@ using Random = UnityEngine.Random;
 
 public class FieldController : MonoBehaviour
 {
-    public int playTime = 180;
+    public int playTime = 30;
     
     //스폰 수
     [Header("몬스터 스폰 관리")]
@@ -28,8 +28,8 @@ public class FieldController : MonoBehaviour
     //보물상자 스폰
     [Space(10)]
     [Header("보물상자 스폰 관리")]
-    public int treasureMaxField = 10;
-    public int treasureDist = 10;
+    public int treasureSpawnAmount = 10;
+    public int treasureDistance = 150;
     public int poissonResearchLimit = 10;
     
     //몬스터 프리팹
@@ -46,7 +46,7 @@ public class FieldController : MonoBehaviour
     //스폰 주기
     //역수 기반 감소 (감소 곡선) 스폰주기 = 플레이타임 /((1f+난이도*스폰난이도))
     private float mCurrentTime;
-    public float spawnInterval;
+    private float spawnInterval;
     
     public GameObject player;//임시 퍼블릭
 
@@ -76,8 +76,10 @@ public class FieldController : MonoBehaviour
     private void FixedUpdate()
     {
         mCurrentTime += Time.fixedDeltaTime;
+        //Debug.Log("Current Time: " + mCurrentTime + " / " + spawnInterval);
         if (mCurrentTime > spawnInterval)
         {
+            Debug.Log("spawnInterval: " +  + spawnInterval);
             mCurrentTime = 0;
             SpawnMonsters();
         }
@@ -151,12 +153,12 @@ public class FieldController : MonoBehaviour
         //스폰 주기 최신화
         spawnInterval = playTime / ((1f + mLevelDesign * spawnTimeDifficult));
         //스폰 수 최신화
-        int spawnCount = (int)(spawnAmount + Random.Range(0, (mLevelDesign + spawnAmountDifficult * 0.1f)));
+        int spawnCount = (int)(spawnAmount + Random.Range(0, mLevelDesign + spawnAmountDifficult * 0.1f));
 
         for (int i = 0; i < spawnCount; i++)
         {
             if (monsterMaxField <= mMonsterCurrentField) return;
-
+            
             int unique = Mathf.Min(mLevelDesign / uniqueSpawnMaxChance, uniqueSpawnMaxChance);
             
             //일반 , 유니크 확률 소환
@@ -182,27 +184,40 @@ public class FieldController : MonoBehaviour
                     Quaternion.identity);
                 monster.transform.SetParent(mFieldMonsterParent.transform);
             }
+
+            mMonsterCurrentField++;
         }
     }
-    
+
     /// <summary>
     /// 베이크된 땅 오브젝트 위로 베이크 된 부분에만 보물상자를 스폰
     /// </summary>
     void SpawnTreasure()
     {
-        int treasureAmount = treasureMaxField + Random.Range(-5, treasureMaxField);
+        int treasureAmount = treasureSpawnAmount + Random.Range(-5, treasureSpawnAmount);
         int whileLoop = 0;
-        int whileMaxLoop = 5;
-        
-        while (whileMaxLoop>0)
+        int whileMaxLoop = 0;
+
+        int distributedTreasures = 0;
+        int navWeights = 0;
+        int restAmount = treasureAmount;
+        for (int i = 0; i < mNavMeshes.Count; i++)
+        {
+            navWeights += i + 1;
+        }
+
+        while (whileMaxLoop < 5)
         {
             for (int i = 0; i < mNavMeshes.Count; i++)
             {
+                int weight = mNavMeshes.Count - i;
+                distributedTreasures = restAmount * weight / navWeights;
+
                 GameObject meshGameObject = mNavMeshes[i].gameObject;
                 NavMeshModifierVolume navMesh = mNavMeshes[i].GetComponent<NavMeshModifierVolume>();
 
                 Vector2 navSize = new Vector2(navMesh.size.x, navMesh.size.z);
-                PoissonGenerator poissonGenerator = new PoissonGenerator(navSize, treasureDist + whileLoop * 2);
+                PoissonGenerator poissonGenerator = new PoissonGenerator(navSize, treasureDistance + whileLoop * 2);
                 List<Vector2> points =
                     poissonGenerator.GeneratePoissonList(poissonResearchLimit);
 
@@ -212,28 +227,25 @@ public class FieldController : MonoBehaviour
                     Vector3 worldPoint = meshGameObject.transform.TransformPoint(localPoint);
 
                     NavMeshHit navHit;
-                    if (NavMesh.SamplePosition(worldPoint, out navHit, 5f, NavMesh.AllAreas))
+                    if (NavMesh.SamplePosition(worldPoint, out navHit, 5f, 1<<navMesh.area))
                     {
                         int setChance = Random.Range(0, 100);
-                        if (setChance > 20 - whileLoop * 5 && treasureAmount > 0)
+                        if (setChance > 20 - whileLoop * 5 && distributedTreasures > 0)
                         {
                             GameObject treasure = Instantiate(treasures[Random.Range(0, treasures.Count)],
                                 navHit.position, Quaternion.identity);
                             treasure.transform.SetParent(mRandomTreasureParent.transform);
-                    
-                            treasureAmount--;
+
+                            distributedTreasures--;
                         }
                     }
-                    
-                    // GameObject treasure = Instantiate(treasures[Random.Range(0, treasures.Count)],
-                    //     worldPoint, Quaternion.identity);
-                    // treasure.transform.SetParent(mRandomTreasureParent.transform);
-                    
-
                 }
+
+                restAmount += distributedTreasures;
             }
-            //whileMaxLoop--;
-            break;
+
+            whileMaxLoop++;
+            if (restAmount <= 0) break;
         }
     }
 
@@ -247,7 +259,11 @@ public class FieldController : MonoBehaviour
         foreach (GameObject spawner in mMonsterSections)
         {
             float dist = Vector3.Distance(spawner.transform.position, player.transform.position);
-            if(dist < 10) closestSpawnController = spawner.gameObject;
+            if (dist < 10)
+            {
+                closestSpawnController = spawner.gameObject;
+                return closestSpawnController;
+            }
         }
         
         return closestSpawnController;
