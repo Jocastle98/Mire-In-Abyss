@@ -16,6 +16,8 @@ public class TestEnemyController : MonoBehaviour
     private CapsuleCollider _capsuleCollider;
     private int mCurrentHealth;
 
+    [SerializeField] private PlayerStats mPlayerStats;
+
     private void Awake()
     {
         _animator = GetComponent<Animator>();
@@ -39,7 +41,7 @@ public class TestEnemyController : MonoBehaviour
         Debug.Log("허수아비 히트!");
         _animator.SetTrigger("Hit");
         
-        mCurrentHealth -= playerController.mCurrentAttackPower;
+        mCurrentHealth -= (int)mPlayerStats.GetAttackPower();
         Debug.Log($"현재 체력: {mCurrentHealth}/{mMaxHealth}");
 
         if (mCurrentHealth <= 0)

@@ -10,7 +10,28 @@ public class ItemEffectSystem : MonoBehaviour
 
     // 획득한 아이템과 그 수량을 저장하는 딕셔너리
     private Dictionary<string, int> mAcquiredItems = new Dictionary<string, int>();
-    
+
+    private void Awake()
+    {
+        if (mPlayerStats == null)
+        {
+            mPlayerStats = GetComponent<PlayerStats>();
+            if (mPlayerStats == null)
+            {
+                mPlayerStats = FindObjectOfType<PlayerStats>();
+            }
+        }
+        
+        if (mItemDatabase == null)
+        {
+            mItemDatabase = GetComponent<ItemDatabase>();
+            if (mItemDatabase == null)
+            {
+                mItemDatabase = FindObjectOfType<ItemDatabase>();
+            }
+        }
+    }
+
     #region 아이템 획득 및 제거
     /// <summary>
     /// 아이템을 획득시 호출하는 메서드
