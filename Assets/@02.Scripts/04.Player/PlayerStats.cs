@@ -114,23 +114,28 @@ public class PlayerStats : MonoBehaviour
     
     private void RecalculateStat(ref float stat, float baseStat, List<(float value, string type)> modifiers)
     {
-        float addSum = 0f;
+        float percentSum = 0f;
         float mulSum = 1f;
+        float flatAdd = 0f;
         
         foreach (var modifier in modifiers)
         {
             if (modifier.type == "add" || modifier.type == "percent")
             {
-                addSum += modifier.value;
+                percentSum += modifier.value;
             }
             else if (modifier.type == "mul" || modifier.type == "multiply")
             {
                 mulSum *= (1f + modifier.value);
             }
+            else if (modifier.type.ToLower() == "flat")
+            {
+                flatAdd += modifier.value;
+            }
             // fixed와 unique는 여기서 처리하지 않음 (특수 로직에서 처리)
         }
         
-        stat = (baseStat + baseStat * addSum) * mulSum;
+        stat = (baseStat + (baseStat * percentSum) + flatAdd) * mulSum;
     }
     
     private void UpdateBuffDuration()

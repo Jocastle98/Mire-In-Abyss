@@ -479,7 +479,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         mWeaponController = rightWeapon;
         mWeaponController.SetPlayer(this);
         int weaponPower = mWeaponController.GetWeaponPower();
-        mPlayerStats.ModifyAttackPower(weaponPower, "add");
+        mPlayerStats.ModifyAttackPower(weaponPower, "flat");
 
         if (leftHandTransform != null)
         {
