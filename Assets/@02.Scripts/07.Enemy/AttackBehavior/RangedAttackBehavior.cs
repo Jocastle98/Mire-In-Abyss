@@ -79,6 +79,38 @@ public class RangedAttackBehavior : ScriptableObject, IAttackBehavior
             }
         }
     }
+    
+    
+    public void FireLastPosition(Transform self, Vector3 targetPosition)
+    {
+        var fp = self.GetComponent<EnemyBTController>().FirePoint;
+        if (fp == null || ProjectilePrefab == null) return;
+
+        Vector3 dir = targetPosition - fp.position;
+        dir.y = 0;
+        if (dir.sqrMagnitude < 0.01f) dir = self.forward;
+        dir.Normalize();
+
+        if (UseRaycastTracer)
+        {
+            if (Physics.Raycast(fp.position, dir, out var hit, Range, HitLayer))
+            {
+                if (hit.collider.TryGetComponent<EnemyBTController>(out var e))
+                    e.SetHit(Damage);
+                SpawnTracer(fp.position, hit.point);
+            }
+            else
+            {
+                SpawnTracer(fp.position, fp.position + dir * Range);
+            }
+        }
+        else
+        {
+            var proj = Instantiate(ProjectilePrefab, fp.position, Quaternion.LookRotation(dir));
+            if (proj.TryGetComponent<ProjectileSkeleton>(out var ps))
+                ps.Initialize(dir, ProjectileSpeed, HitLayer, Damage);
+        }
+    }
 
     private void SpawnTracer(Vector3 from, Vector3 to)
     {
