@@ -119,7 +119,7 @@ public class PlayerStats : MonoBehaviour
         
         foreach (var modifier in modifiers)
         {
-            if (modifier.type == "add")
+            if (modifier.type == "add" || modifier.type == "percent")
             {
                 addSum += modifier.value;
             }
@@ -220,7 +220,13 @@ public class PlayerStats : MonoBehaviour
             return;
         }
 
-        float finalDamage = damage * (1f - mDamageReduction);
+        float finalDamage = damage;
+        if (mDefence > 0)
+        {
+            finalDamage = Mathf.Max(damage - mDefence, 1);
+        }
+
+        finalDamage *= (1f - mDamageReduction);
 
         if (mbHasLastStand && !mbLastStandActive && mCurrentHP - finalDamage <= mMaxHP * 0.3f)
         {
