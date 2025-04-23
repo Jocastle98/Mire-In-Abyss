@@ -2,11 +2,11 @@
 
 public class BTSelector : BTNode
 {
-    private List<BTNode> _children;
-    public BTSelector(params BTNode[] children) => _children = new List<BTNode>(children);
+    private readonly List<BTNode> mChildren;
+    public BTSelector(params BTNode[] children) => mChildren = new List<BTNode>(children);
     public override bool Tick()
     {
-        foreach (var child in _children)
+        foreach (var child in mChildren)
             if (child.Tick()) return true;
         return false;
     }
