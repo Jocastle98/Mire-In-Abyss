@@ -10,16 +10,16 @@ using UnityEngine.InputSystem;
 [RequireComponent(typeof(PlayerInput))]
 public class PlayerController : MonoBehaviour, IObserver<GameObject>
 {
-    [Header("Player Basic Stat")]
+    /*[Header("Player Basic Stat")]
     [SerializeField] private int mMaxHealth = 100;
     [SerializeField] private int mAttackPower = 10;
     public int AttackPower => mAttackPower;
     [SerializeField] private int mDefendPower = 5;
     
-    [Space(10)]
+    [Space(10)]*/
     [Header("Player Move Stat")]
-    [SerializeField] private float mMoveSpeed = 4.0f;
-    [SerializeField] private float mSprintSpeed = 6.0f;
+    /*[SerializeField] private float mMoveSpeed = 4.0f;
+    [SerializeField] private float mSprintSpeed = 6.0f;*/
     [SerializeField] private float mRotationSmoothTime = 0.12f;
     [SerializeField] private float mSpeedChangeRate = 10.0f;
     
@@ -53,6 +53,8 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     [SerializeField] private Transform mRightHandTransform;
     [SerializeField] private Transform mLeftHandTransform;
 
+    [SerializeField] private PlayerStats mPlayerStats;
+    
     // Player Stat
     [SerializeField]
     private float mVerticalVelocity;
@@ -61,7 +63,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     private float mTargetRotation;
     private float mAnimationBlend;
     private float mSpeed;
-    private float mCurrentHealth;
+    /*private float mCurrentHealth;*/
     
     // Timeout Deltatime
     private float mJumpTimeoutDelta;
@@ -173,8 +175,8 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         
         SetPlayerState(PlayerState.Idle);
         
-        // 체력 초기화
-        mCurrentHealth = mMaxHealth;
+        /*// 체력 초기화
+        mCurrentHealth = mMaxHealth;*/
         
         // 무기 할당
         SetPlayerWeapon(mRightHandTransform, "Longsword", mLeftHandTransform, "Shield");
@@ -268,7 +270,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         float inputMagnitude = 1.0f;
         mSpeed = 0.0f;
         
-        mAnimationBlend = Mathf.Lerp(mAnimationBlend, mMoveSpeed, Time.deltaTime * mSpeedChangeRate);
+        mAnimationBlend = Mathf.Lerp(mAnimationBlend, 0, Time.deltaTime * mSpeedChangeRate);
         if (mAnimationBlend < 0.01f)
         {
             mAnimationBlend = 0f;
@@ -297,16 +299,16 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         {
             if (GameManager.Instance.Input.SprintInput)
             {
-                targetSpeed = mSprintSpeed;
+                targetSpeed = mPlayerStats.GetMoveSpeed() * 1.5f;
             }
             else
             {
-                targetSpeed = mMoveSpeed;
+                targetSpeed = mPlayerStats.GetMoveSpeed();
             }
         }
         else
         {
-            targetSpeed = 2.0f;
+            targetSpeed = mPlayerStats.GetMoveSpeed() * 0.5f;
         }
         
         float currentHorizontalSpeed = new Vector3(mCharacterController.velocity.x, 0.0f, mCharacterController.velocity.z).magnitude;
@@ -481,7 +483,9 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         var enemyController = value.GetComponent<TestEnemyController>();
         if (enemyController)
         {
+            float damage = mPlayerStats.GetAttackDamage();
             enemyController.SetHit(this);
+            mPlayerStats.OnDamageDealt(damage);
         }
     }
 
@@ -533,7 +537,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
 
     private void Defending()
     {
-        
+        mPlayerStats.OnGuardSuccess();
     }
 
     #endregion
@@ -590,6 +594,37 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             distanceCovered += moveAmount;
             yield return null;
         }
+    }
+
+    #endregion
+
+    #region 데미지 처리 관련
+
+    //플레이어가 데미지를 받을 때 호출
+    public void TakeDamage(float damage)
+    {
+        mPlayerStats.TakeDamage(damage);
+
+        if (mPlayerStats.GetCurrentHP() <= 0)
+        {
+            SetPlayerState(PlayerState.Dead);
+        }
+        else
+        {
+            SetPlayerState(PlayerState.Hit);
+        }
+    }
+
+    //플레이어가 적을 처치했을 때 호출
+    public void OnEnemyKilled()
+    {
+        mPlayerStats.OnEnemyKilled();
+    }
+    
+    //스킬 사용 시 쿨 타임 리셋 여부 확인
+    public bool CheckSkillReset()
+    {
+        return mPlayerStats.OnSkillUse();
     }
 
     #endregion

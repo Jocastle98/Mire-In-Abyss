@@ -24,6 +24,7 @@ public class PlayerStats : MonoBehaviour
     private float mCritChance;
     private float mCritDamageMultiplier = 1.5f;
 
+    //특수효과 관련 변수
     private bool mbHasReviveAbility = false;
     private bool mbReviveUsed = false;
     private float mLifeStealPercentage = 0f;
@@ -48,6 +49,7 @@ public class PlayerStats : MonoBehaviour
     private bool mbLastStandActive = false;
     private float mLastStandDuration = 0f;
     
+    //스탯 변경 추적을 위한 리스트
     private List<(float value, string type)> mMaxHPModifiers = new List<(float, string)>();
     private List<(float value, string type)> mMoveSpeedModifiers = new List<(float, string)>();
     private List<(float value, string type)> mAttackPowerModifiers = new List<(float, string)>();
@@ -56,10 +58,19 @@ public class PlayerStats : MonoBehaviour
     private List<(float value, string type)> mDamageReductionModifiers = new List<(float, string)>();
 
     private CancellationTokenSource mReviveCts;
+    
+    //이벤트 
+    public event Action OnDeath;
+    public event Action<float> OnHealthChanged;
+
+    private void Awake()
+    {
+        ResetStats();
+    }
 
     private void Start()
     {
-        ResetStats();
+        mCurrentHP = mMaxHP;
     }
 
     private void Update()
@@ -74,7 +85,7 @@ public class PlayerStats : MonoBehaviour
         mReviveCts?.Dispose();
     }
 
-    private void ResetStats()
+    public void ResetStats()
     {
         mMaxHP = mBaseMaxHP;
         mCurrentHP = mMaxHP;
@@ -187,14 +198,20 @@ public class PlayerStats : MonoBehaviour
                 Enemy enemy = hitCollider.GetComponent<Enemy>();
                 if (enemy != null)
                 {
-                    enemy.TakeDamage(aoeDamageValue);
+                    enemy.TakeDamage(mAoeDamageValue);
                 }*/
+                
+                //TODO: enemy범위 공격 로직
             }
         }
         
         Debug.Log($"AoE 데미지 발동! 데미지: {mAoeDamageValue}");
     }
 
+    /// <summary>
+    /// 플레이어가 데미지를 받을 때 호출
+    /// </summary>
+    /// <param name="damage">받는 데미지 양</param>
     public void TakeDamage(float damage)
     {
         if (mbDefenceBuff)
@@ -215,7 +232,10 @@ public class PlayerStats : MonoBehaviour
         }
 
         mCurrentHP -= finalDamage;
+        OnHealthChanged?.Invoke(mCurrentHP);
+        Debug.Log($"데미지 받음{finalDamage}, 남은체력 {mCurrentHP}/{mMaxHP}");
 
+        //사망 처리
         if (mCurrentHP <= 0)
         {
             if (mbHasReviveAbility && !mbReviveUsed)
@@ -229,6 +249,10 @@ public class PlayerStats : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 공격 데미지를 계산하여 반환(크리티컬 적용)
+    /// </summary>
+    /// <returns>최종 공격 데미지</returns>
     public float GetAttackDamage()
     {
         bool isCritical = Random.value <= mCritChance;
@@ -243,6 +267,9 @@ public class PlayerStats : MonoBehaviour
         return damage;
     }
 
+    /// <summary>
+    /// 적을 처치했을 때 호출
+    /// </summary>
     public void OnEnemyKilled()
     {
         if (mMoveSpeedBuffValue > 0)
@@ -254,6 +281,9 @@ public class PlayerStats : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 가드 성공 시 호출
+    /// </summary>
     public void OnGuardSuccess()
     {
         if (mDefenceBuffValue > 0)
@@ -265,6 +295,10 @@ public class PlayerStats : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 스킬 사용시 호출
+    /// </summary>
+    /// <returns></returns>
     public bool OnSkillUse()
     {
         if (mbHasSkillReset && Random.value <= mSkillResetChance)
@@ -276,6 +310,11 @@ public class PlayerStats : MonoBehaviour
         return false;
     }
 
+    /// <summary>
+    /// 데미지 적용한 후 호출, 흡혈효과
+    /// </summary>
+    /// <param name="damage"></param>
+    /// <returns></returns>
     public float OnDamageDealt(float damage)
     {
         if (mLifeStealPercentage > 0)
@@ -289,19 +328,36 @@ public class PlayerStats : MonoBehaviour
         return 0;
     }
 
+    /// <summary>
+    /// 체력을 회복
+    /// </summary>
+    /// <param name="amount">회복량</param>
     public void Heal(float amount)
     {
+        float oldHP = mCurrentHP;
         mCurrentHP += amount;
+        
         if (mCurrentHP > mMaxHP)
         {
             mCurrentHP = mMaxHP;
         }
+
+        float actualHeal = mCurrentHP - oldHP;
+
+        if (actualHeal > 0)
+        {
+            OnHealthChanged?.Invoke(mCurrentHP);
+        }
     }
 
+    /// <summary>
+    /// 부활 효과 적용
+    /// </summary>
     public void Revive()
     {
         mbReviveUsed = true;
         mCurrentHP = mMaxHP;
+        OnHealthChanged?.Invoke(mCurrentHP);
         InvincibleAfterReviveAsync().Forget();
     }
 
@@ -335,8 +391,15 @@ public class PlayerStats : MonoBehaviour
     private void Die()
     {
         Debug.Log("플레이어 사망!");
+        OnDeath?.Invoke();
     }
     
+    /// <summary>
+    /// 지연 시간 후 버프 적용
+    /// </summary>
+    /// <param name="buffAction"></param>
+    /// <param name="delaySeconds"></param>
+    /// <param name="cancellationToken"></param>
     public async UniTaskVoid ApplyBuffAfterDelayAsync(Action buffAction, float delaySeconds, CancellationToken cancellationToken)
     {
         try
