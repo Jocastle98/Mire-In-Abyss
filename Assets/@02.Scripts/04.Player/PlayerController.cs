@@ -11,7 +11,7 @@ using UnityEngine.Serialization;
 [RequireComponent(typeof(PlayerInput))]
 public class PlayerController : MonoBehaviour, IObserver<GameObject>
 {
-    [Header("Player Basic Stat")]
+    /*[Header("Player Basic Stat")]
     [SerializeField] private int mMaxHealth = 100;
     [SerializeField] private int mBaseAttackPower = 10;
     [SerializeField] private int mBaseDefendPower = 5;
@@ -21,12 +21,12 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     [SerializeField] private int mCurrentHealth;
     public int mCurrentAttackPower;
     public int mCurrentDefendPower;
-    public float mSpeed;
+    public float mSpeed;*/
     
     [Space(10)]
     [Header("Player Move Stat")]
-    [SerializeField] private float mMoveSpeed = 4.0f;
-    [SerializeField] private float mSprintSpeed = 6.0f;
+    /*[SerializeField] private float mMoveSpeed = 4.0f;
+    [SerializeField] private float mSprintSpeed = 6.0f;*/
     [SerializeField] private float mRotationSmoothTime = 0.12f;
     [SerializeField] private float mSpeedChangeRate = 10.0f;
     
@@ -60,12 +60,21 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     [SerializeField] private Transform mRightHandTransform;
     [SerializeField] private Transform mLeftHandTransform;
 
+    [Space(10)]
+    [Header("Reference")]
+    [SerializeField] private PlayerStats mPlayerStats;
+    
+    
     // Player Calculation Stat
+    [SerializeField]
     private float mVerticalVelocity;
     private float mRotationVelocity;
     private float mTerminalVelocity = 53.0f;
     private float mTargetRotation;
     private float mAnimationBlend;
+
+    public float mSpeed;
+    
     private bool mbInCombat = false;
     private float mInCombatTimeout = 5.0f;
     
@@ -113,6 +122,12 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         {
             mMainCamera = Camera.main.gameObject;
         }
+        
+        //PlayerStats 컴포넌트가 없으면 자동 추가
+        if (mPlayerStats == null)
+        {
+            mPlayerStats = GetComponent<PlayerStats>();
+        }
     }
 
     private void Start()
@@ -155,6 +170,11 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             { PlayerState.Hit, mPlayerStateHit },
             { PlayerState.Dead, mPlayerStateDead },
         };
+
+        mPlayerStats.OnDeath += () =>
+        {
+            SetPlayerState(PlayerState.Dead);
+        };
         
         Init();
     }
@@ -179,10 +199,10 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         
         SetPlayerState(PlayerState.Idle);
         
-        // 스탯 초기화
+        /*// 스탯 초기화
         mCurrentAttackPower = mBaseAttackPower;
         mCurrentDefendPower = mBaseDefendPower;
-        mCurrentHealth = mMaxHealth;
+        mCurrentHealth = mMaxHealth;*/
         
         // 무기 할당
         SetPlayerWeapon(mRightHandTransform, "Longsword", mLeftHandTransform, "Shield");
@@ -248,7 +268,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             mVerticalVelocity += mGravity * Time.deltaTime;
         }
     }
-
+    
     private void InCombatCheck()
     {
         if (mbInCombat)
@@ -292,16 +312,16 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         {
             if (GameManager.Instance.Input.SprintInput)
             {
-                targetSpeed = mSprintSpeed;
+                targetSpeed = mPlayerStats.GetMoveSpeed() * 1.5f;
             }
             else
             {
-                targetSpeed = mMoveSpeed;
+                targetSpeed = mPlayerStats.GetMoveSpeed();
             }
         }
         else
         {
-            targetSpeed = 2.0f;
+            targetSpeed = mPlayerStats.GetMoveSpeed() * 0.5f;
         }
         
         // 2. 현재 속도 측정 (수평 이동만 고려)
@@ -459,7 +479,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         mWeaponController = rightWeapon;
         mWeaponController.SetPlayer(this);
         int weaponPower = mWeaponController.GetWeaponPower();
-        AddItemAttack(weaponPower);
+        mPlayerStats.ModifyAttackPower(weaponPower, "flat");
 
         if (leftHandTransform != null)
         {
@@ -474,10 +494,10 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         mInCombatTimeout = mInCombatTimeoutDelta;
     }
 
-    public void AddItemAttack(int itemAttackPower)
+    /*public void AddItemAttack(int itemAttackPower)
     {
         mCurrentAttackPower += itemAttackPower;
-    }
+    }*/
     
     public void Attack()
     {
@@ -553,7 +573,11 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         var enemyController = value.GetComponent<TestEnemyController>();
         if (enemyController)
         {
+            //공격력을 PlayerStats에서 가져와 데미지 계산
+            float damage = mPlayerStats.GetAttackDamage();
             enemyController.SetHit(this);
+            //피해적용 후 흡혈효과 처리
+            mPlayerStats.OnDamageDealt(damage);
         }
     }
 
@@ -605,13 +629,13 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     
     private void Defending()
     {
-        
+        mPlayerStats.OnGuardSuccess();
     }
 
-    public void AddItemDefend(int itemDefendPower)
+    /*public void AddItemDefend(int itemDefendPower)
     {
         mCurrentDefendPower += itemDefendPower;
-    }
+    }*/
 
     #endregion
 
@@ -677,15 +701,15 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     {
         if (CurrentPlayerState != PlayerState.Hit)
         {
+            //PlayerState의 TakeDamage 메서드 사용
             var enemyPower = enemyController.EnemyAttackPower;
-            var damage = Mathf.Max(enemyPower - mCurrentDefendPower, 1);
-            mCurrentHealth -= damage;
+            mPlayerStats.TakeDamage(enemyPower);
         }
         
         // 체력 UI 업데이트
-        // GameManager.Instance.SetHP((float)mCurrentHealth / mMaxHealth);
+        // GameManager.Instance.SetHP((float)mPlayerStats.GetCurrentHP() / mPlayerStats.GetMaxHP());
         
-        if (mCurrentHealth <= 0)
+        if (mPlayerStats.GetCurrentHP() <= 0)
         {
             SetPlayerState(PlayerState.Dead);
         }
@@ -697,6 +721,16 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             mPlayerAnimator.SetFloat("HitPosX", -direction.x);
             mPlayerAnimator.SetFloat("HitPosY", -direction.z);
         }
+    }
+
+    public void OnEnemyKilled()
+    {
+        mPlayerStats.OnEnemyKilled();
+    }
+
+    public bool CheckSkillReset()
+    {
+        return mPlayerStats.OnSkillUse();
     }
 
     #endregion
