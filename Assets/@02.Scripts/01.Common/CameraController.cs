@@ -11,6 +11,7 @@ public class CameraController : MonoBehaviour
     [SerializeField] private float mTopClamp = 70.0f;
     [SerializeField] private float mBottomClamp = -30.0f;
     [SerializeField] private float mCameraAngleOverride = 0.0f;
+    [SerializeField] private const float mThreshold = 0.01f;
     
     // cinemachine
     private float mCinemachineTargetYaw;
@@ -42,8 +43,7 @@ public class CameraController : MonoBehaviour
     
     private void CameraRotation()
     {
-        if (GameManager.Instance.Input.LookInput.sqrMagnitude >= 
-                                        mCinemachineCameraTarget.GetComponentInParent<PlayerController>().Threshold)
+        if (GameManager.Instance.Input.LookInput.sqrMagnitude >= mThreshold)
         {
             mCinemachineTargetYaw += GameManager.Instance.Input.LookInput.x * mRotationSensitivity;
             mCinemachineTargetPitch -= GameManager.Instance.Input.LookInput.y * mRotationSensitivity;
