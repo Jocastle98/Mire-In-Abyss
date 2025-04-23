@@ -5,11 +5,15 @@ using UnityEngine;
 public class PlayerStateParry : IPlayerState
 {
     private PlayerController mPlayerController;
+    private Vector3 mParryDirection;
     
     public void OnEnter(PlayerController playerController)
     {
         mPlayerController = playerController;
         mPlayerController.PlayerAnimator.SetTrigger("Parry");
+        
+        mParryDirection = mPlayerController.GetCameraForwardDirection();
+        mPlayerController.transform.rotation = Quaternion.LookRotation(mParryDirection);
     }
 
     public void OnUpdate()
