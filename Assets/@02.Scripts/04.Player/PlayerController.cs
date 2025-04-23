@@ -11,49 +11,24 @@ using UnityEngine.Serialization;
 [RequireComponent(typeof(PlayerInput))]
 public class PlayerController : MonoBehaviour, IObserver<GameObject>
 {
-    /*[Header("Player Basic Stat")]
-    [SerializeField] private int mMaxHealth = 100;
-    [SerializeField] private int mBaseAttackPower = 10;
-    [SerializeField] private int mBaseDefendPower = 5;
     
-    [Space(10)]
-    [Header("Player Current Changed Stat")]
-    [SerializeField] private int mCurrentHealth;
-    public int mCurrentAttackPower;
-    public int mCurrentDefendPower;
-    public float mSpeed;*/
-    
-    [Space(10)]
-    [Header("Player Move Stat")]
-    /*[SerializeField] private float mMoveSpeed = 4.0f;
-    [SerializeField] private float mSprintSpeed = 6.0f;*/
+    [Header("Control Variable")]
     [SerializeField] private float mRotationSmoothTime = 0.12f;
     [SerializeField] private float mSpeedChangeRate = 10.0f;
-    
-    [Space(10)]
-    [Header("Player Jump Stat")]
     [SerializeField] private float mGravity = - 9.81f;
-    [SerializeField] private float mJumpHeight = 5.0f;
     [SerializeField] private float mJumpTimeout = 0.5f;
-    public float JumpTimeout => mJumpTimeout;
     [SerializeField] private float mFallTimeout = 0.15f;
-    public float FallTimeout => mFallTimeout;
-    
-    [Space(10)]
-    [Header("Player Roll Stat")]
+    [SerializeField] private float mJumpHeight = 5.0f;
     [SerializeField] private float mRollDistance = 5.0f;
-    
-    [Space(10)]
-    [Header("Player Dash Stat")]
     [SerializeField] private float mDashDistance = 10.0f;
     
     [Space(10)]
     [Header("Player Grouned Check")]
-    [SerializeField] private bool mbIsGrounded = true;
-    public bool IsGrounded => mbIsGrounded;
+    [SerializeField] private LayerMask mGroundLayers;
     [SerializeField] private float mGroundedOffset = -0.15f;
     [SerializeField] private float mGroundedRadius = 0.3f;
-    [SerializeField] private LayerMask mGroundLayers;
+    [SerializeField] private bool mbIsGrounded = true;
+    public bool IsGrounded => mbIsGrounded;
     
     [Space(10)]
     [Header("Player Attach Point")]
@@ -64,7 +39,6 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     [Header("Reference")]
     [SerializeField] private PlayerStats mPlayerStats;
     
-    
     // Player Calculation Stat
     [SerializeField]
     private float mVerticalVelocity;
@@ -72,8 +46,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     private float mTerminalVelocity = 53.0f;
     private float mTargetRotation;
     private float mAnimationBlend;
-
-    public float mSpeed;
+    private float mSpeed;
     
     private bool mbInCombat = false;
     private float mInCombatTimeout = 10.0f;
@@ -199,11 +172,6 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         
         SetPlayerState(PlayerState.Idle);
         
-        /*// 스탯 초기화
-        mCurrentAttackPower = mBaseAttackPower;
-        mCurrentDefendPower = mBaseDefendPower;
-        mCurrentHealth = mMaxHealth;*/
-        
         // 무기 할당
         SetPlayerWeapon(mRightHandTransform, "Longsword", mLeftHandTransform, "Shield");
     }
@@ -228,13 +196,15 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             QueryTriggerInteraction.Ignore);
 
         PlayerAnimator.SetBool("IsGrounded", mbIsGrounded);
+        
+        mMainCamera.GetComponent<CameraController>().SendPlayerGrounded(mbIsGrounded);
     }
     
     private void ApplyGravity()
     {
         if (mbIsGrounded)
         {
-            mFallTimeoutDelta = FallTimeout;
+            mFallTimeoutDelta = mFallTimeout;
              
             if (mJumpTimeoutDelta >= 0.0f)
             {
@@ -248,7 +218,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         }
         else
         {
-            mJumpTimeoutDelta = JumpTimeout;
+            mJumpTimeoutDelta = mJumpTimeout;
             
             if (mFallTimeoutDelta >= 0.0f)
             {
@@ -573,7 +543,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
                         mVerticalVelocity = 0.0f;
                         mVerticalVelocity = Mathf.Sqrt(mJumpHeight * -2.0f * mGravity);
                         
-                        mPlayerAnimator.SetBool("Jump", false);
+                        mPlayerAnimator.SetBool("Jump", true);
                     }
                 }
             }
@@ -590,7 +560,8 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     // 공격 애니메이션의 공격 모션 시작 시 호출 메서드
     public void MeleeAttackStart()
     {
-        if (CurrentPlayerState == PlayerState.Attack)
+        if (CurrentPlayerState == PlayerState.Attack || CurrentPlayerState == PlayerState.Parry 
+                                                     || CurrentPlayerState == PlayerState.Dash)
         {
             mWeaponController.AttackStart();
         }
@@ -599,7 +570,8 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     // 공격 애니메이션의 공격 모션 종료 시 호출되는 메서드
     public void MeleeAttackEnd()
     {
-        if (CurrentPlayerState == PlayerState.Attack)
+        if (CurrentPlayerState == PlayerState.Attack || CurrentPlayerState == PlayerState.Parry 
+                                                     || CurrentPlayerState == PlayerState.Dash)
         {
             mWeaponController.AttackEnd();
         }
@@ -673,12 +645,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     {
         mPlayerStats.OnGuardSuccess();
     }
-
-    /*public void AddItemDefend(int itemDefendPower)
-    {
-        mCurrentDefendPower += itemDefendPower;
-    }*/
-
+    
     #endregion
 
     #region 패리 관련 기능
