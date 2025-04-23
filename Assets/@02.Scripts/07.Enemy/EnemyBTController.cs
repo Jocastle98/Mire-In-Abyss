@@ -14,6 +14,7 @@ public class EnemyBTController : MonoBehaviour
     [SerializeField] private float mDetectRadius = 10f;
     [SerializeField] private float mDetectAngle = 360f;
     [SerializeField] private LayerMask mPlayerMask;
+    private Vector3 mLastAttackPosition;
 
     [Header("순찰 설정")]
     [SerializeField] private float mPatrolRadius = 5f;
@@ -70,6 +71,7 @@ public class EnemyBTController : MonoBehaviour
             new BTCondition(() => mbIsHit),
             new BTAction(() =>
             {
+                ClearAllBools();
                 mAnim.SetTrigger("Hit");
                 StartCoroutine(HitColorChange());
                 if (mAgent.enabled && mAgent.isOnNavMesh)
@@ -124,26 +126,48 @@ public class EnemyBTController : MonoBehaviour
         if (mAttackBehaviorAsset is RangedAttackBehavior)
         {
             var rangedAttackSeq = new BTSequence(
-                new BTCondition(() => !mbIsAttacking && mAttackBehavior != null && mTarget != null && mAttackBehavior.IsInRange(transform, mTarget)),
+                new BTCondition(() =>
+                    !mbIsAttacking &&
+                    mAttackBehavior != null &&
+                    mTarget != null &&
+                    mAttackBehavior.IsInRange(transform, mTarget)
+                ),
                 new BTAction(() =>
                 {
-                    if (mAgent.enabled && mAgent.isOnNavMesh)
+                    if (mAgent.isOnNavMesh)
                     {
                         mAgent.isStopped = true;
-                        mAgent.velocity = Vector3.zero;
                         mAgent.ResetPath();
                     }
                     ClearAllBools();
+                    mbIsAttacking = true;
+                    mLastAttackPosition = mTarget.position;
+                    Vector3 lookPos = mTarget.position;
+                    lookPos.y = transform.position.y;
+                    transform.rotation = Quaternion.LookRotation((lookPos - transform.position).normalized);
                     mAnim.SetTrigger("Attack");
                     mAttackBehavior.Attack(transform, mTarget);
+                })
+            );
+
+            var rangedAimSeq = new BTSequence(
+                new BTCondition(() =>
+                    mTarget != null &&
+                    mAttackBehavior.IsInRange(transform, mTarget)
+                ),
+                new BTAction(() =>
+                {
+                    mLastAttackPosition = mTarget.position;
+                    Vector3 lookPos = mTarget.position;
+                    lookPos.y = transform.position.y;
+                    transform.rotation = Quaternion.LookRotation((lookPos - transform.position).normalized);
                 })
             );
 
             var rangedTraceSeq = new BTAction(() =>
             {
                 if (mbIsAttacking) return;
-                if (mTarget == null) return;
-                if (!mAttackBehavior.IsInRange(transform, mTarget))
+                if (mTarget != null && !mAttackBehavior.IsInRange(transform, mTarget))
                 {
                     ClearAllBools();
                     mAnim.SetBool("Trace", true);
@@ -152,7 +176,7 @@ public class EnemyBTController : MonoBehaviour
                 }
             });
 
-            engage = new BTSelector(rangedAttackSeq, rangedTraceSeq);
+            engage = new BTSelector(rangedAttackSeq, rangedAimSeq, rangedTraceSeq);
         }
         else
         {
@@ -169,13 +193,11 @@ public class EnemyBTController : MonoBehaviour
             {
                 var rnd = Random.insideUnitSphere * mPatrolRadius + transform.position;
                 if (NavMesh.SamplePosition(rnd, out var hit, mPatrolRadius, NavMesh.AllAreas))
-                {
                     mAgent.SetDestination(hit.position);
-                }
             }
         });
 
-        var idle = new BTAction(() =>
+        var idleAction = new BTAction(() =>
         {
             if (mbIsAttacking) return;
             ClearAllBools();
@@ -183,7 +205,7 @@ public class EnemyBTController : MonoBehaviour
             mAgent.isStopped = true;
         });
 
-        mRoot = new BTSelector(deadSeq, hitSeq, new BTSequence(detectCond, engage), patrolAction, idle);
+        mRoot = new BTSelector(deadSeq, hitSeq, new BTSequence(detectCond, engage), patrolAction, idleAction);
     }
 
     private void Update()
@@ -307,8 +329,17 @@ public class EnemyBTController : MonoBehaviour
     public void OnAttackAnimationExit()
     {
         mbIsAttacking = false;
-        if (mAgent.enabled && mAgent.isOnNavMesh)
+
+        ClearAllBools();
+        if (DetectPlayer())
         {
+            mAnim.SetBool("Trace", true);
+            mAgent.isStopped = false;
+            mAgent.SetDestination(mTarget.position);
+        }
+        else
+        {
+            mAnim.SetBool("Patrol", true);
             mAgent.isStopped = false;
         }
     }
@@ -317,11 +348,13 @@ public class EnemyBTController : MonoBehaviour
     {
         if (mAttackBehaviorAsset is RangedAttackBehavior ranged)
         {
-            ranged.FireProjectileFrom(transform);
+            // 마지막 저장 위치로 발사
+            ranged.FireLastPosition(transform, mLastAttackPosition);
         }
     }
 
     #endregion
+
 
     #region 디버깅
 
