@@ -1,17 +1,20 @@
 using System;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 [RequireComponent(typeof(Animator))]
 [RequireComponent(typeof(Rigidbody))]
 [RequireComponent(typeof(CapsuleCollider))]
 public class TestEnemyController : MonoBehaviour
 {
-    [SerializeField] private int maxHealth = 100;
-    [SerializeField] private int _currentHealth;
-
+    [SerializeField] private int mMaxHealth = 100;
+    [SerializeField] private int mEnemyAttackPower = 5;
+    public int EnemyAttackPower => mEnemyAttackPower;
+    
     private Animator _animator;
     private Rigidbody _rigidbody;
     private CapsuleCollider _capsuleCollider;
+    private int mCurrentHealth;
 
     [SerializeField] private PlayerStats mPlayerStats;
 
@@ -28,20 +31,20 @@ public class TestEnemyController : MonoBehaviour
 
     private void Start()
     {
-        _currentHealth = maxHealth;
+        mCurrentHealth = mMaxHealth;
     }
 
     public void SetHit(PlayerController playerController)
     {
-        if (_currentHealth <= 0) return;
+        if (mCurrentHealth <= 0) return;
 
         Debug.Log("허수아비 히트!");
         _animator.SetTrigger("Hit");
         
-        _currentHealth -= (int)mPlayerStats.GetAttackPower();
-        Debug.Log($"현재 체력: {_currentHealth}/{maxHealth}");
+        mCurrentHealth -= (int)mPlayerStats.GetAttackPower();
+        Debug.Log($"현재 체력: {mCurrentHealth}/{mMaxHealth}");
 
-        if (_currentHealth <= 0)
+        if (mCurrentHealth <= 0)
         {
             Debug.Log("허수아비 파괴됨!");
             _animator.SetTrigger("Dead");

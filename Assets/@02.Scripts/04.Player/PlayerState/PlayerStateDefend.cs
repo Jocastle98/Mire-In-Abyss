@@ -6,9 +6,7 @@ using UnityEngine;
 public class PlayerStateDefend : IPlayerState
 {
     private PlayerController mPlayerController;
-    private Vector3 mCameraForward;
-    public bool bIsDefending { get; set; }
-    public bool bIsDefendEnd { get; set; }
+    private Vector3 mDefendDirection;
     
     public void OnEnter(PlayerController playerController)
     {
@@ -25,6 +23,9 @@ public class PlayerStateDefend : IPlayerState
 
         if (mPlayerController.IsGrounded)
         {
+            mDefendDirection = mPlayerController.GetCameraForwardDirection();
+            mPlayerController.transform.rotation = Quaternion.LookRotation(mDefendDirection);
+            
             mPlayerController.Defend();
         }
     }
