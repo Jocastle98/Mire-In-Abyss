@@ -6,12 +6,17 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(Animator))]
-[RequireComponent(typeof(CharacterController))]
 [RequireComponent(typeof(PlayerInput))]
+[RequireComponent(typeof(PlayerStats))]
+[RequireComponent(typeof(CharacterController))]
 public class PlayerController : MonoBehaviour, IObserver<GameObject>
 {
+    [Header("Reference")]
+    [SerializeField] private PlayerStats mPlayerStats;
     
+    [Space(10)]
     [Header("Control Variable")]
+    [SerializeField] private float mSpeed;
     [SerializeField] private float mRotationSmoothTime = 0.12f;
     [SerializeField] private float mSpeedChangeRate = 10.0f;
     [SerializeField] private float mGravity = - 9.81f;
@@ -33,10 +38,6 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     [Header("Player Attach Point")]
     [SerializeField] private Transform mRightHandTransform;
     [SerializeField] private Transform mLeftHandTransform;
-
-    [Space(10)]
-    [Header("Reference")]
-    [SerializeField] private PlayerStats mPlayerStats;
     
     // Player Calculation Stat
     [SerializeField]
@@ -45,7 +46,6 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     private float mTerminalVelocity = 53.0f;
     private float mTargetRotation;
     private float mAnimationBlend;
-    private float mSpeed;
     
     private bool mbInCombat = false;
     private float mInCombatTimeout = 10.0f;
@@ -93,12 +93,6 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         if (Camera.main != null)
         {
             mMainCamera = Camera.main.gameObject;
-        }
-        
-        //PlayerStats 컴포넌트가 없으면 자동 추가
-        if (mPlayerStats == null)
-        {
-            mPlayerStats = GetComponent<PlayerStats>();
         }
     }
 
@@ -543,11 +537,6 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         mbInCombat = true;
         mInCombatTimeoutDelta = mInCombatTimeout;
     }
-
-    /*public void AddItemAttack(int itemAttackPower)
-    {
-        mCurrentAttackPower += itemAttackPower;
-    }*/
     
     public void Attack()
     {
