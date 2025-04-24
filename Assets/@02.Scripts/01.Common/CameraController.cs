@@ -45,15 +45,7 @@ public class CameraController : MonoBehaviour
             Cursor.lockState = Cursor.visible ? CursorLockMode.None : CursorLockMode.Locked;
         }
     }
-<<<<<<< HEAD
-<<<<<<< HEAD
-    
-=======
 
->>>>>>> parent of 4dfd0c3 (Merge branch 'develop' into YooSeungwan)
-=======
-
->>>>>>> parent of 4dfd0c3 (Merge branch 'develop' into YooSeungwan)
     public void SendPlayerGrounded(bool isGround)
     {
         mbIsGround = isGround;

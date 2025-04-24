@@ -10,35 +10,21 @@ using UnityEngine.InputSystem;
 [RequireComponent(typeof(PlayerInput))]
 public class PlayerController : MonoBehaviour, IObserver<GameObject>
 {
-<<<<<<< HEAD
-<<<<<<< HEAD
+
     [Header("Reference")]
     [SerializeField] private PlayerStats mPlayerStats;
     
     [Space(10)]
     [Header("Control Variable")]
     [SerializeField] private float mSpeed;
-=======
     
     [Header("Control Variable")]
->>>>>>> parent of 4dfd0c3 (Merge branch 'develop' into YooSeungwan)
-=======
-    
-    [Header("Control Variable")]
->>>>>>> parent of 4dfd0c3 (Merge branch 'develop' into YooSeungwan)
     [SerializeField] private float mRotationSmoothTime = 0.12f;
     [SerializeField] private float mSpeedChangeRate = 10.0f;
     [SerializeField] private float mGravity = - 9.81f;
     [SerializeField] private float mJumpTimeout = 0.5f;
     [SerializeField] private float mFallTimeout = 0.15f;
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
     [SerializeField] private float mJumpHeight = 5.0f;
->>>>>>> parent of 4dfd0c3 (Merge branch 'develop' into YooSeungwan)
-=======
-    [SerializeField] private float mJumpHeight = 5.0f;
->>>>>>> parent of 4dfd0c3 (Merge branch 'develop' into YooSeungwan)
     [SerializeField] private float mRollDistance = 5.0f;
     [SerializeField] private float mDashDistance = 10.0f;
     
@@ -54,19 +40,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     [Header("Player Attach Point")]
     [SerializeField] private Transform mRightHandTransform;
     [SerializeField] private Transform mLeftHandTransform;
-<<<<<<< HEAD
     
-    // 각 변수들은 추후에 상태머신으로 메서드들과 같이 이동될 예정
-=======
-
-    [Space(10)]
-    [Header("Reference")]
-    [SerializeField] private PlayerStats mPlayerStats;
-    
-<<<<<<< HEAD
->>>>>>> parent of 4dfd0c3 (Merge branch 'develop' into YooSeungwan)
-=======
->>>>>>> parent of 4dfd0c3 (Merge branch 'develop' into YooSeungwan)
     // Player Calculation Stat
     [SerializeField]
     private float mVerticalVelocity;
@@ -74,14 +48,6 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     private float mTerminalVelocity = 53.0f;
     private float mTargetRotation;
     private float mAnimationBlend;
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-    private float mSpeed;
->>>>>>> parent of 4dfd0c3 (Merge branch 'develop' into YooSeungwan)
-=======
-    private float mSpeed;
->>>>>>> parent of 4dfd0c3 (Merge branch 'develop' into YooSeungwan)
     
     private bool mbInCombat = false;
     private float mInCombatTimeout = 10.0f;
@@ -90,10 +56,6 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     private float mJumpTimeoutDelta;
     private float mFallTimeoutDelta;
     public float mInCombatTimeoutDelta;
-<<<<<<< HEAD
-=======
-    
->>>>>>> parent of 4dfd0c3 (Merge branch 'develop' into YooSeungwan)
     
     // Componenet
     private Animator mPlayerAnimator;
