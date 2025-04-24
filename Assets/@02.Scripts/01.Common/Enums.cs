@@ -1,5 +1,3 @@
-
-
 namespace PlayerEnums
 {
     public enum PlayerState
@@ -14,6 +12,12 @@ namespace PlayerEnums
         Attack,
         Defend,
         Parry,
+        Dash,
+        Skill_1,
+        Skill_2,
+        Skill_3,
+        Skill_4,
+        Interaction,
         Hit,
         Dead
     }
@@ -21,8 +25,5 @@ namespace PlayerEnums
 
 namespace ItemEnums
 {
-    public enum ItemType
-    {
-        
-    }
+    
 }

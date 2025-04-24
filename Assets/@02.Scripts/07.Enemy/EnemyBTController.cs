@@ -6,221 +6,316 @@ using UnityEngine.AI;
 public class EnemyBTController : MonoBehaviour
 {
     [Header("체력 설정")]
-    [SerializeField] private int maxHealth = 100;
-    private int _currentHealth;
-    private bool _isDead = false;
-    
+    [SerializeField] private int mMaxHealth = 100;
+    private int mCurrentHealth;
+    private bool mbIsDead = false;
+
     [Header("감지 설정")]
-    public float      detectRadius        = 10f;  
-    public float      detectAngle         = 360f;  
-    public LayerMask  playerMask;                 
+    [SerializeField] private float mDetectRadius = 10f;
+    [SerializeField] private float mDetectAngle = 360f;
+    [SerializeField] private LayerMask mPlayerMask;
+    private Vector3 mLastAttackPosition;
 
     [Header("순찰 설정")]
-    public float      patrolRadius        = 5f;    
+    [SerializeField] private float mPatrolRadius = 5f;
 
     [Header("공격 전략")]
-    public ScriptableObject attackBehaviorAsset;   
-    private IAttackBehavior  attackBehavior;
+    [SerializeField] private ScriptableObject mAttackBehaviorAsset;
+    private IAttackBehavior mAttackBehavior;
 
-    private NavMeshAgent _agent;
-    private Animator     _anim;
-    private Transform    _target;
-    private BTNode       _root;
+    private NavMeshAgent mAgent;
+    private Animator mAnim;
+    private Transform mTarget;
+    public Transform Target => mTarget;
 
-    private bool _isAttacking = false;
-    private bool _isHit       = false;
+    private BTNode mRoot;
+
+    private bool mbIsAttacking = false;
+    private bool mbIsHit = false;
+
     [Header("렌더러 설정")]
-    [SerializeField] private Renderer[] mRenderer;
+    [SerializeField] private Renderer[] mRenderers;
 
-    void Awake()
+    [Header("원거리 발사 위치")]
+    [SerializeField] private Transform mFirePoint;
+    public Transform FirePoint => mFirePoint;
+
+    private void Awake()
     {
-        _agent         = GetComponent<NavMeshAgent>();
-        _anim          = GetComponent<Animator>();
-        attackBehavior = attackBehaviorAsset as IAttackBehavior;
-        mRenderer = GetComponentsInChildren<Renderer>();
+        mAgent = GetComponent<NavMeshAgent>();
+        mAnim = GetComponent<Animator>();
+        mAttackBehavior = mAttackBehaviorAsset as IAttackBehavior;
+        mRenderers = GetComponentsInChildren<Renderer>();
     }
 
-    void Start()
+    private void Start()
     {
-        // 체력 초기화
-        _currentHealth = maxHealth;
-        
-        // 1) 사망
+        mCurrentHealth = mMaxHealth;
+
         var deadSeq = new BTSequence(
-            new BTCondition(() => _isDead),
+            new BTCondition(() => mbIsDead),
             new BTAction(() =>
             {
                 ClearAllBools();
-                _anim.SetTrigger("Dead");
-
-                if (_agent.enabled && _agent.isOnNavMesh)
+                mAnim.SetTrigger("Dead");
+                if (mAgent.enabled && mAgent.isOnNavMesh)
                 {
-                    _agent.isStopped = true;
-                    _agent.enabled = false;
+                    mAgent.isStopped = true;
+                    mAgent.enabled = false;
                 }
-                _isDead = false;
+                mbIsDead = false;
             })
         );
 
-        // 2) 피격
         var hitSeq = new BTSequence(
-            new BTCondition(() => _isHit),
-            new BTAction(() => {
-                _anim.SetTrigger("Hit");
+            new BTCondition(() => mbIsHit),
+            new BTAction(() =>
+            {
+                ClearAllBools();
+                mAnim.SetTrigger("Hit");
                 StartCoroutine(HitColorChange());
-                if (_agent.enabled && _agent.isOnNavMesh)
+                if (mAgent.enabled && mAgent.isOnNavMesh)
                 {
-                    _agent.isStopped = true;
-                    _agent.ResetPath();
+                    mAgent.isStopped = true;
+                    mAgent.ResetPath();
                 }
             })
         );
 
-        // 3) 플레이어 감지
         var detectCond = new BTCondition(DetectPlayer);
 
-        // 4) 공격 시퀀스
-        var attackSeq = new BTSequence(
-            new BTCondition(() =>
-                !_isAttacking
-                && attackBehavior != null
-                && _target != null
-                && attackBehavior.IsInRange(transform, _target)
-            ),
-            // 4-2) 이동 멈추고, 파라미터 초기화
-            new BTAction(() =>
-            {
-                if (_agent.enabled && _agent.isOnNavMesh)
+        BTNode attackSeq = null;
+        BTNode traceSeq = null;
+        BTNode engage;
+
+        if (mAttackBehaviorAsset is MeleeAttackBehavior)
+        {
+            attackSeq = new BTSequence(
+                new BTCondition(() => !mbIsAttacking && mAttackBehavior != null && mTarget != null && mAttackBehavior.IsInRange(transform, mTarget)),
+                new BTAction(() =>
                 {
-                    _agent.isStopped = true;
-                    _agent.velocity  = Vector3.zero;
-                    _agent.ResetPath();
+                    if (mAgent.enabled && mAgent.isOnNavMesh)
+                    {
+                        mAgent.isStopped = true;
+                        mAgent.velocity = Vector3.zero;
+                        mAgent.ResetPath();
+                    }
+                    ClearAllBools();
+                }),
+                new BTAction(() =>
+                {
+                    mbIsAttacking = true;
+                    mAttackBehavior.Attack(transform, mTarget);
+                })
+            );
+
+            traceSeq = new BTAction(() =>
+            {
+                if (mbIsAttacking) return;
+                if (mTarget == null) return;
+                if (!mAttackBehavior.IsInRange(transform, mTarget))
+                {
+                    ClearAllBools();
+                    mAnim.SetBool("Trace", true);
+                    mAgent.isStopped = false;
+                    mAgent.SetDestination(mTarget.position);
                 }
-                ClearAllBools();
-            }),
-            // 4-3) 실제 공격 트리거 + 플래그 세팅
-            new BTAction(() =>
+            });
+        }
+
+        if (mAttackBehaviorAsset is RangedAttackBehavior)
+        {
+            var rangedAttackSeq = new BTSequence(
+                new BTCondition(() =>
+                    !mbIsAttacking &&
+                    mAttackBehavior != null &&
+                    mTarget != null &&
+                    mAttackBehavior.IsInRange(transform, mTarget)
+                ),
+                new BTAction(() =>
+                {
+                    if (mAgent.isOnNavMesh)
+                    {
+                        mAgent.isStopped = true;
+                        mAgent.ResetPath();
+                    }
+                    ClearAllBools();
+                    mbIsAttacking = true;
+                    mLastAttackPosition = mTarget.position;
+                    Vector3 lookPos = mTarget.position;
+                    lookPos.y = transform.position.y;
+                    transform.rotation = Quaternion.LookRotation((lookPos - transform.position).normalized);
+                    mAnim.SetTrigger("Attack");
+                    mAttackBehavior.Attack(transform, mTarget);
+                })
+            );
+
+            var rangedAimSeq = new BTSequence(
+                new BTCondition(() =>
+                    mTarget != null &&
+                    mAttackBehavior.IsInRange(transform, mTarget)
+                ),
+                new BTAction(() =>
+                {
+                    mLastAttackPosition = mTarget.position;
+                    Vector3 lookPos = mTarget.position;
+                    lookPos.y = transform.position.y;
+                    transform.rotation = Quaternion.LookRotation((lookPos - transform.position).normalized);
+                })
+            );
+
+            var rangedTraceSeq = new BTAction(() =>
             {
-                _isAttacking = true;
-                attackBehavior.Attack(transform, _target);
-            })
-        );
+                if (mbIsAttacking) return;
+                if (mTarget != null && !mAttackBehavior.IsInRange(transform, mTarget))
+                {
+                    ClearAllBools();
+                    mAnim.SetBool("Trace", true);
+                    mAgent.isStopped = false;
+                    mAgent.SetDestination(mTarget.position);
+                }
+            });
 
-        // 5) 추적 (공격 중이 아니고, 범위 밖일 때만)
-        var traceAction = new BTAction(() =>
-        {
-            if (_isAttacking) return;
-            if (_target == null) return;
-            if (!attackBehavior.IsInRange(transform, _target))
-            {
-                ClearAllBools();
-                _anim.SetBool("Trace", true);
-                _agent.isStopped = false;
-                _agent.SetDestination(_target.position);
-            }
-        });
-
-        var engage = new BTSelector(attackSeq, traceAction);
-
-        // 6) 순찰
-        var patrolAction = new BTAction(() =>
-        {
-            if (_isAttacking) return;      
-            ClearAllBools();
-            _anim.SetBool("Patrol", true);
-            _agent.isStopped = false;
-            if (!_agent.hasPath || _agent.remainingDistance <= _agent.stoppingDistance)
-            {
-                var rnd = Random.insideUnitSphere * patrolRadius + transform.position;
-                if (NavMesh.SamplePosition(rnd, out var hit, patrolRadius, NavMesh.AllAreas))
-                    _agent.SetDestination(hit.position);
-            }
-        });
-
-        // 7) 대기
-        var idle = new BTAction(() =>
-        {
-            if (_isAttacking) return;
-            ClearAllBools();
-            _anim.SetBool("Idle", true);
-            _agent.isStopped = true;
-        });
-
-        // 루트 구성
-        _root = new BTSelector(
-            deadSeq,
-            hitSeq,
-            new BTSequence(detectCond, engage),
-            patrolAction,
-            idle
-        );
-    }
-
-    void Update()
-    {
-        _root.Tick();
-    }
-
-   
-
-    private void ClearAllBools()
-    {
-        _anim.SetBool("Patrol", false);
-        _anim.SetBool("Trace",  false);
-        _anim.SetBool("Idle",   false);
-    }
-
-    #region 몬스터 공격 관련
-
-    // Attack 애니메이션 스크립트에서 호출되는 함수
-    public void OnAttackAnimationExit()
-    {
-        _isAttacking = false;
-    }
-    
-
-    #endregion
-
-    #region 플레이어 감지 관련
-
-    private bool DetectPlayer()
-    {
-        var hits = Physics.OverlapSphere(transform.position, detectRadius, playerMask);
-        if (hits.Length > 0)
-        {
-            _target = hits[0].transform;
-            return true;
+            engage = new BTSelector(rangedAttackSeq, rangedAimSeq, rangedTraceSeq);
         }
         else
         {
-            _target = null;
-            return false;
+            engage = new BTSelector(attackSeq, traceSeq);
         }
+
+        var patrolAction = new BTAction(() =>
+        {
+            if (mbIsAttacking) return;
+            ClearAllBools();
+            mAnim.SetBool("Patrol", true);
+            mAgent.isStopped = false;
+            if (!mAgent.pathPending && (mAgent.remainingDistance <= mAgent.stoppingDistance || !mAgent.hasPath))
+            {
+                var rnd = Random.insideUnitSphere * mPatrolRadius + transform.position;
+                if (NavMesh.SamplePosition(rnd, out var hit, mPatrolRadius, NavMesh.AllAreas))
+                    mAgent.SetDestination(hit.position);
+            }
+        });
+
+        var idleAction = new BTAction(() =>
+        {
+            if (mbIsAttacking) return;
+            ClearAllBools();
+            mAnim.SetBool("Idle", true);
+            mAgent.isStopped = true;
+        });
+
+        mRoot = new BTSelector(deadSeq, hitSeq, new BTSequence(detectCond, engage), patrolAction, idleAction);
+    }
+
+    private void Update()
+    {
+        mRoot.Tick();
+    }
+
+    private void ClearAllBools()
+    {
+        mAnim.SetBool("Patrol", false);
+        mAnim.SetBool("Trace", false);
+        mAnim.SetBool("Idle", false);
+    }
+
+    #region 플레이어 감지하기
+
+    private bool DetectPlayer()
+    {
+        var hits = Physics.OverlapSphere(transform.position, mDetectRadius, mPlayerMask);
+        if (hits.Length > 0)
+        {
+            mTarget = hits[0].transform;
+            return true;
+        }
+        mTarget = null;
+        return false;
     }
 
     #endregion
+    
+    #region 몬스터 Hit
 
-    #region Dead 시 실행
+    public void SetHit(int damage)
+    {
+        if (mbIsDead) return;
 
+        mCurrentHealth -= damage;
+        Debug.Log($"현재 체력: {mCurrentHealth}");
+
+        if (mCurrentHealth <= 0)
+        {
+            mbIsDead = true;
+        }
+        else
+        {
+            mbIsHit = true;
+        }
+    }
+    public void OnHitAnimationExit()
+    {
+        mbIsHit = false;
+        if (mTarget == null)
+        {
+            DetectPlayer();
+        }
+        if (mAgent.enabled && mAgent.isOnNavMesh && mTarget != null)
+        {
+            mAnim.SetBool("Trace", true);
+            mAgent.isStopped = false;
+            mAgent.SetDestination(mTarget.position);
+        }
+    }
+
+    private IEnumerator HitColorChange()
+    {
+        var block = new MaterialPropertyBlock();
+        const float Duration = 0.5f;
+        float elapsed = 0f;
+
+        ChangeColorRenderer(Color.red, block);
+        while (elapsed < Duration)
+        {
+            elapsed += Time.deltaTime;
+            var t = Mathf.Clamp01(elapsed / Duration);
+            var color = Color.Lerp(Color.red, Color.white, t);
+            ChangeColorRenderer(color, block);
+            yield return null;
+        }
+        ChangeColorRenderer(Color.white, block);
+    }
+    private void ChangeColorRenderer(Color color, MaterialPropertyBlock block)
+    {
+        foreach (var renderer in mRenderers)
+        {
+            renderer.GetPropertyBlock(block);
+            block.SetColor("_Color", color);
+            renderer.SetPropertyBlock(block);
+        }
+    }
+    
     public void OnDeadAnimationExit()
     {
         StartCoroutine(Dissolve());
     }
+
     private IEnumerator Dissolve()
     {
         var block = new MaterialPropertyBlock();
         float alpha = 1f;
         while (alpha > 0f)
         {
-            alpha -= Time.deltaTime;               
+            alpha -= Time.deltaTime;
             float clamped = Mathf.Clamp01(alpha);
-            foreach (var rend in mRenderer)
+            foreach (var renderer in mRenderers)
             {
-                rend.GetPropertyBlock(block);
-                Color c = block.GetColor("_Color");
-                c.a = clamped;
-                block.SetColor("_Color", c);
-                rend.SetPropertyBlock(block);
+                renderer.GetPropertyBlock(block);
+                var color = block.GetColor("_Color");
+                color.a = clamped;
+                block.SetColor("_Color", color);
+                renderer.SetPropertyBlock(block);
             }
             yield return null;
         }
@@ -228,83 +323,57 @@ public class EnemyBTController : MonoBehaviour
     }
 
     #endregion
+    
+    #region 몬스터 공격
 
-    #region Hit 시 실행
-
-    public void SetHit(int damage)
+    public void OnAttackAnimationExit()
     {
-        if (_isDead) return;       
-        _currentHealth -= damage;  
-        Debug.Log("현재 체력: "+_currentHealth);
+        mbIsAttacking = false;
 
-        if (_currentHealth <= 0)
+        ClearAllBools();
+        if (DetectPlayer())
         {
-            _isDead = true;
+            mAnim.SetBool("Trace", true);
+            mAgent.isStopped = false;
+            mAgent.SetDestination(mTarget.position);
         }
         else
         {
-            _isHit = true;
+            mAnim.SetBool("Patrol", true);
+            mAgent.isStopped = false;
         }
     }
-    // Hit 애니메이션 스크립트에서 호출하는 함수
-    public void OnHitAnimationExit() {
-        _isHit = false;
 
-        // 바로 플레이어 추격으로 복귀
-        if (_agent.enabled && _agent.isOnNavMesh && _target != null) {
-            _anim.SetBool("Trace", true);
-            _agent.isStopped = false;
-            _agent.SetDestination(_target.position);
-        }
-    }
-    // Hit 상태에서 호출할 코루틴
-    private IEnumerator HitColorChange()
+    public void FireProjectile()
     {
-        var block = new MaterialPropertyBlock();
-        float duration = 0.5f;           
-        float elapsed  = 0f;
-
-        ChangeColorRenderer(Color.red, block);
-
-        while (elapsed < duration)
+        if (mAttackBehaviorAsset is RangedAttackBehavior ranged)
         {
-            elapsed += Time.deltaTime;
-            float t = Mathf.Clamp01(elapsed / duration);
-            Color c = Color.Lerp(Color.red, Color.white, t);
-            ChangeColorRenderer(c, block);
-            yield return null;
-        }
-
-        ChangeColorRenderer(Color.white, block);
-    }
-
-    private void ChangeColorRenderer(Color color, MaterialPropertyBlock block)
-    {
-        foreach (var rend in mRenderer)
-        {
-            rend.GetPropertyBlock(block);
-            block.SetColor("_Color", color);
-            rend.SetPropertyBlock(block);
+            // 마지막 저장 위치로 발사
+            ranged.FireLastPosition(transform, mLastAttackPosition);
         }
     }
 
     #endregion
+
 
     #region 디버깅
 
-    // 감지범위
-    void OnDrawGizmosSelected()
+    private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(transform.position, detectRadius);
-
-        if (attackBehaviorAsset is MeleeAttackBehavior melee)
+        Gizmos.DrawWireSphere(transform.position, mDetectRadius);
+        if (mAttackBehaviorAsset is MeleeAttackBehavior melee)
         {
             Gizmos.color = Color.red;
-            Gizmos.DrawWireSphere(transform.position, melee.range);
+            Gizmos.DrawWireSphere(transform.position, melee.Range);
+        }
+        else if (mAttackBehaviorAsset is RangedAttackBehavior ranged)
+        {
+            Gizmos.color = Color.blue;
+            Gizmos.DrawWireSphere(transform.position, ranged.Range);
         }
     }
 
     #endregion
-
+    
 }

@@ -6,19 +6,25 @@ using UnityEngine;
 public class PlayerStateRoll : IPlayerState
 {
     private PlayerController mPlayerController;
-    public bool bIsRolling { get; set; }
+    private Vector3 mTargetDirection;
     
     public void OnEnter(PlayerController playerController)
     {
         mPlayerController = playerController;
-        bIsRolling = false;
         mPlayerController.PlayerAnimator.SetTrigger("Roll");
-        mPlayerController.Roll();
+
+        mTargetDirection = mPlayerController.SetTargetDirection();
+        mPlayerController.transform.rotation = Quaternion.LookRotation(mTargetDirection);
     }
 
     public void OnUpdate()
     {
+        if (mPlayerController == null)
+        {
+            return;
+        }
         
+        mPlayerController?.Roll(mTargetDirection);
     }
 
     public void OnExit()

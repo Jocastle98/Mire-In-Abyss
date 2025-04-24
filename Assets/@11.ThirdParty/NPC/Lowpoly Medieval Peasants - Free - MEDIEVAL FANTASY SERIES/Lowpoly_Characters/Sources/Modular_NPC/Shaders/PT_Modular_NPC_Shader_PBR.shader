@@ -1,4 +1,4 @@
-// Made with Amplify Shader Editor v1.9.2.2
+// Made with Amplify Shader Editor v1.9.1.5
 // Available at the Unity Asset Store - http://u3d.as/y3X 
 Shader "Polytope Studio/ PT_Medieval Modular NPC Shader PBR"
 {
@@ -199,7 +199,7 @@ Shader "Polytope Studio/ PT_Medieval Modular NPC Shader PBR"
 	Fallback "Diffuse"
 }
 /*ASEBEGIN
-Version=19202
+Version=19105
 Node;AmplifyShaderEditor.CommentaryNode;647;-15561.67,102.9185;Inherit;False;483.4482;271.3363;Comment;1;199;;1,1,1,1;0;0
 Node;AmplifyShaderEditor.CommentaryNode;212;-14813.92,104.0023;Inherit;False;1271.642;720.5787;Comment;8;184;186;189;637;183;226;225;638;FEATHERS COLORS;0.735849,0.7152051,0.3158597,1;0;0
 Node;AmplifyShaderEditor.CommentaryNode;648;-15523.26,583.142;Inherit;False;439.4697;254.3918;Comment;1;617;;1,1,1,1;0;0
@@ -378,7 +378,7 @@ Node;AmplifyShaderEditor.ColorNode;25;-1067.646,-1364.901;Inherit;False;Constant
 Node;AmplifyShaderEditor.WireNode;594;982.54,447.0908;Inherit;False;1;0;FLOAT;0;False;1;FLOAT;0
 Node;AmplifyShaderEditor.WireNode;578;-295.6249,387.7201;Inherit;False;1;0;COLOR;0,0,0,0;False;1;COLOR;0
 Node;AmplifyShaderEditor.Vector2Node;18;-1043.557,-1002.802;Inherit;False;Constant;_Vector0;Vector 0;1;0;Create;True;0;0;0;False;0;False;1.6,1;0,0;0;3;FLOAT2;0;FLOAT;1;FLOAT;2
-Node;AmplifyShaderEditor.StandardSurfaceOutputNode;428;1178.721,338.6894;Float;False;True;-1;3;;0;0;Standard;Polytope Studio/ PT_Medieval Modular NPC Shader PBR;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;Back;0;False;;0;False;;False;0;False;;0;False;;False;0;Opaque;0.5;True;True;0;False;Opaque;;Geometry;ForwardOnly;12;all;True;True;True;True;0;False;;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;2;15;10;25;False;0.5;True;0;0;False;;0;False;;0;0;False;;0;False;;0;False;;0;False;;0;False;13.63;1,0,0,0;VertexScale;False;False;Cylindrical;False;True;Relative;0;;-1;-1;-1;-1;0;False;0;0;False;;-1;0;False;;0;0;0;False;0.1;False;;0;False;;False;17;0;FLOAT3;0,0,0;False;1;FLOAT3;0,0,0;False;2;FLOAT3;0,0,0;False;3;FLOAT;0;False;4;FLOAT;0;False;5;FLOAT;0;False;6;FLOAT3;0,0,0;False;7;FLOAT3;0,0,0;False;8;FLOAT;0;False;9;FLOAT;0;False;10;FLOAT;0;False;13;FLOAT3;0,0,0;False;11;FLOAT3;0,0,0;False;12;FLOAT3;0,0,0;False;16;FLOAT4;0,0,0,0;False;14;FLOAT4;0,0,0,0;False;15;FLOAT3;0,0,0;False;0
+Node;AmplifyShaderEditor.StandardSurfaceOutputNode;428;1178.721,338.6894;Float;False;True;-1;3;;0;0;Standard;Polytope Studio/ PT_Medieval Modular NPC Shader PBR;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;Back;0;False;;0;False;;False;0;False;;0;False;;False;0;Opaque;0.5;True;True;0;False;Opaque;;Geometry;ForwardOnly;12;all;True;True;True;True;0;False;;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;2;15;10;25;False;0.5;True;0;0;False;;0;False;;0;0;False;;0;False;;0;False;;0;False;;0;False;13.63;1,0,0,0;VertexScale;False;False;Cylindrical;False;True;Relative;0;;-1;-1;-1;-1;0;False;0;0;False;;-1;0;False;;0;0;0;False;0.1;False;;0;False;;False;16;0;FLOAT3;0,0,0;False;1;FLOAT3;0,0,0;False;2;FLOAT3;0,0,0;False;3;FLOAT;0;False;4;FLOAT;0;False;5;FLOAT;0;False;6;FLOAT3;0,0,0;False;7;FLOAT3;0,0,0;False;8;FLOAT;0;False;9;FLOAT;0;False;10;FLOAT;0;False;13;FLOAT3;0,0,0;False;11;FLOAT3;0,0,0;False;12;FLOAT3;0,0,0;False;14;FLOAT4;0,0,0,0;False;15;FLOAT3;0,0,0;False;0
 WireConnection;180;1;617;0
 WireConnection;180;3;638;0
 WireConnection;183;0;199;0
@@ -601,4 +601,4 @@ WireConnection;428;3;594;0
 WireConnection;428;4;589;0
 WireConnection;428;5;580;0
 ASEEND*/
-//CHKSM=F7382A239CA716C7F4ABB1EA6730BA48D192719B
+//CHKSM=0CCFD4D6C4F46F451BC1191A7B6C58090D07A973
