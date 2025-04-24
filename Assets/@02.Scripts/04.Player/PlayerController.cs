@@ -11,6 +11,7 @@ using UnityEngine.InputSystem;
 public class PlayerController : MonoBehaviour, IObserver<GameObject>
 {
 <<<<<<< HEAD
+<<<<<<< HEAD
     [Header("Reference")]
     [SerializeField] private PlayerStats mPlayerStats;
     
@@ -21,12 +22,20 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     
     [Header("Control Variable")]
 >>>>>>> parent of 4dfd0c3 (Merge branch 'develop' into YooSeungwan)
+=======
+    
+    [Header("Control Variable")]
+>>>>>>> parent of 4dfd0c3 (Merge branch 'develop' into YooSeungwan)
     [SerializeField] private float mRotationSmoothTime = 0.12f;
     [SerializeField] private float mSpeedChangeRate = 10.0f;
     [SerializeField] private float mGravity = - 9.81f;
     [SerializeField] private float mJumpTimeout = 0.5f;
     [SerializeField] private float mFallTimeout = 0.15f;
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+    [SerializeField] private float mJumpHeight = 5.0f;
+>>>>>>> parent of 4dfd0c3 (Merge branch 'develop' into YooSeungwan)
 =======
     [SerializeField] private float mJumpHeight = 5.0f;
 >>>>>>> parent of 4dfd0c3 (Merge branch 'develop' into YooSeungwan)
@@ -54,6 +63,9 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     [Header("Reference")]
     [SerializeField] private PlayerStats mPlayerStats;
     
+<<<<<<< HEAD
+>>>>>>> parent of 4dfd0c3 (Merge branch 'develop' into YooSeungwan)
+=======
 >>>>>>> parent of 4dfd0c3 (Merge branch 'develop' into YooSeungwan)
     // Player Calculation Stat
     [SerializeField]
@@ -63,6 +75,10 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     private float mTargetRotation;
     private float mAnimationBlend;
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+    private float mSpeed;
+>>>>>>> parent of 4dfd0c3 (Merge branch 'develop' into YooSeungwan)
 =======
     private float mSpeed;
 >>>>>>> parent of 4dfd0c3 (Merge branch 'develop' into YooSeungwan)
@@ -74,6 +90,10 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     private float mJumpTimeoutDelta;
     private float mFallTimeoutDelta;
     public float mInCombatTimeoutDelta;
+<<<<<<< HEAD
+=======
+    
+>>>>>>> parent of 4dfd0c3 (Merge branch 'develop' into YooSeungwan)
     
     // Componenet
     private Animator mPlayerAnimator;
