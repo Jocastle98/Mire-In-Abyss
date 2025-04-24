@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using PlayerEnums;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.Serialization;
 
 [RequireComponent(typeof(Animator))]
 [RequireComponent(typeof(CharacterController))]
@@ -255,21 +254,24 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     
     #region 회전/이동 관련 기능
     
-    public Vector3 GetCameraForwardDirection()
+    public Vector3 GetCameraForwardDirection(bool isHorizontalOnly)
     {
         // 카메라 설정
         var cameraForward = mMainCamera.transform.forward;
         
         // Y값을 0으로 설정해서 수평 방향만 고려
-        cameraForward.y = 0;
+        if (isHorizontalOnly)
+        {
+            cameraForward.y = 0;
+        }
         cameraForward.Normalize();
         
         return cameraForward;
     }
     
-    public Vector3 SetTargetDirection()
+    public Vector3 SetRollDirection()
     {
-        var targetDirection = GetCameraForwardDirection();
+        var targetDirection = GetCameraForwardDirection(true);
         
         if (GameManager.Instance.Input.MoveInput != Vector2.zero)
         {
@@ -279,6 +281,18 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
                 Mathf.Atan2(inputDirection.x, inputDirection.z) * Mathf.Rad2Deg + mMainCamera.transform.eulerAngles.y;
 
             targetDirection = Quaternion.Euler(0.0f, targetRotation, 0.0f) * Vector3.forward;
+        }
+        
+        return targetDirection;
+    }
+
+    public Vector3 SetDashDirection()
+    {
+        var targetDirection = GetCameraForwardDirection(true);
+        
+        if (!mbIsGrounded)
+        {
+            targetDirection = GetCameraForwardDirection(false);
         }
         
         return targetDirection;
@@ -344,7 +358,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         
         if (mbInCombat)
         {
-            transform.rotation = Quaternion.LookRotation(GetCameraForwardDirection());
+            transform.rotation = Quaternion.LookRotation(GetCameraForwardDirection(true));
         }
         
         Vector3 targetDirection = Quaternion.Euler(0.0f, mTargetRotation, 0.0f) * Vector3.forward;
@@ -443,36 +457,61 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     #endregion
 
     #region 구르기 관련 기능
-    
-    public void Roll(Vector3 targetDirection)
+
+    // 구르기 쿨타임 만들어야 함(연속 사용시 애니메이션 전환 문제, 애니메이션 완전히 종료되기전 사용시 멈춤)
+    public void Roll()
     {
-        StartCoroutine(RollCoroutine(targetDirection));
+        StartCoroutine(RollCoroutine());
     }
 
-    private IEnumerator RollCoroutine(Vector3 targetDirection)
+    private IEnumerator RollCoroutine()
     {
         // 애니메이션 초기 구간 기다림
-        yield return new WaitForSeconds(0.2f);
-        
+        yield return new WaitForSeconds(0.15f); // 선딜(현재 애니메이션에 맞춤)
         // 일정시간 무적?
-        Rolling();
+        RollFuntion(true);
+        mPlayerStateRoll.bIsRoll = true;
         
-        float distanceCovered = 0f;
-        float maxDistance = mRollDistance;
-        float speed = 20f; // 초기 속도 조정
-    
-        while (distanceCovered < maxDistance)
+        yield return new WaitForSeconds(0.25f);
+        RollFuntion(false);
+        
+        yield return new WaitForSeconds(0.9f); // 애니메이션 종료 직전
+        mPlayerStateRoll.bIsRoll = false;
+        
+        if (GameManager.Instance.Input.MoveInput == Vector2.zero)
         {
-            float moveAmount = speed * Time.deltaTime;
-            mCharacterController.Move(targetDirection * (moveAmount * Time.deltaTime));
-            distanceCovered += moveAmount;
-            yield return null;
+            SetPlayerState(PlayerState.Idle);
+        }
+        else
+        {
+            SetPlayerState(PlayerState.Move);
+        }
+    }
+    
+    public void Rolling(Vector3 targetDirection)
+    {
+        if (mPlayerStateRoll.bIsRoll)
+        {
+            float distanceCovered = 0f;
+            float maxDistance = mRollDistance;
+            float speed = 5.0f; // 초기 속도 조정
+        
+            while (distanceCovered < maxDistance)
+            {
+                float moveAmount = speed * Time.deltaTime;
+                mCharacterController.Move(targetDirection * moveAmount);
+                distanceCovered += moveAmount;
+                return;
+            }
         }
     }
 
-    private void Rolling()
+    private void RollFuntion(bool isRollFunction)
     {
-        
+        if (isRollFunction)
+        {
+            
+        }
     }
     
     #endregion
@@ -682,24 +721,65 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
 
     #region 대시 관련 기능
 
-    public void Dash(Vector3 cameraForwardDirection)
+    public void Dash()
     {
-        StartCoroutine(DashCoroutine(cameraForwardDirection));
+        StartCoroutine(DashCoroutine());
     }
     
-    private IEnumerator DashCoroutine(Vector3 cameraForwardDirection)
+    private IEnumerator DashCoroutine()
     {
-        float distanceCovered = 0f;
-        float maxDistance = mDashDistance;
-        float speed = 50f; // 초기 속도 조정
+        // 애니메이션 초기 구간 기다림
+        yield return new WaitForSeconds(0.0f); // 선딜
+        // 충돌 무시 및 피해감소? 무적?
+        DashFunction(true);
+        mPlayerStateDash.bIsDashing = true;
+        
+        yield return new WaitForSeconds(0.3f);
+        DashFunction(false);
+        
+        yield return new WaitForSeconds(0.7f); // 애니메이션 종료 직전
+        mPlayerStateDash.bIsDashing = false;
 
-        while (distanceCovered < maxDistance)
+        if (IsGrounded)
         {
-            float moveAmount = speed * Time.deltaTime;
-            transform.rotation = Quaternion.LookRotation(cameraForwardDirection);
-            mCharacterController.Move(cameraForwardDirection * (moveAmount * Time.deltaTime));
-            distanceCovered += moveAmount;
-            yield return null;
+            if (GameManager.Instance.Input.MoveInput == Vector2.zero)
+            {
+                SetPlayerState(PlayerState.Idle);
+            }
+            else if (GameManager.Instance.Input.MoveInput != Vector2.zero)
+            {
+                SetPlayerState(PlayerState.Move);
+            }
+        }
+        else
+        {
+            SetPlayerState(PlayerState.Fall);
+        }
+    }
+
+    public void Dashing(Vector3 cameraCenterDirection)
+    {
+        if (mPlayerStateDash.bIsDashing)
+        {
+            float distanceCovered = 0f;
+            float maxDistance = mDashDistance;
+            float speed = 10f; // 초기 속도 조정
+
+            while (distanceCovered < maxDistance)
+            {
+                float moveAmount = speed * Time.deltaTime;
+                mCharacterController.Move(cameraCenterDirection * moveAmount);
+                distanceCovered += moveAmount;
+                return;
+            }
+        }
+    }
+
+    private void DashFunction(bool isDashFunction)
+    {
+        if (isDashFunction)
+        {
+            
         }
     }
 
