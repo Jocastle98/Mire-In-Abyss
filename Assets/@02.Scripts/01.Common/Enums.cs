@@ -37,3 +37,15 @@ namespace UIPanelEnums
         EnterPortal
     }
 }
+
+namespace UIHUDEnums
+{
+    public enum MiniMapIconType
+    {
+        Player,
+        Enemy,
+        Boss,
+        Shop,
+        Portal,
+    }
+}
