@@ -11,22 +11,8 @@ using UnityEngine.Serialization;
 [RequireComponent(typeof(PlayerInput))]
 public class PlayerController : MonoBehaviour, IObserver<GameObject>
 {
-    /*[Header("Player Basic Stat")]
-    [SerializeField] private int mMaxHealth = 100;
-    [SerializeField] private int mBaseAttackPower = 10;
-    [SerializeField] private int mBaseDefendPower = 5;
-    
-    [Space(10)]
-    [Header("Player Current Changed Stat")]
-    [SerializeField] private int mCurrentHealth;
-    public int mCurrentAttackPower;
-    public int mCurrentDefendPower;
-    public float mSpeed;*/
-    
     [Space(10)]
     [Header("Player Move Stat")]
-    /*[SerializeField] private float mMoveSpeed = 4.0f;
-    [SerializeField] private float mSprintSpeed = 6.0f;*/
     [SerializeField] private float mRotationSmoothTime = 0.12f;
     [SerializeField] private float mSpeedChangeRate = 10.0f;
     
