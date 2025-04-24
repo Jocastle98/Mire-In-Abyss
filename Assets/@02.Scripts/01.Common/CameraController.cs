@@ -8,24 +8,19 @@ public class CameraController : MonoBehaviour
 {
     [SerializeField] private float mRotationSensitivity = 1.0f;
     [SerializeField] private GameObject mCinemachineCameraTarget;
+    [SerializeField] private float mTopClamp = 70.0f;
+    [SerializeField] private float mBottomClamp = -30.0f;
     [SerializeField] private float mCameraAngleOverride = 0.0f;
-    [SerializeField] private float mThreshold = 0.01f;
-    [SerializeField] private float mGroundedTopClamp = 70.0f;
-    [SerializeField] private float mGroundedBottomClamp = -30.0f;
-    
-    // 공중 시야 제한 완화(90로도 하면 공격감지 콜라이더에 문제 생김)
-    private float mAirTopClamp = 89f;
-    private float mAirBottomClamp = -89f;
+    [SerializeField] private const float mThreshold = 0.01f;
     
     // cinemachine
     private float mCinemachineTargetYaw;
     private float mCinemachineTargetPitch;
-    private bool mbIsGround;
 
     private void Awake()
     {
-        Cursor.visible = false;
-        Cursor.lockState = CursorLockMode.Locked;
+        /*Cursor.visible = false;
+        Cursor.lockState = CursorLockMode.Locked;*/
         
         mCinemachineCameraTarget = GetComponent<CinemachineVirtualCamera>().Follow.gameObject;
         mCinemachineTargetYaw = mCinemachineCameraTarget.transform.rotation.eulerAngles.y;
@@ -33,7 +28,7 @@ public class CameraController : MonoBehaviour
     
     private void LateUpdate()
     {
-        SetCursor();
+        //SetCursor();
         CameraRotation();
     }
 
@@ -45,11 +40,6 @@ public class CameraController : MonoBehaviour
             Cursor.lockState = Cursor.visible ? CursorLockMode.None : CursorLockMode.Locked;
         }
     }
-
-    public void SendPlayerGrounded(bool isGround)
-    {
-        mbIsGround = isGround;
-    }
     
     private void CameraRotation()
     {
@@ -60,15 +50,7 @@ public class CameraController : MonoBehaviour
         }
     
         mCinemachineTargetYaw = ClampAngle(mCinemachineTargetYaw, float.MinValue, float.MaxValue);
-
-        if (mbIsGround)
-        {
-            mCinemachineTargetPitch = ClampAngle(mCinemachineTargetPitch, mGroundedBottomClamp, mGroundedTopClamp);
-        }
-        else
-        {
-            mCinemachineTargetPitch = ClampAngle(mCinemachineTargetPitch, mAirBottomClamp, mAirTopClamp);
-        }
+        mCinemachineTargetPitch = ClampAngle(mCinemachineTargetPitch, mBottomClamp, mTopClamp);
         
         mCinemachineCameraTarget.transform.rotation = Quaternion.Euler(mCinemachineTargetPitch + mCameraAngleOverride,
             mCinemachineTargetYaw, 0.0f);
