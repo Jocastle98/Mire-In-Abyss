@@ -10,36 +10,59 @@ using UnityEngine.InputSystem;
 [RequireComponent(typeof(PlayerInput))]
 public class PlayerController : MonoBehaviour, IObserver<GameObject>
 {
-
-    [Header("Reference")]
-    [SerializeField] private PlayerStats mPlayerStats;
+    /*[Header("Player Basic Stat")]
+    [SerializeField] private int mMaxHealth = 100;
+    [SerializeField] private int mBaseAttackPower = 10;
+    [SerializeField] private int mBaseDefendPower = 5;
     
     [Space(10)]
-    [Header("Control Variable")]
-    [SerializeField] private float mSpeed;
+    [Header("Player Current Changed Stat")]
+    [SerializeField] private int mCurrentHealth;
+    public int mCurrentAttackPower;
+    public int mCurrentDefendPower;
+    public float mSpeed;*/
     
-    [Header("Control Variable")]
+    [Space(10)]
+    [Header("Player Move Stat")]
+    /*[SerializeField] private float mMoveSpeed = 4.0f;
+    [SerializeField] private float mSprintSpeed = 6.0f;*/
     [SerializeField] private float mRotationSmoothTime = 0.12f;
     [SerializeField] private float mSpeedChangeRate = 10.0f;
+    
+    [Space(10)]
+    [Header("Player Jump Stat")]
     [SerializeField] private float mGravity = - 9.81f;
-    [SerializeField] private float mJumpTimeout = 0.5f;
-    [SerializeField] private float mFallTimeout = 0.15f;
     [SerializeField] private float mJumpHeight = 5.0f;
+    [SerializeField] private float mJumpTimeout = 0.5f;
+    public float JumpTimeout => mJumpTimeout;
+    [SerializeField] private float mFallTimeout = 0.15f;
+    public float FallTimeout => mFallTimeout;
+    
+    [Space(10)]
+    [Header("Player Roll Stat")]
     [SerializeField] private float mRollDistance = 5.0f;
+    
+    [Space(10)]
+    [Header("Player Dash Stat")]
     [SerializeField] private float mDashDistance = 10.0f;
     
     [Space(10)]
     [Header("Player Grouned Check")]
-    [SerializeField] private LayerMask mGroundLayers;
-    [SerializeField] private float mGroundedOffset = -0.15f;
-    [SerializeField] private float mGroundedRadius = 0.3f;
     [SerializeField] private bool mbIsGrounded = true;
     public bool IsGrounded => mbIsGrounded;
+    [SerializeField] private float mGroundedOffset = -0.15f;
+    [SerializeField] private float mGroundedRadius = 0.3f;
+    [SerializeField] private LayerMask mGroundLayers;
     
     [Space(10)]
     [Header("Player Attach Point")]
     [SerializeField] private Transform mRightHandTransform;
     [SerializeField] private Transform mLeftHandTransform;
+
+    [Space(10)]
+    [Header("Reference")]
+    [SerializeField] private PlayerStats mPlayerStats;
+    
     
     // Player Calculation Stat
     [SerializeField]
@@ -48,14 +71,17 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     private float mTerminalVelocity = 53.0f;
     private float mTargetRotation;
     private float mAnimationBlend;
+
+    public float mSpeed;
     
     private bool mbInCombat = false;
-    private float mInCombatTimeout = 10.0f;
+    private float mInCombatTimeout = 5.0f;
     
     // Timeout Deltatime
     private float mJumpTimeoutDelta;
     private float mFallTimeoutDelta;
-    public float mInCombatTimeoutDelta;
+    private float mInCombatTimeoutDelta;
+    
     
     // Componenet
     private Animator mPlayerAnimator;
@@ -172,6 +198,11 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         
         SetPlayerState(PlayerState.Idle);
         
+        /*// 스탯 초기화
+        mCurrentAttackPower = mBaseAttackPower;
+        mCurrentDefendPower = mBaseDefendPower;
+        mCurrentHealth = mMaxHealth;*/
+        
         // 무기 할당
         SetPlayerWeapon(mRightHandTransform, "Longsword", mLeftHandTransform, "Shield");
     }
@@ -196,15 +227,13 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             QueryTriggerInteraction.Ignore);
 
         PlayerAnimator.SetBool("IsGrounded", mbIsGrounded);
-        
-        mMainCamera.GetComponent<CameraController>().SendPlayerGrounded(mbIsGrounded);
     }
     
     private void ApplyGravity()
     {
         if (mbIsGrounded)
         {
-            mFallTimeoutDelta = mFallTimeout;
+            mFallTimeoutDelta = FallTimeout;
              
             if (mJumpTimeoutDelta >= 0.0f)
             {
@@ -218,7 +247,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         }
         else
         {
-            mJumpTimeoutDelta = mJumpTimeout;
+            mJumpTimeoutDelta = JumpTimeout;
             
             if (mFallTimeoutDelta >= 0.0f)
             {
@@ -243,8 +272,8 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     {
         if (mbInCombat)
         {
-            mInCombatTimeoutDelta -= Time.deltaTime;
-            if (mInCombatTimeoutDelta <= 0.0f)
+            mInCombatTimeout -= Time.deltaTime;
+            if (mInCombatTimeout <= 0.0f)
             {
                 mbInCombat = false;
             }
@@ -346,6 +375,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         // 4. 방향 처리 (회전 허용 여부 분기)
         Vector3 inputDirection = 
             new Vector3(GameManager.Instance.Input.MoveInput.x, 0.0f, GameManager.Instance.Input.MoveInput.y).normalized;
+        
         mTargetRotation = 
             Mathf.Atan2(inputDirection.x, inputDirection.z) * Mathf.Rad2Deg + mMainCamera.transform.eulerAngles.y;
         
@@ -372,34 +402,10 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         {
             mCharacterController.Move(targetDirection.normalized * (mSpeed * Time.deltaTime) + new Vector3(0.0f, mVerticalVelocity, 0.0f) * Time.deltaTime);
         }
-
-        if (mbInCombat)
-        {
-            Vector3 direction = GameManager.Instance.Input.MoveInput;
-            
-            // 현재 애니메이터 파라미터 값 가져오기
-            float currentVertical = mPlayerAnimator.GetFloat("Vertical");
-            float currentHorizontal = mPlayerAnimator.GetFloat("Horizontal");
-    
-            // 목표 값 설정
-            float targetVertical = direction.y;
-            float targetHorizontal = direction.x;
-            
-            // 부드러운 전환을 위한 보간
-            float smoothedVertical = Mathf.Lerp(currentVertical, targetVertical, Time.deltaTime * mSpeedChangeRate);
-            float smoothedHorizontal = Mathf.Lerp(currentHorizontal, targetHorizontal, Time.deltaTime * mSpeedChangeRate);
-            
-            
-            mPlayerAnimator.SetFloat("Vertical", smoothedVertical);
-            mPlayerAnimator.SetFloat("Horizontal", smoothedHorizontal);
-        }
-        else
-        {
-            mPlayerAnimator.SetFloat("Vertical", 1.0f);
-            mPlayerAnimator.SetFloat("Horizontal", 0.0f);
-        }
         
         mPlayerAnimator.SetFloat("Speed", mAnimationBlend);
+        mPlayerAnimator.SetFloat("Vertical", GameManager.Instance.Input.MoveInput.y); // 임시
+        mPlayerAnimator.SetFloat("Horizontal", GameManager.Instance.Input.MoveInput.x); //임시
         mPlayerAnimator.SetFloat("MotionSpeed", inputMagnitude);
     }
     
@@ -542,7 +548,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     public void EnterCombat()
     {
         mbInCombat = true;
-        mInCombatTimeoutDelta = mInCombatTimeout;
+        mInCombatTimeout = mInCombatTimeoutDelta;
     }
 
     /*public void AddItemAttack(int itemAttackPower)
@@ -553,7 +559,6 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     public void Attack()
     {
         GameManager.Instance.Input.SprintOff();
-        EnterCombat();
         
         // 이동 공격시 하반신(Base Layer) 애니메이션
         if (GameManager.Instance.Input.MoveInput == Vector2.zero)
@@ -583,7 +588,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
                         mVerticalVelocity = 0.0f;
                         mVerticalVelocity = Mathf.Sqrt(mJumpHeight * -2.0f * mGravity);
                         
-                        mPlayerAnimator.SetBool("Jump", true);
+                        mPlayerAnimator.SetBool("Jump", false);
                     }
                 }
             }
@@ -600,8 +605,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     // 공격 애니메이션의 공격 모션 시작 시 호출 메서드
     public void MeleeAttackStart()
     {
-        if (CurrentPlayerState == PlayerState.Attack || CurrentPlayerState == PlayerState.Parry 
-                                                     || CurrentPlayerState == PlayerState.Dash)
+        if (CurrentPlayerState == PlayerState.Attack)
         {
             mWeaponController.AttackStart();
         }
@@ -610,8 +614,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     // 공격 애니메이션의 공격 모션 종료 시 호출되는 메서드
     public void MeleeAttackEnd()
     {
-        if (CurrentPlayerState == PlayerState.Attack || CurrentPlayerState == PlayerState.Parry 
-                                                     || CurrentPlayerState == PlayerState.Dash)
+        if (CurrentPlayerState == PlayerState.Attack)
         {
             mWeaponController.AttackEnd();
         }
@@ -685,7 +688,12 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     {
         mPlayerStats.OnGuardSuccess();
     }
-    
+
+    /*public void AddItemDefend(int itemDefendPower)
+    {
+        mCurrentDefendPower += itemDefendPower;
+    }*/
+
     #endregion
 
     #region 패리 관련 기능
@@ -693,7 +701,6 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     public void Parry()
     {
         GameManager.Instance.Input.SprintOff();
-        EnterCombat();
 
         // 패리 성공 시 행동 메서드
         ParrySuccess();
@@ -806,8 +813,6 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         }
         else
         {
-            EnterCombat();     
-            
             SetPlayerState(PlayerState.Hit);
             // 방향에 따라 맞는 애니메이션이 없으므로 현재는 효과가 없는 것이나 마찬가지인 상태, 일단 대기
             // 플레이어 캐릭터의 방향을 회전시켜주는 수동적인 방식을 사용하거나?
