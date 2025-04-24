@@ -12,7 +12,7 @@ public class PlayerStateParry : IPlayerState
         mPlayerController = playerController;
         mPlayerController.PlayerAnimator.SetTrigger("Parry");
         
-        mParryDirection = mPlayerController.GetCameraForwardDirection();
+        mParryDirection = mPlayerController.GetCameraForwardDirection(true);
         mPlayerController.transform.rotation = Quaternion.LookRotation(mParryDirection);
     }
 

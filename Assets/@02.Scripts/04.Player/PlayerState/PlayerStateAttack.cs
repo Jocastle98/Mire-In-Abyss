@@ -17,7 +17,7 @@ public class PlayerStateAttack : IPlayerState
         
         bIsCombo = true;
         
-        mAttackDirection = mPlayerController.GetCameraForwardDirection();
+        mAttackDirection = mPlayerController.GetCameraForwardDirection(true);
         mPlayerController.transform.rotation = Quaternion.LookRotation(mAttackDirection);
     }
 

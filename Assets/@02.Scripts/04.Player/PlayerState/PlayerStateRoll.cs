@@ -7,13 +7,16 @@ public class PlayerStateRoll : IPlayerState
 {
     private PlayerController mPlayerController;
     private Vector3 mTargetDirection;
+    public bool bIsRoll { get; set; }
     
     public void OnEnter(PlayerController playerController)
     {
         mPlayerController = playerController;
         mPlayerController.PlayerAnimator.SetTrigger("Roll");
 
-        mTargetDirection = mPlayerController.SetTargetDirection();
+        mTargetDirection = mPlayerController.SetRollDirection();
+        mPlayerController.transform.rotation = Quaternion.LookRotation(mTargetDirection);
+        mPlayerController.Roll();
     }
 
     public void OnUpdate()
@@ -23,7 +26,7 @@ public class PlayerStateRoll : IPlayerState
             return;
         }
         
-        mPlayerController?.Roll(mTargetDirection);
+        mPlayerController?.Rolling(mTargetDirection);
     }
 
     public void OnExit()

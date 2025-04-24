@@ -4,51 +4,40 @@ using System.Collections.Generic;
 using PlayerEnums;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.Serialization;
 
 [RequireComponent(typeof(Animator))]
-[RequireComponent(typeof(CharacterController))]
 [RequireComponent(typeof(PlayerInput))]
+[RequireComponent(typeof(PlayerStats))]
+[RequireComponent(typeof(CharacterController))]
 public class PlayerController : MonoBehaviour, IObserver<GameObject>
 {
+    [Header("Reference")]
+    [SerializeField] private PlayerStats mPlayerStats;
+
     [Space(10)]
-    [Header("Player Move Stat")]
+    [Header("Control Variable")]
+    [SerializeField] private float mSpeed;
     [SerializeField] private float mRotationSmoothTime = 0.12f;
     [SerializeField] private float mSpeedChangeRate = 10.0f;
-    
-    [Space(10)]
-    [Header("Player Jump Stat")]
     [SerializeField] private float mGravity = - 9.81f;
     [SerializeField] private float mJumpHeight = 5.0f;
     [SerializeField] private float mJumpTimeout = 0.5f;
-    public float JumpTimeout => mJumpTimeout;
     [SerializeField] private float mFallTimeout = 0.15f;
-    public float FallTimeout => mFallTimeout;
-    
-    [Space(10)]
-    [Header("Player Roll Stat")]
     [SerializeField] private float mRollDistance = 5.0f;
-    
-    [Space(10)]
-    [Header("Player Dash Stat")]
     [SerializeField] private float mDashDistance = 10.0f;
     
     [Space(10)]
     [Header("Player Grouned Check")]
-    [SerializeField] private bool mbIsGrounded = true;
-    public bool IsGrounded => mbIsGrounded;
+    [SerializeField] private LayerMask mGroundLayers;
     [SerializeField] private float mGroundedOffset = -0.15f;
     [SerializeField] private float mGroundedRadius = 0.3f;
-    [SerializeField] private LayerMask mGroundLayers;
+    [SerializeField] private bool mbIsGrounded = true;
+    public bool IsGrounded => mbIsGrounded;
     
     [Space(10)]
     [Header("Player Attach Point")]
     [SerializeField] private Transform mRightHandTransform;
     [SerializeField] private Transform mLeftHandTransform;
-
-    [Space(10)]
-    [Header("Reference")]
-    [SerializeField] private PlayerStats mPlayerStats;
     
     
     // Player Calculation Stat
@@ -58,11 +47,9 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     private float mTerminalVelocity = 53.0f;
     private float mTargetRotation;
     private float mAnimationBlend;
-
-    public float mSpeed;
     
     private bool mbInCombat = false;
-    private float mInCombatTimeout = 5.0f;
+    private float mInCombatTimeout = 10.0f;
     
     // Timeout Deltatime
     private float mJumpTimeoutDelta;
@@ -107,12 +94,6 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         if (Camera.main != null)
         {
             mMainCamera = Camera.main.gameObject;
-        }
-        
-        //PlayerStats 컴포넌트가 없으면 자동 추가
-        if (mPlayerStats == null)
-        {
-            mPlayerStats = GetComponent<PlayerStats>();
         }
     }
 
@@ -185,11 +166,6 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         
         SetPlayerState(PlayerState.Idle);
         
-        /*// 스탯 초기화
-        mCurrentAttackPower = mBaseAttackPower;
-        mCurrentDefendPower = mBaseDefendPower;
-        mCurrentHealth = mMaxHealth;*/
-        
         // 무기 할당
         SetPlayerWeapon(mRightHandTransform, "Longsword", mLeftHandTransform, "Shield");
     }
@@ -208,19 +184,19 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
 
     private void GroundedCheck()
     {
-        Vector3 spherePosition = new Vector3(transform.position.x, transform.position.y - mGroundedOffset,
-            transform.position.z);
-        mbIsGrounded = Physics.CheckSphere(spherePosition, mGroundedRadius, mGroundLayers,
-            QueryTriggerInteraction.Ignore);
+        Vector3 spherePosition = new Vector3(transform.position.x, transform.position.y - mGroundedOffset, transform.position.z);
+        mbIsGrounded = Physics.CheckSphere(spherePosition, mGroundedRadius, mGroundLayers, QueryTriggerInteraction.Ignore);
 
         PlayerAnimator.SetBool("IsGrounded", mbIsGrounded);
+
+        mMainCamera.GetComponent<CameraController>().SendPlayerGrounded(mbIsGrounded);
     }
     
     private void ApplyGravity()
     {
         if (mbIsGrounded)
         {
-            mFallTimeoutDelta = FallTimeout;
+            mFallTimeoutDelta = mFallTimeout;
              
             if (mJumpTimeoutDelta >= 0.0f)
             {
@@ -234,7 +210,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         }
         else
         {
-            mJumpTimeoutDelta = JumpTimeout;
+            mJumpTimeoutDelta = mJumpTimeout;
             
             if (mFallTimeoutDelta >= 0.0f)
             {
@@ -259,8 +235,8 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     {
         if (mbInCombat)
         {
-            mInCombatTimeout -= Time.deltaTime;
-            if (mInCombatTimeout <= 0.0f)
+            mInCombatTimeoutDelta -= Time.deltaTime;
+            if (mInCombatTimeoutDelta <= 0.0f)
             {
                 mbInCombat = false;
             }
@@ -271,21 +247,45 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     
     #region 회전/이동 관련 기능
     
-    public Vector3 GetCameraForwardDirection()
+    public Vector3 GetCameraForwardDirection(bool isHorizontalOnly)
     {
         // 카메라 설정
         var cameraForward = mMainCamera.transform.forward;
         
         // Y값을 0으로 설정해서 수평 방향만 고려
-        cameraForward.y = 0;
+        if (isHorizontalOnly)
+        {
+            cameraForward.y = 0;
+        }
         cameraForward.Normalize();
         
         return cameraForward;
     }
-
-    public Vector3 SetTargetDirection()
+    
+    public Vector3 SetRollDirection()
     {
-        Vector3 targetDirection = Quaternion.Euler(0.0f, mTargetRotation, 0.0f) * Vector3.forward;
+        var targetDirection = GetCameraForwardDirection(true);
+        
+        if (GameManager.Instance.Input.MoveInput != Vector2.zero)
+        {
+            Vector3 inputDirection = new Vector3(GameManager.Instance.Input.MoveInput.x, 0.0f, GameManager.Instance.Input.MoveInput.y).normalized;
+            float targetRotation = Mathf.Atan2(inputDirection.x, inputDirection.z) * Mathf.Rad2Deg + mMainCamera.transform.eulerAngles.y;
+
+            targetDirection = Quaternion.Euler(0.0f, targetRotation, 0.0f) * Vector3.forward;
+        }
+        
+        return targetDirection;
+    }
+
+    public Vector3 SetDashDirection()
+    {
+        var targetDirection = GetCameraForwardDirection(true);
+        
+        if (!mbIsGrounded)
+        {
+            targetDirection = GetCameraForwardDirection(false);
+        }
+        
         return targetDirection;
     }
     
@@ -334,16 +334,19 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         }
         
         // 4. 방향 처리 (회전 허용 여부 분기)
-        Vector3 inputDirection = 
-            new Vector3(GameManager.Instance.Input.MoveInput.x, 0.0f, GameManager.Instance.Input.MoveInput.y).normalized;
-        
-        mTargetRotation = 
-            Mathf.Atan2(inputDirection.x, inputDirection.z) * Mathf.Rad2Deg + mMainCamera.transform.eulerAngles.y;
+        Vector3 inputDirection = new Vector3(GameManager.Instance.Input.MoveInput.x, 0.0f, GameManager.Instance.Input.MoveInput.y).normalized;
+        mTargetRotation = Mathf.Atan2(inputDirection.x, inputDirection.z) * Mathf.Rad2Deg + mMainCamera.transform.eulerAngles.y;
         
         if (allowRotation)
         {
             float rotation = Mathf.SmoothDampAngle(transform.eulerAngles.y, mTargetRotation, ref mRotationVelocity, mRotationSmoothTime);
-            transform.rotation = Quaternion.Euler(0.0f, rotation, 0.0f);
+            Vector3 rotationDirection =new Vector3(0.0f, rotation, 0.0f);
+            transform.rotation = Quaternion.Euler(rotationDirection);
+        }
+        
+        if (mbInCombat)
+        {
+            transform.rotation = Quaternion.LookRotation(GetCameraForwardDirection(true));
         }
         
         Vector3 targetDirection = Quaternion.Euler(0.0f, mTargetRotation, 0.0f) * Vector3.forward;
@@ -357,9 +360,33 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             mCharacterController.Move(targetDirection.normalized * (mSpeed * Time.deltaTime) + new Vector3(0.0f, mVerticalVelocity, 0.0f) * Time.deltaTime);
         }
         
+        if (mbInCombat)
+        {
+            Vector3 direction = GameManager.Instance.Input.MoveInput;
+             
+            // 현재 애니메이터 파라미터 값 가져오기
+            float currentVertical = mPlayerAnimator.GetFloat("Vertical");
+            float currentHorizontal = mPlayerAnimator.GetFloat("Horizontal");
+     
+            // 목표 값 설정
+            float targetVertical = direction.y;
+            float targetHorizontal = direction.x;
+             
+            // 부드러운 전환을 위한 보간
+            float smoothedVertical = Mathf.Lerp(currentVertical, targetVertical, Time.deltaTime * mSpeedChangeRate);
+            float smoothedHorizontal = Mathf.Lerp(currentHorizontal, targetHorizontal, Time.deltaTime * mSpeedChangeRate);
+             
+            
+            mPlayerAnimator.SetFloat("Vertical", smoothedVertical);
+            mPlayerAnimator.SetFloat("Horizontal", smoothedHorizontal);
+        }
+        else
+        {
+            mPlayerAnimator.SetFloat("Vertical", 1.0f);
+            mPlayerAnimator.SetFloat("Horizontal", 0.0f);
+        }
+        
         mPlayerAnimator.SetFloat("Speed", mAnimationBlend);
-        mPlayerAnimator.SetFloat("Vertical", GameManager.Instance.Input.MoveInput.y); // 임시
-        mPlayerAnimator.SetFloat("Horizontal", GameManager.Instance.Input.MoveInput.x); //임시
         mPlayerAnimator.SetFloat("MotionSpeed", inputMagnitude);
     }
     
@@ -418,36 +445,61 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     #endregion
 
     #region 구르기 관련 기능
-    
-    public void Roll(Vector3 targetDirection)
+
+    // 구르기 쿨타임 만들어야 함(연속 사용시 애니메이션 전환 문제, 애니메이션 완전히 종료되기전 사용시 멈춤)
+    public void Roll()
     {
-        StartCoroutine(RollCoroutine(targetDirection));
+        StartCoroutine(RollCoroutine());
     }
 
-    private IEnumerator RollCoroutine(Vector3 targetDirection)
+    private IEnumerator RollCoroutine()
     {
         // 애니메이션 초기 구간 기다림
-        yield return new WaitForSeconds(0.2f);
-        
+        yield return new WaitForSeconds(0.15f); // 선딜(현재 애니메이션에 맞춤)
         // 일정시간 무적?
-        Rolling();
+        RollFuntion(true);
+        mPlayerStateRoll.bIsRoll = true;
         
-        float distanceCovered = 0f;
-        float maxDistance = mRollDistance;
-        float speed = 20f; // 초기 속도 조정
-    
-        while (distanceCovered < maxDistance)
+        yield return new WaitForSeconds(0.25f);
+        RollFuntion(false);
+        
+        yield return new WaitForSeconds(0.9f); // 애니메이션 종료 직전
+        mPlayerStateRoll.bIsRoll = false;
+        
+        if (GameManager.Instance.Input.MoveInput == Vector2.zero)
         {
-            float moveAmount = speed * Time.deltaTime;
-            mCharacterController.Move(targetDirection * (moveAmount * Time.deltaTime));
-            distanceCovered += moveAmount;
-            yield return null;
+            SetPlayerState(PlayerState.Idle);
+        }
+        else
+        {
+            SetPlayerState(PlayerState.Move);
+        }
+    }
+    
+    public void Rolling(Vector3 targetDirection)
+    {
+        if (mPlayerStateRoll.bIsRoll)
+        {
+            float distanceCovered = 0f;
+            float maxDistance = mRollDistance;
+            float speed = 5.0f; // 초기 속도 조정
+        
+            while (distanceCovered < maxDistance)
+            {
+                float moveAmount = speed * Time.deltaTime;
+                mCharacterController.Move(targetDirection * moveAmount);
+                distanceCovered += moveAmount;
+                return;
+            }
         }
     }
 
-    private void Rolling()
+    private void RollFuntion(bool isRollFunction)
     {
-        
+        if (isRollFunction)
+        {
+            
+        }
     }
     
     #endregion
@@ -477,17 +529,13 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     public void EnterCombat()
     {
         mbInCombat = true;
-        mInCombatTimeout = mInCombatTimeoutDelta;
+        mInCombatTimeoutDelta = mInCombatTimeout;
     }
-
-    /*public void AddItemAttack(int itemAttackPower)
-    {
-        mCurrentAttackPower += itemAttackPower;
-    }*/
     
     public void Attack()
     {
         GameManager.Instance.Input.SprintOff();
+        EnterCombat();
         
         // 이동 공격시 하반신(Base Layer) 애니메이션
         if (GameManager.Instance.Input.MoveInput == Vector2.zero)
@@ -517,7 +565,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
                         mVerticalVelocity = 0.0f;
                         mVerticalVelocity = Mathf.Sqrt(mJumpHeight * -2.0f * mGravity);
                         
-                        mPlayerAnimator.SetBool("Jump", false);
+                        mPlayerAnimator.SetBool("Jump", true);
                     }
                 }
             }
@@ -534,7 +582,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     // 공격 애니메이션의 공격 모션 시작 시 호출 메서드
     public void MeleeAttackStart()
     {
-        if (CurrentPlayerState == PlayerState.Attack)
+        if (CurrentPlayerState == PlayerState.Attack || CurrentPlayerState == PlayerState.Parry || CurrentPlayerState == PlayerState.Dash)
         {
             mWeaponController.AttackStart();
         }
@@ -543,7 +591,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     // 공격 애니메이션의 공격 모션 종료 시 호출되는 메서드
     public void MeleeAttackEnd()
     {
-        if (CurrentPlayerState == PlayerState.Attack)
+        if (CurrentPlayerState == PlayerState.Attack || CurrentPlayerState == PlayerState.Parry || CurrentPlayerState == PlayerState.Dash)
         {
             mWeaponController.AttackEnd();
         }
@@ -618,11 +666,6 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         mPlayerStats.OnGuardSuccess();
     }
 
-    /*public void AddItemDefend(int itemDefendPower)
-    {
-        mCurrentDefendPower += itemDefendPower;
-    }*/
-
     #endregion
 
     #region 패리 관련 기능
@@ -630,6 +673,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     public void Parry()
     {
         GameManager.Instance.Input.SprintOff();
+        EnterCombat();
 
         // 패리 성공 시 행동 메서드
         ParrySuccess();
@@ -658,24 +702,66 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
 
     #region 대시 관련 기능
 
-    public void Dash(Vector3 cameraForwardDirection)
+    public void Dash()
     {
-        StartCoroutine(DashCoroutine(cameraForwardDirection));
+        StartCoroutine(DashCoroutine());
+        EnterCombat();
     }
     
-    private IEnumerator DashCoroutine(Vector3 cameraForwardDirection)
+    private IEnumerator DashCoroutine()
     {
-        float distanceCovered = 0f;
-        float maxDistance = mDashDistance;
-        float speed = 50f; // 초기 속도 조정
+        // 애니메이션 초기 구간 기다림
+        yield return new WaitForSeconds(0.0f); // 선딜
+        // 충돌 무시 및 피해감소? 무적?
+        DashFunction(true);
+        mPlayerStateDash.bIsDashing = true;
+        
+        yield return new WaitForSeconds(0.3f);
+        DashFunction(false);
+        
+        yield return new WaitForSeconds(0.7f); // 애니메이션 종료 직전
+        mPlayerStateDash.bIsDashing = false;
 
-        while (distanceCovered < maxDistance)
+        if (IsGrounded)
         {
-            float moveAmount = speed * Time.deltaTime;
-            transform.rotation = Quaternion.LookRotation(cameraForwardDirection);
-            mCharacterController.Move(cameraForwardDirection * (moveAmount * Time.deltaTime));
-            distanceCovered += moveAmount;
-            yield return null;
+            if (GameManager.Instance.Input.MoveInput == Vector2.zero)
+            {
+                SetPlayerState(PlayerState.Idle);
+            }
+            else if (GameManager.Instance.Input.MoveInput != Vector2.zero)
+            {
+                SetPlayerState(PlayerState.Move);
+            }
+        }
+        else
+        {
+            SetPlayerState(PlayerState.Fall);
+        }
+    }
+
+    public void Dashing(Vector3 cameraCenterDirection)
+    {
+        if (mPlayerStateDash.bIsDashing)
+        {
+            float distanceCovered = 0f;
+            float maxDistance = mDashDistance;
+            float speed = 10f; // 초기 속도 조정
+
+            while (distanceCovered < maxDistance)
+            {
+                float moveAmount = speed * Time.deltaTime;
+                mCharacterController.Move(cameraCenterDirection * moveAmount);
+                distanceCovered += moveAmount;
+                return;
+            }
+        }
+    }
+
+    private void DashFunction(bool isDashFunction)
+    {
+        if (isDashFunction)
+        {
+            
         }
     }
 
@@ -701,6 +787,8 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         }
         else
         {
+            EnterCombat();
+            
             SetPlayerState(PlayerState.Hit);
             // 방향에 따라 맞는 애니메이션이 없으므로 현재는 효과가 없는 것이나 마찬가지인 상태, 일단 대기
             // 플레이어 캐릭터의 방향을 회전시켜주는 수동적인 방식을 사용하거나?
