@@ -8,7 +8,7 @@ using UnityEngine.AI;
 using UnityEngine.Serialization;
 using Random = UnityEngine.Random;
 
-public class FieldController : MonoBehaviour
+public class FieldController : BattleArea
 {
     public int playTime = 30;
     
@@ -30,6 +30,7 @@ public class FieldController : MonoBehaviour
     [Header("보물상자 스폰 관리")]
     public int treasureSpawnAmount = 10;
     public int treasureDistance = 150;
+    [Range(5,25)]
     public int poissonResearchLimit = 10;
     
     //몬스터 프리팹
@@ -78,12 +79,6 @@ public class FieldController : MonoBehaviour
     private GameObject mFieldMonsterParent;
     private GameObject mRandomTreasureParent;
 
-    //임시 Init함수는 BattleAreaManager에 의해 사용됨
-    private void Start()
-    {
-        FieldInit(null, 1);
-    }
-
     private void FixedUpdate()
     {
         mCurrentTime += Time.fixedDeltaTime;
@@ -95,6 +90,20 @@ public class FieldController : MonoBehaviour
             SpawnMonsters();
         }
     }
+    
+    public override void BattleAreaInit(GameObject player, int levelDesign)
+    {
+        FieldInit(player, levelDesign);
+    }
+
+    public override void BattleAreaClear()
+    {
+        ClearField();
+        OnClearBattleArea.Invoke();
+        Destroy(gameObject);
+    }
+
+
 
     /// <summary>
     /// 제작된 맵 프리팹의 필요한 오브젝트들을 불러옴.
@@ -105,7 +114,7 @@ public class FieldController : MonoBehaviour
     /// <param name="levelDesign"></param>
     public void FieldInit(GameObject player, int levelDesign)
     {
-        //this.player = player;
+        this.player = player;
         mLevelDesign = levelDesign;
         GetMonsterSpawnZone();
         GetNavGrounds();
@@ -215,7 +224,7 @@ public class FieldController : MonoBehaviour
     /// </summary>
     void SpawnTreasure()
     {
-        int treasureAmount = treasureSpawnAmount + Random.Range(-5, treasureSpawnAmount);
+        int treasureAmount = treasureSpawnAmount + Random.Range(-5, 5);
         int whileLoop = 0;
         int whileMaxLoop = 0;
 
