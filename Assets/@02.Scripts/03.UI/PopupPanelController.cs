@@ -27,7 +27,7 @@ public class PopupPanelController : MonoBehaviour
         mPanelRectTransform.localScale = Vector3.zero;
         
         //TODO: create UIManager
-        UIPanelManager.Instance.PushPopup(this);
+        //UIManager.Instance.PushPopup(this);
         
         // 배경은 등속으로 등장, 패널은 튕기듯이 등장
         mBackgroundCanvasGroup.DOFade(1, 0.3f).SetEase(Ease.Linear);
@@ -41,7 +41,7 @@ public class PopupPanelController : MonoBehaviour
     public virtual void Hide(Action onPanelControllerHide = null)
     {
         //TODO: create UIManager
-        UIPanelManager.Instance.PopPopup(this);
+        //UIManager.Instance.PopPopup(this);
         
         // 사라지기 전 초기화
         mBackgroundCanvasGroup.alpha = 1;

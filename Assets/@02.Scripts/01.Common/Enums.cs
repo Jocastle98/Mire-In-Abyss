@@ -27,13 +27,3 @@ namespace ItemEnums
 {
     
 }
-
-namespace UIPanelEnums
-{
-    public enum UIPanelType
-    {
-        SoulStoneShop,
-        QuestBoard,
-        EnterPortal
-    }
-}
