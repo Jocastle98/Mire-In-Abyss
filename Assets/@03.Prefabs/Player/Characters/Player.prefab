@@ -1466,6 +1466,8 @@ GameObject:
   - component: {fileID: 4297884469358006277}
   - component: {fileID: 8277639500135812554}
   - component: {fileID: 4959012575149737574}
+  - component: {fileID: 4749783104172799161}
+  - component: {fileID: 3600470690653789154}
   m_Layer: 8
   m_Name: Player
   m_TagString: Player
@@ -1610,22 +1612,22 @@ MonoBehaviour:
   mRotationSmoothTime: 0.12
   mSpeedChangeRate: 10
   mGravity: -9.81
+  mJumpHeight: 5
   mJumpTimeout: 0.5
   mFallTimeout: 0.15
-  mJumpHeight: 5
   mRollDistance: 8
   mDashDistance: 10
+  mbIsGrounded: 1
+  mGroundedOffset: -0.15
+  mGroundedRadius: 0.3
   mGroundLayers:
     serializedVersion: 2
     m_Bits: 8
-  mGroundedOffset: -0.15
-  mGroundedRadius: 0.3
-  mbIsGrounded: 1
   mRightHandTransform: {fileID: 1561646755167969338}
   mLeftHandTransform: {fileID: 5870613848163703736}
   mPlayerStats: {fileID: 4749783104172799161}
   mVerticalVelocity: 0
-  mInCombatTimeoutDelta: 0
+  mSpeed: 0
 --- !u!1 &3080968844867647087
 GameObject:
   m_ObjectHideFlags: 0

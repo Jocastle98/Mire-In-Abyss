@@ -10,60 +10,35 @@ using UnityEngine.InputSystem;
 [RequireComponent(typeof(PlayerInput))]
 public class PlayerController : MonoBehaviour, IObserver<GameObject>
 {
-    /*[Header("Player Basic Stat")]
-    [SerializeField] private int mMaxHealth = 100;
-    [SerializeField] private int mBaseAttackPower = 10;
-    [SerializeField] private int mBaseDefendPower = 5;
+    [Header("Reference")]
+    [SerializeField] private PlayerStats mPlayerStats;
     
     [Space(10)]
-    [Header("Player Current Changed Stat")]
-    [SerializeField] private int mCurrentHealth;
-    public int mCurrentAttackPower;
-    public int mCurrentDefendPower;
-    public float mSpeed;*/
-    
-    [Space(10)]
-    [Header("Player Move Stat")]
-    /*[SerializeField] private float mMoveSpeed = 4.0f;
-    [SerializeField] private float mSprintSpeed = 6.0f;*/
+    [Header("Control Variable")]
+    [SerializeField] private float mSpeed;
     [SerializeField] private float mRotationSmoothTime = 0.12f;
     [SerializeField] private float mSpeedChangeRate = 10.0f;
-    
-    [Space(10)]
-    [Header("Player Jump Stat")]
     [SerializeField] private float mGravity = - 9.81f;
     [SerializeField] private float mJumpHeight = 5.0f;
     [SerializeField] private float mJumpTimeout = 0.5f;
-    public float JumpTimeout => mJumpTimeout;
     [SerializeField] private float mFallTimeout = 0.15f;
-    public float FallTimeout => mFallTimeout;
-    
-    [Space(10)]
-    [Header("Player Roll Stat")]
     [SerializeField] private float mRollDistance = 5.0f;
-    
-    [Space(10)]
-    [Header("Player Dash Stat")]
     [SerializeField] private float mDashDistance = 10.0f;
     
     [Space(10)]
     [Header("Player Grouned Check")]
-    [SerializeField] private bool mbIsGrounded = true;
-    public bool IsGrounded => mbIsGrounded;
+    [SerializeField] private LayerMask mGroundLayers;
     [SerializeField] private float mGroundedOffset = -0.15f;
     [SerializeField] private float mGroundedRadius = 0.3f;
-    [SerializeField] private LayerMask mGroundLayers;
+    [SerializeField] private bool mbIsGrounded = true;
+    public bool IsGrounded => mbIsGrounded;
     
     [Space(10)]
     [Header("Player Attach Point")]
     [SerializeField] private Transform mRightHandTransform;
     [SerializeField] private Transform mLeftHandTransform;
-
-    [Space(10)]
-    [Header("Reference")]
-    [SerializeField] private PlayerStats mPlayerStats;
     
-    
+    // 각 변수들은 추후에 상태머신으로 메서드들과 같이 이동될 예정
     // Player Calculation Stat
     [SerializeField]
     private float mVerticalVelocity;
@@ -71,8 +46,6 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     private float mTerminalVelocity = 53.0f;
     private float mTargetRotation;
     private float mAnimationBlend;
-
-    public float mSpeed;
     
     private bool mbInCombat = false;
     private float mInCombatTimeout = 5.0f;
@@ -81,7 +54,6 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     private float mJumpTimeoutDelta;
     private float mFallTimeoutDelta;
     private float mInCombatTimeoutDelta;
-    
     
     // Componenet
     private Animator mPlayerAnimator;
@@ -198,11 +170,6 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         
         SetPlayerState(PlayerState.Idle);
         
-        /*// 스탯 초기화
-        mCurrentAttackPower = mBaseAttackPower;
-        mCurrentDefendPower = mBaseDefendPower;
-        mCurrentHealth = mMaxHealth;*/
-        
         // 무기 할당
         SetPlayerWeapon(mRightHandTransform, "Longsword", mLeftHandTransform, "Shield");
     }
@@ -227,13 +194,15 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             QueryTriggerInteraction.Ignore);
 
         PlayerAnimator.SetBool("IsGrounded", mbIsGrounded);
+        
+        mMainCamera.GetComponent<CameraController>().SendPlayerGrounded(mbIsGrounded);
     }
     
     private void ApplyGravity()
     {
         if (mbIsGrounded)
         {
-            mFallTimeoutDelta = FallTimeout;
+            mFallTimeoutDelta = mFallTimeout;
              
             if (mJumpTimeoutDelta >= 0.0f)
             {
@@ -247,7 +216,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         }
         else
         {
-            mJumpTimeoutDelta = JumpTimeout;
+            mJumpTimeoutDelta = mJumpTimeout;
             
             if (mFallTimeoutDelta >= 0.0f)
             {
