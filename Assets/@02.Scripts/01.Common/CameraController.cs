@@ -19,8 +19,8 @@ public class CameraController : MonoBehaviour
 
     private void Awake()
     {
-        Cursor.visible = false;
-        Cursor.lockState = CursorLockMode.Locked;
+        /*Cursor.visible = false;
+        Cursor.lockState = CursorLockMode.Locked;*/
         
         mCinemachineCameraTarget = GetComponent<CinemachineVirtualCamera>().Follow.gameObject;
         mCinemachineTargetYaw = mCinemachineCameraTarget.transform.rotation.eulerAngles.y;
@@ -28,7 +28,7 @@ public class CameraController : MonoBehaviour
     
     private void LateUpdate()
     {
-        SetCursor();
+        //SetCursor();
         CameraRotation();
     }
 

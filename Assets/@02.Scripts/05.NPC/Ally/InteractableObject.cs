@@ -47,6 +47,7 @@ public class InteractableObject : MonoBehaviour
     {
         if (other.CompareTag("Player"))
         {
+            SetInteractionText();
             playerInRange = true;
             mInteractionTextUI.SetActive(true);
         }
