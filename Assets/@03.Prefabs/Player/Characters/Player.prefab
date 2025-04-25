@@ -1628,7 +1628,6 @@ MonoBehaviour:
   mPlayerStats: {fileID: 4749783104172799161}
   mVerticalVelocity: 0
   mSpeed: 0
-  mInCombatTimeoutDelta: 0
 --- !u!1 &3080968844867647087
 GameObject:
   m_ObjectHideFlags: 0

@@ -130,7 +130,7 @@ MonoBehaviour:
   monsterKillMaxCount: 30
   uniqueSpawnAmount: 0
   uniqueSpawnMaxChance: 40
-  treasureSpawnAmount: 127
+  treasureSpawnAmount: 10
   treasureDistance: 69
   poissonResearchLimit: 10
   commonMonsters:
