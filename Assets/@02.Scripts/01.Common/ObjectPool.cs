@@ -18,7 +18,12 @@ public sealed class ObjectPool<T> where T : Component
         }
     }
 
-    T createInstance() => UnityEngine.Object.Instantiate(mPrefab, mParent);
+    T createInstance()
+    {
+        var obj = UnityEngine.Object.Instantiate(mPrefab, mParent);
+        obj.gameObject.SetActive(false);
+        return obj;
+    }
 
     public T Rent()
     {
