@@ -51,6 +51,15 @@ public class PlayerStateMove : IPlayerState
             {
                 mPlayerController?.SetPlayerState(PlayerState.Parry);
             }
+            
+            if (mPlayerController?.NearestInteractableObject != null)
+            {
+                if (GameManager.Instance.Input.InteractionInput)
+                {
+                    mPlayerController?.SetPlayerState(PlayerState.Interaction);
+                    return;
+                }
+            }
         }
         
         if (GameManager.Instance.Input.AttackInput)

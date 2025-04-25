@@ -24,9 +24,13 @@ public class PlayerStateAttack : IPlayerState
     public void OnUpdate()
     {
         mPlayerController?.Attack();
+        
         if (GameManager.Instance.Input.AttackInput && bIsCombo)
         {
             mPlayerController?.PlayerAnimator.SetTrigger("Attack");
+            
+            /*mAttackDirection = mPlayerController.GetCameraForwardDirection(true);
+            mPlayerController.transform.rotation = Quaternion.LookRotation(mAttackDirection);*/
         }
     }
 

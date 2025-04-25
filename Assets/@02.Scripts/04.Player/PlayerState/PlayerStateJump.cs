@@ -20,7 +20,7 @@ public class PlayerStateJump : IPlayerState
             return;
         }
         
-        mPlayerController.Jump();
+        mPlayerController?.Jump();
         
         if (GameManager.Instance.Input.AttackInput)
         {

@@ -35,6 +35,12 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     public bool IsGrounded => mbIsGrounded;
     
     [Space(10)]
+    [Header("Player Interactables Check")]
+    [SerializeField] private LayerMask mInteractableLayers;
+    [SerializeField] private Collider[] mInteractables = new Collider[5];
+    [SerializeField] private float mInteractableRadius = 2.0f;
+    
+    [Space(10)]
     [Header("Player Attach Point")]
     [SerializeField] private Transform mRightHandTransform;
     [SerializeField] private Transform mLeftHandTransform;
@@ -64,6 +70,8 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     private PlayerInput mPlayerInput;
     private GameObject mMainCamera;
     private WeaponController mWeaponController;
+    private InteractableObject mNearestInteractableObject;
+    public InteractableObject NearestInteractableObject => mNearestInteractableObject;
     
     // State
     private PlayerStateIdle mPlayerStateIdle;
@@ -159,6 +167,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         GroundedCheck();
         ApplyGravity();
         InCombatCheck();
+        CheckNearbyInteractables();
     }
 
     public void Init()
@@ -221,13 +230,21 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             }
             else
             {
-                if (CurrentPlayerState != PlayerState.Attack && CurrentPlayerState != PlayerState.Dash)
+                if (CurrentPlayerState == PlayerState.Attack)
+                {
+                    Fall();
+                }
+                else if (CurrentPlayerState == PlayerState.Dash)
+                {
+                    mVerticalVelocity = 0.0f;
+                }
+                else
                 {
                     SetPlayerState(PlayerState.Fall);
                 }
             }
         }
-
+        
         if (mVerticalVelocity < mTerminalVelocity)
         {
             mVerticalVelocity += mGravity * Time.deltaTime;
@@ -242,6 +259,26 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             if (mInCombatTimeoutDelta <= 0.0f)
             {
                 mbInCombat = false;
+            }
+        }
+    }
+    
+    private void CheckNearbyInteractables()
+    {
+        int InteractableCount = Physics.OverlapSphereNonAlloc(transform.position, mInteractableRadius, mInteractables,mInteractableLayers, QueryTriggerInteraction.Ignore);
+
+        if (InteractableCount > 0)
+        {
+            float shortestDistance = float.MaxValue;
+
+            for (int i = 0; i < InteractableCount; i++)
+            {
+                float distance = Vector2.Distance(transform.position, mInteractables[i].transform.position);
+                if (distance < shortestDistance)
+                {
+                    shortestDistance = distance;
+                    // mNearestInteractableObject = mInteractables[i].GetComponent<InteractableObject>();
+                }
             }
         }
     }
@@ -434,16 +471,26 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             mVerticalVelocity = Mathf.Sqrt(mJumpHeight * -2.0f * mGravity);
 
             Vector3 targetDirection = Quaternion.Euler(0.0f, mTargetRotation, 0.0f) * Vector3.forward;
-            mCharacterController.Move(targetDirection.normalized * (mSpeed * Time.deltaTime) 
-                                                + new Vector3(0.0f, mVerticalVelocity, 0.0f) * Time.deltaTime);
+            mCharacterController.Move(targetDirection.normalized * (mSpeed * Time.deltaTime) + new Vector3(0.0f, mVerticalVelocity, 0.0f) * Time.deltaTime);
         }
     }
     
     public void Fall()
     {
         Vector3 targetDirection = Quaternion.Euler(0.0f, mTargetRotation, 0.0f) * Vector3.forward;
-        mCharacterController.Move(targetDirection.normalized * (mSpeed * Time.deltaTime) 
-                                  + new Vector3(0.0f, mVerticalVelocity, 0.0f) * Time.deltaTime);
+
+        if (CurrentPlayerState == PlayerState.Fall)
+        {
+            mCharacterController.Move(targetDirection.normalized * (mSpeed * Time.deltaTime) + new Vector3(0.0f, mVerticalVelocity, 0.0f) * Time.deltaTime);
+        }
+        else if (CurrentPlayerState == PlayerState.Attack)
+        {
+            // 공중 공격 시 낙하 가속도 감소
+            mCharacterController.Move(new Vector3(0.0f, -0.1f, 0.0f) * Time.deltaTime);
+            
+            // 공중 공격 시 중력 가속도 상쇄
+            mVerticalVelocity -= mGravity * Time.deltaTime;
+        }
     }
     
     #endregion
@@ -561,46 +608,41 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     {
         GameManager.Instance.Input.SprintOff();
         EnterCombat();
-        
-        // 이동 공격시 하반신(Base Layer) 애니메이션
-        if (GameManager.Instance.Input.MoveInput == Vector2.zero)
-        {
-            Idle();
-            
-            mPlayerAnimator.SetBool("Idle", true);
-            mPlayerAnimator.SetBool("Move", false);
-            mPlayerAnimator.SetBool("Jump", false);
-        }
-        else
-        {
-            AttackMove();
-            
-            if (mbIsGrounded)
-            {
-                // 공격 중 이동 상태
-                mPlayerAnimator.SetBool("Idle", false);
-                mPlayerAnimator.SetBool("Move", true);
-                mPlayerAnimator.SetBool("Jump", false);
 
-                // 공격 중 점프 상태
-                if (GameManager.Instance.Input.JumpInput)
-                {
-                    if (mJumpTimeoutDelta < 0.0f)
-                    {
-                        mVerticalVelocity = 0.0f;
-                        mVerticalVelocity = Mathf.Sqrt(mJumpHeight * -2.0f * mGravity);
-                        
-                        mPlayerAnimator.SetBool("Jump", true);
-                    }
-                }
+        mPlayerAnimator.SetBool("Idle", false);
+        mPlayerAnimator.SetBool("Move", false);
+        mPlayerAnimator.SetBool("Jump", false);
+        mPlayerAnimator.SetBool("Fall", false);
+        
+        if (mbIsGrounded)
+        {
+            if (GameManager.Instance.Input.MoveInput == Vector2.zero)
+            {
+                Idle();
+            
+                // 제자리 공격 상태
+                mPlayerAnimator.SetBool("Idle", true);
             }
             else
             {
-                // 공격 중 낙하 상태
-                mPlayerAnimator.SetBool("Idle", false);
-                mPlayerAnimator.SetBool("Move", false);
-                mPlayerAnimator.SetBool("Jump", false);
+                AttackMove();
+                
+                // 공격 중 이동 상태
+                mPlayerAnimator.SetBool("Move", true);
             }
+            
+            // 공격 중 점프 상태
+            if (GameManager.Instance.Input.JumpInput)
+            {
+                Jump();
+                
+                mPlayerAnimator.SetBool("Jump", true);
+            }
+        }
+        else
+        {
+            // 공격 중 낙하 상태
+            mPlayerAnimator.SetBool("Fall", true);
         }
     }
     
@@ -731,6 +773,10 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     
     public void Dash()
     {
+        // 4. 낙하 방향 처리
+        Vector3 inputDirection = new Vector3(GameManager.Instance.Input.MoveInput.x, 0.0f, GameManager.Instance.Input.MoveInput.y).normalized;
+        mTargetRotation = Mathf.Atan2(inputDirection.x, inputDirection.z) * Mathf.Rad2Deg + mMainCamera.transform.eulerAngles.y;
+        
         if (mDashCoroutine == null || mPlayerStateDash.bIsDashing)
         {
             mDashCoroutine = StartCoroutine(DashCoroutine());
@@ -749,9 +795,6 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     
     private IEnumerator DashCoroutine()
     {
-        // 중력 적용 초기화
-        mVerticalVelocity = 0.0f;
-        
         // 애니메이션 초기 구간 기다림
         yield return new WaitForSeconds(0.0f); // 선딜
         
@@ -764,7 +807,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         
         yield return new WaitForSeconds(0.7f); // 애니메이션 종료 직전
         mPlayerStateDash.bIsDashing = false;
-
+        
         if (IsGrounded)
         {
             if (GameManager.Instance.Input.MoveInput == Vector2.zero)

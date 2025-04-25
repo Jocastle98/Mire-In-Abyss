@@ -11,6 +11,8 @@ public class PlayerStateFall : IPlayerState
     {
         mPlayerController = playerController;
         mPlayerController.PlayerAnimator.SetBool("Fall", true);
+        
+        
     }
 
     public void OnUpdate()
@@ -23,20 +25,23 @@ public class PlayerStateFall : IPlayerState
         if (mPlayerController.IsGrounded)
         {
             mPlayerController.SetPlayerState(PlayerState.Land);
+            return;
         }
         else
         {
-            mPlayerController?.Fall();
-            
             if (GameManager.Instance.Input.AttackInput)
             {
                 mPlayerController?.SetPlayerState(PlayerState.Attack);
+                return;
             }
             
             if (GameManager.Instance.Input.DashInput)
             {
                 mPlayerController?.SetPlayerState(PlayerState.Dash);
+                return;
             }
+            
+            mPlayerController?.Fall();
         }
     }
 
