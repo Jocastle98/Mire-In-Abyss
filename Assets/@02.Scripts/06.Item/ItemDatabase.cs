@@ -7,7 +7,7 @@ using Random = UnityEngine.Random;
 public class ItemDatabase : MonoBehaviour
 {
     public TextAsset itemCsvFile;//item_list.csv를 인스펙터에 할당
-    private string mItemCsvFilePath = "Item/item_list"; //Resources 폴더 내 경로
+    private string mItemCsvFilePath = "Items/item_list"; //Resources 폴더 내 경로
 
     private Dictionary<string, Item> mItemDatabase = new Dictionary<string, Item>();
     public int ItemCount => mItemDatabase.Count;
