@@ -36,7 +36,7 @@ public sealed class MiniMapPresenter : HudPresenterBase
         
         // 미니맵 외곽선 크기 세팅
         var minimapRT = GetComponent<RectTransform>();
-        mMinimapOutlineObj.GetComponent<RectTransform>().sizeDelta = new Vector2(minimapRT.rect.width, minimapRT.rect.height);
+        mMinimapOutlineObj.GetComponent<RectTransform>().sizeDelta = new Vector2(minimapRT.rect.width+5, minimapRT.rect.height+5);
     }
 
     void OnEnable()
