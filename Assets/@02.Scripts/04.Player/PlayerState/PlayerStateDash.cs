@@ -34,6 +34,7 @@ public class PlayerStateDash : IPlayerState
 
     public void OnExit()
     {
+        mPlayerController?.StopDash();
         mPlayerController = null;
     }
 }

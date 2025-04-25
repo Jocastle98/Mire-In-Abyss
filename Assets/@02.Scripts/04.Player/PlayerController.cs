@@ -82,6 +82,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     private PlayerStateSkill_4 mPlayerStateSkill_4;
     private PlayerStateInteraction mPlayerStateInteraction;
     private PlayerStateHit mPlayerStateHit;
+    private PlayerStateStun mPlayerStateStun;
     private PlayerStateDead mPlayerStateDead;
     public PlayerState CurrentPlayerState { get; private set; }
     private Dictionary<PlayerState, IPlayerState> mPlayerStates;
@@ -108,14 +109,15 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         mPlayerStateAttack = new PlayerStateAttack();
         mPlayerStateDefend = new PlayerStateDefend();
         mPlayerStateParry = new PlayerStateParry();
-        mPlayerStateHit = new PlayerStateHit();
-        mPlayerStateDead = new PlayerStateDead();
         mPlayerStateDash = new PlayerStateDash();
         mPlayerStateSkill_1 = new PlayerStateSkill_1();
         mPlayerStateSkill_2 = new PlayerStateSkill_2();
         mPlayerStateSkill_3 = new PlayerStateSkill_3();
         mPlayerStateSkill_4 = new PlayerStateSkill_4();
         mPlayerStateInteraction = new PlayerStateInteraction();
+        mPlayerStateHit = new PlayerStateHit();
+        mPlayerStateStun = new PlayerStateStun();
+        mPlayerStateDead = new PlayerStateDead();
 
         mPlayerStates = new Dictionary<PlayerState, IPlayerState>
         {
@@ -134,6 +136,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             { PlayerState.Skill_3, mPlayerStateSkill_3 },
             { PlayerState.Skill_4, mPlayerStateSkill_4 },
             { PlayerState.Interaction, mPlayerStateInteraction },
+            { PlayerState.Stun, mPlayerStateStun },
             { PlayerState.Hit, mPlayerStateHit },
             { PlayerState.Dead, mPlayerStateDead },
         };
@@ -224,7 +227,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
                 }
             }
         }
-        
+
         if (mVerticalVelocity < mTerminalVelocity)
         {
             mVerticalVelocity += mGravity * Time.deltaTime;
@@ -299,6 +302,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             if (GameManager.Instance.Input.SprintInput)
             {
                 targetSpeed = mPlayerStats.GetMoveSpeed() * 1.5f;
+                ExitCombat();
             }
             else
             {
@@ -445,17 +449,32 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     #endregion
 
     #region 구르기 관련 기능
-
+    
+    private Coroutine mRollCoroutine;
+    
     // 구르기 쿨타임 만들어야 함(연속 사용시 애니메이션 전환 문제, 애니메이션 완전히 종료되기전 사용시 멈춤)
     public void Roll()
     {
-        StartCoroutine(RollCoroutine());
+        if (mRollCoroutine == null || !mPlayerStateRoll.bIsRoll)
+        {
+            mRollCoroutine = StartCoroutine(RollCoroutine());
+        }
+    }
+    
+    public void StopRoll()
+    {
+        if (mRollCoroutine != null)
+        {
+            StopCoroutine(mRollCoroutine);
+            mRollCoroutine = null;
+        }
     }
 
     private IEnumerator RollCoroutine()
     {
         // 애니메이션 초기 구간 기다림
         yield return new WaitForSeconds(0.15f); // 선딜(현재 애니메이션에 맞춤)
+        
         // 일정시간 무적?
         RollFuntion(true);
         mPlayerStateRoll.bIsRoll = true;
@@ -530,6 +549,12 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     {
         mbInCombat = true;
         mInCombatTimeoutDelta = mInCombatTimeout;
+    }
+
+    public void ExitCombat()
+    {
+        mbInCombat = false;
+        mInCombatTimeoutDelta = 0.0f;
     }
     
     public void Attack()
@@ -701,17 +726,35 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     #endregion
 
     #region 대시 관련 기능
-
+    
+    private Coroutine mDashCoroutine;
+    
     public void Dash()
     {
-        StartCoroutine(DashCoroutine());
-        EnterCombat();
+        if (mDashCoroutine == null || mPlayerStateDash.bIsDashing)
+        {
+            mDashCoroutine = StartCoroutine(DashCoroutine());
+            EnterCombat();
+        }
+    }
+
+    public void StopDash()
+    {
+        if (mDashCoroutine != null)
+        {
+            StopCoroutine(mDashCoroutine);
+            mDashCoroutine = null;
+        }
     }
     
     private IEnumerator DashCoroutine()
     {
+        // 중력 적용 초기화
+        mVerticalVelocity = 0.0f;
+        
         // 애니메이션 초기 구간 기다림
         yield return new WaitForSeconds(0.0f); // 선딜
+        
         // 충돌 무시 및 피해감소? 무적?
         DashFunction(true);
         mPlayerStateDash.bIsDashing = true;
@@ -795,6 +838,61 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             mPlayerAnimator.SetFloat("HitPosX", -direction.x);
             mPlayerAnimator.SetFloat("HitPosY", -direction.z);
         }
+    }
+
+    // 플레이어의 상태이상 효과
+    public void SetStatusEffect(StatusEffect statusEffectType, float duration)
+    {
+        switch (statusEffectType)
+        {
+            case StatusEffect.None:
+                break;
+            case StatusEffect.Stun:
+                if (CurrentPlayerState != PlayerState.Stun && CurrentPlayerState != PlayerState.Dead)
+                {
+                    SetPlayerState(PlayerState.Stun);
+                    StartCoroutine(StatusEffectDuration(
+                        onStart: () => { /* 스턴 이펙트? */ },
+                        duration,
+                        onEnd: () => { SetPlayerState(PlayerState.Idle); }));
+                }
+                break;
+            case StatusEffect.Freeze:
+                /*if (CurrentPlayerState != PlayerState.Freeze && CurrentPlayerState != PlayerState.Dead)
+                {
+                    SetPlayerState(PlayerState.Freeze);
+                    StartCoroutine(StatusEffectDuration(
+                        onStart: () => { /* 애니메이션 재생속도 = 0 #1# },
+                        duration,
+                        onEnd: () => { /* 애니메이션 재생속도 = 1 #1# }));
+                }*/
+                break;
+            case StatusEffect.Burn:        // 중첩이나 지속시간 갱신 기능 필요시 수정해야함
+                /*if (CurrentPlayerState != PlayerState.Burn && CurrentPlayerState != PlayerState.Dead)
+                {
+                    SetPlayerState(PlayerState.Burn);
+                    StartCoroutine(StatusEffectDuration(
+                        onStart: () => { /* 화상 이펙트, 토트 데지미 적용 코루틴 #1# },
+                        duration,
+                        onEnd: () => { /* 화상 이펙트 종료, 토트 데지미 코루틴 종료 #1# }));
+                }*/
+                break;
+            case StatusEffect.Poison:
+                // 화상 상태이상과 동일
+                break;
+            case StatusEffect.Bleed:
+                // 화상 상태이상과 동일
+                break;
+        }
+    }
+
+    private IEnumerator StatusEffectDuration(Action onStart, float duration, Action onEnd)
+    {
+        onStart.Invoke();
+        
+        yield return new WaitForSeconds(duration);
+        
+        onEnd?.Invoke();
     }
 
     public void OnEnemyKilled()

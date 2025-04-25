@@ -19,7 +19,18 @@ namespace PlayerEnums
         Skill_4,
         Interaction,
         Hit,
+        Stun,
         Dead
+    }
+
+    public enum StatusEffect
+    {
+        None,
+        Stun,
+        Freeze,
+        Burn,
+        Poison,
+        Bleed
     }
 }
 

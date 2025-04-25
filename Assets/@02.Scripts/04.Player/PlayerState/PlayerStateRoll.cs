@@ -31,6 +31,7 @@ public class PlayerStateRoll : IPlayerState
 
     public void OnExit()
     {
+        mPlayerController?.StopRoll();
         mPlayerController = null;
     }
 }
