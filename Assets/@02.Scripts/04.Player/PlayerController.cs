@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using PlayerEnums;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.Serialization;
 
 [RequireComponent(typeof(Animator))]
 [RequireComponent(typeof(PlayerInput))]
@@ -37,8 +38,11 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     [Space(10)]
     [Header("Player Interactables Check")]
     [SerializeField] private LayerMask mInteractableLayers;
-    [SerializeField] private Collider[] mInteractables = new Collider[5];
-    [SerializeField] private float mInteractableRadius = 2.0f;
+    [SerializeField] private float mInteractableRadius = 3.0f;
+    [SerializeField] private InteractableObject mNearestInteractableObject;
+    public InteractableObject NearestInteractableObject => mNearestInteractableObject;
+    private Collider[] mDetectedInteractables = new Collider[5];
+    private List<Collider> mActiveInteractables = new List<Collider>();
     
     [Space(10)]
     [Header("Player Attach Point")]
@@ -70,8 +74,6 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     private PlayerInput mPlayerInput;
     private GameObject mMainCamera;
     private WeaponController mWeaponController;
-    private InteractableObject mNearestInteractableObject;
-    public InteractableObject NearestInteractableObject => mNearestInteractableObject;
     
     // State
     private PlayerStateIdle mPlayerStateIdle;
@@ -265,21 +267,50 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     
     private void CheckNearbyInteractables()
     {
-        int InteractableCount = Physics.OverlapSphereNonAlloc(transform.position, mInteractableRadius, mInteractables,mInteractableLayers, QueryTriggerInteraction.Ignore);
+        // 감지된 Interactable 콜라이더의 수
+        int InteractableCount = Physics.OverlapSphereNonAlloc(transform.position, mInteractableRadius, mDetectedInteractables, mInteractableLayers, QueryTriggerInteraction.Ignore);
+        
+        // 현재 감지된 콜라이더들을 해시셋으로 변환
+        HashSet<Collider> currentDetected  = new HashSet<Collider>();
+        for (int i = 0; i < InteractableCount; i++)
+        {
+            currentDetected.Add(mDetectedInteractables[i]);
+        }
 
-        if (InteractableCount > 0)
+        // 이전 리스트 중, 더 이상 감지되지 않는 것은 제거
+        mActiveInteractables.RemoveAll(InteractableCollider => !currentDetected.Contains(InteractableCollider));
+        
+        // 현재 감지된 것 중, 새로 들어온 것은 추가
+        foreach (var detectCollider in currentDetected)
+        {
+            if (!mActiveInteractables.Contains(detectCollider))
+            {
+                mActiveInteractables.Add(detectCollider);
+            }
+        }
+
+        // 가장 가까운 상호작용 오브젝트 계산
+        if (mActiveInteractables.Count > 0)
         {
             float shortestDistance = float.MaxValue;
+            Collider nearest = null;
 
-            for (int i = 0; i < InteractableCount; i++)
+            foreach (var currentInteractable in mActiveInteractables)
             {
-                float distance = Vector2.Distance(transform.position, mInteractables[i].transform.position);
+                float distance = Vector3.Distance(transform.position, currentInteractable.transform.position);
                 if (distance < shortestDistance)
                 {
                     shortestDistance = distance;
-                    // mNearestInteractableObject = mInteractables[i].GetComponent<InteractableObject>();
+                    nearest = currentInteractable;
                 }
             }
+            
+            // 상호작용 가능한 오브젝트 캐싱
+            mNearestInteractableObject = nearest?.GetComponent<InteractableObject>();
+        }
+        else
+        {
+            mNearestInteractableObject = null;
         }
     }
     
