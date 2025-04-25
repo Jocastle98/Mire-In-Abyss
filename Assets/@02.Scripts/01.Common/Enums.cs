@@ -48,4 +48,10 @@ namespace UIHUDEnums
         Shop,
         Portal,
     }
+
+    public enum QuestState
+    {
+        Active,
+        Completed
+    }
 }

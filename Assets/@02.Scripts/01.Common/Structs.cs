@@ -1,4 +1,5 @@
 using System;
+using UIHUDEnums;
 using UnityEngine;
 
 
@@ -19,9 +20,11 @@ namespace Events.Abyss
     public readonly struct PlayTimeChanged
     {
         public readonly TimeSpan Elapsed;
+
         public PlayTimeChanged(TimeSpan elapsed)
             => Elapsed = elapsed;
     }
+
     public readonly struct DifficultyProgressed
     {
         public readonly float DifficultyProgress;
@@ -29,9 +32,11 @@ namespace Events.Abyss
         public DifficultyProgressed(float difficultyProgress)
             => (DifficultyProgress) = (difficultyProgress);
     }
+
     public readonly struct DifficultyChanged
     {
         public readonly int DifficultyLevel;
+
         public DifficultyChanged(int difficultyLevel)
             => DifficultyLevel = difficultyLevel;
     }
@@ -88,4 +93,37 @@ namespace Events.Abyss
     }
 
     #endregion Object Spawn Despawn
+}
+
+namespace Events.Quest
+{
+    // TODO: 아래의 QuestInfo를 퀘스트 담당자가 작성한 타입으로 대체(여기 작성할 필요 없음)
+    public readonly struct TempQuestInfo
+    {
+        public readonly int Id;
+        public readonly string Title;
+        public readonly string ShortDesc;
+        public readonly QuestState State;
+
+        public TempQuestInfo(int id, string title, string desc, QuestState state)
+            => (Id, Title, ShortDesc, State) = (id, title, desc, state);
+    }
+
+    public readonly struct QuestAddedOrUpdated
+    {
+        public readonly TempQuestInfo Info;
+        public QuestAddedOrUpdated(TempQuestInfo i) => Info = i;
+    }
+
+    public readonly struct QuestCompleted
+    {
+        public readonly int QuestId;
+        public QuestCompleted(int id) => QuestId = id;
+    }
+    
+    public readonly struct QuestRemoved
+    {
+        public readonly int QuestId;
+        public QuestRemoved(int id) => QuestId = id;
+    }
 }

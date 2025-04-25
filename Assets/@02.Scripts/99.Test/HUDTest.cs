@@ -1,5 +1,7 @@
 using System;
 using Events.Abyss;
+using Events.Quest;
+using UIHUDEnums;
 using UnityEngine;
 using UnityEngine.Serialization;
 
@@ -10,7 +12,18 @@ public class HUDTest: MonoBehaviour
     public int DifficultyLevel = 1;
     public float DifficultyProgress = 0;
 
+    [Header("Quest")] [SerializeField] private string mQuestTitle;
+    [SerializeField] private string mQuestDesc;
+    
+    [Header("QuestUpdate")]
+    [SerializeField] private int mUpdatedQuestID;
+    [SerializeField] private string mUpdatedQuestTitle;
+    [SerializeField] private string mUpdatedQuestDesc;
+    [SerializeField] private QuestState mUpdatedQuestState;
+    
     DateTime mStartUtc;
+    private int mLastQuestID = -1;
+
     
     private void Start()
     {
@@ -53,5 +66,34 @@ public class HUDTest: MonoBehaviour
         DifficultyProgress = 0;
         R3EventBus.Instance.Publish(new DifficultyChanged(DifficultyLevel));
         R3EventBus.Instance.Publish(new DifficultyProgressed(DifficultyProgress));
+    }
+
+    public void OnAddQuest()
+    {
+        mLastQuestID++;
+        TempQuestInfo questInfo = new TempQuestInfo(mLastQuestID, mQuestTitle, mQuestDesc, QuestState.Active);
+        R3EventBus.Instance.Publish(new QuestAddedOrUpdated(questInfo));
+    }
+
+    public void OnQuestUpdated()
+    {
+        if (mUpdatedQuestState == QuestState.Completed)
+        {
+            OnQuestCompleted();
+            return;
+        }
+            
+        TempQuestInfo questInfo = new TempQuestInfo(mUpdatedQuestID, mUpdatedQuestTitle, mUpdatedQuestDesc, QuestState.Active);
+        R3EventBus.Instance.Publish(new QuestAddedOrUpdated(questInfo));
+    }
+
+    public void OnQuestCompleted()
+    {
+        R3EventBus.Instance.Publish(new QuestCompleted(mUpdatedQuestID));
+    }
+
+    public void OnRemoveQuest()
+    {
+        R3EventBus.Instance.Publish(new QuestRemoved(mUpdatedQuestID));
     }
 }
