@@ -625,7 +625,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
 
     #region 구르기 관련 기능
     
-    // 구르기 쿨타임 만들어야 함(연속 사용시 애니메이션 전환 문제, 애니메이션 완전히 종료되기전 사용시 멈춤)
+    // todo: 현재 재사용대기시간 적용 -> 스테미너 소모 형식으로 바꿀지 고민 중 / 재사용대기시간을 적용 한다면 돌진기와 공통기능 통합 가능
     public void StartRoll(Vector3 targetDirection)
     {
         if (mRollCoroutine == null || !mPlayerStateRoll.bIsRoll)
@@ -913,48 +913,46 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     // 공격 애니메이션의 공격 모션 시작 시 호출 메서드
     public void MeleeAttackStart()
     {
-        if (CurrentPlayerState == PlayerState.Attack || CurrentPlayerState == PlayerState.Parry || CurrentPlayerState == PlayerState.Dash)
-        {
-            mWeaponController.AttackStart();
-        }
+        mWeaponController.AttackStart();
     }
 
     // 공격 애니메이션의 공격 모션 종료 시 호출되는 메서드
     public void MeleeAttackEnd()
     {
-        if (CurrentPlayerState == PlayerState.Attack || CurrentPlayerState == PlayerState.Parry || CurrentPlayerState == PlayerState.Dash)
-        {
-            mWeaponController.AttackEnd();
-        }
+        mWeaponController.AttackEnd();
     }
 
     public void EndCombo()
     {
         mPlayerStateAttack.bIsCombo = false;
     }
-    
-    public void OnNext(GameObject value)
-    {
-        var enemyController = value.GetComponent<TestEnemyController>();
-        if (enemyController)
+
+    #region 옵저버 패턴 관련 기능
+
+        public void OnNext(GameObject value)
         {
-            //공격력을 PlayerStats에서 가져와 데미지 계산
-            float damage = mPlayerStats.GetAttackDamage();
-            enemyController.SetHit(this);
-            //피해적용 후 흡혈효과 처리
-            mPlayerStats.OnDamageDealt(damage);
+            var enemyController = value.GetComponent<TestEnemyController>();
+            if (enemyController)
+            {
+                //공격력을 PlayerStats에서 가져와 데미지 계산
+                float damage = mPlayerStats.GetAttackDamage();
+                enemyController.SetHit(this);
+                //피해적용 후 흡혈효과 처리
+                mPlayerStats.OnDamageDealt(damage);
+            }
         }
-    }
 
-    public void OnError(Exception error)
-    {
+        public void OnError(Exception error)
+        {
+            
+        }
+
+        public void OnCompleted()
+        {
+            mWeaponController.Unsubscribe(this);
+        }
         
-    }
-
-    public void OnCompleted()
-    {
-        mWeaponController.Unsubscribe(this);
-    }
+    #endregion
     
     #endregion
 
