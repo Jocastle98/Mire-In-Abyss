@@ -52,6 +52,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     [Header("Player Attack Stat")] 
     [SerializeField] private float mAttackTimeout = 1.0f;
     [SerializeField] private float mAttackTimeoutDelta;
+    public float AttackTimeoutDelta => mAttackTimeoutDelta;
     
     [Space(10)]
     [Header("Player Grouned Check")]
