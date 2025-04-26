@@ -16,7 +16,7 @@ public class PlayerStateRoll : IPlayerState
 
         mRollDirection = mPlayerController.SetRollDirection();
         mPlayerController.transform.rotation = Quaternion.LookRotation(mRollDirection);
-        mPlayerController.Roll();
+        mPlayerController.StartRoll(mRollDirection);
     }
 
     public void OnUpdate()
@@ -25,8 +25,6 @@ public class PlayerStateRoll : IPlayerState
         {
             return;
         }
-        
-        mPlayerController?.Rolling(mRollDirection);
     }
 
     public void OnExit()

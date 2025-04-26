@@ -36,14 +36,18 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     [SerializeField] private float mRollFunctionDuration = 0.3f;
     [SerializeField] private float mRollTimeout = 3.0f;
     [SerializeField] private float mRollTimeoutDelta;
+    public float RollTimeoutDelta => mRollTimeoutDelta;
+    private Coroutine mRollCoroutine;
     
     [Space(10)]
     [Header("Player Dash Stat")]
     [SerializeField] private float mDashDistance = 10.0f;
     [SerializeField] private float mDashTimeout = 5.0f;
     [SerializeField] private float mDashTimeoutDelta;
+    public float DashTimeoutDelta => mDashTimeoutDelta;
 
-    [Space(10)] [Header("Player Attack Stat")] 
+    [Space(10)] 
+    [Header("Player Attack Stat")] 
     [SerializeField] private float mAttackTimeout = 1.0f;
     [SerializeField] private float mAttackTimeoutDelta;
     
@@ -58,7 +62,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     [Header("Player Combat Check")]
     [SerializeField] private float mInCombatTimeout = 10.0f;
     [SerializeField] private float mInCombatTimeoutDelta;
-    private bool mbInCombat = false;
+    [SerializeField] private bool mbInCombat = false;
     
     [Space(10)]
     [Header("Player Interactables Check")]
@@ -73,7 +77,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     [SerializeField] private Transform mRightHandTransform;
     [SerializeField] private Transform mLeftHandTransform;
     
-    // Player Calculation Stat
+    // Player Internal Calculation Stat
     [SerializeField]
     private float mVerticalVelocity;
     private float mRotationVelocity;
@@ -612,14 +616,12 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
 
     #region 구르기 관련 기능
     
-    private Coroutine mRollCoroutine;
-    
     // 구르기 쿨타임 만들어야 함(연속 사용시 애니메이션 전환 문제, 애니메이션 완전히 종료되기전 사용시 멈춤)
-    public void Roll()
+    public void StartRoll(Vector3 targetDirection)
     {
         if (mRollCoroutine == null || !mPlayerStateRoll.bIsRoll)
         {
-            mRollCoroutine = StartCoroutine(RollCoroutine());
+            mRollCoroutine = StartCoroutine(RollCoroutine(targetDirection));
         }
     }
     
@@ -632,54 +634,75 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         }
     }
 
-    private IEnumerator RollCoroutine()
+    private IEnumerator RollCoroutine(Vector3 targetDirection)
     {
+        float rollEndOffset = 0.5f;
+        float firstDelay = 0.2f;
+        
         mRollTimeoutDelta = mRollTimeout;
         mPlayerStateRoll.bIsRoll = true;
-        
-        // 애니메이션 초기 구간 기다림
-        yield return new WaitForSeconds(0.15f); // 선딜(현재 애니메이션에 맞춤)
+
+        yield return new WaitForSeconds(firstDelay); // 선딜(현재 애니메이션에 맞춤)
         RollFunction(true);
+     
+        StartCoroutine(RollingCoroutine(targetDirection));
         
         yield return new WaitForSeconds(mRollFunctionDuration); // 무적시간?
         RollFunction(false);
 
-        float rollAnimInfo = PlayerAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime;
-        yield return new WaitForSeconds(rollAnimInfo * 0.9f); // 애니메이션 종료 직전
-        mPlayerStateRoll.bIsRoll = false;
-
-        if (bIsGrounded)
+        yield return null;
+        var rollAnimationInfo = PlayerAnimator.GetCurrentAnimatorStateInfo(0);
+        if (rollAnimationInfo.IsName("Roll"))
         {
-            if (GameManager.Instance.Input.MoveInput == Vector2.zero)
+            float rollAnimationLength = rollAnimationInfo.length;
+            float rollEndTime = Mathf.Max(0.0f, rollAnimationLength - rollEndOffset - firstDelay - mRollFunctionDuration);
+            Debug.Log(rollEndTime);
+            yield return new WaitForSeconds(rollEndTime);
+            
+            mPlayerStateRoll.bIsRoll = false;
+
+            if (bIsGrounded)
             {
-                SetPlayerState(PlayerState.Idle);
+                if (GameManager.Instance.Input.MoveInput == Vector2.zero)
+                {
+                    SetPlayerState(PlayerState.Idle);
+                }
+                else
+                {
+                    SetPlayerState(PlayerState.Move);
+                }
             }
             else
             {
-                SetPlayerState(PlayerState.Move);
+                SetPlayerState(PlayerState.Fall);
             }
         }
         else
         {
-            SetPlayerState(PlayerState.Fall);
+            // 만약 아직 롤 애니메이션이 아니면, 약간 대기 후 다시 체크
+            yield return new WaitForSeconds(0.1f);
         }
     }
     
-    public void Rolling(Vector3 targetDirection)
+    // mRollDistance 만큼 구르기 동작을 수행하는 코루틴 메서드
+    private IEnumerator RollingCoroutine(Vector3 targetDirection)
     {
-        if (mPlayerStateRoll.bIsRoll)
-        {
-            float distanceCovered = 0f;
-            float maxDistance = mRollDistance;
-            float speed = 5.0f; // 초기 속도 조정
+        float distanceCovered = 0f;
+        float maxDistance = mRollDistance;
+        float speed = 10.0f; // 초기 속도 조정
         
-            while (distanceCovered < maxDistance)
+        while (distanceCovered < maxDistance)
+        {
+            float moveAmount = speed * Time.deltaTime;
+
+            if (distanceCovered + moveAmount > maxDistance)
             {
-                float moveAmount = speed * Time.deltaTime;
-                mCharacterController.Move(targetDirection * moveAmount);
-                distanceCovered += moveAmount;
-                return;
+                moveAmount = maxDistance - distanceCovered;
             }
+            
+            mCharacterController.Move(targetDirection * moveAmount);
+            distanceCovered += moveAmount;
+            yield return null;
         }
     }
 

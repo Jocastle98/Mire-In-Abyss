@@ -34,7 +34,7 @@ public class PlayerStateMove : IPlayerState
 
         if (mPlayerController.bIsGrounded)
         {
-            if (GameManager.Instance.Input.RollInput)
+            if (GameManager.Instance.Input.RollInput && mPlayerController.RollTimeoutDelta < 0.0f)
             {
                 mPlayerController.SetPlayerState(PlayerState.Roll);
                 return;
