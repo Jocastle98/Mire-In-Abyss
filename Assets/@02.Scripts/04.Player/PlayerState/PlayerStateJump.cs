@@ -20,7 +20,7 @@ public class PlayerStateJump : IPlayerState
             return;
         }
         
-        if (GameManager.Instance.Input.DashInput)
+        if (GameManager.Instance.Input.DashInput && mPlayerController.DashTimeoutDelta < 0.0f)
         {
             mPlayerController.SetPlayerState(PlayerState.Dash);
             return;

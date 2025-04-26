@@ -42,9 +42,11 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     [Space(10)]
     [Header("Player Dash Stat")]
     [SerializeField] private float mDashDistance = 10.0f;
+    [SerializeField] private float mDashFunctionDuration = 0.3f;
     [SerializeField] private float mDashTimeout = 5.0f;
     [SerializeField] private float mDashTimeoutDelta;
     public float DashTimeoutDelta => mDashTimeoutDelta;
+    private Coroutine mDashCoroutine;
 
     [Space(10)] 
     [Header("Player Attack Stat")] 
@@ -202,6 +204,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         mJumpTimeoutDelta = mJumpTimeout;
         mFallTimeoutDelta = mFallTimeout;
         mRollTimeoutDelta = 0.0f;
+        mDashTimeoutDelta = 0.0f;
         
         SetPlayerState(PlayerState.Idle);
         
@@ -345,6 +348,12 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         if (mRollTimeoutDelta >= 0.0f)
         {
             mRollTimeoutDelta -= Time.deltaTime;
+        }
+        
+        // Dash 관련 Timeout
+        if (mDashTimeoutDelta >= 0.0f)
+        {
+            mDashTimeoutDelta -= Time.deltaTime;
         }
     }
     
@@ -656,7 +665,6 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         {
             float rollAnimationLength = rollAnimationInfo.length;
             float rollEndTime = Mathf.Max(0.0f, rollAnimationLength - rollEndOffset - firstDelay - mRollFunctionDuration);
-            Debug.Log(rollEndTime);
             yield return new WaitForSeconds(rollEndTime);
             
             mPlayerStateRoll.bIsRoll = false;
@@ -687,7 +695,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     // mRollDistance 만큼 구르기 동작을 수행하는 코루틴 메서드
     private IEnumerator RollingCoroutine(Vector3 targetDirection)
     {
-        float distanceCovered = 0f;
+        float distanceCovered = 0.0f;
         float maxDistance = mRollDistance;
         float speed = 10.0f; // 초기 속도 조정
         
@@ -719,17 +727,16 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     
     #region 대시 관련 기능
     
-    private Coroutine mDashCoroutine;
-    
-    public void Dash()
+    public void StartDash(Vector3 cameraCenterDirection)
     {
-        // 4. 낙하 방향 처리
-        Vector3 inputDirection = new Vector3(GameManager.Instance.Input.MoveInput.x, 0.0f, GameManager.Instance.Input.MoveInput.y).normalized;
+        // 돌진 이후의 낙하 방향 설정
+        Vector2 moveInput = GameManager.Instance.Input.MoveInput;
+        Vector3 inputDirection = new Vector3(moveInput.x, 0.0f, moveInput.y).normalized;
         mTargetRotation = Mathf.Atan2(inputDirection.x, inputDirection.z) * Mathf.Rad2Deg + mMainCamera.transform.eulerAngles.y;
         
-        if (mDashCoroutine == null || mPlayerStateDash.bIsDashing)
+        if (mDashCoroutine == null || !mPlayerStateDash.bIsDashing)
         {
-            mDashCoroutine = StartCoroutine(DashCoroutine());
+            mDashCoroutine = StartCoroutine(DashCoroutine(cameraCenterDirection));
             EnterCombat();
         }
     }
@@ -743,56 +750,80 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         }
     }
     
-    private IEnumerator DashCoroutine()
+    private IEnumerator DashCoroutine(Vector3 cameraCenterDirection)
     {
-        // 애니메이션 초기 구간 기다림
-        yield return new WaitForSeconds(0.0f); // 선딜
+        float dashEndOffset = 0.5f;
+        float firstDelay = 0.0f;
         
-        // 충돌 무시 및 피해감소? 무적?
-        DashFunction(true);
+        mDashTimeoutDelta = mDashTimeout;
         mPlayerStateDash.bIsDashing = true;
         
-        yield return new WaitForSeconds(0.3f);
+        // 애니메이션 초기 구간 기다림
+        yield return new WaitForSeconds(firstDelay); // 선딜
+        DashFunction(true);
+        
+        StartCoroutine(DashingCoroutine(cameraCenterDirection));
+        
+        yield return new WaitForSeconds(mDashFunctionDuration);
         DashFunction(false);
         
-        yield return new WaitForSeconds(0.7f); // 애니메이션 종료 직전
-        mPlayerStateDash.bIsDashing = false;
-        
-        if (bIsGrounded)
+        yield return null;
+        var dashAnimationInfo = PlayerAnimator.GetCurrentAnimatorStateInfo(0);
+        if (dashAnimationInfo.IsName("Dash"))
         {
-            if (GameManager.Instance.Input.MoveInput == Vector2.zero)
+            float dashAnimationLength = dashAnimationInfo.length;
+            float dashEndTime = Mathf.Max(0.0f, dashAnimationLength - dashEndOffset - firstDelay - mDashFunctionDuration);
+            yield return new WaitForSeconds(dashEndTime);
+            
+            mPlayerStateDash.bIsDashing = false;
+        
+            if (bIsGrounded)
             {
-                SetPlayerState(PlayerState.Idle);
+                if (GameManager.Instance.Input.MoveInput == Vector2.zero)
+                {
+                    SetPlayerState(PlayerState.Idle);
+                }
+                else if (GameManager.Instance.Input.MoveInput != Vector2.zero)
+                {
+                    SetPlayerState(PlayerState.Move);
+                }
             }
-            else if (GameManager.Instance.Input.MoveInput != Vector2.zero)
+            else
             {
-                SetPlayerState(PlayerState.Move);
+                SetPlayerState(PlayerState.Fall);
             }
         }
         else
         {
-            SetPlayerState(PlayerState.Fall);
+            yield return new WaitForSeconds(0.1f);
         }
     }
 
-    public void Dashing(Vector3 cameraCenterDirection)
+    public IEnumerator DashingCoroutine(Vector3 cameraCenterDirection)
     {
         if (mPlayerStateDash.bIsDashing)
         {
-            float distanceCovered = 0f;
+            float distanceCovered = 0.0f;
             float maxDistance = mDashDistance;
-            float speed = 10f; // 초기 속도 조정
+            float speed = 50.0f; // 초기 속도 조정
 
             while (distanceCovered < maxDistance)
             {
                 float moveAmount = speed * Time.deltaTime;
+
+                if (distanceCovered + moveAmount > maxDistance)
+                {
+                    moveAmount = maxDistance - distanceCovered;
+                }
+                
                 mCharacterController.Move(cameraCenterDirection * moveAmount);
                 distanceCovered += moveAmount;
-                return;
+                yield return null;
             }
         }
     }
 
+    // 충돌 무시 및 피해감소? 무적?
     private void DashFunction(bool isDashFunction)
     {
         if (isDashFunction)

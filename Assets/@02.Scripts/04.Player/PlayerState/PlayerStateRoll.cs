@@ -21,10 +21,7 @@ public class PlayerStateRoll : IPlayerState
 
     public void OnUpdate()
     {
-        if (mPlayerController == null)
-        {
-            return;
-        }
+        
     }
 
     public void OnExit()
