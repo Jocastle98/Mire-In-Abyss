@@ -1,5 +1,6 @@
 using System;
 using Events.Abyss;
+using Events.Player;
 using Events.Quest;
 using UIHUDEnums;
 using UnityEngine;
@@ -20,6 +21,10 @@ public class HUDTest: MonoBehaviour
     [SerializeField] private string mUpdatedQuestTitle;
     [SerializeField] private string mUpdatedQuestDesc;
     [SerializeField] private QuestState mUpdatedQuestState;
+
+    [Header("Currency")]
+    [SerializeField] private int mGold;
+    [SerializeField] private int mSoul;
     
     DateTime mStartUtc;
     private int mLastQuestID = -1;
@@ -95,5 +100,10 @@ public class HUDTest: MonoBehaviour
     public void OnRemoveQuest()
     {
         R3EventBus.Instance.Publish(new QuestRemoved(mUpdatedQuestID));
+    }
+
+    public void OnCurrencyChanged()
+    {
+        R3EventBus.Instance.Publish(new CurrencyChanged(mGold, mSoul));
     }
 }

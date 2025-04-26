@@ -13,6 +13,15 @@ namespace Events.Player
         public PlayerHpChanged(int current, int max)
             => (Current, Max) = (current, max);
     }
+
+    public readonly struct CurrencyChanged
+    {
+        public readonly int Gold;
+        public readonly int Soul;
+
+        public CurrencyChanged(int gold, int soul)
+            => (Gold, Soul) = (gold, soul);
+    }
 }
 
 namespace Events.Abyss
