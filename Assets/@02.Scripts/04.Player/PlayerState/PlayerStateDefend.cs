@@ -21,7 +21,7 @@ public class PlayerStateDefend : IPlayerState
             return;
         }
 
-        if (mPlayerController.IsGrounded)
+        if (mPlayerController.bIsGrounded)
         {
             mDefendDirection = mPlayerController.GetCameraForwardDirection(true);
             mPlayerController.transform.rotation = Quaternion.LookRotation(mDefendDirection);

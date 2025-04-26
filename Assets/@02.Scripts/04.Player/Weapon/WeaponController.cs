@@ -5,7 +5,7 @@ public class WeaponController : MonoBehaviour, IObservable<GameObject>
 {
     [Header("Attack Settings")]
     [SerializeField] private int mWeaponPower = 10;
-    [SerializeField] private float mAttackDistance = 1.5f;
+    [SerializeField] private float mAttackDistance = 2.0f;
     [SerializeField] private Vector3 mAttackBoxSize = new Vector3(2.0f, 2.0f, 1.0f); // 박스 크기
     [SerializeField] private LayerMask mTargetLayerMask;
     [SerializeField] private float mAttackArcHeight = 2.0f;
@@ -65,7 +65,7 @@ public class WeaponController : MonoBehaviour, IObservable<GameObject>
         );
         
         // 2. 반원 각도로 정규화 (0°~180°)
-        if (mPlayerController.IsGrounded)
+        if (mPlayerController.bIsGrounded)
         {
             pitchAngle = Mathf.Clamp(pitchAngle, -90.0f, 0.0f);
         }

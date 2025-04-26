@@ -11,8 +11,6 @@ public class PlayerStateFall : IPlayerState
     {
         mPlayerController = playerController;
         mPlayerController.PlayerAnimator.SetBool("Fall", true);
-        
-        
     }
 
     public void OnUpdate()
@@ -22,26 +20,26 @@ public class PlayerStateFall : IPlayerState
             return;
         }
         
-        if (mPlayerController.IsGrounded)
+        if (!mPlayerController.bIsGrounded)
         {
-            mPlayerController.SetPlayerState(PlayerState.Land);
-            return;
+            if (GameManager.Instance.Input.DashInput)
+            {
+                mPlayerController.SetPlayerState(PlayerState.Dash);
+                return;
+            }
+            
+            if (GameManager.Instance.Input.AttackInput)
+            {
+                mPlayerController.SetPlayerState(PlayerState.Attack);
+                return;
+            }
+            
+            mPlayerController.Fall();
         }
         else
         {
-            if (GameManager.Instance.Input.AttackInput)
-            {
-                mPlayerController?.SetPlayerState(PlayerState.Attack);
-                return;
-            }
-            
-            if (GameManager.Instance.Input.DashInput)
-            {
-                mPlayerController?.SetPlayerState(PlayerState.Dash);
-                return;
-            }
-            
-            mPlayerController?.Fall();
+            mPlayerController.SetPlayerState(PlayerState.Land);
+            return;
         }
     }
 

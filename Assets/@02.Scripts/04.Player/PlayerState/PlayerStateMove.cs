@@ -6,7 +6,6 @@ using UnityEngine;
 public class PlayerStateMove : IPlayerState
 {
     private PlayerController mPlayerController;
-    private float originMoveSpeed;
     
     public void OnEnter(PlayerController playerController)
     {
@@ -21,55 +20,58 @@ public class PlayerStateMove : IPlayerState
             return;
         }
         
-        if (mPlayerController.IsGrounded)
+        if (GameManager.Instance.Input.AttackInput)
         {
-            if (GameManager.Instance.Input.MoveInput != Vector2.zero)
-            {
-                mPlayerController?.Move();
-            }
-            else
-            {
-                mPlayerController?.SetPlayerState(PlayerState.Idle);
-            }
+            mPlayerController.SetPlayerState(PlayerState.Attack);
+            return;
+        }
 
-            if (GameManager.Instance.Input.JumpInput)
-            {
-                mPlayerController?.SetPlayerState(PlayerState.Jump);
-            }
-            
+        if (GameManager.Instance.Input.DashInput)
+        {
+            mPlayerController.SetPlayerState(PlayerState.Dash);
+            return;
+        }
+
+        if (mPlayerController.bIsGrounded)
+        {
             if (GameManager.Instance.Input.RollInput)
             {
-                mPlayerController?.SetPlayerState(PlayerState.Roll);
-            }
-            
-            if (GameManager.Instance.Input.DefendInput)
-            {
-                mPlayerController?.SetPlayerState(PlayerState.Defend);
+                mPlayerController.SetPlayerState(PlayerState.Roll);
+                return;
             }
             
             if (GameManager.Instance.Input.ParryInput)
             {
-                mPlayerController?.SetPlayerState(PlayerState.Parry);
+                mPlayerController.SetPlayerState(PlayerState.Parry);
+                return;
             }
             
-            if (mPlayerController?.NearestInteractableObject != null)
+            if (GameManager.Instance.Input.DefendInput)
             {
-                if (GameManager.Instance.Input.InteractionInput)
-                {
-                    mPlayerController?.SetPlayerState(PlayerState.Interaction);
-                    return;
-                }
+                mPlayerController.SetPlayerState(PlayerState.Defend);
+                return;
             }
-        }
-        
-        if (GameManager.Instance.Input.AttackInput)
-        {
-            mPlayerController?.SetPlayerState(PlayerState.Attack);
-        }
-        
-        if (GameManager.Instance.Input.DashInput)
-        {
-            mPlayerController?.SetPlayerState(PlayerState.Dash);
+            
+            if (GameManager.Instance.Input.JumpInput)
+            {
+                mPlayerController.SetPlayerState(PlayerState.Jump);
+                return;
+            }
+            
+            if (GameManager.Instance.Input.InteractionInput && mPlayerController.NearestInteractableObject != null)
+            {
+                mPlayerController.SetPlayerState(PlayerState.Interaction);
+                return;
+            }
+            
+            if (GameManager.Instance.Input.MoveInput != Vector2.zero)
+            {
+                mPlayerController.Move();
+            }
+            else
+            {
+                mPlayerController.SetPlayerState(PlayerState.Idle);
+            }
         }
     }
 

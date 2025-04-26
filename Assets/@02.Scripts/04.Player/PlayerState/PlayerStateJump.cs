@@ -20,17 +20,19 @@ public class PlayerStateJump : IPlayerState
             return;
         }
         
-        mPlayerController?.Jump();
+        if (GameManager.Instance.Input.DashInput)
+        {
+            mPlayerController.SetPlayerState(PlayerState.Dash);
+            return;
+        }
         
         if (GameManager.Instance.Input.AttackInput)
         {
-            mPlayerController?.SetPlayerState(PlayerState.Attack);
+            mPlayerController.SetPlayerState(PlayerState.Attack);
+            return;
         }
         
-        if (GameManager.Instance.Input.DashInput)
-        {
-            mPlayerController?.SetPlayerState(PlayerState.Dash);
-        }
+        mPlayerController.Jump();
     }
 
     public void OnExit()
