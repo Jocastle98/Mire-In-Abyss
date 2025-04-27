@@ -209,13 +209,100 @@ public class QuestDatabase : MonoBehaviour
 
         foreach (var quest in mActiveQuests.Values.ToList())
         {
-            if (!string.IsNullOrEmpty(targetId) &&
-                !quest.RequestInformation.Equals(targetId, StringComparison.OrdinalIgnoreCase))
-                continue;
+            if (quest.Objective == objective)
+            {
+                if (!string.IsNullOrEmpty(targetId) &&
+                    !quest.RequestInformation.Equals(targetId, StringComparison.OrdinalIgnoreCase))
+                    continue;
 
-            int prevAmount = quest.CurrentAmount;
-            quest.CurrentAmount += amount;
+                int prevAmount = quest.CurrentAmount;
+                quest.CurrentAmount += amount;
+
+                if (quest.CurrentAmount < 0)
+                    quest.CurrentAmount = 0;
+                if (quest.CurrentAmount > quest.TargetAmount)
+                    quest.CurrentAmount = quest.TargetAmount;
+
+                if (prevAmount != quest.CurrentAmount)
+                {
+                    questUpdated = true;
+                    Debug.Log($"퀘스트 진행 상황업데이트 {quest.Title} - {quest.CurrentAmount}/{quest.TargetAmount}");
+                
+                    OnQuestUpdated?.Invoke(quest);
+
+                    if (quest.CurrentAmount >= quest.TargetAmount)
+                    {
+                        quest.isCompleted = true;
+                        CompleteQuest(quest.Id);
+                    }
+                }
+            }
         }
+
+        if (!questUpdated)
+        {
+            Debug.Log($"업데이트 할 활성 퀘스트 없음 목표 {objective}, 타겟 {targetId}");
+        }
+        
+    }
+
+    public bool CompleteQuest(string questId)
+    {
+        if (!mActiveQuests.TryGetValue(questId, out Quest quest))
+        {
+            Debug.LogWarning($"완료할 활성 퀘스트를 찾을 수 없음 : {questId}");
+            return false;
+        }
+
+        quest.isCompleted = true;
+
+        mActiveQuests.Remove(questId);
+        mCompletedQuests[questId] = quest;
+
+        Debug.Log($"퀘스트 완료 {quest.Title}, 보상 {quest.RewardSoul}");
+        
+        OnQuestCompleted?.Invoke(quest);
+        
+        //TODO: 보상 지급
+
+        return true;
+    }
+
+    public List<Quest> GetActiveQuests()
+    {
+        return mActiveQuests.Values.ToList();
+    }
+
+    public List<Quest> GetCompletedQuests()
+    {
+        return mCompletedQuests.Values.ToList();
     }
     #endregion
+
+    #region 디버깅 관련
+
+    public void DebugPrintAllQuest()
+    {
+        Debug.Log($"===== 퀘스트 데이터베이스 총 {mQuestDatabase.Count}개 퀘스트 =====");
+        foreach (var quest in mQuestDatabase.Values)
+        {
+            Debug.Log($"ID: {quest.Id}, 제목: {quest.Title}");
+            Debug.Log($"목표: {quest.Objective}, 대상: {quest.RequestInformation}, 목표량: {quest.TargetAmount}");
+            Debug.Log($"보상: {quest.RewardSoul} 소울");
+            Debug.Log($"설명: {quest.Description}");
+            Debug.Log("-------------------------------------");
+        }
+    }
+
+    public void DebugPrintActiveQuests()
+    {
+        Debug.Log($"===== 활성화된 퀘스트 {mActiveQuests.Count}개 =====");
+        foreach (var quest in mActiveQuests.Values)
+        {
+            Debug.Log($"제목: {quest.Title}, 진행도: {quest.CurrentAmount}/{quest.TargetAmount}");
+        }
+    }
+
+    #endregion
+    
 }
