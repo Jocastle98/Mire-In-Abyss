@@ -36,6 +36,16 @@ public class HUDTest: MonoBehaviour
     [SerializeField] private string mBossSubName;
     [SerializeField] private int mBossMaxHp;
     [SerializeField] private int mBossCurrentHp;
+
+    [Header("Player")]
+    [SerializeField] private int mPlayerCurrentHp;
+    [SerializeField] private int mPlayerMaxHp;
+    [SerializeField] private int mPlayerCurrentExp;
+    [SerializeField] private int mPlayerMaxExp;
+    [SerializeField] private int mPlayerLevel;
+    [SerializeField] private int mBuffID;
+    [SerializeField] private int mBuffDuration;
+    [SerializeField] private bool mBuffIsDebuff;
     
     private bool mIsTestButtonGroupActive = false;
     DateTime mStartUtc;
@@ -141,5 +151,25 @@ public class HUDTest: MonoBehaviour
     public void OnBossDisengage()
     {
         R3EventBus.Instance.Publish(new BossDisengage(mBossID));
+    }
+    
+    public void OnPlayerHpChanged()
+    {
+        R3EventBus.Instance.Publish(new PlayerHpChanged(mPlayerCurrentHp, mPlayerMaxHp));
+    }
+
+    public void OnPlayerExpChanged()
+    {
+        R3EventBus.Instance.Publish(new PlayerExpChanged(mPlayerCurrentExp, mPlayerMaxExp));
+    }
+    
+    public void OnPlayerLevelChanged()
+    {
+        R3EventBus.Instance.Publish(new PlayerLevelChanged(mPlayerLevel));
+    }
+
+    public void OnBuffAdded()
+    {
+        R3EventBus.Instance.Publish(new BuffAdded(mBuffID, mBuffDuration, mBuffIsDebuff));
     }
 }

@@ -178,7 +178,7 @@ GameObject:
   - component: {fileID: 3909827433730245679}
   - component: {fileID: 1553685841479656505}
   m_Layer: 5
-  m_Name: Diff BarBG
+  m_Name: ProgressBar With BG
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

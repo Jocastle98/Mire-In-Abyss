@@ -22,6 +22,27 @@ namespace Events.Player
         public CurrencyChanged(int gold, int soul)
             => (Gold, Soul) = (gold, soul);
     }
+
+    public readonly struct BuffAdded
+    {
+        public readonly int ID;
+        public readonly int Duration;
+        public readonly bool IsDebuff;
+        public BuffAdded(int id, int duration, bool isDebuff)
+            => (ID, Duration, IsDebuff) = (id, duration, isDebuff);
+    }
+    public readonly struct PlayerExpChanged
+    {
+        public readonly int Current;
+        public readonly int Max;
+        public PlayerExpChanged(int current, int max)
+            => (Current, Max) = (current, max);
+    }
+    public readonly struct PlayerLevelChanged
+    {
+        public readonly int Level;
+        public PlayerLevelChanged(int level) => Level = level;
+    }
 }
 
 namespace Events.Combat
@@ -152,5 +173,15 @@ namespace Events.Quest
     {
         public readonly int QuestId;
         public QuestRemoved(int id) => QuestId = id;
+    }
+}
+
+namespace Events.HUD
+{
+    // HUD안에서 buff slot -> Player Info UI로의 알림용 struct
+    public readonly struct BuffEnded
+    {
+        public readonly int ID;
+        public BuffEnded(int id) => ID = id;
     }
 }
