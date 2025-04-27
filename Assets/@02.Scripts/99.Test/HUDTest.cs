@@ -1,5 +1,6 @@
 using System;
 using Events.Abyss;
+using Events.Combat;
 using Events.Player;
 using Events.Quest;
 using UIHUDEnums;
@@ -8,12 +9,15 @@ using UnityEngine.Serialization;
 
 public class HUDTest: MonoBehaviour
 {
-    public GameObject Enemy;
-    public bool IsSpawned = false;
-    public int DifficultyLevel = 1;
-    public float DifficultyProgress = 0;
+    [SerializeField] private CanvasGroup mTestButtonGroup;
+    [Header("Minimap")]
+    [SerializeField] private GameObject mEnemy;
+    [Header("Difficulty")]
+    [SerializeField] private int mDifficultyLevel = 1;
+    [SerializeField] private float mDifficultyProgress = 0;
 
-    [Header("Quest")] [SerializeField] private string mQuestTitle;
+    [Header("Quest")] 
+    [SerializeField] private string mQuestTitle;
     [SerializeField] private string mQuestDesc;
     
     [Header("QuestUpdate")]
@@ -25,52 +29,74 @@ public class HUDTest: MonoBehaviour
     [Header("Currency")]
     [SerializeField] private int mGold;
     [SerializeField] private int mSoul;
+
+    [Header("Boss")]
+    [SerializeField] private int mBossID;
+    [SerializeField] private string mBossName;
+    [SerializeField] private string mBossSubName;
+    [SerializeField] private int mBossMaxHp;
+    [SerializeField] private int mBossCurrentHp;
     
+    private bool mIsTestButtonGroupActive = false;
     DateTime mStartUtc;
     private int mLastQuestID = -1;
+    private bool mIsSpawned = false;
+
 
     
     private void Start()
     {
         mStartUtc     = DateTime.UtcNow;
+
+        mTestButtonGroup.alpha = 0;
+        mTestButtonGroup.interactable = false;
+        mTestButtonGroup.blocksRaycasts = false;
     }
 
     private void Update()
     {
-        DifficultyProgress += Time.deltaTime * 0.3f;
-        if (DifficultyProgress >= 1)
+        mDifficultyProgress += Time.deltaTime * 0.3f;
+        if (mDifficultyProgress >= 1)
         {
-            DifficultyProgress = 0;
-            DifficultyLevel++;
-            R3EventBus.Instance.Publish(new DifficultyChanged(DifficultyLevel));
+            mDifficultyProgress = 0;
+            mDifficultyLevel++;
+            R3EventBus.Instance.Publish(new DifficultyChanged(mDifficultyLevel));
         }
         
-        R3EventBus.Instance.Publish(new DifficultyProgressed(DifficultyProgress));
+        R3EventBus.Instance.Publish(new DifficultyProgressed(mDifficultyProgress));
         
         TimeSpan elapsed = DateTime.UtcNow - mStartUtc;
         R3EventBus.Instance.Publish(new PlayTimeChanged(elapsed));
     }
 
+    public void OnTestButtonToggle()
+    {
+        mIsTestButtonGroupActive = !mIsTestButtonGroupActive;
+        mTestButtonGroup.alpha = mIsTestButtonGroupActive ? 1 : 0;
+        mTestButtonGroup.interactable = mIsTestButtonGroupActive;
+        mTestButtonGroup.blocksRaycasts = mIsTestButtonGroupActive;
+    }
+
     public void OnToggleEnemyExist()
     {
-        if (IsSpawned)
+        if (mIsSpawned)
         {
-            IsSpawned = false;
-            R3EventBus.Instance.Publish(new EnemyDied(Enemy.transform));
+            mIsSpawned = false;
+            R3EventBus.Instance.Publish(new EnemyDied(mEnemy.transform));
         }
         else
         {
-            IsSpawned = true;
-            R3EventBus.Instance.Publish(new EnemySpawned(Enemy.transform));
+            mIsSpawned = true;
+            R3EventBus.Instance.Publish(new EnemySpawned(mEnemy.transform));
         }
     }
 
     public void OnDifficultyLevelUp()
     {
-        DifficultyLevel++;
-        DifficultyProgress = 0;
-        R3EventBus.Instance.Publish(new DifficultyChanged(DifficultyLevel));
-        R3EventBus.Instance.Publish(new DifficultyProgressed(DifficultyProgress));
+        mDifficultyLevel++;
+        mDifficultyProgress = 0;
+        R3EventBus.Instance.Publish(new DifficultyChanged(mDifficultyLevel));
+        R3EventBus.Instance.Publish(new DifficultyProgressed(mDifficultyProgress));
     }
 
     public void OnAddQuest()
@@ -105,5 +131,15 @@ public class HUDTest: MonoBehaviour
     public void OnCurrencyChanged()
     {
         R3EventBus.Instance.Publish(new CurrencyChanged(mGold, mSoul));
+    }
+
+    public void OnBossHpChanged()
+    {
+        R3EventBus.Instance.Publish(new BossHpChanged(mBossID, mBossName, mBossSubName, mBossMaxHp, mBossCurrentHp));
+    }
+
+    public void OnBossDisengage()
+    {
+        R3EventBus.Instance.Publish(new BossDisengage(mBossID));
     }
 }

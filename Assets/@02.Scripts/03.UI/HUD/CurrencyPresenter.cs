@@ -6,8 +6,8 @@ using Events.Player;
 
 public sealed class CurrencyPresenter : HudPresenterBase
 {
-    [SerializeField] private TextMeshProUGUI _goldText;
-    [SerializeField] private TextMeshProUGUI _soulText;
+    [SerializeField] private TextMeshProUGUI mGoldText;
+    [SerializeField] private TextMeshProUGUI mSoulText;
 
     private void Start()
     {
@@ -26,7 +26,7 @@ public sealed class CurrencyPresenter : HudPresenterBase
 
     private void setCurrencyText(int gold, int soul)
     {
-        _goldText.text = gold.ToString();
-        _soulText.text = soul.ToString();
+        mGoldText.text = gold.ToString();
+        mSoulText.text = soul.ToString();
     }
 }

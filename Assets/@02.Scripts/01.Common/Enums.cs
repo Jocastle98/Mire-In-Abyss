@@ -54,4 +54,10 @@ namespace UIHUDEnums
         Active,
         Completed
     }
+
+    public enum ProgressBarImageType
+    {
+        Rect,
+        RoundedRect,
+    }
 }

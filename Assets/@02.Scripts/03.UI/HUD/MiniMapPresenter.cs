@@ -17,7 +17,6 @@ public sealed class MiniMapPresenter : HudPresenterBase
     [SerializeField] RectTransform mPlayerIconLayer;
     [SerializeField] Camera mMiniMapCam;
     [SerializeField] Transform mPlayer;
-    [SerializeField] private GameObject mMinimapOutlineObj;
     [SerializeField] private List<MiniMapIcon> mIconPrefabs;
 
     private Camera mMainCam;
@@ -33,10 +32,6 @@ public sealed class MiniMapPresenter : HudPresenterBase
         mIconPools.Add(new(mIconPrefabs[(int)MiniMapIconType.Boss], mOtherIconLayer, 2));
         mIconPools.Add(new(mIconPrefabs[(int)MiniMapIconType.Shop], mOtherIconLayer, 1));
         mIconPools.Add(new(mIconPrefabs[(int)MiniMapIconType.Portal], mOtherIconLayer, 2));
-        
-        // 미니맵 외곽선 크기 세팅
-        var minimapRT = GetComponent<RectTransform>();
-        mMinimapOutlineObj.GetComponent<RectTransform>().sizeDelta = new Vector2(minimapRT.rect.width+5, minimapRT.rect.height+5);
     }
 
     void OnEnable()

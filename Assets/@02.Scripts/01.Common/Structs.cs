@@ -24,6 +24,24 @@ namespace Events.Player
     }
 }
 
+namespace Events.Combat
+{
+    public readonly struct BossHpChanged     // 보스 전투 진입
+    {
+        public readonly int ID;
+        public readonly string Name;
+        public readonly string SubName;
+        public readonly int    MaxHp;
+        public readonly int    CurrentHp;
+        public BossHpChanged(int id, string n, string subName, int hp, int curHp)=>(ID,Name,SubName,MaxHp,CurrentHp)=(id,n,subName,hp,curHp);
+    }
+    public readonly struct BossDisengage    // 보스 이탈 or 처치
+    {
+        public readonly int ID;
+        public BossDisengage(int id)=>ID=id;
+    }
+}
+
 namespace Events.Abyss
 {
     public readonly struct PlayTimeChanged
