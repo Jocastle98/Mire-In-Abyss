@@ -49,10 +49,8 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     private Coroutine mDashCoroutine;
 
     [Space(10)] 
-    [Header("Player Attack Stat")] 
-    [SerializeField] private float mAttackTimeout = 1.0f;
-    [SerializeField] private float mAttackTimeoutDelta;
-    public float AttackTimeoutDelta => mAttackTimeoutDelta;
+    [Header("Player Attack Stat")]
+    [SerializeField] private float mAttackSpeed = 1.0f;
     
     [Space(10)]
     [Header("Player Grouned Check")]
@@ -130,6 +128,45 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
 
     private void Start()
     {
+        Init();
+    }
+
+    private void Update()
+    {
+        if (CurrentPlayerState != PlayerState.None)
+        {
+            mPlayerStates[CurrentPlayerState].OnUpdate();
+        }
+        
+        GroundedCheck();
+        NearbyInteractablesCheck();
+        TimeoutCheck();
+    }
+
+    private void FixedUpdate()
+    {
+        CalculateGravity();
+    }
+
+    /// <summary>
+    /// 플레이어 캐릭터 초기화 메서드
+    /// </summary>
+    public void Init()
+    {
+        StateInit();
+        TimeoutInit();
+        
+        GameManager.Instance.Input.Init(mPlayerInput);
+        
+        // 공격 속도 설정
+        PlayerAnimator.SetFloat("AttackSpeed", mAttackSpeed);
+        
+        // 무기 할당
+        SetPlayerWeapon(mRightHandTransform, "Longsword", mLeftHandTransform, "Shield");
+    }
+
+    private void StateInit()
+    {
         mPlayerStateIdle = new PlayerStateIdle();
         mPlayerStateMove = new PlayerStateMove();
         mPlayerStateJump = new PlayerStateJump();
@@ -176,41 +213,15 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             SetPlayerState(PlayerState.Dead);
         };
         
-        Init();
+        SetPlayerState(PlayerState.Idle);
     }
 
-    private void Update()
+    private void TimeoutInit()
     {
-        if (CurrentPlayerState != PlayerState.None)
-        {
-            mPlayerStates[CurrentPlayerState].OnUpdate();
-        }
-        
-        GroundedCheck();
-        NearbyInteractablesCheck();
-        TimeoutCheck();
-    }
-
-    private void FixedUpdate()
-    {
-        CalculateGravity();
-    }
-
-    /// <summary>
-    /// 플레이어 캐릭터 초기화 메서드
-    /// </summary>
-    public void Init()
-    {
-        GameManager.Instance.Input.Init(mPlayerInput);
         mJumpTimeoutDelta = mJumpTimeout;
         mFallTimeoutDelta = mFallTimeout;
         mRollTimeoutDelta = 0.0f;
         mDashTimeoutDelta = 0.0f;
-        
-        SetPlayerState(PlayerState.Idle);
-        
-        // 무기 할당
-        SetPlayerWeapon(mRightHandTransform, "Longsword", mLeftHandTransform, "Shield");
     }
 
     /// <summary>
@@ -405,8 +416,8 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     public Vector3 SetRollDirection()
     {
         Vector3 targetDirection = Vector3.zero;
-
         Vector2 moveInput = GameManager.Instance.Input.MoveInput;
+        
         if (moveInput == Vector2.zero)
         {
             targetDirection = GetCameraForwardDirection(true);
@@ -477,7 +488,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             if (GameManager.Instance.Input.SprintInput)
             {
                  targetSpeed = mPlayerStats.GetMoveSpeed() * 1.5f;
-                 ExitCombat();
+                 SetCombatState(false);
             }
             else
             {
@@ -738,7 +749,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         if (mDashCoroutine == null || !mPlayerStateDash.bIsDashing)
         {
             mDashCoroutine = StartCoroutine(DashCoroutine(cameraCenterDirection));
-            EnterCombat();
+            SetCombatState(true);
         }
     }
 
@@ -857,23 +868,26 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         }
     }
 
-    public void EnterCombat()
+    // 전투돌입 상태를 설정해주는 메서드
+    private void SetCombatState(bool inCombat)
     {
-        mbInCombat = true;
-        mInCombatTimeoutDelta = mInCombatTimeout;
+        mbInCombat = inCombat;
+        mInCombatTimeoutDelta = inCombat ? mInCombatTimeout : 0.0f;
     }
 
-    public void ExitCombat()
+    // 플레이어 캐릭터의 공격속도 설정 및 애니메이션에 반영
+    public void SetAttackSpeed(float speed)
     {
-        mbInCombat = false;
-        mInCombatTimeoutDelta = 0.0f;
+        mAttackSpeed = speed;
+        PlayerAnimator.SetFloat("AttackSpeed", mAttackSpeed);
     }
     
+    // 공격 상태 중 캐릭터의 움직임을 설정하는 메서드
     public void Attack()
     {
         GameManager.Instance.Input.SprintOff();
-        EnterCombat();
-
+        SetCombatState(true);
+        
         PlayerAnimator.SetBool("Idle", false);
         PlayerAnimator.SetBool("Move", false);
         PlayerAnimator.SetBool("Jump", false);
@@ -925,7 +939,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
 
     public void EndCombo()
     {
-        mPlayerStateAttack.bIsCombo = false;
+        mPlayerStateAttack.bIsComboActive = false;
     }
 
     #region 옵저버 패턴 관련 기능
@@ -1003,7 +1017,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     public void Parry()
     {
         GameManager.Instance.Input.SprintOff();
-        EnterCombat();
+        SetCombatState(true);
 
         // 패리 성공 시 행동 메서드
         ParrySuccess();
@@ -1051,7 +1065,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         }
         else
         {
-            EnterCombat();
+            SetCombatState(true);
             
             SetPlayerState(PlayerState.Hit);
             // 방향에 따라 맞는 애니메이션이 없으므로 현재는 효과가 없는 것이나 마찬가지인 상태, 일단 대기

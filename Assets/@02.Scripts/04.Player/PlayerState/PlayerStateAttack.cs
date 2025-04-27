@@ -7,28 +7,32 @@ public class PlayerStateAttack : IPlayerState
 {
     private PlayerController mPlayerController;
     private Vector3 mAttackDirection;
-    public bool bIsAttacking { get; set; }
-    public bool bIsCombo { get; set; }
+    public bool bIsComboActive;
 
     public void OnEnter(PlayerController playerController)
     {
         mPlayerController = playerController;
         mPlayerController.PlayerAnimator.SetTrigger("Attack");
         
-        bIsCombo = true;
-        
         mAttackDirection = mPlayerController.GetCameraForwardDirection(true);
         mPlayerController.transform.rotation = Quaternion.LookRotation(mAttackDirection);
+        
+        bIsComboActive = true;
     }
 
     public void OnUpdate()
     {
-        mPlayerController?.Attack();
-        
-        if (GameManager.Instance.Input.AttackInput && bIsCombo)
+        if (mPlayerController == null)
         {
-            mPlayerController?.PlayerAnimator.SetTrigger("Attack");
+            return;
         }
+        
+        if ((GameManager.Instance.Input.AttackInput || GameManager.Instance.Input.IsAttacking) && bIsComboActive)
+        {
+            mPlayerController.PlayerAnimator.SetTrigger("Attack");
+        }
+        
+        mPlayerController.Attack();
     }
 
     public void OnExit()

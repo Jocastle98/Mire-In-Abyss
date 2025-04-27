@@ -19,16 +19,16 @@ public class PlayerStateMove : IPlayerState
         {
             return;
         }
-        
-        if (GameManager.Instance.Input.AttackInput)
-        {
-            mPlayerController.SetPlayerState(PlayerState.Attack);
-            return;
-        }
 
         if (GameManager.Instance.Input.DashInput && mPlayerController.DashTimeoutDelta < 0.0f)
         {
             mPlayerController.SetPlayerState(PlayerState.Dash);
+            return;
+        }
+        
+        if (GameManager.Instance.Input.AttackInput || GameManager.Instance.Input.IsAttacking)
+        {
+            mPlayerController.SetPlayerState(PlayerState.Attack);
             return;
         }
 
