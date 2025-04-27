@@ -28,7 +28,7 @@ public class PlayerStateFall : IPlayerState
                 return;
             }
             
-            if (GameManager.Instance.Input.AttackInput || GameManager.Instance.Input.IsAttacking)
+            if (GameManager.Instance.Input.AttackInput)
             {
                 mPlayerController.SetPlayerState(PlayerState.Attack);
                 return;

@@ -20,6 +20,7 @@ namespace PlayerEnums
         Interaction,
         Hit,
         Stun,
+        Freeze,
         Dead
     }
 

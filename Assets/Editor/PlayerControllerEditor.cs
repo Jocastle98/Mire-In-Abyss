@@ -50,6 +50,9 @@ public class PlayerControllerEditor : Editor
                 GUI.backgroundColor = new Color(0.5f, 0.0f, 1.0f);
                 break;
             case PlayerState.Stun:
+                GUI.backgroundColor = new Color(0.5f, 0.5f, 0.5f);
+                break;
+            case PlayerState.Freeze:
                 GUI.backgroundColor = new Color(0.5f, 1.0f, 1.0f);
                 break;
             case PlayerState.Dead:
@@ -110,10 +113,13 @@ public class PlayerControllerEditor : Editor
         {
             playerController.SetPlayerState(PlayerState.Hit);
         }
-
         if (GUILayout.Button("Stun"))
         {
             playerController.SetStatusEffect(StatusEffect.Stun, 3.0f);
+        }
+        if (GUILayout.Button("Freeze"))
+        {
+            playerController.SetStatusEffect(StatusEffect.Freeze, 3.0f);
         }
         if (GUILayout.Button("Dead"))
         {

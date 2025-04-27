@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using PlayerEnums;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 public class PlayerStateAttack : IPlayerState
 {
@@ -27,7 +28,7 @@ public class PlayerStateAttack : IPlayerState
             return;
         }
         
-        if ((GameManager.Instance.Input.AttackInput || GameManager.Instance.Input.IsAttacking) && bIsComboActive)
+        if (GameManager.Instance.Input.AttackInput && bIsComboActive)
         {
             mPlayerController.PlayerAnimator.SetTrigger("Attack");
         }
@@ -37,7 +38,6 @@ public class PlayerStateAttack : IPlayerState
 
     public void OnExit()
     {
-        mPlayerController.PlayerAnimator.ResetTrigger("Attack");
         mPlayerController = null;
     }
 }

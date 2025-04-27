@@ -111,6 +111,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     private PlayerStateInteraction mPlayerStateInteraction;
     private PlayerStateHit mPlayerStateHit;
     private PlayerStateStun mPlayerStateStun;
+    private PlayerStateFreeze mPlayerStateFreeze;
     private PlayerStateDead mPlayerStateDead;
     public PlayerState CurrentPlayerState { get; private set; }
     private Dictionary<PlayerState, IPlayerState> mPlayerStates;
@@ -184,6 +185,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         mPlayerStateInteraction = new PlayerStateInteraction();
         mPlayerStateHit = new PlayerStateHit();
         mPlayerStateStun = new PlayerStateStun();
+        mPlayerStateFreeze = new PlayerStateFreeze();
         mPlayerStateDead = new PlayerStateDead();
 
         mPlayerStates = new Dictionary<PlayerState, IPlayerState>
@@ -203,8 +205,9 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             { PlayerState.Skill_3, mPlayerStateSkill_3 },
             { PlayerState.Skill_4, mPlayerStateSkill_4 },
             { PlayerState.Interaction, mPlayerStateInteraction },
-            { PlayerState.Stun, mPlayerStateStun },
             { PlayerState.Hit, mPlayerStateHit },
+            { PlayerState.Stun, mPlayerStateStun },
+            { PlayerState.Freeze, mPlayerStateFreeze },
             { PlayerState.Dead, mPlayerStateDead },
         };
 
@@ -737,7 +740,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     
     #endregion
     
-    #region 대시 관련 기능
+    #region 돌진기 관련 기능
     
     public void StartDash(Vector3 cameraCenterDirection)
     {
@@ -840,7 +843,11 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     {
         if (isDashFunction)
         {
-            
+            mCharacterController.excludeLayers = LayerMask.GetMask("Enemy");
+        }
+        else
+        {
+            mCharacterController.excludeLayers = LayerMask.GetMask("Nothing");
         }
     }
 
@@ -1080,6 +1087,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     {
         switch (statusEffectType)
         {
+            // 상태이상 없음 or 해제된 상태
             case StatusEffect.None:
                 break;
             case StatusEffect.Stun:
@@ -1087,30 +1095,26 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
                 {
                     SetPlayerState(PlayerState.Stun);
                     StartCoroutine(StatusEffectDuration(
-                        onStart: () => { /* 스턴 이펙트? */ },
+                        onStart: () => { },
                         duration,
                         onEnd: () => { SetPlayerState(PlayerState.Idle); }));
                 }
                 break;
             case StatusEffect.Freeze:
-                /*if (CurrentPlayerState != PlayerState.Freeze && CurrentPlayerState != PlayerState.Dead)
+                if (CurrentPlayerState != PlayerState.Freeze && CurrentPlayerState != PlayerState.Dead)
                 {
                     SetPlayerState(PlayerState.Freeze);
                     StartCoroutine(StatusEffectDuration(
-                        onStart: () => { /* 애니메이션 재생속도 = 0 #1# },
+                        onStart: () => { PlayerAnimator.speed = 0.0f; },
                         duration,
-                        onEnd: () => { /* 애니메이션 재생속도 = 1 #1# }));
-                }*/
+                        onEnd: () => { PlayerAnimator.speed = 1.0f; SetPlayerState(PlayerState.Idle); }));
+                }
                 break;
-            case StatusEffect.Burn:        // 중첩이나 지속시간 갱신 기능 필요시 수정해야함
-                /*if (CurrentPlayerState != PlayerState.Burn && CurrentPlayerState != PlayerState.Dead)
-                {
-                    SetPlayerState(PlayerState.Burn);
-                    StartCoroutine(StatusEffectDuration(
+            case StatusEffect.Burn: // 캐릭터 움직임에 제한을 주지 않는 상태이상이므로 별도의 상태머신은 없음
+                /*StartCoroutine(StatusEffectDuration(
                         onStart: () => { /* 화상 이펙트, 토트 데지미 적용 코루틴 #1# },
                         duration,
-                        onEnd: () => { /* 화상 이펙트 종료, 토트 데지미 코루틴 종료 #1# }));
-                }*/
+                        onEnd: () => { /* 화상 이펙트 종료, 토트 데지미 코루틴 종료 #1# }));*/
                 break;
             case StatusEffect.Poison:
                 // 화상 상태이상과 동일
