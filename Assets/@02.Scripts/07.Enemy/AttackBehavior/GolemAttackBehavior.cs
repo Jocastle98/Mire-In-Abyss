@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 [CreateAssetMenu(menuName = "AI/Attack Behaviors/Golem")]
 public class GolemAttackBehavior : ScriptableObject, IAttackBehavior
@@ -14,12 +15,19 @@ public class GolemAttackBehavior : ScriptableObject, IAttackBehavior
     [SerializeField] private float mImpactCooldown   = 10f;
 
     private float mLastImpactTime = -Mathf.Infinity;
+
     public float SwingRange       => mSwingRange;
     public int   SwingDamage      => mSwingDamage;
     public float ImpactRange      => mImpactRange;
     public int   ImpactDamage     => mImpactDamage;
     public float ImpactChargeTime => mImpactChargeTime;
     public float ImpactCooldown   => mImpactCooldown;
+
+
+    private void OnEnable()
+    {
+        mLastImpactTime = Time.time;
+    }
 
     public bool IsInRange(Transform self, Transform target)
     {
@@ -32,8 +40,12 @@ public class GolemAttackBehavior : ScriptableObject, IAttackBehavior
     {
         if (target == null) return false;
         float dist = Vector3.Distance(self.position, target.position);
-        return Time.time >= mLastImpactTime + mImpactCooldown
-               && dist <= mImpactRange;
+        float nextImpactTime = mLastImpactTime + mImpactCooldown;
+        float remaining = nextImpactTime - Time.time;
+        
+        bool can = Time.time >= nextImpactTime && dist <= mImpactRange;
+        Debug.Log($"임팩트 쿨타임: {remaining}");
+        return can;
     }
 
     public bool CanSwing(Transform self, Transform target)
