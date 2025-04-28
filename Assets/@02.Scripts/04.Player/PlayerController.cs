@@ -109,8 +109,6 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     private PlayerStateSkill_3 mPlayerStateSkill_3;
     private PlayerStateSkill_4 mPlayerStateSkill_4;
     private PlayerStateInteraction mPlayerStateInteraction;
-    private PlayerStateHit mPlayerStateHit;
-    private PlayerStateDefendHit mPlayerStateDefend_Hit;
     private PlayerStateStun mPlayerStateStun;
     private PlayerStateFreeze mPlayerStateFreeze;
     private PlayerStateDead mPlayerStateDead;
@@ -184,8 +182,6 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         mPlayerStateSkill_3 = new PlayerStateSkill_3();
         mPlayerStateSkill_4 = new PlayerStateSkill_4();
         mPlayerStateInteraction = new PlayerStateInteraction();
-        mPlayerStateHit = new PlayerStateHit();
-        mPlayerStateDefend_Hit = new PlayerStateDefendHit();
         mPlayerStateStun = new PlayerStateStun();
         mPlayerStateFreeze = new PlayerStateFreeze();
         mPlayerStateDead = new PlayerStateDead();
@@ -207,8 +203,6 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             { PlayerState.Skill_3, mPlayerStateSkill_3 },
             { PlayerState.Skill_4, mPlayerStateSkill_4 },
             { PlayerState.Interaction, mPlayerStateInteraction },
-            { PlayerState.Hit, mPlayerStateHit },
-            { PlayerState.Defend_Hit, mPlayerStateDefend_Hit },
             { PlayerState.Stun, mPlayerStateStun },
             { PlayerState.Freeze, mPlayerStateFreeze },
             { PlayerState.Dead, mPlayerStateDead },
@@ -1076,14 +1070,11 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             return; // 사망 상태에서는 더 이상 피해를 받지 않음
         }
         
-        if (CurrentPlayerState != PlayerState.Hit)
+        //PlayerState의 TakeDamage 메서드 사용
+        var enemyPower = enemyController.AttackBehaviorAsset as MeleeAttackBehavior;
+        if (enemyPower != null)
         {
-            //PlayerState의 TakeDamage 메서드 사용
-            var enemyPower = enemyController.AttackBehaviorAsset as MeleeAttackBehavior;
-            if (enemyPower != null)
-            {
-                mPlayerStats.TakeDamage(enemyPower.Damage);
-            }
+            mPlayerStats.TakeDamage(enemyPower.Damage);
         }
         
         // 체력 UI 업데이트
@@ -1096,14 +1087,16 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         else
         {
             SetCombatState(true);
-
+            
+            
             if (CurrentPlayerState == PlayerState.Defend)
             {
-                SetPlayerState(PlayerState.Defend_Hit);
+                PlayerAnimator.SetTrigger("DefendHit");
             }
-            else
+            // 공격 관련 동작들이 끊기지 않도록
+            else if(CurrentPlayerState == PlayerState.Idle || CurrentPlayerState == PlayerState.Move)
             {
-                SetPlayerState(PlayerState.Hit);
+                PlayerAnimator.SetTrigger("Hit");
                 
                 // 방향에 따라 맞는 애니메이션이 없으므로 현재는 효과가 없는 것이나 마찬가지인 상태, 일단 대기
                 // 플레이어 캐릭터의 방향을 회전시켜주는 수동적인 방식을 사용하거나?

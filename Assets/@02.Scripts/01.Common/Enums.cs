@@ -18,8 +18,6 @@ namespace PlayerEnums
         Skill_3,
         Skill_4,
         Interaction,
-        Hit,
-        Defend_Hit,
         Stun,
         Freeze,
         Dead

@@ -1,14 +1,20 @@
-using System.Collections;
-using System.Collections.Generic;
-using PlayerEnums;
 using UnityEngine;
+using PlayerEnums;
 
-public class PlayerAnimatorStateHit : StateMachineBehaviour
+public class PlayerAnimatorStateSkill_4 : StateMachineBehaviour
 {
     // OnStateExit is called when a transition ends and the state machine finishes evaluating this state
     override public void OnStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
         PlayerController playerController = animator.gameObject.GetComponent<PlayerController>();
-        playerController.SetPlayerState(PlayerState.Idle);
+        
+        if (GameManager.Instance.Input.MoveInput == Vector2.zero)
+        {
+            playerController.SetPlayerState(PlayerState.Idle);
+        }
+        else
+        {
+            playerController.SetPlayerState(PlayerState.Move);
+        }
     }
 }
