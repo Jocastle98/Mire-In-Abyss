@@ -1466,6 +1466,8 @@ GameObject:
   - component: {fileID: 4297884469358006277}
   - component: {fileID: 8277639500135812554}
   - component: {fileID: 4959012575149737574}
+  - component: {fileID: 4749783104172799161}
+  - component: {fileID: 3600470690653789154}
   m_Layer: 8
   m_Name: Player
   m_TagString: Player
@@ -1571,13 +1573,84 @@ CharacterController:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Height: 2
-  m_Radius: 0.5
-  m_SlopeLimit: 45
+  m_Height: 1.8
+  m_Radius: 0.28
+  m_SlopeLimit: 60
   m_StepOffset: 0.3
-  m_SkinWidth: 0.08
+  m_SkinWidth: 0.02
   m_MinMoveDistance: 0.001
-  m_Center: {x: 0, y: 0, z: 0}
+  m_Center: {x: 0, y: 0.93, z: 0}
+--- !u!114 &4749783104172799161
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3017948563938787297}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 41fc9940aabc7c24d9a0b8391d7f7e80, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mBaseMaxHP: 100
+  mBaseMoveSpeed: 5
+  mBaseAttackPower: 10
+  mBaseDefence: 0
+  mBaseCritChance: 0.05
+--- !u!114 &3600470690653789154
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3017948563938787297}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0ddcd4a207e3fd544be43345cd4807de, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mPlayerStats: {fileID: 4749783104172799161}
+  mSpeed: 0
+  mSpeedChangeRate: 10
+  mRotationSmoothTime: 0.12
+  mGravity: -9.81
+  mJumpHeight: 5
+  mJumpTimeout: 0.5
+  mJumpTimeoutDelta: 0
+  mFallTimeout: 0.15
+  mFallTimeoutDelta: 0
+  mRollDistance: 8
+  mRollFunctionDuration: 0.3
+  mRollTimeout: 3
+  mRollTimeoutDelta: 0
+  mDashDistance: 10
+  mDashFunctionDuration: 0.3
+  mDashTimeout: 5
+  mDashTimeoutDelta: 0
+  mAttackTimeout: 1
+  mAttackTimeoutDelta: 0
+  mGroundLayers:
+    serializedVersion: 2
+    m_Bits: 8
+  mGroundedOffset: -0.15
+  mGroundedRadius: 0.3
+  mInCombatTimeout: 10
+  mInCombatTimeoutDelta: 0
+  mbInCombat: 0
+  mInteractableLayers:
+    serializedVersion: 2
+    m_Bits: 128
+  mInteractableRadius: 3
+  mDetectedInteractables:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  mActiveInteractables: []
+  mRightHandTransform: {fileID: 1561646755167969338}
+  mLeftHandTransform: {fileID: 5870613848163703736}
+  mVerticalVelocity: 0
 --- !u!1 &3080968844867647087
 GameObject:
   m_ObjectHideFlags: 0

@@ -49,6 +49,12 @@ public class PlayerControllerEditor : Editor
             case PlayerState.Hit:
                 GUI.backgroundColor = new Color(0.5f, 0.0f, 1.0f);
                 break;
+            case PlayerState.Stun:
+                GUI.backgroundColor = new Color(0.5f, 0.5f, 0.5f);
+                break;
+            case PlayerState.Freeze:
+                GUI.backgroundColor = new Color(0.5f, 1.0f, 1.0f);
+                break;
             case PlayerState.Dead:
                 GUI.backgroundColor = new Color(0.0f, 0.0f, 0.0f);
                 break;
@@ -66,7 +72,7 @@ public class PlayerControllerEditor : Editor
         
         EditorGUILayout.BeginVertical(EditorStyles.helpBox);
         GUI.enabled = false;
-        EditorGUILayout.Toggle("지면 접촉", playerController.IsGrounded);
+        EditorGUILayout.Toggle("지면 접촉", playerController.bIsGrounded);
         GUI.enabled = true;
         EditorGUILayout.EndVertical();
         
@@ -106,6 +112,14 @@ public class PlayerControllerEditor : Editor
         if (GUILayout.Button("Hit"))
         {
             playerController.SetPlayerState(PlayerState.Hit);
+        }
+        if (GUILayout.Button("Stun"))
+        {
+            playerController.SetStatusEffect(StatusEffect.Stun, 3.0f);
+        }
+        if (GUILayout.Button("Freeze"))
+        {
+            playerController.SetStatusEffect(StatusEffect.Freeze, 3.0f);
         }
         if (GUILayout.Button("Dead"))
         {

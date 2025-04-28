@@ -12,7 +12,7 @@ public class PlayerStateParry : IPlayerState
         mPlayerController = playerController;
         mPlayerController.PlayerAnimator.SetTrigger("Parry");
         
-        mParryDirection = mPlayerController.GetCameraForwardDirection();
+        mParryDirection = mPlayerController.GetCameraForwardDirection(true);
         mPlayerController.transform.rotation = Quaternion.LookRotation(mParryDirection);
     }
 
@@ -23,16 +23,14 @@ public class PlayerStateParry : IPlayerState
             return;
         }
 
-        if (mPlayerController.IsGrounded)
+        if (mPlayerController.bIsGrounded)
         {
-            mPlayerController?.Parry();
+            mPlayerController.Parry();
         }
     }
 
     public void OnExit()
     {
-        mPlayerController.PlayerAnimator.SetBool("Idle", false);
-        mPlayerController.PlayerAnimator.SetBool("Move", false);
         mPlayerController = null;
     }
 }

@@ -40,8 +40,9 @@ public class TestEnemyController : MonoBehaviour
 
         Debug.Log("허수아비 히트!");
         _animator.SetTrigger("Hit");
-        
-        mCurrentHealth -= (int)mPlayerStats.GetAttackPower();
+
+        int playerAttackPower = (int)playerController.GetComponent<PlayerStats>().GetAttackPower();
+        mCurrentHealth -= playerAttackPower;
         Debug.Log($"현재 체력: {mCurrentHealth}/{mMaxHealth}");
 
         if (mCurrentHealth <= 0)

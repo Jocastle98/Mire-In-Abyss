@@ -19,15 +19,17 @@ public class PlayerStateLand : IPlayerState
             return;
         }
         
-        if (mPlayerController.IsGrounded)
+        if (mPlayerController.bIsGrounded)
         {
-            if (GameManager.Instance.Input.MoveInput != Vector2.zero)
+            if (GameManager.Instance.Input.MoveInput == Vector2.zero)
             {
-                mPlayerController.SetPlayerState(PlayerState.Move);
+                mPlayerController.SetPlayerState(PlayerState.Idle);
+                return;
             }
             else
             {
-                mPlayerController.SetPlayerState(PlayerState.Idle);
+                mPlayerController.SetPlayerState(PlayerState.Move);
+                return;
             }
         }
     }
