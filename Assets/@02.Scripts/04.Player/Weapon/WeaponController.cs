@@ -1,11 +1,12 @@
 using System.Collections.Generic;
+using PlayerEnums;
 using UnityEngine;
 
 public class WeaponController : MonoBehaviour, IObservable<GameObject>
 {
     [Header("Attack Settings")]
     [SerializeField] private int mWeaponPower = 10;
-    [SerializeField] private float mAttackDistance = 1.5f;
+    [SerializeField] private float mAttackDistance = 2.0f;
     [SerializeField] private Vector3 mAttackBoxSize = new Vector3(2.0f, 2.0f, 1.0f); // 박스 크기
     [SerializeField] private LayerMask mTargetLayerMask;
     [SerializeField] private float mAttackArcHeight = 2.0f;
@@ -65,7 +66,7 @@ public class WeaponController : MonoBehaviour, IObservable<GameObject>
         );
         
         // 2. 반원 각도로 정규화 (0°~180°)
-        if (mPlayerController.IsGrounded)
+        if (mPlayerController.bIsGrounded)
         {
             pitchAngle = Mathf.Clamp(pitchAngle, -90.0f, 0.0f);
         }
@@ -82,12 +83,16 @@ public class WeaponController : MonoBehaviour, IObservable<GameObject>
                    mPlayerController.transform.TransformDirection(localOffset);
 
         // 5. 박스 회전 계산 (캐릭터 전방 + 카메라 피치 반영)
-        Quaternion yawRotation = Quaternion.LookRotation(
-            mPlayerController.transform.forward,
-            Vector3.up
-        );
+        Quaternion yawRotation = Quaternion.LookRotation(mPlayerController.transform.forward, Vector3.up);
         Quaternion pitchRotation = Quaternion.Euler(pitchAngle, 0.0f, 0.0f);
         rotation = yawRotation * pitchRotation;
+
+        if (mPlayerController.CurrentPlayerState == PlayerState.Dash)
+        {
+            // 대시 상태에서는 카메라나 피치 각도와 관계없이 플레이어 전방으로 공격 박스를 배치
+            position = mPlayerController.transform.position + mPlayerController.transform.forward * mAttackDistance;
+            rotation = Quaternion.LookRotation(mPlayerController.transform.forward, Vector3.up); // 전방으로 회전
+        }
     }
 
     public void SetPlayer(PlayerController playerController)

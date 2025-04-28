@@ -96,14 +96,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 15ecc8ea02bfb2440b39dd526b0a7ed6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mTriggerZones:
-  - position: {x: 0, y: -1.25, z: 0}
-    radius: 0.35
-  - position: {x: 0, y: -2, z: 0}
-    radius: 0.35
-  - position: {x: 0, y: -0.5, z: 0}
-    radius: 0.35
-  mWeaponAttackPower: 10
+  mWeaponPower: 10
+  mAttackDistance: 2
+  mAttackBoxSize: {x: 2, y: 2, z: 1}
   mTargetLayerMask:
     serializedVersion: 2
     m_Bits: 512
+  mAttackArcHeight: 2

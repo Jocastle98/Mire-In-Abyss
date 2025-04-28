@@ -6,7 +6,7 @@ using UnityEngine;
 public class PlayerStateRoll : IPlayerState
 {
     private PlayerController mPlayerController;
-    private Vector3 mTargetDirection;
+    private Vector3 mRollDirection;
     public bool bIsRoll { get; set; }
     
     public void OnEnter(PlayerController playerController)
@@ -14,23 +14,19 @@ public class PlayerStateRoll : IPlayerState
         mPlayerController = playerController;
         mPlayerController.PlayerAnimator.SetTrigger("Roll");
 
-        mTargetDirection = mPlayerController.SetRollDirection();
-        mPlayerController.transform.rotation = Quaternion.LookRotation(mTargetDirection);
-        mPlayerController.Roll();
+        mRollDirection = mPlayerController.SetRollDirection();
+        mPlayerController.transform.rotation = Quaternion.LookRotation(mRollDirection);
+        mPlayerController.StartRoll(mRollDirection);
     }
 
     public void OnUpdate()
     {
-        if (mPlayerController == null)
-        {
-            return;
-        }
         
-        mPlayerController?.Rolling(mTargetDirection);
     }
 
     public void OnExit()
     {
+        mPlayerController?.StopRoll();
         mPlayerController = null;
     }
 }
