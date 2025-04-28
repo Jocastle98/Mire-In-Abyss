@@ -10,12 +10,11 @@ public sealed class BuffSlotView : MonoBehaviour
     [SerializeField] private Image mBuffImage;
     [SerializeField] private Image mBuffCoolMask;
     private Image mBuffImageBG;
-    private float mDuration;
-    private float mCoolTime;
+    private float mBuffDurationTime;
+    private float mBuffTimer;
     private int mID = -1;
     private static readonly Color mBuffColor = new Color32(165, 255, 255, 255);
     private static readonly Color mDebuffColor = new Color32(255, 189, 189, 255);
-    static readonly Dictionary<int, Sprite> mCacheBuffSpriteDict = new();
 
     void Awake()
     {
@@ -35,18 +34,18 @@ public sealed class BuffSlotView : MonoBehaviour
         }
 
         mBuffImageBG.color = buffInfo.IsDebuff ? mDebuffColor : mBuffColor;
-        mDuration = buffInfo.Duration;
-        mCoolTime = 0;
+        mBuffDurationTime = buffInfo.Duration;
+        mBuffTimer = 0;
         mBuffImage.fillAmount = 0;
     }
 
     private void progressBuffCoolTime()
     {
-        if (mCoolTime < mDuration)
+        if (mBuffTimer < mBuffDurationTime)
         {
-            mCoolTime += Time.deltaTime;
-            mBuffCoolMask.fillAmount = mCoolTime / mDuration;
-            if (mCoolTime >= mDuration)
+            mBuffTimer += Time.deltaTime;
+            mBuffCoolMask.fillAmount = mBuffTimer / mBuffDurationTime;
+            if (mBuffTimer >= mBuffDurationTime)
             {
                 PublishBuffEnd();
             }

@@ -6,6 +6,7 @@ using R3;
 using TMPro;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.UI;
 
 public sealed class PlayerStatusPresenter : HudPresenterBase
@@ -92,16 +93,25 @@ public sealed class PlayerStatusPresenter : HudPresenterBase
         }
 
         var list = new List<Sprite>();
-        var handle = Addressables.LoadAssetsAsync<Sprite>(
-                    "Buff_Icons",
-                    sp => list.Add(sp));
+        var handle = Addressables.LoadAssetsAsync<Sprite>
+        (
+            "Buff_Icons",
+            sp => list.Add(sp)
+        );
         await handle.Task;
 
-        mBuffIconMap = new();
-        foreach (var sp in list)
+        if (handle.Status == AsyncOperationStatus.Succeeded)
         {
-            int id = int.Parse(sp.name.Split('_')[1]); // "icon_101"
-            mBuffIconMap[id] = sp;
+            mBuffIconMap = new();
+            foreach (var sp in list)
+            {
+                int id = int.Parse(sp.name.Split('_')[1]); // "icon_101"
+                mBuffIconMap[id] = sp;
+            }
+        }
+        else
+        {
+            Debug.LogError("Failed to load buff icons");
         }
         Addressables.Release(handle);
     }

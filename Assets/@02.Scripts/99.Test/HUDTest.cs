@@ -7,7 +7,7 @@ using UIHUDEnums;
 using UnityEngine;
 using UnityEngine.Serialization;
 
-public class HUDTest: MonoBehaviour
+public class HUDTest : MonoBehaviour
 {
     [SerializeField] private CanvasGroup mTestButtonGroup;
     [Header("Minimap")]
@@ -19,10 +19,10 @@ public class HUDTest: MonoBehaviour
     [SerializeField] private int mDifficultyLevel = 1;
     [SerializeField] private float mDifficultyProgress = 0;
 
-    [Header("Quest")] 
+    [Header("Quest")]
     [SerializeField] private string mQuestTitle;
     [SerializeField] private string mQuestDesc;
-    
+
     [Header("QuestUpdate")]
     [SerializeField] private int mUpdatedQuestID;
     [SerializeField] private string mUpdatedQuestTitle;
@@ -49,17 +49,17 @@ public class HUDTest: MonoBehaviour
     [SerializeField] private int mBuffID;
     [SerializeField] private int mBuffDuration;
     [SerializeField] private bool mBuffIsDebuff;
-    
+
     private bool mIsTestButtonGroupActive = false;
     DateTime mStartUtc;
     private int mLastQuestID = -1;
     private bool mIsSpawned = false;
 
 
-    
+
     private void Start()
     {
-        mStartUtc     = DateTime.UtcNow;
+        mStartUtc = DateTime.UtcNow;
 
         mTestButtonGroup.alpha = 0;
         mTestButtonGroup.interactable = false;
@@ -68,6 +68,12 @@ public class HUDTest: MonoBehaviour
 
     private void Update()
     {
+        difficultyTestProgress();
+        skillTestProgress();
+    }
+
+    private void difficultyTestProgress()
+    {
         mDifficultyProgress += Time.deltaTime * 0.3f;
         if (mDifficultyProgress >= 1)
         {
@@ -75,13 +81,24 @@ public class HUDTest: MonoBehaviour
             mDifficultyLevel++;
             R3EventBus.Instance.Publish(new DifficultyChanged(mDifficultyLevel));
         }
-        
+
         R3EventBus.Instance.Publish(new DifficultyProgressed(mDifficultyProgress));
-        
+
         TimeSpan elapsed = DateTime.UtcNow - mStartUtc;
         R3EventBus.Instance.Publish(new PlayTimeChanged(elapsed));
     }
 
+    private void skillTestProgress()
+    {
+        if(Input.GetKeyDown(KeyCode.LeftShift))
+        {
+            R3EventBus.Instance.Publish(new SkillUsed(3));
+        }
+        if(Input.GetKeyDown(KeyCode.F))
+        {
+            R3EventBus.Instance.Publish(new SkillUsed(4));
+        }
+    }
     public void OnTestButtonToggle()
     {
         mIsTestButtonGroupActive = !mIsTestButtonGroupActive;
@@ -132,7 +149,7 @@ public class HUDTest: MonoBehaviour
             OnQuestCompleted();
             return;
         }
-            
+
         TempQuestInfo questInfo = new TempQuestInfo(mUpdatedQuestID, mUpdatedQuestTitle, mUpdatedQuestDesc, QuestState.Active);
         R3EventBus.Instance.Publish(new QuestAddedOrUpdated(questInfo));
     }
@@ -161,7 +178,7 @@ public class HUDTest: MonoBehaviour
     {
         R3EventBus.Instance.Publish(new BossDisengage(mBossID));
     }
-    
+
     public void OnPlayerHpChanged()
     {
         R3EventBus.Instance.Publish(new PlayerHpChanged(mPlayerCurrentHp, mPlayerMaxHp));
@@ -171,7 +188,7 @@ public class HUDTest: MonoBehaviour
     {
         R3EventBus.Instance.Publish(new PlayerExpChanged(mPlayerCurrentExp, mPlayerMaxExp));
     }
-    
+
     public void OnPlayerLevelChanged()
     {
         R3EventBus.Instance.Publish(new PlayerLevelChanged(mPlayerLevel));

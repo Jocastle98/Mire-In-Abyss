@@ -92,4 +92,9 @@ public sealed class BossBarPresenter : HudPresenterBase
         mRootGroup.blocksRaycasts = false;
         mMaxHp = 0;
     }
+
+    protected override void OnDisable()
+    {
+        base.OnDisable();
+    }
 }

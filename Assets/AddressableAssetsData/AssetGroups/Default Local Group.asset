@@ -17,6 +17,12 @@ MonoBehaviour:
     m_SerializedData: []
   m_GUID: ed0e0a943dfe4844e87cb51890a10c20
   m_SerializeEntries:
+  - m_GUID: 0796fc806ad348c449674e4c0dbaf86c
+    m_Address: Assets/@04.Sprites/02.UI/SkillIcon
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Skill_Icons
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 2759fb758351d1a45b3d4fe30b5dedc8
     m_Address: Assets/@04.Sprites/02.UI/BuffIcon
     m_ReadOnly: 0

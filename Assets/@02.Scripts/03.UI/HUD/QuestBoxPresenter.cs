@@ -221,7 +221,7 @@ public sealed class QuestBoxPresenter : HudPresenterBase
 
     protected override void OnDisable()
     {
-        mCD.Dispose();
+        base.OnDisable();
         foreach (var c in mVisibleCards.Values) mCardPool.Return(c);
         mVisibleCards.Clear();
         mPendingActive.Clear();

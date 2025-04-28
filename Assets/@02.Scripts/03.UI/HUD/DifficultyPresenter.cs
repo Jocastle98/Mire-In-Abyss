@@ -15,7 +15,7 @@ public sealed class DifficultyPresenter : HudPresenterBase
     [SerializeField] private ProgressBarUI mLevelProgressBar;
 
 
-    void OnEnable()
+    void Start()
     {
         subscribeEvents();
     }
@@ -69,5 +69,10 @@ public sealed class DifficultyPresenter : HudPresenterBase
         };
 
         return ret;
+    }
+
+    protected override void OnDisable()
+    {
+        base.OnDisable();
     }
 }

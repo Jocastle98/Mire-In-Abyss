@@ -138,7 +138,7 @@ public sealed class MiniMapPresenter : HudPresenterBase
 
     protected override void OnDisable()
     {
-        mCD.Dispose();
+        base.OnDisable();
         foreach (var ico in mIcons.Values)
         {
             ico.ResetIcon();

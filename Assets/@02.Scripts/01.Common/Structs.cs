@@ -43,6 +43,31 @@ namespace Events.Player
         public readonly int Level;
         public PlayerLevelChanged(int level) => Level = level;
     }
+
+    //TODO: 담당자의 스킬 Info로 대체
+    public readonly struct TempSkillInfo
+    {
+        public readonly int ID;
+        public readonly KeyCode KeyCode;
+        public readonly float CooldownTime;
+        public TempSkillInfo(int id, KeyCode keyCode, float cooldownTime)
+            => (ID, KeyCode, CooldownTime) = (id, keyCode, cooldownTime);
+    }
+
+    public readonly struct SkillUsed
+    {
+        public readonly int ID;
+        public SkillUsed(int id) => ID = id;
+    }
+
+    public readonly struct SkillUpdated
+    {
+        public readonly int ID;
+        public readonly float CooldownTime;
+        public readonly KeyCode KeyCode;
+        public SkillUpdated(int id, float cooldownTime, KeyCode keyCode)
+            => (ID, CooldownTime, KeyCode) = (id, cooldownTime, keyCode);
+    }
 }
 
 namespace Events.Combat
