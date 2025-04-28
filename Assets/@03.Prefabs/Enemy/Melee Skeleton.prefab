@@ -733,7 +733,7 @@ GameObject:
   m_Component:
   - component: {fileID: 158916516392278202}
   - component: {fileID: 2034264869803996864}
-  - component: {fileID: 6415084959073460890}
+  - component: {fileID: 5111684243112721732}
   - component: {fileID: 6354803296981084445}
   - component: {fileID: 22493401646877056}
   - component: {fileID: 8125056749957959188}
@@ -753,7 +753,7 @@ Transform:
   m_GameObject: {fileID: 2304139275706850596}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 1.8073623, y: 0.00000023841858, z: 0.11236858}
+  m_LocalPosition: {x: 25.87, y: 0, z: -19.96}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -776,7 +776,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4cc25f372f5f49119443e74bf35b903d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &6415084959073460890
+--- !u!114 &5111684243112721732
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -785,10 +785,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 2304139275706850596}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a1087477150a4c19a5dbc15b48a07acc, type: 3}
+  m_Script: {fileID: 11500000, guid: 9c45721ce2284fcd8e162061a0a5a2e1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   mMaxHealth: 100
+  mDefense: 5
   mDetectRadius: 10
   mDetectAngle: 360
   mPlayerMask:
@@ -796,12 +797,16 @@ MonoBehaviour:
     m_Bits: 256
   mPatrolRadius: 5
   mAttackBehaviorAsset: {fileID: 11400000, guid: 8c90e2cfcd24a564ab2eb6e5bb9874bf, type: 2}
+  mFirePoint: {fileID: 0}
+  ImpactProjectorPrefab: {fileID: 0}
+  ImpactHitLayer:
+    serializedVersion: 2
+    m_Bits: 0
   mRenderers:
   - {fileID: 7986256973236227083}
   - {fileID: 4009753674306402108}
   - {fileID: 8425103675733317816}
   - {fileID: 8453473589168831972}
-  mFirePoint: {fileID: 0}
 --- !u!95 &6354803296981084445
 Animator:
   serializedVersion: 5
