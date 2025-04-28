@@ -9,7 +9,7 @@ public class PlayerStateAttack : IPlayerState
     private PlayerController mPlayerController;
     private Vector3 mAttackDirection;
     public bool bIsComboActive;
-
+    
     public void OnEnter(PlayerController playerController)
     {
         mPlayerController = playerController;
@@ -28,11 +28,13 @@ public class PlayerStateAttack : IPlayerState
             return;
         }
         
-        if (GameManager.Instance.Input.AttackInput && bIsComboActive)
+        // 공격 입력과 콤보 활성화 체크
+        if ((GameManager.Instance.Input.AttackInput) && bIsComboActive)
         {
             mPlayerController.PlayerAnimator.SetTrigger("Attack");
+            return;
         }
-        
+
         mPlayerController.Attack();
     }
 

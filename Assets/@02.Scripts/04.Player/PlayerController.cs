@@ -110,6 +110,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     private PlayerStateSkill_4 mPlayerStateSkill_4;
     private PlayerStateInteraction mPlayerStateInteraction;
     private PlayerStateHit mPlayerStateHit;
+    private PlayerStateDefendHit mPlayerStateDefend_Hit;
     private PlayerStateStun mPlayerStateStun;
     private PlayerStateFreeze mPlayerStateFreeze;
     private PlayerStateDead mPlayerStateDead;
@@ -184,6 +185,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         mPlayerStateSkill_4 = new PlayerStateSkill_4();
         mPlayerStateInteraction = new PlayerStateInteraction();
         mPlayerStateHit = new PlayerStateHit();
+        mPlayerStateDefend_Hit = new PlayerStateDefendHit();
         mPlayerStateStun = new PlayerStateStun();
         mPlayerStateFreeze = new PlayerStateFreeze();
         mPlayerStateDead = new PlayerStateDead();
@@ -206,6 +208,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             { PlayerState.Skill_4, mPlayerStateSkill_4 },
             { PlayerState.Interaction, mPlayerStateInteraction },
             { PlayerState.Hit, mPlayerStateHit },
+            { PlayerState.Defend_Hit, mPlayerStateDefend_Hit },
             { PlayerState.Stun, mPlayerStateStun },
             { PlayerState.Freeze, mPlayerStateFreeze },
             { PlayerState.Dead, mPlayerStateDead },
@@ -953,12 +956,12 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
 
         public void OnNext(GameObject value)
         {
-            var enemyController = value.GetComponent<TestEnemyController>();
+            var enemyController = value.GetComponent<EnemyBTController>();
             if (enemyController)
             {
                 //공격력을 PlayerStats에서 가져와 데미지 계산
                 float damage = mPlayerStats.GetAttackDamage();
-                enemyController.SetHit(this);
+                enemyController.SetHit((int)damage);
                 //피해적용 후 흡혈효과 처리
                 mPlayerStats.OnDamageDealt(damage);
             }
@@ -986,6 +989,8 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         
         if (!GameManager.Instance.Input.IsDefending)
         {
+            Defending(false);
+            
             PlayerAnimator.SetBool("Idle", false);
             PlayerAnimator.SetBool("Move", false);
             PlayerAnimator.SetBool("Defend", false);
@@ -994,7 +999,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         else
         {
             // 피해감소 or 방어력 증가 기능 메서드
-            Defending();
+            Defending(true);
             
             // 이동 방어시 하반신(Base Layer) 애니메이션
             if (GameManager.Instance.Input.MoveInput == Vector2.zero)
@@ -1012,9 +1017,18 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         }
     }
     
-    private void Defending()
+    private void Defending(bool isDefending)
     {
-        mPlayerStats.OnGuardSuccess();
+        if (isDefending)
+        {
+            // todo: 임시[테스트용]
+            mPlayerStats.EnableDefenceBuff(90.0f);
+            mPlayerStats.OnGuardSuccess();
+        }
+        else
+        {
+            mPlayerStats.EnableDefenceBuff(0.0f);
+        }
     }
 
     #endregion
@@ -1054,13 +1068,22 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     
     #region 피격/사망 관련 기능
 
-    public void SetHit(TestEnemyController enemyController, Vector3 direction)
+    public void SetHit(EnemyBTController enemyController, Vector3 direction)
     {
+        // 플레이어가 죽은 상태일 때는 공격을 받지 않음
+        if (CurrentPlayerState == PlayerState.Dead)
+        {
+            return; // 사망 상태에서는 더 이상 피해를 받지 않음
+        }
+        
         if (CurrentPlayerState != PlayerState.Hit)
         {
             //PlayerState의 TakeDamage 메서드 사용
-            var enemyPower = enemyController.EnemyAttackPower;
-            mPlayerStats.TakeDamage(enemyPower);
+            var enemyPower = enemyController.AttackBehaviorAsset as MeleeAttackBehavior;
+            if (enemyPower != null)
+            {
+                mPlayerStats.TakeDamage(enemyPower.Damage);
+            }
         }
         
         // 체력 UI 업데이트
@@ -1073,12 +1096,20 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         else
         {
             SetCombatState(true);
-            
-            SetPlayerState(PlayerState.Hit);
-            // 방향에 따라 맞는 애니메이션이 없으므로 현재는 효과가 없는 것이나 마찬가지인 상태, 일단 대기
-            // 플레이어 캐릭터의 방향을 회전시켜주는 수동적인 방식을 사용하거나?
-            PlayerAnimator.SetFloat("HitPosX", -direction.x);
-            PlayerAnimator.SetFloat("HitPosY", -direction.z);
+
+            if (CurrentPlayerState == PlayerState.Defend)
+            {
+                SetPlayerState(PlayerState.Defend_Hit);
+            }
+            else
+            {
+                SetPlayerState(PlayerState.Hit);
+                
+                // 방향에 따라 맞는 애니메이션이 없으므로 현재는 효과가 없는 것이나 마찬가지인 상태, 일단 대기
+                // 플레이어 캐릭터의 방향을 회전시켜주는 수동적인 방식을 사용하거나?
+                PlayerAnimator.SetFloat("HitPosX", -direction.x);
+                PlayerAnimator.SetFloat("HitPosY", -direction.z);
+            }
         }
     }
 
