@@ -16,7 +16,13 @@ MonoBehaviour:
   m_Data:
     m_SerializedData: []
   m_GUID: ed0e0a943dfe4844e87cb51890a10c20
-  m_SerializeEntries: []
+  m_SerializeEntries:
+  - m_GUID: 2759fb758351d1a45b3d4fe30b5dedc8
+    m_Address: Assets/@04.Sprites/02.UI/BuffIcon
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Buff_Icons
+    FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: eda3e4f7b76b45141b0f737aa1a49998, type: 2}
   m_SchemaSet:

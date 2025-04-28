@@ -1,9 +1,11 @@
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using Events.HUD;
 using Events.Player;
 using R3;
 using TMPro;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
 using UnityEngine.UI;
 
 public sealed class PlayerStatusPresenter : HudPresenterBase
@@ -18,7 +20,8 @@ public sealed class PlayerStatusPresenter : HudPresenterBase
     [SerializeField] BuffSlotView mBuffSlotPrefab;
 
     ObjectPool<BuffSlotView> mPool;
-    readonly Dictionary<int, BuffSlotView> mBuffSlots = new();
+    private Dictionary<int, BuffSlotView> mBuffSlots = new();
+    private Dictionary<int, Sprite> mBuffIconMap = null;
 
     void Awake()
     {
@@ -28,6 +31,7 @@ public sealed class PlayerStatusPresenter : HudPresenterBase
     void Start()
     {
         subscribeEvents();
+        setBuffSprites().Forget();
     }
 
     void subscribeEvents()
@@ -56,29 +60,53 @@ public sealed class PlayerStatusPresenter : HudPresenterBase
 
         /* ─── 버프 아이콘 ─── */
         R3EventBus.Instance.Receive<BuffAdded>()
-            .Subscribe(e => AddBuff(e))
+            .Subscribe(e => addBuff(e))
             .AddTo(mCD);
 
         R3EventBus.Instance.Receive<BuffEnded>()
-            .Subscribe(e => RemoveBuff(e.ID))
+            .Subscribe(e => removeBuff(e.ID))
             .AddTo(mCD);
     }
 
     /* ────── Buff helpers ────── */
-    void AddBuff(BuffAdded buffInfo)
+    async UniTaskVoid addBuff(BuffAdded buffInfo)
     {
+        await setBuffSprites();
+
         if (mBuffSlots.ContainsKey(buffInfo.ID))
         {
-            mBuffSlots[buffInfo.ID].Bind(buffInfo);
+            mBuffSlots[buffInfo.ID].Bind(buffInfo, mBuffIconMap[buffInfo.ID]);
             return;
         }
 
         var buffSlot = mPool.Rent();
-        buffSlot.Bind(buffInfo);
+        buffSlot.Bind(buffInfo, mBuffIconMap[buffInfo.ID]);
         mBuffSlots[buffInfo.ID] = buffSlot;
     }
 
-    void RemoveBuff(int id)
+    async UniTask setBuffSprites()
+    {
+        if (mBuffIconMap != null)
+        {
+            return;
+        }
+
+        var list = new List<Sprite>();
+        var handle = Addressables.LoadAssetsAsync<Sprite>(
+                    "Buff_Icons",
+                    sp => list.Add(sp));
+        await handle.Task;
+
+        mBuffIconMap = new();
+        foreach (var sp in list)
+        {
+            int id = int.Parse(sp.name.Split('_')[1]); // "icon_101"
+            mBuffIconMap[id] = sp;
+        }
+        Addressables.Release(handle);
+    }
+
+    void removeBuff(int id)
     {
         if (!mBuffSlots.TryGetValue(id, out var buffSlot))
         {

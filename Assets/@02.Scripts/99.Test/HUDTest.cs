@@ -11,7 +11,10 @@ public class HUDTest: MonoBehaviour
 {
     [SerializeField] private CanvasGroup mTestButtonGroup;
     [Header("Minimap")]
-    [SerializeField] private GameObject mEnemy;
+    [SerializeField] private GameObject mEnemyDummy;
+    [SerializeField] private GameObject mPortalDummy;
+    [SerializeField] private GameObject mShopDummy;
+    [SerializeField] private GameObject mBossDummy;
     [Header("Difficulty")]
     [SerializeField] private int mDifficultyLevel = 1;
     [SerializeField] private float mDifficultyProgress = 0;
@@ -87,17 +90,23 @@ public class HUDTest: MonoBehaviour
         mTestButtonGroup.blocksRaycasts = mIsTestButtonGroupActive;
     }
 
-    public void OnToggleEnemyExist()
+    public void OnToggleMinimapIcon()
     {
         if (mIsSpawned)
         {
             mIsSpawned = false;
-            R3EventBus.Instance.Publish(new EnemyDied(mEnemy.transform));
+            R3EventBus.Instance.Publish(new EnemyDied(mEnemyDummy.transform));
+            R3EventBus.Instance.Publish(new BossDied(mBossDummy.transform));
+            R3EventBus.Instance.Publish(new PortalClosed(mPortalDummy.transform));
+            R3EventBus.Instance.Publish(new ShopClosed(mShopDummy.transform));
         }
         else
         {
             mIsSpawned = true;
-            R3EventBus.Instance.Publish(new EnemySpawned(mEnemy.transform));
+            R3EventBus.Instance.Publish(new EnemySpawned(mEnemyDummy.transform));
+            R3EventBus.Instance.Publish(new BossSpawned(mBossDummy.transform));
+            R3EventBus.Instance.Publish(new PortalSpawned(mPortalDummy.transform));
+            R3EventBus.Instance.Publish(new ShopSpawned(mShopDummy.transform));
         }
     }
 

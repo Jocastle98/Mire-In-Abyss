@@ -2158,7 +2158,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mTestButtonGroup: {fileID: 4569593639698706983}
-  mEnemy: {fileID: 0}
+  mEnemyDummy: {fileID: 0}
+  mPortalDummy: {fileID: 0}
+  mShopDummy: {fileID: 0}
+  mBossDummy: {fileID: 0}
   mDifficultyLevel: 1
   mDifficultyProgress: 0
   mQuestTitle: "\uC2EC\uC5F0\uC758 \uBB38\uC9C0\uAE30 \uCC98\uCE58"
@@ -2604,7 +2607,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mHpBarUI: {fileID: 3239532410529465896}
-  mHpText: {fileID: 3235087071986947136}
+  mHpText: {fileID: 591786070513097064}
   mExpBarUI: {fileID: 2118679925543990350}
   mLevelText: {fileID: 3235087071986947136}
   mBuffRoot: {fileID: 3310967999416716746}
@@ -4811,7 +4814,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 4543430404126736197}
         m_TargetAssemblyTypeName: HUDTest, Assembly-CSharp
-        m_MethodName: OnToggleEnemyExist
+        m_MethodName: OnToggleMinimapIcon
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -6824,6 +6827,17 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: f884d260bd2837d46851e8a70a43e87f, type: 3}
+--- !u!114 &591786070513097064 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3552388828553460601, guid: f884d260bd2837d46851e8a70a43e87f, type: 3}
+  m_PrefabInstance: {fileID: 4141882956812362257}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!224 &1092443413774398037 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 3914701087482269764, guid: f884d260bd2837d46851e8a70a43e87f, type: 3}

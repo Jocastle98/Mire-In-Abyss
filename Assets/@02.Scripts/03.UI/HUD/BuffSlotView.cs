@@ -26,12 +26,12 @@ public sealed class BuffSlotView : MonoBehaviour
     {
         progressBuffCoolTime();
     }
-    public void Bind(BuffAdded buffInfo)
+    public void Bind(BuffAdded buffInfo, Sprite sprite)
     {
         if (mID != buffInfo.ID)
         {
             mID = buffInfo.ID;
-            setSpriteAsync(buffInfo.ID);
+            mBuffImage.sprite = sprite;
         }
 
         mBuffImageBG.color = buffInfo.IsDebuff ? mDebuffColor : mBuffColor;
@@ -51,30 +51,6 @@ public sealed class BuffSlotView : MonoBehaviour
                 PublishBuffEnd();
             }
         }
-    }
-
-    async void setSpriteAsync(int id)
-    {
-        //TODO: 버프 이미지 로드, 어드레서블 추가
-        /* if (mCacheBuffSpriteDict.TryGetValue(id, out var sp))
-        {
-            mBuffImage.sprite = sp;
-            return;
-        }
-
-        string address = $"Buff/{id}";
-        AsyncOperationHandle<Sprite> h = Addressables.LoadAssetAsync<Sprite>(address);
-        await h.Task;
-
-        if (h.Status == AsyncOperationStatus.Succeeded)
-        {
-            mCacheBuffSpriteDict[id] = h.Result;
-            mBuffImage.sprite = h.Result;
-        }
-        else
-        {
-            Debug.LogWarning($"Buff icon {id} not found.");
-        } */
     }
 
     private void PublishBuffEnd()
