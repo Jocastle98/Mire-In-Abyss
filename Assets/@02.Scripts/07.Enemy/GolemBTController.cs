@@ -12,8 +12,8 @@ public class GolemBTController : MonoBehaviour
     private bool mbIsDead;
 
     [Header("감지 설정")]
-    [SerializeField] private float mDetectRadius = 15f;
-    [SerializeField] private float mDetectAngle  = 120f; // 시야 각도
+    [SerializeField] private float    mDetectRadius = 15f;
+    [SerializeField] private float    mDetectAngle  = 120f;
     [SerializeField] private LayerMask mPlayerMask;
     private Transform mTarget;
 
@@ -22,18 +22,25 @@ public class GolemBTController : MonoBehaviour
 
     [Header("공격 전략")]
     [SerializeField] private ScriptableObject mAttackBehaviorAsset;
-    private GolemAttackBehavior mAttackBehavior;
+    private GolemAttackBehavior        mAttackBehavior;
+
+    [Header("임팩트 장판")]
+    [SerializeField] private GameObject ImpactIndicatorPrefab;
+    [SerializeField] private LayerMask  ImpactHitLayer;
+
+    private GameObject currentIndicator;
+    private Material   indicatorMat;
 
     private NavMeshAgent mAgent;
-    private Animator mAnim;
-    private BTNode mRoot;
-    private bool mbIsAttacking;
-    private bool mbIsHit;
+    private Animator     mAnim;
+    private BTNode       mRoot;
+    private bool         mbIsAttacking;
+    private bool         mbIsHit;
 
     void Awake()
     {
-        mAgent = GetComponent<NavMeshAgent>();
-        mAnim  = GetComponent<Animator>();
+        mAgent          = GetComponent<NavMeshAgent>();
+        mAnim           = GetComponent<Animator>();
         mAttackBehavior = mAttackBehaviorAsset as GolemAttackBehavior;
     }
 
@@ -41,11 +48,11 @@ public class GolemBTController : MonoBehaviour
     {
         mCurrentHealth = mMaxHealth;
 
-        // 1. Dead
         var deadSeq = new BTSequence(
             new BTCondition(() => mbIsDead),
-            new BTAction(() => {
-                ResetBools();
+            new BTAction(() =>
+            {
+                ClearAllBools();
                 mAnim.SetTrigger("Dead");
                 mAgent.isStopped = true;
                 mAgent.enabled   = false;
@@ -53,11 +60,11 @@ public class GolemBTController : MonoBehaviour
             })
         );
 
-        // 2. Hit
         var hitSeq = new BTSequence(
             new BTCondition(() => mbIsHit),
-            new BTAction(() => {
-                ResetBools();
+            new BTAction(() =>
+            {
+                ClearAllBools();
                 mAnim.SetTrigger("Hit");
                 StartCoroutine(HitFlash());
                 mAgent.isStopped = true;
@@ -65,62 +72,72 @@ public class GolemBTController : MonoBehaviour
             })
         );
 
-        // 3. Detect
         var detectCond = new BTCondition(DetectPlayer);
 
-        // 4. Impact ▶ 5. Swing ▶ 6. Trace ▶ 7. Patrol ▶ 8. Idle
         var impactSeq = new BTSequence(
-            new BTCondition(() => !mbIsAttacking && mAttackBehavior != null && mAttackBehavior.CanImpact(transform, mTarget)),
-            new BTAction(() => {
-                mbIsAttacking = true;
-                ResetBools();
+            new BTCondition(() =>
+                !mbIsAttacking
+             && mAttackBehavior != null
+             && mAttackBehavior.CanImpact(transform, mTarget)
+            ),
+            new BTAction(() =>
+            {
+                mbIsAttacking    = true;
+                ClearAllBools();
                 mAgent.isStopped = true;
-                mAnim.SetBool("Trace", false);
                 mAttackBehavior.Attack(transform, mTarget);
             })
         );
 
         var swingSeq = new BTSequence(
-            new BTCondition(() => !mbIsAttacking && mAttackBehavior !=
-                null && mAttackBehavior.CanSwing(transform, mTarget)),
-            new BTAction(() => {
-                mbIsAttacking = true;
-                ResetBools();
+            new BTCondition(() =>
+                !mbIsAttacking
+             && mAttackBehavior != null
+             && mAttackBehavior.CanSwing(transform, mTarget)
+            ),
+            new BTAction(() =>
+            {
+                mbIsAttacking    = true;
+                ClearAllBools();
                 mAgent.isStopped = true;
-                mAnim.SetBool("Trace", false);
                 mAttackBehavior.Attack(transform, mTarget);
             })
         );
 
-        var traceSeq = new BTAction(() => {
+        var traceSeq = new BTAction(() =>
+        {
             if (mbIsAttacking || mTarget == null) return;
             float d = Vector3.Distance(transform.position, mTarget.position);
-            if (d > mAttackBehavior.SwingRange && d > mAttackBehavior.ImpactRange)
+            if (d > mAttackBehavior.SwingRange
+             && d > mAttackBehavior.ImpactRange)
             {
-                ResetBools();
+                ClearAllBools();
                 mAnim.SetBool("Trace", true);
                 mAgent.isStopped = false;
                 mAgent.SetDestination(mTarget.position);
             }
         });
 
-        var patrolSeq = new BTAction(() => {
+        var patrolSeq = new BTAction(() =>
+        {
             if (mbIsAttacking) return;
-            ResetBools();
+            ClearAllBools();
             mAnim.SetBool("Patrol", true);
             mAgent.isStopped = false;
-            if (!mAgent.pathPending &&
-                (mAgent.remainingDistance <= mAgent.stoppingDistance || !mAgent.hasPath))
+            if (!mAgent.pathPending
+             && (mAgent.remainingDistance <= mAgent.stoppingDistance
+              || !mAgent.hasPath))
             {
                 Vector3 rnd = Random.insideUnitSphere * mPatrolRadius + transform.position;
-                if (NavMesh.SamplePosition(rnd, out var hit, mPatrolRadius, NavMesh.AllAreas))
-                    mAgent.SetDestination(hit.position);
+                if (NavMesh.SamplePosition(rnd, out var h, mPatrolRadius, NavMesh.AllAreas))
+                    mAgent.SetDestination(h.position);
             }
         });
 
-        var idleSeq = new BTAction(() => {
+        var idleSeq = new BTAction(() =>
+        {
             if (mbIsAttacking) return;
-            ResetBools();
+            ClearAllBools();
             mAnim.SetBool("Idle", true);
             mAgent.isStopped = true;
         });
@@ -136,11 +153,11 @@ public class GolemBTController : MonoBehaviour
 
     void Update() => mRoot.Tick();
 
-    private void ResetBools()
+    private void ClearAllBools()
     {
-        mAnim.SetBool("Trace", false);
+        mAnim.SetBool("Trace",  false);
         mAnim.SetBool("Patrol", false);
-        mAnim.SetBool("Idle", false);
+        mAnim.SetBool("Idle",   false);
     }
 
     private bool DetectPlayer()
@@ -192,11 +209,10 @@ public class GolemBTController : MonoBehaviour
         }
     }
 
-    // StateMachineBehaviour(OnStateExit) 에서 호출
     public void OnAttackAnimationExit()
     {
         mbIsAttacking = false;
-        ResetBools();
+        ClearAllBools();
         if (mTarget != null)
         {
             mAnim.SetBool("Trace", true);
@@ -210,16 +226,80 @@ public class GolemBTController : MonoBehaviour
         }
     }
 
+    // === 애니메이션 이벤트 핸들러 ===
+
+    public void OnImpactIndicator()
+    {
+        if (ImpactIndicatorPrefab == null || mTarget == null) return;
+        Vector3 pos = mTarget.position;
+        currentIndicator = Instantiate(
+            ImpactIndicatorPrefab, 
+            pos, 
+            Quaternion.Euler(90f,0f,0f)
+        );
+        indicatorMat = currentIndicator.GetComponent<Renderer>().material;
+        StartCoroutine(IndicatorRoutine());
+    }
+
+    private IEnumerator IndicatorRoutine()
+    {
+        float t        = 0f;
+        float charge   = mAttackBehavior.ImpactChargeTime;
+        float diameter = mAttackBehavior.ImpactRange * 2f;
+
+        while (t < charge)
+        {
+            t += Time.deltaTime;
+            float p = Mathf.Clamp01(t / charge);
+            currentIndicator.transform.localScale = Vector3.one * (diameter * p);
+            Color c = indicatorMat.color;
+            c.a = p;
+            indicatorMat.color = c;
+            yield return null;
+        }
+
+        Color fc = indicatorMat.color;
+        fc.a = 1f;
+        indicatorMat.color = fc;
+    }
+
+    public void OnImpactLand()
+    {
+        Collider[] hits = Physics.OverlapSphere(
+            transform.position, 
+            mAttackBehavior.ImpactRange, 
+            ImpactHitLayer
+        );
+        foreach (var col in hits)
+            if (col.TryGetComponent<GolemBTController>(out var e))
+                e.SetHit(mAttackBehavior.ImpactDamage);
+        if (currentIndicator != null)
+            Destroy(currentIndicator, 0.5f);
+        currentIndicator = null;
+        indicatorMat     = null;
+    }
+
+    public void OnSwingAttack()
+    {
+        Collider[] hits = Physics.OverlapSphere(
+            transform.position, 
+            mAttackBehavior.SwingRange, 
+            ImpactHitLayer
+        );
+        foreach (var col in hits)
+            if (col.TryGetComponent<GolemBTController>(out var e))
+                e.SetHit(mAttackBehavior.SwingDamage);
+    }
+
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireSphere(transform.position, mDetectRadius);
 
-        // 시야 각도 표시 (양쪽 레이)
-        Vector3 leftDir  = Quaternion.Euler(0, -mDetectAngle * 0.5f, 0) * transform.forward;
-        Vector3 rightDir = Quaternion.Euler(0,  mDetectAngle * 0.5f, 0) * transform.forward;
-        Gizmos.DrawRay(transform.position, leftDir * mDetectRadius);
-        Gizmos.DrawRay(transform.position, rightDir * mDetectRadius);
+        Vector3 l = Quaternion.Euler(0,-mDetectAngle*0.5f,0)*transform.forward;
+        Vector3 r = Quaternion.Euler(0, mDetectAngle*0.5f,0)*transform.forward;
+        Gizmos.DrawRay(transform.position, l*mDetectRadius);
+        Gizmos.DrawRay(transform.position, r*mDetectRadius);
 
         if (mAttackBehavior != null)
         {

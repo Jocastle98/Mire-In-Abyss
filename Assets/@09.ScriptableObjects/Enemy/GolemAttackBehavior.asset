@@ -12,13 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2f5b0d21fd8a4ab286e41a66e1cae99a, type: 3}
   m_Name: GolemAttackBehavior
   m_EditorClassIdentifier: 
-  SwingRange: 3
-  SwingDamage: 20
-  ImpactRange: 6
-  ImpactDamage: 35
-  ImpactChargeTime: 1.5
-  ImpactCooldown: 10
-  ImpactHitLayer:
-    serializedVersion: 2
-    m_Bits: 256
-  IndicatorPrefab: {fileID: 0}
+  mSwingRange: 3
+  mSwingDamage: 20
+  mImpactRange: 6
+  mImpactDamage: 35
+  mImpactChargeTime: 1.5
+  mImpactCooldown: 10
