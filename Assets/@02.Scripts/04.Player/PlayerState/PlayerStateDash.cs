@@ -17,23 +17,18 @@ public class PlayerStateDash : IPlayerState
 
         mCameraCenterDirection = mPlayerController.SetDashDirection();
         mLookDirection = new Vector3(mCameraCenterDirection.x, 0, mCameraCenterDirection.z);
-        
         mPlayerController.transform.rotation = Quaternion.LookRotation(mLookDirection);
-        mPlayerController.Dash();
+        mPlayerController.StartDash(mCameraCenterDirection);
     }
 
     public void OnUpdate()
     {
-        if (mPlayerController == null)
-        {
-            return;
-        }
         
-        mPlayerController?.Dashing(mCameraCenterDirection);
     }
 
     public void OnExit()
     {
+        mPlayerController?.StopDash();
         mPlayerController = null;
     }
 }

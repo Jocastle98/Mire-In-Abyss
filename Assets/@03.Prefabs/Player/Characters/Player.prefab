@@ -1609,25 +1609,48 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0ddcd4a207e3fd544be43345cd4807de, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mRotationSmoothTime: 0.12
+  mPlayerStats: {fileID: 4749783104172799161}
+  mSpeed: 0
   mSpeedChangeRate: 10
+  mRotationSmoothTime: 0.12
   mGravity: -9.81
   mJumpHeight: 5
   mJumpTimeout: 0.5
+  mJumpTimeoutDelta: 0
   mFallTimeout: 0.15
+  mFallTimeoutDelta: 0
   mRollDistance: 8
+  mRollFunctionDuration: 0.3
+  mRollTimeout: 3
+  mRollTimeoutDelta: 0
   mDashDistance: 10
-  mbIsGrounded: 1
-  mGroundedOffset: -0.15
-  mGroundedRadius: 0.3
+  mDashFunctionDuration: 0.3
+  mDashTimeout: 5
+  mDashTimeoutDelta: 0
+  mAttackTimeout: 1
+  mAttackTimeoutDelta: 0
   mGroundLayers:
     serializedVersion: 2
     m_Bits: 8
+  mGroundedOffset: -0.15
+  mGroundedRadius: 0.3
+  mInCombatTimeout: 10
+  mInCombatTimeoutDelta: 0
+  mbInCombat: 0
+  mInteractableLayers:
+    serializedVersion: 2
+    m_Bits: 128
+  mInteractableRadius: 3
+  mDetectedInteractables:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  mActiveInteractables: []
   mRightHandTransform: {fileID: 1561646755167969338}
   mLeftHandTransform: {fileID: 5870613848163703736}
-  mPlayerStats: {fileID: 4749783104172799161}
   mVerticalVelocity: 0
-  mSpeed: 0
 --- !u!1 &3080968844867647087
 GameObject:
   m_ObjectHideFlags: 0

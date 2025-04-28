@@ -20,23 +20,26 @@ public class PlayerStateFall : IPlayerState
             return;
         }
         
-        if (mPlayerController.IsGrounded)
+        if (!mPlayerController.bIsGrounded)
         {
-            mPlayerController.SetPlayerState(PlayerState.Land);
-        }
-        else
-        {
-            mPlayerController?.Fall();
+            if (GameManager.Instance.Input.DashInput && mPlayerController.DashTimeoutDelta < 0.0f)
+            {
+                mPlayerController.SetPlayerState(PlayerState.Dash);
+                return;
+            }
             
             if (GameManager.Instance.Input.AttackInput)
             {
-                mPlayerController?.SetPlayerState(PlayerState.Attack);
+                mPlayerController.SetPlayerState(PlayerState.Attack);
+                return;
             }
             
-            if (GameManager.Instance.Input.DashInput)
-            {
-                mPlayerController?.SetPlayerState(PlayerState.Dash);
-            }
+            mPlayerController.Fall();
+        }
+        else
+        {
+            mPlayerController.SetPlayerState(PlayerState.Land);
+            return;
         }
     }
 
