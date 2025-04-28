@@ -86,6 +86,9 @@ public class GolemBTController : MonoBehaviour
             ),
             new BTAction(() =>
             {
+                Vector3 lookPos = mTarget.position;
+                lookPos.y = transform.position.y;
+                transform.rotation = Quaternion.LookRotation((lookPos - transform.position).normalized);
                 mbIsAttacking    = true;
                 ClearAllBools();
                 mAgent.isStopped = true;
@@ -101,6 +104,9 @@ public class GolemBTController : MonoBehaviour
             ),
             new BTAction(() =>
             {
+                Vector3 lookPos = mTarget.position;
+                lookPos.y = transform.position.y;
+                transform.rotation = Quaternion.LookRotation((lookPos - transform.position).normalized);
                 mbIsAttacking    = true;
                 ClearAllBools();
                 mAgent.isStopped = true;
@@ -184,7 +190,6 @@ public class GolemBTController : MonoBehaviour
     }
 
     #endregion
-    
 
     #region 골렘 Hit 
 
