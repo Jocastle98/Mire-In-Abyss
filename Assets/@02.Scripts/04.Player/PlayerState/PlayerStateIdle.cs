@@ -37,6 +37,11 @@ public class PlayerStateIdle : IPlayerState
                 mPlayerController.SetPlayerState(PlayerState.Skill_4);
                 return;
             }
+            else if (GameManager.Instance.Input.Skill_3Input)
+            {
+                mPlayerController.SetPlayerState(PlayerState.Skill_3);
+                return;
+            }
             
             if (GameManager.Instance.Input.RollInput && mPlayerController.RollTimeoutDelta < 0.0f)
             {

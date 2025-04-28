@@ -1088,7 +1088,6 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         {
             SetCombatState(true);
             
-            
             if (CurrentPlayerState == PlayerState.Defend)
             {
                 PlayerAnimator.SetTrigger("DefendHit");
@@ -1166,6 +1165,23 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     public bool CheckSkillReset()
     {
         return mPlayerStats.OnSkillUse();
+    }
+
+    #endregion
+
+    #region 스킬_3 관련 기능
+
+    public void WhirlwindTest()
+    {
+        StartCoroutine(WhirlwindTestCorutine());
+    }
+
+    private IEnumerator WhirlwindTestCorutine()
+    {
+        PlayerAnimator.Play("Skill_3", 0, 0.2f);
+        
+        yield return new WaitForSeconds(5.0f);
+        SetPlayerState(PlayerState.Idle);
     }
 
     #endregion
