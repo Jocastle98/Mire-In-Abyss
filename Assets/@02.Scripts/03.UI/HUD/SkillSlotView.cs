@@ -21,8 +21,12 @@ public sealed class SkillSlotView : MonoBehaviour
     {
         mSkillCooldownTime = cooldownTime;
         mSkillTimer = 0;
-        mSkillCoolMask.fillAmount = 0;
 
+        
+        if(mSkillCoolMask != null)
+        {
+            mSkillCoolMask.fillAmount = 0;
+        }
         if (mSkillKeyText != null)
         {
             mSkillKeyText.text = keyCode.ToString();

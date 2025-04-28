@@ -61,7 +61,7 @@ public sealed class PlayerStatusPresenter : HudPresenterBase
 
         /* ─── 버프 아이콘 ─── */
         R3EventBus.Instance.Receive<BuffAdded>()
-            .Subscribe(e => addBuff(e))
+            .Subscribe(e => addBuff(e).Forget())
             .AddTo(mCD);
 
         R3EventBus.Instance.Receive<BuffEnded>()

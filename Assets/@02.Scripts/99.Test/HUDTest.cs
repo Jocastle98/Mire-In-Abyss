@@ -1,6 +1,7 @@
 using System;
 using Events.Abyss;
 using Events.Combat;
+using Events.HUD;
 using Events.Player;
 using Events.Quest;
 using UIHUDEnums;
@@ -50,6 +51,9 @@ public class HUDTest : MonoBehaviour
     [SerializeField] private int mBuffDuration;
     [SerializeField] private bool mBuffIsDebuff;
 
+    [Header("Toast")]
+    [SerializeField] private string mToastMessage;
+
     private bool mIsTestButtonGroupActive = false;
     DateTime mStartUtc;
     private int mLastQuestID = -1;
@@ -92,11 +96,11 @@ public class HUDTest : MonoBehaviour
     {
         if(Input.GetKeyDown(KeyCode.LeftShift))
         {
-            R3EventBus.Instance.Publish(new SkillUsed(3));
+            R3EventBus.Instance.Publish(new SkillUsed(4));
         }
         if(Input.GetKeyDown(KeyCode.F))
         {
-            R3EventBus.Instance.Publish(new SkillUsed(4));
+            R3EventBus.Instance.Publish(new SkillUsed(5));
         }
     }
     public void OnTestButtonToggle()
@@ -197,5 +201,10 @@ public class HUDTest : MonoBehaviour
     public void OnBuffAdded()
     {
         R3EventBus.Instance.Publish(new BuffAdded(mBuffID, mBuffDuration, mBuffIsDebuff));
+    }
+
+    public void OnToastPopup()
+    {
+        R3EventBus.Instance.Publish(new ToastPopup(mToastMessage));
     }
 }

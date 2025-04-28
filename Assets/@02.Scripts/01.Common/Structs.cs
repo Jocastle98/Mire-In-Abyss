@@ -209,4 +209,13 @@ namespace Events.HUD
         public readonly int ID;
         public BuffEnded(int id) => ID = id;
     }
+
+    public readonly struct ToastPopup
+    {
+        public readonly string Message;
+        public readonly float Duration;
+        public readonly Color Color;
+        public ToastPopup(string message, float duration = 2f, Color color = default)
+            => (Message, Duration, Color) = (message, duration, color);
+    }
 }
