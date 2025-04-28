@@ -1,5 +1,4 @@
-﻿// GolemAttackBehavior.cs
-using UnityEngine;
+﻿using UnityEngine;
 
 [CreateAssetMenu(menuName = "AI/Attack Behaviors/Golem")]
 public class GolemAttackBehavior : ScriptableObject, IAttackBehavior
@@ -15,15 +14,12 @@ public class GolemAttackBehavior : ScriptableObject, IAttackBehavior
     [SerializeField] private float mImpactCooldown   = 10f;
 
     private float mLastImpactTime = -Mathf.Infinity;
-
-    // ── 외부 참조용 프로퍼티 ──
     public float SwingRange       => mSwingRange;
     public int   SwingDamage      => mSwingDamage;
     public float ImpactRange      => mImpactRange;
     public int   ImpactDamage     => mImpactDamage;
     public float ImpactChargeTime => mImpactChargeTime;
     public float ImpactCooldown   => mImpactCooldown;
-    // ────────────────────────
 
     public bool IsInRange(Transform self, Transform target)
     {
