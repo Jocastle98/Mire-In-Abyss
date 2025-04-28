@@ -88,6 +88,25 @@ namespace Events.Combat
     }
 }
 
+namespace Events.Item
+{
+    public readonly struct ItemAdded
+    {
+        public readonly int ID;
+        public readonly int Count;
+        public ItemAdded(int id, int count = 1)
+            => (ID, Count) = (id, count);
+    }
+
+    public readonly struct ItemSubTracked
+    {
+        public readonly int ID;
+        public readonly int Count;
+        public ItemSubTracked(int id, int count = 1)
+            => (ID, Count) = (id, count);
+    }
+}
+
 namespace Events.Abyss
 {
     public readonly struct PlayTimeChanged

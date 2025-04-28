@@ -2,6 +2,7 @@ using System;
 using Events.Abyss;
 using Events.Combat;
 using Events.HUD;
+using Events.Item;
 using Events.Player;
 using Events.Quest;
 using UIHUDEnums;
@@ -53,6 +54,10 @@ public class HUDTest : MonoBehaviour
 
     [Header("Toast")]
     [SerializeField] private string mToastMessage;
+
+    [Header("Item")]
+    [SerializeField] private int mItemID;
+    [SerializeField] private int mItemCount;
 
     private bool mIsTestButtonGroupActive = false;
     DateTime mStartUtc;
@@ -206,5 +211,15 @@ public class HUDTest : MonoBehaviour
     public void OnToastPopup()
     {
         R3EventBus.Instance.Publish(new ToastPopup(mToastMessage));
+    }
+
+    public void OnItemAdded()
+    {
+        R3EventBus.Instance.Publish(new ItemAdded(mItemID, mItemCount));
+    }
+
+    public void OnItemSubTracked()
+    {
+        R3EventBus.Instance.Publish(new ItemSubTracked(mItemID, mItemCount));
     }
 }

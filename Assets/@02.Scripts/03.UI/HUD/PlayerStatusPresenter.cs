@@ -72,7 +72,10 @@ public sealed class PlayerStatusPresenter : HudPresenterBase
     /* ────── Buff helpers ────── */
     async UniTaskVoid addBuff(BuffAdded buffInfo)
     {
-        await setBuffSprites();
+        if (mBuffIconMap == null)
+        {
+            await setBuffSprites();
+        }
 
         if (mBuffSlots.ContainsKey(buffInfo.ID))
         {
@@ -87,29 +90,19 @@ public sealed class PlayerStatusPresenter : HudPresenterBase
 
     async UniTask setBuffSprites()
     {
-        if (mBuffIconMap != null)
-        {
-            return;
-        }
-
-        var list = new List<Sprite>();
+        mBuffIconMap = new();
         var handle = Addressables.LoadAssetsAsync<Sprite>
         (
             "Buff_Icons",
-            sp => list.Add(sp)
-        );
-        await handle.Task;
-
-        if (handle.Status == AsyncOperationStatus.Succeeded)
-        {
-            mBuffIconMap = new();
-            foreach (var sp in list)
+            sp => 
             {
                 int id = int.Parse(sp.name.Split('_')[1]); // "icon_101"
                 mBuffIconMap[id] = sp;
             }
-        }
-        else
+        );
+        await handle.Task;
+
+        if (handle.Status != AsyncOperationStatus.Succeeded)
         {
             Debug.LogError("Failed to load buff icons");
         }
@@ -135,5 +128,6 @@ public sealed class PlayerStatusPresenter : HudPresenterBase
             mPool.Return(v);
         }
         mBuffSlots.Clear();
+        mBuffIconMap = null;
     }
 }

@@ -29,6 +29,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - Buff_Icons
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5052bc7dba8044d48a166a2d81ee1695
+    m_Address: Assets/@04.Sprites/02.UI/ItemIcon
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Item_Icons
+    FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: eda3e4f7b76b45141b0f737aa1a49998, type: 2}
   m_SchemaSet:
