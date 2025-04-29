@@ -16,42 +16,60 @@ public class CameraController : MonoBehaviour
     // 공중 시야 제한 완화(90로도 하면 공격감지 콜라이더에 문제 생김)
     private float mAirTopClamp = 89f;
     private float mAirBottomClamp = -89f;
-    
+
     // cinemachine
     private float mCinemachineTargetYaw;
     private float mCinemachineTargetPitch;
     private bool mbIsGround;
 
+    // 디버깅용
+    bool mCursorShown;
+
+
     private void Awake()
     {
         Cursor.visible = false;
         Cursor.lockState = CursorLockMode.Locked;
-        
+
         mCinemachineCameraTarget = GetComponent<CinemachineVirtualCamera>().Follow.gameObject;
         mCinemachineTargetYaw = mCinemachineCameraTarget.transform.rotation.eulerAngles.y;
     }
-    
+
     private void LateUpdate()
     {
-        SetCursor();
+        // 디버깅용
+        if (Input.GetKeyDown(KeyCode.BackQuote))    // ` 키 (1 왼쪽에 있는 거)
+        {
+            toggleCursor(!mCursorShown);
+        }
+
+
         CameraRotation();
     }
 
-    private void SetCursor()
+    // 디버깅용
+    void toggleCursor(bool show)
     {
-        if (GameManager.Instance.Input.CursorToggleInput)
+        mCursorShown = show;
+
+        if (show)
         {
-            Cursor.visible = !Cursor.visible;
-            Cursor.lockState = Cursor.visible ? CursorLockMode.None : CursorLockMode.Locked;
+            Cursor.lockState = CursorLockMode.None;  // 1) 먼저 락 해제
+            Cursor.visible = true;                 // 2) 그다음 보이게
+        }
+        else
+        {
+            Cursor.visible = false;                // 1) 먼저 숨김
+            Cursor.lockState = CursorLockMode.Locked;// 2) 그다음 잠금
         }
     }
-    
-    
+
+
     public void SendPlayerGrounded(bool isGround)
     {
         mbIsGround = isGround;
     }
-    
+
     private void CameraRotation()
     {
         if (GameManager.Instance.Input.LookInput.sqrMagnitude >= mThreshold)
@@ -59,7 +77,7 @@ public class CameraController : MonoBehaviour
             mCinemachineTargetYaw += GameManager.Instance.Input.LookInput.x * mRotationSensitivity;
             mCinemachineTargetPitch -= GameManager.Instance.Input.LookInput.y * mRotationSensitivity;
         }
-    
+
         mCinemachineTargetYaw = ClampAngle(mCinemachineTargetYaw, float.MinValue, float.MaxValue);
         if (mbIsGround)
         {
@@ -69,7 +87,7 @@ public class CameraController : MonoBehaviour
         {
             mCinemachineTargetPitch = ClampAngle(mCinemachineTargetPitch, mAirBottomClamp, mAirTopClamp);
         }
-        
+
         mCinemachineCameraTarget.transform.rotation = Quaternion.Euler(mCinemachineTargetPitch + mCameraAngleOverride,
             mCinemachineTargetYaw, 0.0f);
     }

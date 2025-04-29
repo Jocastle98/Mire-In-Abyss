@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 6712445853451970235}
   - component: {fileID: 822825406709607746}
   - component: {fileID: 4303453890276649640}
-  m_Layer: 7
+  m_Layer: 10
   m_Name: WorldSpaceUI - DamageText
   m_TagString: Untagged
   m_Icon: {fileID: 0}

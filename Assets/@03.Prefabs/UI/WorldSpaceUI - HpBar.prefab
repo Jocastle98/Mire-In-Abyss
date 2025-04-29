@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 9199047794432361427}
   - component: {fileID: 6920218356892600778}
   - component: {fileID: 2217967177814052114}
-  m_Layer: 7
+  m_Layer: 10
   m_Name: FillMask
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -101,7 +101,7 @@ GameObject:
   - component: {fileID: 534169928116471900}
   - component: {fileID: 8243187982711495084}
   - component: {fileID: 2881650128514527051}
-  m_Layer: 7
+  m_Layer: 10
   m_Name: Fill Bar
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -178,7 +178,7 @@ GameObject:
   - component: {fileID: 6562677522642415631}
   - component: {fileID: 3200584918932635190}
   - component: {fileID: 6067585642004928421}
-  m_Layer: 7
+  m_Layer: 10
   m_Name: WorldSpaceUI - HpBar
   m_TagString: Untagged
   m_Icon: {fileID: 0}
