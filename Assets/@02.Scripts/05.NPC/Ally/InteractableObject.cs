@@ -37,7 +37,7 @@ public class InteractableObject : MonoBehaviour
 
     private void Update()
     {
-        if (playerInRange && Input.GetKeyDown(KeyCode.E))
+        if (playerInRange && GameManager.Instance.Input.InteractionInput)
         {
             UIPanelManager.Instance.OpenPanel(mPanelType);
         }

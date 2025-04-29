@@ -6,7 +6,8 @@ using UnityEngine;
 public class PlayerStateDash : IPlayerState
 {
     private PlayerController mPlayerController;
-    private Vector3 mCameraDirection;
+    private Vector3 mCameraCenterDirection;
+    private Vector3 mLookDirection;
     public bool bIsDashing { get; set; }
     
     public void OnEnter(PlayerController playerController)
@@ -14,21 +15,20 @@ public class PlayerStateDash : IPlayerState
         mPlayerController = playerController;
         mPlayerController.PlayerAnimator.SetTrigger("Dash");
 
-        mCameraDirection = mPlayerController.GetCameraForwardDirection();
+        mCameraCenterDirection = mPlayerController.SetDashDirection();
+        mLookDirection = new Vector3(mCameraCenterDirection.x, 0, mCameraCenterDirection.z);
+        mPlayerController.transform.rotation = Quaternion.LookRotation(mLookDirection);
+        mPlayerController.StartDash(mCameraCenterDirection);
     }
 
     public void OnUpdate()
     {
-        if (mPlayerController == null)
-        {
-            return;
-        }
         
-        mPlayerController?.Dash(mCameraDirection);
     }
 
     public void OnExit()
     {
+        mPlayerController?.StopDash();
         mPlayerController = null;
     }
 }
