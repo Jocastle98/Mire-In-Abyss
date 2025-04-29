@@ -1,8 +1,6 @@
 ﻿using System.Collections;
-using PlayerEnums;
 using UnityEngine;
 using UnityEngine.AI;
-
 
 [RequireComponent(typeof(NavMeshAgent))]
 public class EnemyBTController : MonoBehaviour
@@ -27,7 +25,6 @@ public class EnemyBTController : MonoBehaviour
 
     [Header("공격 설정")]
     [SerializeField] private ScriptableObject mAttackBehaviorAsset;
-    public ScriptableObject AttackBehaviorAsset => mAttackBehaviorAsset;
     private IAttackBehavior mAttackBehavior;
 
     [Header("원거리 발사 위치 (원거리 스켈레톤)")]
@@ -254,6 +251,7 @@ public class EnemyBTController : MonoBehaviour
     #endregion
 
     #region Hit & Death 처리
+    
     public void SetHit(int damage)
     {
         if (mbIsDead) return;
@@ -327,13 +325,6 @@ public class EnemyBTController : MonoBehaviour
             mAnim.SetBool("Trace", true);
             mAgent.isStopped = false;
             mAgent.SetDestination(mTarget.position);
-            
-            // todo: 임시[테스트용], 플레이어에게 피해 주기
-            var player = mTarget.GetComponent<PlayerController>();
-            if (player != null && player.CurrentPlayerState != PlayerState.Dead)
-            {
-                player.SetHit(this, transform.position - mTarget.position);
-            } // => 플레이어 사망 시 패트롤로 전환하는 기능 있어야 함
         }
         else
         {

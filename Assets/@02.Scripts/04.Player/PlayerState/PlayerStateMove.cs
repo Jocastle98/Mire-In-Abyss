@@ -34,7 +34,7 @@ public class PlayerStateMove : IPlayerState
 
         if (mPlayerController.bIsGrounded)
         {
-            if (GameManager.Instance.Input.Skill_1Input)
+            if (GameManager.Instance.Input.Skill_1Input && mPlayerController.Skill_1_TimeoutDelta < 0.0f)
             {
                 mPlayerController.SetPlayerState(PlayerState.Skill_1);
                 return;
