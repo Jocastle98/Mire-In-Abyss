@@ -26,7 +26,7 @@ public class PlayerStateJump : IPlayerState
             return;
         }
         
-        if (GameManager.Instance.Input.AttackInput)
+        if (GameManager.Instance.Input.AttackInput || GameManager.Instance.Input.IsAttacking)
         {
             mPlayerController.SetPlayerState(PlayerState.Attack);
             return;

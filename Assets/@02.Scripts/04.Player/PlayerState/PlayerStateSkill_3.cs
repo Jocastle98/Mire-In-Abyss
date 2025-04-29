@@ -9,19 +9,18 @@ public class PlayerStateSkill_3 : IPlayerState
     public void OnEnter(PlayerController playerController)
     {
         mPlayerController = playerController;
-        mPlayerController.PlayerAnimator.SetTrigger("Skill_3");
-        mPlayerController.PlayerAnimator.SetBool("IsSkill_3", true);
-        mPlayerController.WhirlwindTest();
+        mPlayerController.PlayerAnimator.SetTrigger("Skill");
+        mPlayerController.PlayerAnimator.SetInteger("Skill_Index", 3);
     }
 
     public void OnUpdate()
     {
-        mPlayerController.Move();
+        
     }
 
     public void OnExit()
     {
-        mPlayerController.PlayerAnimator.SetBool("IsSkill_3", false);
+        mPlayerController.PlayerAnimator.SetInteger("Skill_Index", 0);
         mPlayerController = null;
     }
 }

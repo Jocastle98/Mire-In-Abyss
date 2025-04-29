@@ -9,7 +9,8 @@ public class PlayerStateSkill_2 : IPlayerState
     public void OnEnter(PlayerController playerController)
     {
         mPlayerController = playerController;
-        mPlayerController.PlayerAnimator.SetBool("Skill_2", true);
+        mPlayerController.PlayerAnimator.SetTrigger("Skill");
+        mPlayerController.PlayerAnimator.SetInteger("Skill_Index", 2);
     }
 
     public void OnUpdate()
@@ -19,7 +20,7 @@ public class PlayerStateSkill_2 : IPlayerState
 
     public void OnExit()
     {
-        mPlayerController.PlayerAnimator.SetBool("Skill_2", false);
+        mPlayerController.PlayerAnimator.SetInteger("Skill_Index", 0);
         mPlayerController = null;
     }
 }

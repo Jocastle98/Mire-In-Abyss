@@ -236,6 +236,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         }
         CurrentPlayerState = newPlayerState;
         mPlayerStates[CurrentPlayerState].OnEnter(this);
+        Debug.Log(CurrentPlayerState);
     }
 
     #region 감지 관련 기능
@@ -929,18 +930,21 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         }
     }
     
-    // 공격 애니메이션의 공격 모션 시작 시 호출 메서드
+    // 공격 애니메이션 중 공격 행동 시작 시점에 호출되는 메서드
     public void MeleeAttackStart()
     {
         mWeaponController.AttackStart();
+        mPlayerStateAttack.HasReceivedNextAttackInput = false;
+        mPlayerStateAttack.bIsComboActive = true;
     }
 
-    // 공격 애니메이션의 공격 모션 종료 시 호출되는 메서드
+    // 공격 애니메이션 중 공격 행동 종료 시점에 호출되는 메서드
     public void MeleeAttackEnd()
     {
         mWeaponController.AttackEnd();
     }
 
+    // 공격 애니메이션의 종료 직전 호출되는 메서드
     public void EndCombo()
     {
         mPlayerStateAttack.bIsComboActive = false;
@@ -1016,7 +1020,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         if (isDefending)
         {
             // todo: 임시[테스트용]
-            mPlayerStats.EnableDefenceBuff(90.0f);
+            // mPlayerStats.EnableDefenceBuff(90.0f);
             mPlayerStats.OnGuardSuccess();
         }
         else
@@ -1165,23 +1169,6 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     public bool CheckSkillReset()
     {
         return mPlayerStats.OnSkillUse();
-    }
-
-    #endregion
-
-    #region 스킬_3 관련 기능
-
-    public void WhirlwindTest()
-    {
-        StartCoroutine(WhirlwindTestCorutine());
-    }
-
-    private IEnumerator WhirlwindTestCorutine()
-    {
-        PlayerAnimator.Play("Skill_3", 0, 0.2f);
-        
-        yield return new WaitForSeconds(5.0f);
-        SetPlayerState(PlayerState.Idle);
     }
 
     #endregion
