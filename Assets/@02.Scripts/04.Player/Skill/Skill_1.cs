@@ -41,11 +41,12 @@ public class Skill_1 : MonoBehaviour
     {
         if (other.gameObject.layer == LayerMask.NameToLayer("Enemy"))
         {
-            Debug.Log(other.gameObject.name);
             var enemy = other.gameObject.GetComponent<EnemyBTController>();
             if (enemy != null)
             {
                 enemy.SetHit((int)(mDamage * mDamageMultiplier));
+                
+                // Todo: 흡혈효과 처리 추가해야함
             }
         }
     }
