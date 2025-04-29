@@ -7,14 +7,21 @@ public class PlayerAnimatorStateSkill : StateMachineBehaviour
     override public void OnStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
         PlayerController playerController = animator.gameObject.GetComponent<PlayerController>();
-        
-        if (GameManager.Instance.Input.MoveInput == Vector2.zero)
+
+        if (playerController.bIsGrounded)
         {
-            playerController.SetPlayerState(PlayerState.Idle);
+            if (GameManager.Instance.Input.MoveInput == Vector2.zero)
+            {
+                playerController.SetPlayerState(PlayerState.Idle);
+            }
+            else
+            {
+                playerController.SetPlayerState(PlayerState.Move);
+            }
         }
         else
         {
-            playerController.SetPlayerState(PlayerState.Move);
+            playerController.SetPlayerState(PlayerState.Fall);
         }
     }
 }
