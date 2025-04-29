@@ -22,48 +22,17 @@ public class CameraController : MonoBehaviour
     private float mCinemachineTargetPitch;
     private bool mbIsGround;
 
-    // 디버깅용
-    bool mCursorShown;
-
 
     private void Awake()
     {
-        Cursor.visible = false;
-        Cursor.lockState = CursorLockMode.Locked;
-
         mCinemachineCameraTarget = GetComponent<CinemachineVirtualCamera>().Follow.gameObject;
         mCinemachineTargetYaw = mCinemachineCameraTarget.transform.rotation.eulerAngles.y;
     }
 
     private void LateUpdate()
     {
-        // 디버깅용
-        if (Input.GetKeyDown(KeyCode.BackQuote))    // ` 키 (1 왼쪽에 있는 거)
-        {
-            toggleCursor(!mCursorShown);
-        }
-
-
         CameraRotation();
     }
-
-    // 디버깅용
-    void toggleCursor(bool show)
-    {
-        mCursorShown = show;
-
-        if (show)
-        {
-            Cursor.lockState = CursorLockMode.None;  // 1) 먼저 락 해제
-            Cursor.visible = true;                 // 2) 그다음 보이게
-        }
-        else
-        {
-            Cursor.visible = false;                // 1) 먼저 숨김
-            Cursor.lockState = CursorLockMode.Locked;// 2) 그다음 잠금
-        }
-    }
-
 
     public void SendPlayerGrounded(bool isGround)
     {
