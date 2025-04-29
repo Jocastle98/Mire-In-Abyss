@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2398510401068035719}
   - component: {fileID: 8658994351602136009}
-  m_Layer: 5
+  m_Layer: 10
   m_Name: Enemy HpBar_Root
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -58,7 +58,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1698040634118465738}
   - component: {fileID: 3192398223243132635}
-  m_Layer: 5
+  m_Layer: 10
   m_Name: DamageText_Root
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -106,7 +106,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8657148550712491713}
   - component: {fileID: 6718757026236942938}
-  m_Layer: 5
+  m_Layer: 10
   m_Name: World Space UI Manager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -167,7 +167,7 @@ GameObject:
   - component: {fileID: 4162258706698416627}
   - component: {fileID: 357334597860915012}
   - component: {fileID: 5230087294918473447}
-  m_Layer: 5
+  m_Layer: 10
   m_Name: "World\_Space\_UI"
   m_TagString: Untagged
   m_Icon: {fileID: 0}
