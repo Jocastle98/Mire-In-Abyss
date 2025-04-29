@@ -20,7 +20,7 @@ public sealed class PlayerStatusPresenter : HudPresenterBase
     [SerializeField] RectTransform mBuffRoot;
     [SerializeField] BuffSlotView mBuffSlotPrefab;
 
-    ObjectPool<BuffSlotView> mPool;
+    private ObjectPool<BuffSlotView> mPool;
     private Dictionary<int, BuffSlotView> mBuffSlots = new();
     private Dictionary<int, Sprite> mBuffIconMap = null;
 

@@ -21,7 +21,7 @@ public sealed class MiniMapPresenter : HudPresenterBase
 
     private Camera mMainCam;
     private RectTransform mPlayerIconRT;
-    private readonly Dictionary<int, MiniMapIcon> mIcons = new(); // instanceID → icon
+    private readonly Dictionary<int, MiniMapIcon> mIconsMap = new(); // instanceID → icon
     private List<ObjectPool<MiniMapIcon>> mIconPools = new();
     private float mWorldToUIScale;
 
@@ -37,7 +37,7 @@ public sealed class MiniMapPresenter : HudPresenterBase
     void OnEnable()
     {
         var playerIcon = mIconPools[(int)MiniMapIconType.Player].Rent();
-        mIcons[mPlayer.GetInstanceID()] = playerIcon;
+        mIconsMap[mPlayer.GetInstanceID()] = playerIcon;
         
         // 플레이어 아이콘 회전을 위한 할당
         mPlayerIconRT = playerIcon.GetComponent<RectTransform>();
@@ -88,7 +88,7 @@ public sealed class MiniMapPresenter : HudPresenterBase
         mPlayerIconRT.rotation = Quaternion.Euler(playerIconRotation);
         
         // 아이콘 업데이트
-        foreach (var pair in mIcons)
+        foreach (var pair in mIconsMap)
         {
             Transform target = pair.Value.Target; // 커스텀 속성
             if (target == null)
@@ -123,27 +123,27 @@ public sealed class MiniMapPresenter : HudPresenterBase
     {
         var icon = mIconPools[(int)iconType].Rent();
         icon.Init(target);
-        mIcons[target.GetInstanceID()] = icon;
+        mIconsMap[target.GetInstanceID()] = icon;
     }
 
     private void despawnIcon(Transform target, MiniMapIconType iconType)
     {
-        if (mIcons.TryGetValue(target.GetInstanceID(), out var icon))
+        if (mIconsMap.TryGetValue(target.GetInstanceID(), out var icon))
         {
             icon.ResetIcon();
             mIconPools[(int)iconType].Return(icon);
-            mIcons.Remove(target.GetInstanceID());
+            mIconsMap.Remove(target.GetInstanceID());
         }
     }
 
     protected override void OnDisable()
     {
         base.OnDisable();
-        foreach (var ico in mIcons.Values)
+        foreach (var ico in mIconsMap.Values)
         {
             ico.ResetIcon();
         }
 
-        mIcons.Clear();
+        mIconsMap.Clear();
     }
 }

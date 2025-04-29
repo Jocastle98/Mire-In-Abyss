@@ -9,10 +9,10 @@ using UnityEngine.ResourceManagement.AsyncOperations;
 
 public sealed class SkillSlotsPresenter : HudPresenterBase
 {
-    [SerializeField] SkillSlotView slotPrefab;
+    [SerializeField] SkillSlotView mSlotPrefab;
     [SerializeField] RectTransform mSkillSlotRoot;
     [SerializeField] List<SkillSlotView> mDefaultSkillSlots = new();
-    readonly Dictionary<int, SkillSlotView> slots = new();
+    private readonly Dictionary<int, SkillSlotView> mSlots = new();
 
 
     void Start()
@@ -27,7 +27,7 @@ public sealed class SkillSlotsPresenter : HudPresenterBase
         R3EventBus.Instance.Receive<SkillUsed>()
             .Subscribe(e =>
             {
-                if (slots.TryGetValue(e.ID, out var slot))
+                if (mSlots.TryGetValue(e.ID, out var slot))
                     slot.SkillUsed();
             })
             .AddTo(mCD);
@@ -36,7 +36,7 @@ public sealed class SkillSlotsPresenter : HudPresenterBase
         R3EventBus.Instance.Receive<SkillUpdated>()
             .Subscribe(e =>
             {
-                if (slots.TryGetValue(e.ID, out var slot))
+                if (mSlots.TryGetValue(e.ID, out var slot))
                     slot.Bind(e.CooldownTime, e.KeyCode);
             })
             .AddTo(mCD);
@@ -52,15 +52,15 @@ public sealed class SkillSlotsPresenter : HudPresenterBase
         for (int i = 0; i < mDefaultSkillSlots.Count; i++)
         {
             mDefaultSkillSlots[i].Bind(skillInfos[i].CooldownTime, skillInfos[i].KeyCode, skillIcons[skillInfos[i].ID]);
-            slots[skillInfos[i].ID] = mDefaultSkillSlots[i];
+            mSlots[skillInfos[i].ID] = mDefaultSkillSlots[i];
         }
 
         // 추가 스킬 정보 등록
         for (int i = mDefaultSkillSlots.Count; i < skillInfos.Count; i++)
         {
-            var slot = Instantiate(slotPrefab, mSkillSlotRoot);
+            var slot = Instantiate(mSlotPrefab, mSkillSlotRoot);
             slot.Bind(skillInfos[i].CooldownTime, skillInfos[i].KeyCode, skillIcons[skillInfos[i].ID]);
-            slots[skillInfos[i].ID] = slot;
+            mSlots[skillInfos[i].ID] = slot;
         }
 
     }
@@ -108,10 +108,10 @@ public sealed class SkillSlotsPresenter : HudPresenterBase
     protected override void OnDisable()
     {
         base.OnDisable();
-        foreach (var s in slots.Values)
+        foreach (var s in mSlots.Values)
         {
             Destroy(s.gameObject);
         }
-        slots.Clear();
+        mSlots.Clear();
     }
 }

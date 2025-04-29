@@ -14,13 +14,16 @@ namespace Events.Player
             => (Current, Max) = (current, max);
     }
 
-    public readonly struct CurrencyChanged
+    public readonly struct GoldChanged
     {
         public readonly int Gold;
+        public GoldChanged(int gold) => Gold = gold;
+    }
+    
+    public readonly struct SoulChanged
+    {
         public readonly int Soul;
-
-        public CurrencyChanged(int gold, int soul)
-            => (Gold, Soul) = (gold, soul);
+        public SoulChanged(int soul) => Soul = soul;
     }
 
     public readonly struct BuffAdded

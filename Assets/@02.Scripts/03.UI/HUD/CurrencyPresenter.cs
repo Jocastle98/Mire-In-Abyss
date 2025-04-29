@@ -16,17 +16,11 @@ public sealed class CurrencyPresenter : HudPresenterBase
 
     private void subscribeEvents()
     {
-        R3EventBus.Instance.Receive<CurrencyChanged>()
-            .Subscribe(e =>
-            {
-                setCurrencyText(e.Gold, e.Soul);
-            })
+        R3EventBus.Instance.Receive<GoldChanged>()
+            .Subscribe(e => mGoldText.text = e.Gold.ToString())
             .AddTo(mCD);
-    }
-
-    private void setCurrencyText(int gold, int soul)
-    {
-        mGoldText.text = gold.ToString();
-        mSoulText.text = soul.ToString();
+        R3EventBus.Instance.Receive<SoulChanged>()
+            .Subscribe(e => mSoulText.text = e.Soul.ToString())
+            .AddTo(mCD);
     }
 }

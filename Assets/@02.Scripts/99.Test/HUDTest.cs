@@ -175,7 +175,8 @@ public class HUDTest : MonoBehaviour
 
     public void OnCurrencyChanged()
     {
-        R3EventBus.Instance.Publish(new CurrencyChanged(mGold, mSoul));
+        R3EventBus.Instance.Publish(new GoldChanged(mGold));
+        R3EventBus.Instance.Publish(new SoulChanged(mSoul));
     }
 
     public void OnBossHpChanged()
