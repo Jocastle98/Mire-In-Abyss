@@ -34,7 +34,7 @@ public sealed class ItemSummaryPresenter : HudPresenterBase
         setItemSprites().Forget();
     }
 
-    void subscribeEvents()
+    private void subscribeEvents()
     {
         R3EventBus.Instance.Receive<ItemAdded>()
             .Subscribe(e => addItem(e).Forget())
@@ -44,7 +44,7 @@ public sealed class ItemSummaryPresenter : HudPresenterBase
             .AddTo(mCD);
     }
 
-    async UniTaskVoid addItem(ItemAdded itemInfo)
+    private async UniTaskVoid addItem(ItemAdded itemInfo)
     {
         if (mItemIconMap == null)
         {
@@ -87,7 +87,7 @@ public sealed class ItemSummaryPresenter : HudPresenterBase
             {
                 mPool.Return(mSlotsMap[itemInfo.ID]);
                 mSlotsMap.Remove(itemInfo.ID);
-                TryFlushPendingItems();
+                tryFlushPendingItems();
             }
             else
             {
@@ -96,7 +96,7 @@ public sealed class ItemSummaryPresenter : HudPresenterBase
         }
     }
 
-    private void TryFlushPendingItems()
+    private void tryFlushPendingItems()
     {
         while (mSlotsMap.Count < mMaxMiniViewCount && mPendingItems.Count > 0)
         {
@@ -107,7 +107,7 @@ public sealed class ItemSummaryPresenter : HudPresenterBase
     }
 
 
-    async UniTask setItemSprites()
+    private async UniTask setItemSprites()
     {
         mItemIconMap = new();
         var handle = Addressables.LoadAssetsAsync<Sprite>

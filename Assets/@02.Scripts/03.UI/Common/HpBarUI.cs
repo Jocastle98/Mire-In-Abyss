@@ -6,10 +6,11 @@ using UnityEngine.UI;
 
 [ExecuteAlways]
 [RequireComponent(typeof(RectTransform))]
-public class ProgressBarUI : MonoBehaviour
+public class HpBarUI : MonoBehaviour
 {
     [Header("References")]
     [SerializeField] private RectTransform mFillBarMaskRT;
+    [SerializeField] private RectTransform mBackgroundRT;
     [SerializeField] private GameObject mFillBar;
 
     [Header("Padding (0~1)")]
@@ -20,15 +21,12 @@ public class ProgressBarUI : MonoBehaviour
     [Range(0f, 1f)]
     [Tooltip("Background height에서 이 비율만큼 뺀 값으로 FillBar height를 설정합니다.")]
     [SerializeField] private float mHeightPadding;
-
     private Image mFillImage;
-    private RectTransform mBackgroundRT;
     private RectTransform mFillBarRT;
 
 
     private void Awake()
     {
-        mBackgroundRT = GetComponent<RectTransform>();
         mFillImage = mFillBar.GetComponent<Image>();
         mFillBarRT = mFillBar.GetComponent<RectTransform>();
     }
@@ -61,14 +59,20 @@ public class ProgressBarUI : MonoBehaviour
 
 #if UNITY_EDITOR
     private void OnValidate()
+{
+    // Awake 이전에도 mFillBarRT/MBackgroundRT를 확보
+    if (mFillBar != null && mFillBarRT == null)
+        mFillBarRT = mFillBar.GetComponent<RectTransform>();
+
+    if (mBackgroundRT == null)
+        mBackgroundRT = GetComponent<RectTransform>();
+
+    // 예약된 호출
+    EditorApplication.delayCall += () =>
     {
-        EditorApplication.delayCall += () =>
-        {
-            if (this != null)
-            {
-                applyPadding();
-            }
-        };
-    }
+        if (this != null)
+            applyPadding();
+    };
+}
 #endif
 }

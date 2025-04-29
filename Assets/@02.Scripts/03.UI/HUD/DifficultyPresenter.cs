@@ -33,7 +33,7 @@ public sealed class DifficultyPresenter : HudPresenterBase
             .AddTo(mCD);
     }
 
-    void updateDifficultyUI(DifficultyChanged e)
+    private void updateDifficultyUI(DifficultyChanged e)
     {
         // TODO: 게임 난이도 기획 사항과 합일 시키기 (해당 역할을 담당하는 곳에서 값을 받아오는 방식으로 연결)
         // TODO: 난이도 이미지와 연결
@@ -44,13 +44,13 @@ public sealed class DifficultyPresenter : HudPresenterBase
         mNextDifficultyLevelText.text = getTempLevelText(e.DifficultyLevel + 1);
     }
 
-    void updateDifficultyProgressUI(DifficultyProgressed e)
+    private void updateDifficultyProgressUI(DifficultyProgressed e)
     {
         // TODO: 난이도 끝에 도달했을 시 ProgressBar 처리
         mLevelProgressBar.SetProgress(e.DifficultyProgress);
     }
 
-    void updateElpseUI(PlayTimeChanged e)
+    private void updateElpseUI(PlayTimeChanged e)
     {
         mAbyssElapseText.text = $"{e.Elapsed:mm\\:ss}";
     }

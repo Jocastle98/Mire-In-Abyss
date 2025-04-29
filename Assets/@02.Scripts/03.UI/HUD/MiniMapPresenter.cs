@@ -52,34 +52,6 @@ public sealed class MiniMapPresenter : HudPresenterBase
         mWorldToUIScale = mOtherIconLayer.rect.width / (mMiniMapCam.orthographicSize * 2); // 월드 → UI 스케일
     }
 
-    private void subscribeEvents()
-    {
-        R3EventBus.Instance.Receive<EnemySpawned>()
-            .Subscribe(e => spawnIcon(e.Transform, MiniMapIconType.Enemy))
-            .AddTo(mCD);
-        R3EventBus.Instance.Receive<EnemyDied>()
-            .Subscribe(e => despawnIcon(e.Transform, MiniMapIconType.Enemy))
-            .AddTo(mCD);
-        R3EventBus.Instance.Receive<BossSpawned>()
-            .Subscribe(e => spawnIcon(e.Transform, MiniMapIconType.Boss))
-            .AddTo(mCD);
-        R3EventBus.Instance.Receive<BossDied>()
-            .Subscribe(e => despawnIcon(e.Transform, MiniMapIconType.Boss))
-            .AddTo(mCD);
-        R3EventBus.Instance.Receive<ShopSpawned>()
-            .Subscribe(e => spawnIcon(e.Transform, MiniMapIconType.Shop))
-            .AddTo(mCD);
-        R3EventBus.Instance.Receive<ShopClosed>()
-            .Subscribe(e => despawnIcon(e.Transform, MiniMapIconType.Shop))
-            .AddTo(mCD);
-        R3EventBus.Instance.Receive<PortalSpawned>()
-            .Subscribe(e => spawnIcon(e.Transform, MiniMapIconType.Portal))
-            .AddTo(mCD);
-        R3EventBus.Instance.Receive<PortalClosed>()
-            .Subscribe(e => despawnIcon(e.Transform, MiniMapIconType.Portal))
-            .AddTo(mCD);
-    }
-
     void LateUpdate()
     {
         // 플레이어 아이콘 방향 업데이트
@@ -110,6 +82,34 @@ public sealed class MiniMapPresenter : HudPresenterBase
                 pair.Value.gameObject.SetActive(true);
             }
         }
+    }
+
+    private void subscribeEvents()
+    {
+        R3EventBus.Instance.Receive<EnemySpawned>()
+            .Subscribe(e => spawnIcon(e.Transform, MiniMapIconType.Enemy))
+            .AddTo(mCD);
+        R3EventBus.Instance.Receive<EnemyDied>()
+            .Subscribe(e => despawnIcon(e.Transform, MiniMapIconType.Enemy))
+            .AddTo(mCD);
+        R3EventBus.Instance.Receive<BossSpawned>()
+            .Subscribe(e => spawnIcon(e.Transform, MiniMapIconType.Boss))
+            .AddTo(mCD);
+        R3EventBus.Instance.Receive<BossDied>()
+            .Subscribe(e => despawnIcon(e.Transform, MiniMapIconType.Boss))
+            .AddTo(mCD);
+        R3EventBus.Instance.Receive<ShopSpawned>()
+            .Subscribe(e => spawnIcon(e.Transform, MiniMapIconType.Shop))
+            .AddTo(mCD);
+        R3EventBus.Instance.Receive<ShopClosed>()
+            .Subscribe(e => despawnIcon(e.Transform, MiniMapIconType.Shop))
+            .AddTo(mCD);
+        R3EventBus.Instance.Receive<PortalSpawned>()
+            .Subscribe(e => spawnIcon(e.Transform, MiniMapIconType.Portal))
+            .AddTo(mCD);
+        R3EventBus.Instance.Receive<PortalClosed>()
+            .Subscribe(e => despawnIcon(e.Transform, MiniMapIconType.Portal))
+            .AddTo(mCD);
     }
 
     private bool isOutOfMinimap(Vector3 minimapCamPos)

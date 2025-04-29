@@ -35,7 +35,7 @@ public sealed class PlayerStatusPresenter : HudPresenterBase
         setBuffSprites().Forget();
     }
 
-    void subscribeEvents()
+    private void subscribeEvents()
     {
         /* ─── HP ─── */
         R3EventBus.Instance.Receive<PlayerHpChanged>()
@@ -70,7 +70,7 @@ public sealed class PlayerStatusPresenter : HudPresenterBase
     }
 
     /* ────── Buff helpers ────── */
-    async UniTaskVoid addBuff(BuffAdded buffInfo)
+    private async UniTaskVoid addBuff(BuffAdded buffInfo)
     {
         if (mBuffIconMap == null)
         {
@@ -88,7 +88,7 @@ public sealed class PlayerStatusPresenter : HudPresenterBase
         mBuffSlots[buffInfo.ID] = buffSlot;
     }
 
-    async UniTask setBuffSprites()
+    private async UniTask setBuffSprites()
     {
         mBuffIconMap = new();
         var handle = Addressables.LoadAssetsAsync<Sprite>
@@ -109,7 +109,7 @@ public sealed class PlayerStatusPresenter : HudPresenterBase
         Addressables.Release(handle);
     }
 
-    void removeBuff(int id)
+    private void removeBuff(int id)
     {
         if (!mBuffSlots.TryGetValue(id, out var buffSlot))
         {

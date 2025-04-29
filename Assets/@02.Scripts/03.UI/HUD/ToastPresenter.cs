@@ -34,16 +34,16 @@ public sealed class ToastPresenter : HudPresenterBase
     private void subscribeEvents()
     {
         R3EventBus.Instance.Receive<ToastPopup>()
-                               .Subscribe(EnqueueToast)
-                               .AddTo(mCD);
+            .Subscribe(EnqueueToast)
+            .AddTo(mCD);
     }
 
     /* ─────────────────────────────────────── */
-    void EnqueueToast(ToastPopup popup)
+    private void EnqueueToast(ToastPopup popup)
     {
         if (mActiveCount < mMaxActive)
         {
-            ShowToastAsync(popup).Forget();
+            showToastAsync(popup).Forget();
         }
         else
         {
@@ -51,7 +51,7 @@ public sealed class ToastPresenter : HudPresenterBase
         }
     }
 
-    async UniTaskVoid ShowToastAsync(ToastPopup popup)
+    private async UniTaskVoid showToastAsync(ToastPopup popup)
     {
         mActiveCount++;
 
@@ -69,15 +69,15 @@ public sealed class ToastPresenter : HudPresenterBase
         mPool.Return(view);
         mActiveCount--;
 
-        TryFlushPending();
+        tryFlushPending();
     }
 
     /* ─── 빈칸이 있으면 대기열에서 끌어오기 ─── */
-    void TryFlushPending()
+    private void tryFlushPending()
     {
         while (mActiveCount < mMaxActive && mPending.Count > 0)
         {
-            ShowToastAsync(mPending.Dequeue()).Forget();
+            showToastAsync(mPending.Dequeue()).Forget();
         }
     }
 

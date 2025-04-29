@@ -21,7 +21,7 @@ public sealed class SkillSlotsPresenter : HudPresenterBase
         setSkillInfos().Forget();
     }
 
-    void subscribeEvents()
+    private void subscribeEvents()
     {
         // 스킬 사용 수신
         R3EventBus.Instance.Receive<SkillUsed>()

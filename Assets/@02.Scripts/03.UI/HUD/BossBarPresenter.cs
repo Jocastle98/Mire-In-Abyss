@@ -45,7 +45,7 @@ public sealed class BossBarPresenter : HudPresenterBase
 
     /* ---------- EVENTS ---------- */
 
-    void UpdateHp(BossHpChanged b)
+    private void UpdateHp(BossHpChanged b)
     {
         if (mBossID != b.ID)
         {
@@ -61,11 +61,11 @@ public sealed class BossBarPresenter : HudPresenterBase
         if (!mIsEngaged)
         {
             mIsEngaged = true;
-            ShowAsync().Forget();
+            showAsync().Forget();
         }
     }
 
-    void OnDisengage(BossDisengage b)
+    private void OnDisengage(BossDisengage b)
     {
         if (mBossID != b.ID)
         {
@@ -74,18 +74,18 @@ public sealed class BossBarPresenter : HudPresenterBase
 
         mIsEngaged = false;
         mBossID = -1;
-        HideAsync().Forget();
+        hideAsync().Forget();
     }
 
 
     /* ---------- Animations ---------- */
-    async UniTaskVoid ShowAsync()
+    private async UniTaskVoid showAsync()
     {
         mRootGroup.interactable = true;
         mRootGroup.blocksRaycasts = true;
         await mRootGroup.DOFade(1f, 0.25f).SetEase(Ease.OutSine).ToUniTask();
     }
-    async UniTaskVoid HideAsync()
+    private async UniTaskVoid hideAsync()
     {
         await mRootGroup.DOFade(0f, 0.25f).SetEase(Ease.InSine).ToUniTask();
         mRootGroup.interactable = false;

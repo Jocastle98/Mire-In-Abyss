@@ -47,7 +47,7 @@ public sealed class QuestBoxPresenter : HudPresenterBase
     }
 
 
-    void onQuestAddOrUpdate(TempQuestInfo info)
+    private void onQuestAddOrUpdate(TempQuestInfo info)
     {
         // Completed Quest
         if (info.State == QuestState.Completed)
@@ -90,7 +90,7 @@ public sealed class QuestBoxPresenter : HudPresenterBase
         addPending(info);
     }
 
-    void onQuestComplete(int id)
+    private void onQuestComplete(int id)
     {
         if (mVisibleCards.TryGetValue(id, out var card))
         {
@@ -108,7 +108,7 @@ public sealed class QuestBoxPresenter : HudPresenterBase
         }
     }
 
-    void onQuestRemove(int id)
+    private void onQuestRemove(int id)
     {
         if (mVisibleCards.TryGetValue(id, out var card))
         {
@@ -123,7 +123,7 @@ public sealed class QuestBoxPresenter : HudPresenterBase
     }
 
     /* ============  Helper Methods  =============== */
-    QuestCardView spawnCard(TempQuestInfo info)
+    private QuestCardView spawnCard(TempQuestInfo info)
     {
         var card = mCardPool.Rent();
         card.Bind(info);
@@ -132,7 +132,7 @@ public sealed class QuestBoxPresenter : HudPresenterBase
         return card;
     }
 
-    QuestCardView findFirstCompletedVisible()
+    private QuestCardView findFirstCompletedVisible()
     {
         foreach (var kv in mVisibleCards)
         {
@@ -144,14 +144,14 @@ public sealed class QuestBoxPresenter : HudPresenterBase
         return null;
     }
 
-    void moveVisibleCardToCompleted(QuestCardView card)
+    private void moveVisibleCardToCompleted(QuestCardView card)
     {
         mVisibleCards.Remove(card.QuestInfo.Id);
         mCardPool.Return(card);
         mPendingComplete.Add(card.QuestInfo);
     }
 
-    void addPending(TempQuestInfo info)
+    private void addPending(TempQuestInfo info)
     {
         if (info.State == QuestState.Completed)
         {
@@ -163,7 +163,7 @@ public sealed class QuestBoxPresenter : HudPresenterBase
         }
     }
 
-    void fillVacancyFromPending()
+    private void fillVacancyFromPending()
     {
         while (mVisibleCards.Count < mMaxCardNumber)
         {
@@ -188,7 +188,7 @@ public sealed class QuestBoxPresenter : HudPresenterBase
         }
     }
 
-    void promotePendingToCompleted(int id)
+    private void promotePendingToCompleted(int id)
     {
         // Active 리스트 ⇒ Completed 리스트 이동
         int index = mPendingActive.FindIndex(q => q.Id == id);
@@ -200,7 +200,7 @@ public sealed class QuestBoxPresenter : HudPresenterBase
         }
     }
 
-    void removeFromPendingList(int id)
+    private void removeFromPendingList(int id)
     {
         int index = mPendingActive.FindIndex(q => q.Id == id);
         if (index >= 0)

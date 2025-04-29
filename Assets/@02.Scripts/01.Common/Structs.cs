@@ -89,6 +89,23 @@ namespace Events.Combat
         public readonly int ID;
         public BossDisengage(int id)=>ID=id;
     }
+    public readonly struct DamagePopup
+    {
+        public readonly Vector3 WorldPos;
+        public readonly int     Amount;
+        public readonly Color   Color;
+        public DamagePopup(Vector3 pos,int amt, Color color = default)
+            => (WorldPos,Amount,Color)=(pos,amt,color);
+    }
+    public readonly struct EnemyHpChanged
+    {
+        public readonly Transform Anchor;   // Enemy UI Anchor transform
+        public readonly int Current;
+        public readonly int Max;
+        public EnemyHpChanged(Transform t,int cur,int max)
+            => (Anchor,Current,Max)=(t,cur,max);
+    }
+
 }
 
 namespace Events.Item
@@ -148,7 +165,8 @@ namespace Events.Abyss
     public readonly struct EnemyDied
     {
         public readonly Transform Transform;
-        public EnemyDied(Transform transform) => Transform = transform;
+        public readonly Transform UIAnchor;
+        public EnemyDied(Transform transform, Transform uiAnchor) => (Transform, UIAnchor) = (transform, uiAnchor);
     }
 
     public readonly struct BossSpawned

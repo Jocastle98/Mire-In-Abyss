@@ -59,6 +59,14 @@ public class HUDTest : MonoBehaviour
     [SerializeField] private int mItemID;
     [SerializeField] private int mItemCount;
 
+    [Header("Combat")]
+    [SerializeField] private GameObject mEnemyDummy2;
+    [SerializeField] private GameObject mEnemyDummy2UIAnchor;
+    [SerializeField] private int mEnemyHp;
+    [SerializeField] private int mEnemyMaxHp;
+    [SerializeField] private int mWeaponDamageMin;
+    [SerializeField] private int mWeaponDamageMax;
+
     private bool mIsTestButtonGroupActive = false;
     DateTime mStartUtc;
     private int mLastQuestID = -1;
@@ -121,7 +129,7 @@ public class HUDTest : MonoBehaviour
         if (mIsSpawned)
         {
             mIsSpawned = false;
-            R3EventBus.Instance.Publish(new EnemyDied(mEnemyDummy.transform));
+            R3EventBus.Instance.Publish(new EnemyDied(mEnemyDummy.transform, mEnemyDummy.transform));
             R3EventBus.Instance.Publish(new BossDied(mBossDummy.transform));
             R3EventBus.Instance.Publish(new PortalClosed(mPortalDummy.transform));
             R3EventBus.Instance.Publish(new ShopClosed(mShopDummy.transform));
@@ -222,5 +230,26 @@ public class HUDTest : MonoBehaviour
     public void OnItemSubTracked()
     {
         R3EventBus.Instance.Publish(new ItemSubTracked(mItemID, mItemCount));
+    }
+
+    public void OnAttackDummy()
+    {
+        if(mEnemyHp == mEnemyMaxHp)
+        {
+            R3EventBus.Instance.Publish(new EnemySpawned(mEnemyDummy2.transform));
+        }
+
+        int damage = UnityEngine.Random.Range(mWeaponDamageMin, mWeaponDamageMax);
+        mEnemyHp -= damage;
+        R3EventBus.Instance.Publish(new DamagePopup(mEnemyDummy2.transform.position, damage));
+        if (mEnemyHp < 0)
+        {
+            mEnemyHp = mEnemyMaxHp;
+            R3EventBus.Instance.Publish(new EnemyDied(mEnemyDummy2.transform, mEnemyDummy2UIAnchor.transform));
+        }
+        else
+        {
+            R3EventBus.Instance.Publish(new EnemyHpChanged(mEnemyDummy2UIAnchor.transform, mEnemyHp, mEnemyMaxHp));
+        }
     }
 }
