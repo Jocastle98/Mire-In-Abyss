@@ -1069,7 +1069,13 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     
     #region 피격/사망 관련 기능
 
-    public void SetHit(EnemyBTController enemyController, Vector3 direction)
+    /// <summary>
+    /// 플레이어 캐릭터에 피격 적용하는 메서드
+    /// </summary>
+    /// <param name="enemyAttackPower"> 적의 공격력 </param>
+    /// <param name="enemyTransform"> 적의 위치(현재 사용안해서 없어도 됨) </param>
+    /// <param name="hitPower"> 피격 단계 0 = 살짝 휘청, 1 = 크게 휘청 </param>
+    public void SetHit(int enemyAttackPower, Transform enemyTransform = null, int hitPower = 0)
     {
         // 플레이어가 죽은 상태일 때는 공격을 받지 않음
         if (CurrentPlayerState == PlayerState.Dead)
@@ -1077,12 +1083,8 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             return; // 사망 상태에서는 더 이상 피해를 받지 않음
         }
         
-        /*//PlayerState의 TakeDamage 메서드 사용
-        var enemyPower = enemyController.~~~~~;
-        if (enemyPower != null)
-        {
-            mPlayerStats.TakeDamage(enemyPower.Damage);
-        }*/
+        //PlayerState의 TakeDamage 메서드 사용
+        mPlayerStats.TakeDamage(enemyAttackPower);
         
         // 체력 UI 업데이트
         // GameManager.Instance.SetHP((float)mPlayerStats.GetCurrentHP() / mPlayerStats.GetMaxHP());
@@ -1102,12 +1104,18 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             // 공격 관련 동작들이 끊기지 않도록
             else if(CurrentPlayerState == PlayerState.Idle || CurrentPlayerState == PlayerState.Move)
             {
+                PlayerAnimator.SetFloat("HitPower", hitPower);
                 PlayerAnimator.SetTrigger("Hit");
                 
                 // 방향에 따라 맞는 애니메이션이 없으므로 현재는 효과가 없는 것이나 마찬가지인 상태, 일단 대기
                 // 플레이어 캐릭터의 방향을 회전시켜주는 수동적인 방식을 사용하거나?
-                PlayerAnimator.SetFloat("HitPosX", -direction.x);
-                PlayerAnimator.SetFloat("HitPosY", -direction.z);
+                if (enemyTransform != null)
+                {
+                    Vector3 direction = enemyTransform.transform.position - transform.position;
+                    
+                    PlayerAnimator.SetFloat("HitPosX", -direction.x);
+                    PlayerAnimator.SetFloat("HitPosY", -direction.z);
+                }
             }
         }
     }

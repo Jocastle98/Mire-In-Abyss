@@ -367,7 +367,12 @@ public class EnemyBTController : MonoBehaviour
         if (!(mAttackBehaviorAsset is GolemAttackBehavior golem)) return;
         var hits = Physics.OverlapSphere(transform.position, golem.ImpactRange, ImpactHitLayer);
         foreach (var col in hits)
-            if (col.CompareTag("Player")) Debug.Log("임팩트 데미지 적용");
+            if (col.CompareTag("Player"))
+            {
+                GolemAttackBehavior golemAttackPower = mAttackBehaviorAsset as GolemAttackBehavior;
+                col.GetComponent<PlayerController>().SetHit(golemAttackPower.ImpactDamage, this.transform, 1);
+                Debug.Log("임팩트 데미지 적용");
+            }
         if (currentProjector) Destroy(currentProjector.gameObject, 0.5f);
     }
 
@@ -376,7 +381,12 @@ public class EnemyBTController : MonoBehaviour
         if (!(mAttackBehaviorAsset is GolemAttackBehavior golem)) return;
         var hits = Physics.OverlapSphere(transform.position, golem.SwingRange, ImpactHitLayer);
         foreach (var col in hits)
-            if (col.CompareTag("Player")) Debug.Log("스윙 데미지 적용");
+            if (col.CompareTag("Player"))
+            {
+                GolemAttackBehavior golemAttackPower = mAttackBehaviorAsset as GolemAttackBehavior;
+                col.GetComponent<PlayerController>().SetHit(golemAttackPower.SwingDamage, this.transform, 0);
+                Debug.Log("스윙 데미지 적용");
+            }
     }
     #endregion
 
