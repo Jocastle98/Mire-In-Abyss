@@ -6,14 +6,14 @@ public class InputManager
     public bool CursorToggleInput => mCursorToggleBuffer.ConsumeInputBuffer();
     public Vector2 LookInput { get; private set; }
     public Vector2 MoveInput { get; private set; }
-    public bool SprintInput => mSprintBuffer.IsHolding;
+    public bool SprintInput => mSprintBuffer.bIsHolding;
     private bool mSprintToggled = false;
     public bool JumpInput => mJumpBuffer.ConsumeInputBuffer();
     public bool RollInput => mRollBuffer.ConsumeInputBuffer();
     public bool AttackInput => mAttackBuffer.ConsumeInputBuffer();
-    //public bool IsAttacking => mAttackBuffer.IsHolding;
+    public bool IsAttacking => mAttackBuffer.bIsHolding;
     public bool DefendInput => mDefendBuffer.ConsumeInputBuffer();  // 단발성
-    public bool IsDefending => mDefendBuffer.IsHolding;             // 지속 입력
+    public bool IsDefending => mDefendBuffer.bIsHolding;             // 지속 입력
     public bool ParryInput => mParryBuffer.ConsumeInputBuffer();
     public bool DashInput => mDashBuffer.ConsumeInputBuffer();
     public bool Skill_1Input => mSkill_1Buffer.ConsumeInputBuffer();
@@ -95,7 +95,7 @@ public class InputManager
         SetInputBuffer(mJumpAction, mJumpBuffer);
         SetInputBuffer(mRollAction, mRollBuffer);
         SetInputBuffer(mAttackAction, mAttackBuffer);
-        //mAttackBuffer.SetHold(mAttackAction.IsPressed());
+        mAttackBuffer.SetHold(mAttackAction.IsPressed());
         SetInputBuffer(mDefendAction, mDefendBuffer);
         mDefendBuffer.SetHold(mDefendAction.IsPressed());
         SetInputBuffer(mParryAction, mParryBuffer);

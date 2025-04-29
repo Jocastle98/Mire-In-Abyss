@@ -2,7 +2,6 @@
 using UnityEngine;
 using UnityEngine.AI;
 
-
 [RequireComponent(typeof(NavMeshAgent))]
 public class EnemyBTController : MonoBehaviour
 {
@@ -252,6 +251,7 @@ public class EnemyBTController : MonoBehaviour
     #endregion
 
     #region Hit & Death 처리
+    
     public void SetHit(int damage)
     {
         if (mbIsDead) return;
