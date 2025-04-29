@@ -1,4 +1,5 @@
-﻿using System;
+﻿// DragonAttackBehavior.cs
+using System;
 using UnityEngine;
 
 [CreateAssetMenu(menuName = "AI/Attack Behaviors/Dragon")]
@@ -15,32 +16,44 @@ public class DragonAttackBehavior : ScriptableObject, IAttackBehavior
     [Header("공중 불발사")]
     public float AirFireRange;
 
-    public bool CanBreath(Transform self, Transform target) {
+    public bool CanBreath(Transform self, Transform target)
+    {
         return Time.time >= mLastBreathTime + BreathCooldown
                && Vector3.Distance(self.position, target.position) <= BreathRange;
     }
-    public bool CanTail(Transform self, Transform target) {
+
+    public bool CanTail(Transform self, Transform target)
+    {
         return Vector3.Distance(self.position, target.position) <= TailRange;
     }
-    public bool CanAirFire(Transform self, Transform target) {
+
+    public bool CanAirFire(Transform self, Transform target)
+    {
         return Vector3.Distance(self.position, target.position) <= AirFireRange;
     }
 
     public bool IsInRange(Transform self, Transform target)
     {
-        throw new NotImplementedException();
+        float dist = Vector3.Distance(self.position, target.position);
+        return dist <= BreathRange
+               || dist <= TailRange
+               || dist <= AirFireRange;
     }
 
-    public void Attack(Transform self, Transform target) {
+    public void Attack(Transform self, Transform target)
+    {
         var anim = self.GetComponent<Animator>();
-        if (CanBreath(self, target)) {
+        if (CanBreath(self, target))
+        {
             mLastBreathTime = Time.time;
             anim.SetTrigger("Breath");
         }
-        else if (CanTail(self, target)) {
+        else if (CanTail(self, target))
+        {
             anim.SetTrigger("Tail");
         }
-        else if (CanAirFire(self, target)) {
+        else if (CanAirFire(self, target))
+        {
             anim.SetTrigger("AirFire");
         }
     }

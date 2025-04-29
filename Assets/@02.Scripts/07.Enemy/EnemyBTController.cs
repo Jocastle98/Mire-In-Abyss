@@ -36,6 +36,11 @@ public class EnemyBTController : MonoBehaviour
     [Header("임팩트 설정 (골렘)")]
     [SerializeField] private GameObject ImpactProjectorPrefab;
     [SerializeField] private LayerMask ImpactHitLayer;
+    
+    [Header("드래곤 비행 설정")]
+    [SerializeField] private float mFlightDuration = 10f;
+    private bool mbIsFlying;
+    private float mFlightStartTime;
 
     [Header("렌더러 설정")]
     [SerializeField] private Renderer[] mRenderers;
@@ -185,6 +190,99 @@ public class EnemyBTController : MonoBehaviour
                 }
             });
             engage = new BTSelector(attackSeq, traceSeq);
+        }
+        else if (mAttackBehaviorAsset is DragonAttackBehavior)
+        {
+            var dragon = mAttackBehavior as DragonAttackBehavior;
+
+            // 1) 지상 브레스
+            var breathSeq = new BTSequence(
+                new BTCondition(() => !mbIsFlying && !mbIsAttacking &&
+                                   mTarget != null && dragon.CanBreath(transform, mTarget)),
+                new BTAction(() =>
+                {
+                    mbIsAttacking = true;
+                    ClearAllBools();
+                    mAgent.isStopped = true;
+                    FaceTarget();
+                    mAttackBehavior.Attack(transform, mTarget);
+                })
+            );
+
+            // 2) 지상 꼬리
+            var tailSeq = new BTSequence(
+                new BTCondition(() => !mbIsFlying && !mbIsAttacking &&
+                                   mTarget != null && dragon.CanTail(transform, mTarget)),
+                new BTAction(() =>
+                {
+                    mbIsAttacking = true;
+                    ClearAllBools();
+                    mAgent.isStopped = true;
+                    FaceTarget();
+                    mAttackBehavior.Attack(transform, mTarget);
+                })
+            );
+
+            // 3) 범위 벗어나면 이륙
+            var takeOffSeq = new BTSequence(
+                new BTCondition(() => !mbIsFlying &&
+                                   mTarget != null &&
+                                   Vector3.Distance(transform.position, mTarget.position) > dragon.TailRange),
+                new BTAction(() =>
+                {
+                    mbIsFlying = true;
+                    mFlightStartTime = Time.time;
+                    ClearAllBools();
+                    mAgent.isStopped = true;
+                    mAnim.SetTrigger("TakeOff");
+                })
+            );
+
+            // 4) 공중 공격
+            var airAttackSeq = new BTSequence(
+                new BTCondition(() => mbIsFlying &&
+                                   Time.time < mFlightStartTime + mFlightDuration &&
+                                   mTarget != null && dragon.CanAirFire(transform, mTarget)),
+                new BTAction(() =>
+                {
+                    mbIsAttacking = true;
+                    ClearAllBools();
+                    mAgent.isStopped = true;
+                    FaceTarget();
+                    mAttackBehavior.Attack(transform, mTarget);
+                })
+            );
+
+            // 5) 공중 추적
+            var airTrace = new BTAction(() =>
+            {
+                if (!mbIsFlying || mbIsAttacking || mTarget == null) return;
+                ClearAllBools();
+                mAnim.SetBool("Trace", true);
+                mAgent.isStopped = false;
+                mAgent.SetDestination(mTarget.position);
+            });
+
+            // 6) 착지
+            var landSeq = new BTSequence(
+                new BTCondition(() => mbIsFlying && Time.time >= mFlightStartTime + mFlightDuration),
+                new BTAction(() =>
+                {
+                    mbIsFlying = false;
+                    ClearAllBools();
+                    mAgent.isStopped = true;
+                    mAnim.SetTrigger("Land");
+                })
+            );
+
+            engage = new BTSelector(
+                breathSeq,
+                tailSeq,
+                takeOffSeq,
+                airAttackSeq,
+                airTrace,
+                landSeq
+            );
         }
         else
         {
