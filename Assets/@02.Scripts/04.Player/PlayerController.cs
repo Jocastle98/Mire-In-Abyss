@@ -67,7 +67,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     [Space(10)] 
     [Header("Player Skill_3 Stat")]
     [SerializeField] private float mSkill_3_DamageMultiplier = 2.0f;
-    [SerializeField] private float mSkill_3_Radius = 10.0f;
+    [SerializeField] private float mSkill_3_Radius = 5.0f;
     [SerializeField] private float mSkill_3_Timeout = 12.0f;
     [SerializeField] private float mSkill_3_TimeoutDelta;
     public float Skill_3_TimeoutDelta => mSkill_3_TimeoutDelta;
