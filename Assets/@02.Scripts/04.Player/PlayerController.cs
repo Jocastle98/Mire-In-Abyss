@@ -1295,12 +1295,19 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
                 }
             }
         }
+        
+        mSkill_3_TimeoutDelta = mSkill_3_Timeout;
     }
 
     #endregion
 
     #region 4번 스킬
 
+    private Coroutine mSkill4Coroutine;
+    private Coroutine mCameraCoroutine;
+    private Coroutine mAimAndFireCoroutine;
+    private Coroutine mProjectileCoroutine;
+    
     private float originCameraDistance = 0.0f;
     private bool mbIsCameraResetting = false;
     
@@ -1308,37 +1315,70 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     {
         StartCoroutine(Skill_4());
     }
+
+    public void Stop_Skill_4()
+    {
+        if (mSkill4Coroutine != null)
+        {
+            StopCoroutine(mSkill4Coroutine);
+            mSkill4Coroutine = null;
+        }
+
+        if (mCameraCoroutine != null)
+        {
+            StopCoroutine(mCameraCoroutine);
+            mCameraCoroutine = null;
+        }
+
+        if (mAimAndFireCoroutine != null)
+        {
+            StopCoroutine(mAimAndFireCoroutine);
+            mAimAndFireCoroutine = null;
+        }
+
+        if (mProjectileCoroutine != null)
+        {
+            StopCoroutine(mProjectileCoroutine);
+            mProjectileCoroutine = null;
+        }
+    }
     
     private IEnumerator Skill_4()
     {
-        Coroutine stanceCoroutine = StartCoroutine(Skill_4_Stance());
-        Coroutine cameraCoroutine = StartCoroutine(Skill_4_Camera(true));
-        yield return stanceCoroutine;
-        yield return cameraCoroutine;
+        mSkill4Coroutine = StartCoroutine(Skill_4_Stance());
+        mCameraCoroutine = StartCoroutine(Skill_4_Camera(true));
+        yield return mSkill4Coroutine;
+        yield return mCameraCoroutine;
 
-        Coroutine fireCoroutine = StartCoroutine(Skill_4_AimAndFire());
-        yield return fireCoroutine;
+        mAimAndFireCoroutine = StartCoroutine(Skill_4_AimAndFire());
+        yield return mAimAndFireCoroutine;
     }
     
     private IEnumerator Skill_4_Stance()
     {
-        float jumpHeightCovered = 0.0f;
-        float jumpHeight = 10.0f;
+        Vector3 groundPosition = transform.position;
+        if (Physics.Raycast(transform.position + Vector3.up * 2.0f, Vector3.down, out RaycastHit hit, 100.0f, mGroundLayers))
+        {
+            groundPosition = hit.point;
+        }
+        
         float jumpSpeed = 20.0f;
-
-        while (jumpHeightCovered < jumpHeight)
+        float jumpHeight = 10.0f;
+        float targetHeight = groundPosition.y + jumpHeight;
+        
+        PlayerAnimator.SetBool("Jump", true);
+        
+        while (transform.position.y < targetHeight)
         {
             float jumpAmount = jumpSpeed * Time.deltaTime;
 
-            if (jumpHeightCovered + jumpAmount > jumpHeight)
+            if (transform.position.y + jumpAmount > targetHeight)
             {
-                jumpAmount = jumpHeight - jumpHeightCovered;
+                jumpAmount = targetHeight - transform.position.y;
             }
             
-            PlayerAnimator.SetBool("Jump", true);
-            mCharacterController.Move(transform.up * jumpAmount);
-            jumpHeightCovered += jumpAmount;
             
+            mCharacterController.Move(Vector3.up * jumpAmount);
             yield return null;
         }
         
@@ -1395,6 +1435,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
 
         float timer = 5.0f;
         bool isAttackCompleted = false;
+        Vector3 finalTargetPoint = Vector3.zero;
         
         while (timer > 0.0f)
         {
@@ -1405,11 +1446,16 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             if (Physics.Raycast(ray, out hit, 100.0f, mGroundLayers))
             {
                 rangeIndicator.transform.position = hit.point;
+                finalTargetPoint = hit.point;
             }
 
+            Vector3 cameraForward = GetCameraForwardDirection(true);
+            Quaternion cameraRotation = Quaternion.LookRotation(cameraForward);
+            transform.rotation = Quaternion.Slerp(transform.rotation, cameraRotation, 10.0f * Time.deltaTime);
+            
             if (GameManager.Instance.Input.AttackInput)
             {
-                FireProjectile();
+                FireProjectile(finalTargetPoint);
                 isAttackCompleted = true;
                 break;
             }
@@ -1428,7 +1474,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         // 자동 발사
         if (!isAttackCompleted)
         {
-            FireProjectile();
+            FireProjectile(finalTargetPoint);
         }
         
         Destroy(rangeIndicator);
@@ -1437,29 +1483,19 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         SetCombatState(true);
     }
     
-    private void FireProjectile()
+    private void FireProjectile(Vector3 targetPoint)
     {
-        StartCoroutine(FireProjectileCoroutine());
+        mProjectileCoroutine = StartCoroutine(FireProjectileCoroutine(targetPoint));
+        
+        mSkill_4_TimeoutDelta = mSkill_4_Timeout;
     }
 
-    private IEnumerator FireProjectileCoroutine()
+    private IEnumerator FireProjectileCoroutine(Vector3 targetPoint)
     {
         PlayerAnimator.SetTrigger("Skill");
         PlayerAnimator.SetInteger("Skill_Index", 4);
         
         yield return new WaitForSeconds(0.8f); // 애니메이션 선딜
-        
-        // 발사 로직
-        Vector3 targetPoint;
-        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        if (Physics.Raycast(ray, out RaycastHit hit, 100.0f, mGroundLayers))
-        {
-            targetPoint = hit.point;
-        }
-        else
-        {
-            targetPoint = transform.position + transform.forward * 10.0f;
-        }
         
         GameObject projectilePrefab = Resources.Load<GameObject>("Player/Effects/Skill_4_Projectile");
         if (projectilePrefab == null)
@@ -1468,9 +1504,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         }
         Vector3 firePosition = targetPoint + Vector3.up * 10.0f;
         
-        GameObject projectileObject = GameObject.Instantiate(projectilePrefab, 
-            firePosition, 
-            Quaternion.identity);
+        GameObject projectileObject = GameObject.Instantiate(projectilePrefab, firePosition, Quaternion.identity);
         
         Skill_4 skill_4 = projectileObject.GetComponent<Skill_4>();
         skill_4.Init((int)mPlayerStats.GetAttackDamage(), mSkill_4_DamageMultiplier, mSkill_4_Radius, targetPoint);
@@ -1481,7 +1515,8 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     private void CancelSkill()
     {
         StartCoroutine(Skill_4_Camera(false));
-        // 스킬 취소 로직
+        
+        SetPlayerState(PlayerState.Fall);
     }
     
     #endregion
