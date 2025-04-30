@@ -5,12 +5,12 @@ using UnityEngine;
 public class PlayerStateSkill_4 : IPlayerState
 {
     private PlayerController mPlayerController;
+    public bool bIsSkillActive;
     
     public void OnEnter(PlayerController playerController)
     {
         mPlayerController = playerController;
-        mPlayerController.PlayerAnimator.SetTrigger("Skill");
-        mPlayerController.PlayerAnimator.SetInteger("Skill_Index", 4);
+        mPlayerController.Start_Skill_4();
     }
 
     public void OnUpdate()

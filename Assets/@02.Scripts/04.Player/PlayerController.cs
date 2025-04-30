@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Cinemachine;
 using PlayerEnums;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -54,7 +55,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
 
     [Space(10)] 
     [Header("Player Skill_1 Stat")]
-    [SerializeField] private float mSkill_1_DamageMultiplier = 2.0f;
+    [SerializeField] private float mSkill_1_DamageMultiplier = 1.5f;
     [SerializeField] private float mSkill_1_Distance = 20.0f;
     [SerializeField] private float mSkill_1_Timeout = 10.0f;
     [SerializeField] private float mSkill_1_TimeoutDelta;
@@ -65,14 +66,19 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     
     [Space(10)] 
     [Header("Player Skill_3 Stat")]
-    [SerializeField] private float mSkill_2_DamageMultiplier = 2.0f;
-    [SerializeField] private float mSkill_2_Distance = 10.0f;
-    [SerializeField] private float mSkill_2_Timeout = 12.0f;
-    [SerializeField] private float mSkill_2_TimeoutDelta;
-    public float Skill_2_TimeoutDelta => mSkill_2_TimeoutDelta;
+    [SerializeField] private float mSkill_3_DamageMultiplier = 2.0f;
+    [SerializeField] private float mSkill_3_Radius = 10.0f;
+    [SerializeField] private float mSkill_3_Timeout = 12.0f;
+    [SerializeField] private float mSkill_3_TimeoutDelta;
+    public float Skill_3_TimeoutDelta => mSkill_3_TimeoutDelta;
     
     [Space(10)] 
     [Header("Player Skill_4 Stat")]
+    [SerializeField] private float mSkill_4_DamageMultiplier = 2.5f;
+    [SerializeField] private float mSkill_4_Radius = 5.0f;
+    [SerializeField] private float mSkill_4_Timeout = 30.0f;
+    [SerializeField] private float mSkill_4_TimeoutDelta;
+    public float Skill_4_TimeoutDelta => mSkill_4_TimeoutDelta;
     
     [Space(10)]
     [Header("Player Grouned Check")]
@@ -167,7 +173,10 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
 
     private void FixedUpdate()
     {
-        CalculateGravity();
+        if (CurrentPlayerState != PlayerState.Skill_4)
+        {
+            CalculateGravity();
+        }
     }
 
     /// <summary>
@@ -245,6 +254,8 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         mRollTimeoutDelta = 0.0f;
         mDashTimeoutDelta = 0.0f;
         mSkill_1_TimeoutDelta = 0.0f;
+        mSkill_3_TimeoutDelta = 0.0f;
+        mSkill_4_TimeoutDelta = 0.0f;
     }
 
     /// <summary>
@@ -358,7 +369,8 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
                 {
                     Fall();
                 }
-                else if (CurrentPlayerState == PlayerState.Dash || CurrentPlayerState == PlayerState.Skill_1)
+                else if (CurrentPlayerState == PlayerState.Dash || CurrentPlayerState == PlayerState.Skill_1 ||
+                         CurrentPlayerState == PlayerState.Skill_4)
                 {
                     mVerticalVelocity = 0.0f;
                 }
@@ -395,6 +407,18 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         if (mSkill_1_TimeoutDelta >= 0.0f)
         {
             mSkill_1_TimeoutDelta -= Time.deltaTime;
+        }
+        
+        // Skill_3 관련 Timeout
+        if (mSkill_3_TimeoutDelta >= 0.0f)
+        {
+            mSkill_3_TimeoutDelta -= Time.deltaTime;
+        }
+        
+        // Skill_4 관련 Timeout
+        if (mSkill_4_TimeoutDelta >= 0.0f)
+        {
+            mSkill_4_TimeoutDelta -= Time.deltaTime;
         }
     }
     
@@ -893,8 +917,14 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     // 전투돌입 상태를 설정해주는 메서드
     private void SetCombatState(bool inCombat)
     {
+        Debug.Log("컴뱃 상태 변경");
         mbInCombat = inCombat;
         mInCombatTimeoutDelta = inCombat ? mInCombatTimeout : 0.0f;
+
+        if (mbInCombat)
+        {
+            GameManager.Instance.Input.SprintOff();
+        }
     }
 
     // 플레이어 캐릭터의 공격속도 설정 및 애니메이션에 반영
@@ -907,7 +937,6 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     // 공격 상태 중 캐릭터의 움직임을 설정하는 메서드
     public void Attack()
     {
-        GameManager.Instance.Input.SprintOff();
         SetCombatState(true);
         
         PlayerAnimator.SetBool("Idle", false);
@@ -1000,7 +1029,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
 
     public void Defend()
     {
-        GameManager.Instance.Input.SprintOff();
+        SetCombatState(true);
         
         if (!GameManager.Instance.Input.IsDefending)
         {
@@ -1052,7 +1081,6 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
 
     public void Parry()
     {
-        GameManager.Instance.Input.SprintOff();
         SetCombatState(true);
 
         // 패리 성공 시 행동 메서드
@@ -1211,19 +1239,20 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
 
     private void Skill_1_Fire()
     {
-        Vector3 direction = GetActionDirection(false, false);
-        GameObject prefab = Resources.Load<GameObject>("Player/Effects/SlashProjectileEffect");
-        if (prefab == null)
+        GameObject projectilePrefab = Resources.Load<GameObject>("Player/Effects/SlashProjectileEffect");
+        if (projectilePrefab == null)
         {
             return;
         }
+        Vector3 firePosition = transform.position + transform.forward * 2.0f + Vector3.up;
+        Vector3 direction = GetActionDirection(false, false);
         
-        GameObject slashProjectileObject = GameObject.Instantiate(prefab);
-        slashProjectileObject.transform.position = transform.position + transform.forward * 2.5f + transform.up;
-        slashProjectileObject.transform.rotation = Quaternion.LookRotation(direction);
+        GameObject projectileObject = GameObject.Instantiate(projectilePrefab,
+                                                             firePosition,
+                                                             Quaternion.LookRotation(direction));
         
         // 검기 스크립트에 방향 및 속도 설정
-        Skill_1 skill_1 = slashProjectileObject.GetComponent<Skill_1>();
+        Skill_1 skill_1 = projectileObject.GetComponent<Skill_1>();
         skill_1.Init((int)mPlayerStats.GetAttackDamage(), mSkill_1_DamageMultiplier, mSkill_1_Distance, direction);
 
         mSkill_1_TimeoutDelta = mSkill_1_Timeout;
@@ -1244,9 +1273,217 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
 
     public void Skill_3()
     {
-        
+        SetCombatState(true);
+
+        Invoke("Skill_3_Fire", 0.5f);
     }
 
+    private void Skill_3_Fire()
+    {
+        // 주변 적에게 데미지 주는 로직
+        Collider[] hitColliders = Physics.OverlapSphere(transform.position, mSkill_3_Radius);
+        foreach (var hitCollider in hitColliders)
+        {
+            if (hitCollider.transform.gameObject.layer == LayerMask.NameToLayer("Enemy"))
+            {
+                //TODO: enemy범위 공격 로직
+                // 데미지 처리
+                EnemyBTController enemy = hitCollider.GetComponent<EnemyBTController>();
+                if (enemy != null)
+                {
+                    enemy.SetHit((int)(mPlayerStats.GetAttackDamage() * mSkill_3_DamageMultiplier));
+                }
+            }
+        }
+    }
+
+    #endregion
+
+    #region 4번 스킬
+
+    private float originCameraDistance = 0.0f;
+    private bool mbIsCameraResetting = false;
+    
+    public void Start_Skill_4()
+    {
+        StartCoroutine(Skill_4());
+    }
+    
+    private IEnumerator Skill_4()
+    {
+        Coroutine stanceCoroutine = StartCoroutine(Skill_4_Stance());
+        Coroutine cameraCoroutine = StartCoroutine(Skill_4_Camera(true));
+        yield return stanceCoroutine;
+        yield return cameraCoroutine;
+
+        Coroutine fireCoroutine = StartCoroutine(Skill_4_AimAndFire());
+        yield return fireCoroutine;
+    }
+    
+    private IEnumerator Skill_4_Stance()
+    {
+        float jumpHeightCovered = 0.0f;
+        float jumpHeight = 10.0f;
+        float jumpSpeed = 20.0f;
+
+        while (jumpHeightCovered < jumpHeight)
+        {
+            float jumpAmount = jumpSpeed * Time.deltaTime;
+
+            if (jumpHeightCovered + jumpAmount > jumpHeight)
+            {
+                jumpAmount = jumpHeight - jumpHeightCovered;
+            }
+            
+            PlayerAnimator.SetBool("Jump", true);
+            mCharacterController.Move(transform.up * jumpAmount);
+            jumpHeightCovered += jumpAmount;
+            
+            yield return null;
+        }
+        
+        PlayerAnimator.SetBool("Jump", false);
+    }
+
+    private IEnumerator Skill_4_Camera(bool isStance)
+    {
+        if (!isStance && mbIsCameraResetting)
+        {
+            yield break;
+        }
+        
+        var camera = mMainCamera.GetComponent<CameraController>();
+        var virtualCamera = camera.GetComponent<CinemachineVirtualCamera>();
+        var threePersonFollow = virtualCamera.GetCinemachineComponent<Cinemachine3rdPersonFollow>();
+        
+        if (isStance)
+        {
+            originCameraDistance = threePersonFollow.CameraDistance;
+            mbIsCameraResetting = false;
+            
+            float timeElapsed = 0f;
+            while (timeElapsed < 1.0f)
+            {
+                threePersonFollow.CameraDistance = Mathf.Lerp(originCameraDistance, 20.0f, timeElapsed / 1.0f);
+                timeElapsed += Time.deltaTime;
+                yield return null;
+            }
+
+            threePersonFollow.CameraDistance = 20.0f;
+        }
+        else
+        {
+            mbIsCameraResetting = true;
+            float startDistance = threePersonFollow.CameraDistance;
+            
+            float timeElapsed = 0f;
+            while (timeElapsed < 1.0f)
+            {
+                threePersonFollow.CameraDistance = Mathf.Lerp(startDistance, originCameraDistance, timeElapsed / 1.0f);
+                timeElapsed += Time.deltaTime;
+                yield return null;
+            }
+
+            threePersonFollow.CameraDistance = originCameraDistance;
+        }
+    }
+    
+    private IEnumerator Skill_4_AimAndFire()
+    {
+        GameObject rangeIndicatorObject = Resources.Load<GameObject>("Player/Effects/Skill_4_RangeIndicator");
+        GameObject rangeIndicator = GameObject.Instantiate(rangeIndicatorObject);
+
+        float timer = 5.0f;
+        bool isAttackCompleted = false;
+        
+        while (timer > 0.0f)
+        {
+            timer -= Time.deltaTime;
+            
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            RaycastHit hit;
+            if (Physics.Raycast(ray, out hit, 100.0f, mGroundLayers))
+            {
+                rangeIndicator.transform.position = hit.point;
+            }
+
+            if (GameManager.Instance.Input.AttackInput)
+            {
+                FireProjectile();
+                isAttackCompleted = true;
+                break;
+            }
+            
+            // 취소 입력 시
+            if (GameManager.Instance.Input.DefendInput)
+            {
+                CancelSkill();
+                isAttackCompleted = true;
+                break;
+            }
+            
+            yield return null;
+        }
+        
+        // 자동 발사
+        if (!isAttackCompleted)
+        {
+            FireProjectile();
+        }
+        
+        Destroy(rangeIndicator);
+        rangeIndicator = null;
+        
+        SetCombatState(true);
+    }
+    
+    private void FireProjectile()
+    {
+        StartCoroutine(FireProjectileCoroutine());
+    }
+
+    private IEnumerator FireProjectileCoroutine()
+    {
+        PlayerAnimator.SetTrigger("Skill");
+        PlayerAnimator.SetInteger("Skill_Index", 4);
+        
+        yield return new WaitForSeconds(0.8f); // 애니메이션 선딜
+        
+        // 발사 로직
+        Vector3 targetPoint;
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        if (Physics.Raycast(ray, out RaycastHit hit, 100.0f, mGroundLayers))
+        {
+            targetPoint = hit.point;
+        }
+        else
+        {
+            targetPoint = transform.position + transform.forward * 10.0f;
+        }
+        
+        GameObject projectilePrefab = Resources.Load<GameObject>("Player/Effects/Skill_4_Projectile");
+        if (projectilePrefab == null)
+        {
+            yield break;
+        }
+        Vector3 firePosition = targetPoint + Vector3.up * 10.0f;
+        
+        GameObject projectileObject = GameObject.Instantiate(projectilePrefab, 
+            firePosition, 
+            Quaternion.identity);
+        
+        Skill_4 skill_4 = projectileObject.GetComponent<Skill_4>();
+        skill_4.Init((int)mPlayerStats.GetAttackDamage(), mSkill_4_DamageMultiplier, mSkill_4_Radius, targetPoint);
+        
+        StartCoroutine(Skill_4_Camera(false));
+    }
+
+    private void CancelSkill()
+    {
+        StartCoroutine(Skill_4_Camera(false));
+        // 스킬 취소 로직
+    }
+    
     #endregion
     
     #endregion

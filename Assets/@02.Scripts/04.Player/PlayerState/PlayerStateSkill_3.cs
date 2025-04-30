@@ -15,6 +15,8 @@ public class PlayerStateSkill_3 : IPlayerState
         
         mSkillDirection = mPlayerController.GetCameraForwardDirection(true);
         mPlayerController.transform.rotation = Quaternion.LookRotation(mSkillDirection);
+        
+        mPlayerController.Skill_3();
     }
 
     public void OnUpdate()
