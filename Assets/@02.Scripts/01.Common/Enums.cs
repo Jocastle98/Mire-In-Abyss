@@ -18,7 +18,6 @@ namespace PlayerEnums
         Skill_3,
         Skill_4,
         Interaction,
-        Hit,
         Stun,
         Freeze,
         Dead
@@ -47,5 +46,29 @@ namespace UIPanelEnums
         SoulStoneShop,
         QuestBoard,
         EnterPortal
+    }
+}
+
+namespace UIHUDEnums
+{
+    public enum MiniMapIconType
+    {
+        Player,
+        Enemy,
+        Boss,
+        Shop,
+        Portal,
+    }
+
+    public enum QuestState
+    {
+        Active,
+        Completed
+    }
+
+    public enum ProgressBarImageType
+    {
+        Rect,
+        RoundedRect,
     }
 }

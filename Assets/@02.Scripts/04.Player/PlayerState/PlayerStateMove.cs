@@ -26,7 +26,7 @@ public class PlayerStateMove : IPlayerState
             return;
         }
         
-        if (GameManager.Instance.Input.AttackInput)
+        if (GameManager.Instance.Input.AttackInput || GameManager.Instance.Input.IsAttacking)
         {
             mPlayerController.SetPlayerState(PlayerState.Attack);
             return;
@@ -34,6 +34,27 @@ public class PlayerStateMove : IPlayerState
 
         if (mPlayerController.bIsGrounded)
         {
+            if (GameManager.Instance.Input.Skill_1Input && mPlayerController.Skill_1_TimeoutDelta < 0.0f)
+            {
+                mPlayerController.SetPlayerState(PlayerState.Skill_1);
+                return;
+            }
+            else if (GameManager.Instance.Input.Skill_2Input)
+            {
+                mPlayerController.SetPlayerState(PlayerState.Skill_2);
+                return;
+            }
+            else if (GameManager.Instance.Input.Skill_3Input)
+            {
+                mPlayerController.SetPlayerState(PlayerState.Skill_3);
+                return;
+            }
+            else if (GameManager.Instance.Input.Skill_4Input)
+            {
+                mPlayerController.SetPlayerState(PlayerState.Skill_4);
+                return;
+            }
+            
             if (GameManager.Instance.Input.RollInput && mPlayerController.RollTimeoutDelta < 0.0f)
             {
                 mPlayerController.SetPlayerState(PlayerState.Roll);
