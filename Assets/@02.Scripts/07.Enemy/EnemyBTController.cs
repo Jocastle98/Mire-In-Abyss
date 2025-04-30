@@ -43,6 +43,11 @@ public class EnemyBTController : MonoBehaviour
 
     [Header("렌더러 설정")]
     [SerializeField] private Renderer[] mRenderers;
+    
+    [Header("순찰 대기 시간 (초)")]
+    [SerializeField] private float mPatrolWaitTime = 2f;
+    private float mPatrolWaitTimer = 0f;
+    private bool  mPatrolPointAssigned = false;
 
     private NavMeshAgent mAgent;
     private Animator mAnim;
@@ -292,16 +297,42 @@ public class EnemyBTController : MonoBehaviour
         var patrol = new BTAction(() =>
         {
             if (mbIsAttacking) return;
+
             ClearAllBools();
-            mAnim.SetBool("Patrol", true);
-            mAgent.isStopped = false;
-            if (!mAgent.pathPending && (mAgent.remainingDistance <= mAgent.stoppingDistance || !mAgent.hasPath))
+            if (mAgent.pathPending) return;
+            if (!mPatrolPointAssigned)
             {
                 var rnd = Random.insideUnitSphere * mPatrolRadius + transform.position;
                 if (NavMesh.SamplePosition(rnd, out var hit, mPatrolRadius, NavMesh.AllAreas))
+                {
                     mAgent.SetDestination(hit.position);
+                    mPatrolPointAssigned = true;
+                    mPatrolWaitTimer = 0f;
+                }
+            }
+            else
+            {
+                if (mAgent.remainingDistance <= mAgent.stoppingDistance)
+                {
+                    mAgent.isStopped = true;
+                    mAnim.SetBool("Idle", true);
+                    mPatrolWaitTimer += Time.deltaTime;
+                    if (mPatrolWaitTimer >= mPatrolWaitTime)
+                    {
+                        mPatrolPointAssigned = false;
+                        mAgent.isStopped = false;
+                    }
+                }
+                else
+                {
+                    mAgent.isStopped = false;
+                    mAnim.SetBool("Patrol", true);
+                    mPatrolWaitTimer = 0f;
+                }
             }
         });
+
+
         var idle = new BTAction(() =>
         {
             if (mbIsAttacking) return;

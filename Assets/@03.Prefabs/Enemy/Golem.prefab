@@ -1421,6 +1421,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mMaxHealth: 500
+  mDefense: 5
   mDetectRadius: 12
   mDetectAngle: 360
   mPlayerMask:
@@ -1428,10 +1429,12 @@ MonoBehaviour:
     m_Bits: 256
   mPatrolRadius: 2
   mAttackBehaviorAsset: {fileID: 11400000, guid: 5c66b92f2a3ce7240a25cbb00f7c23a5, type: 2}
+  mFirePoint: {fileID: 0}
   ImpactProjectorPrefab: {fileID: 445203090441399207, guid: 205db9980c8e90b48bb068dd407c43e7, type: 3}
   ImpactHitLayer:
     serializedVersion: 2
     m_Bits: 256
+  mFlightDuration: 10
   mRenderers:
   - {fileID: 4775264756205059350}
   - {fileID: 8464983910157389335}
@@ -1470,8 +1473,8 @@ NavMeshAgent:
   m_Speed: 3.5
   m_Acceleration: 8
   avoidancePriority: 50
-  m_AngularSpeed: 120
-  m_StoppingDistance: 2
+  m_AngularSpeed: 240
+  m_StoppingDistance: 1
   m_AutoTraverseOffMeshLink: 1
   m_AutoBraking: 0
   m_AutoRepath: 1
