@@ -22,7 +22,6 @@ public class CameraController : MonoBehaviour
     private float mCinemachineTargetPitch;
     private bool mbIsGround;
 
-
     private void Awake()
     {
         mCinemachineCameraTarget = GetComponent<CinemachineVirtualCamera>().Follow.gameObject;

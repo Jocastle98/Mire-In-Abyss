@@ -40,7 +40,7 @@ public class PlayerStateAttack : IPlayerState
         mPlayerController.Attack();
 
         // 콤보가 끝날 때 HasReceivedNextAttackInput을 false로 설정
-        if (AttackCount > 3) // 콤보가 끝났을 때
+        if (AttackCount > 3)
         {
             HasReceivedNextAttackInput = false;
             bIsComboActive = false;
