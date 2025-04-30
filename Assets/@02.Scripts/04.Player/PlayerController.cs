@@ -14,10 +14,10 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
 {
     [Header("Reference")]
     [SerializeField] private PlayerStats mPlayerStats;
-
+    
     [Space(10)]
     [Header("Player Movement Stat")]
-    [SerializeField] private float mSpeed;
+    [SerializeField] private float mCurrentSpeed;
     [SerializeField] private float mSpeedChangeRate = 10.0f;
     [SerializeField] private float mRotationSmoothTime = 0.12f;
     
@@ -47,18 +47,32 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     [SerializeField] private float mDashTimeoutDelta;
     public float DashTimeoutDelta => mDashTimeoutDelta;
     private Coroutine mDashCoroutine;
-
-    [FormerlySerializedAs("mAttackSpeed")]
+    
     [Space(10)] 
     [Header("Player Attack Stat")]
     [SerializeField] private float mAttackSpeedMultiplier = 1.0f;
 
-    [Space(10)] [Header("Player Skill_1 Stat")]
+    [Space(10)] 
+    [Header("Player Skill_1 Stat")]
     [SerializeField] private float mSkill_1_DamageMultiplier = 2.0f;
     [SerializeField] private float mSkill_1_Distance = 20.0f;
     [SerializeField] private float mSkill_1_Timeout = 10.0f;
     [SerializeField] private float mSkill_1_TimeoutDelta;
     public float Skill_1_TimeoutDelta => mSkill_1_TimeoutDelta;
+    
+    [Space(10)] 
+    [Header("Player Skill_2 Stat")]
+    
+    [Space(10)] 
+    [Header("Player Skill_3 Stat")]
+    [SerializeField] private float mSkill_2_DamageMultiplier = 2.0f;
+    [SerializeField] private float mSkill_2_Distance = 10.0f;
+    [SerializeField] private float mSkill_2_Timeout = 12.0f;
+    [SerializeField] private float mSkill_2_TimeoutDelta;
+    public float Skill_2_TimeoutDelta => mSkill_2_TimeoutDelta;
+    
+    [Space(10)] 
+    [Header("Player Skill_4 Stat")]
     
     [Space(10)]
     [Header("Player Grouned Check")]
@@ -469,7 +483,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         float targetSpeed = SetSpeed();
         
         // 2. 현재 속도 측정 (수평 이동만 고려) 및 목표 속도로 증감
-        mSpeed = HandleSpeed(targetSpeed);
+        mCurrentSpeed = HandleSpeed(targetSpeed);
         
         // 3. 플레이어 캐릭터 회전
         HandleRotation(allowRotation);
@@ -547,11 +561,11 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         
         if (CurrentPlayerState == PlayerState.Move)
         {
-            mCharacterController.Move(targetDirection.normalized * (mSpeed * Time.deltaTime) + new Vector3(0.0f, mGravity, 0.0f) * Time.deltaTime);
+            mCharacterController.Move(targetDirection.normalized * (mCurrentSpeed * Time.deltaTime) + new Vector3(0.0f, mGravity, 0.0f) * Time.deltaTime);
         }
         else
         {
-            mCharacterController.Move(targetDirection.normalized * (mSpeed * Time.deltaTime) + new Vector3(0.0f, mVerticalVelocity, 0.0f) * Time.deltaTime);
+            mCharacterController.Move(targetDirection.normalized * (mCurrentSpeed * Time.deltaTime) + new Vector3(0.0f, mVerticalVelocity, 0.0f) * Time.deltaTime);
         }
     }
     
@@ -577,7 +591,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         
         // 애니메이션의 이동 속도 블랜드
         float currentSpeed = PlayerAnimator.GetFloat("Speed");
-        float smoothedSpeed = Mathf.Lerp(currentSpeed, mSpeed, Time.deltaTime * mSpeedChangeRate);
+        float smoothedSpeed = Mathf.Lerp(currentSpeed, mCurrentSpeed, Time.deltaTime * mSpeedChangeRate);
         if (smoothedSpeed < 0.01f)
         {
             smoothedSpeed = 0f;
@@ -589,7 +603,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     
     public void Idle()
     {
-        mSpeed = 0.0f;
+        mCurrentSpeed = 0.0f;
         
         if (CurrentPlayerState == PlayerState.Idle)
         {
@@ -600,7 +614,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             mCharacterController.Move(new Vector3(0.0f, mVerticalVelocity, 0.0f) * Time.deltaTime);
         }
         
-        PlayerAnimator.SetFloat("Speed", mSpeed);
+        PlayerAnimator.SetFloat("Speed", mCurrentSpeed);
     }
 
     public void Move()
@@ -625,7 +639,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             mVerticalVelocity = Mathf.Sqrt(mJumpHeight * -2.0f * mGravity);
 
             Vector3 targetDirection = Quaternion.Euler(0.0f, mTargetRotation, 0.0f) * Vector3.forward;
-            mCharacterController.Move(targetDirection.normalized * (mSpeed * Time.deltaTime) 
+            mCharacterController.Move(targetDirection.normalized * (mCurrentSpeed * Time.deltaTime) 
                                       + new Vector3(0.0f, mVerticalVelocity, 0.0f) * Time.deltaTime);
         }
     }
@@ -633,7 +647,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     public void Fall()
     {
         Vector3 targetDirection = Quaternion.Euler(0.0f, mTargetRotation, 0.0f) * Vector3.forward;
-        mCharacterController.Move(targetDirection.normalized * (mSpeed * Time.deltaTime) 
+        mCharacterController.Move(targetDirection.normalized * (mCurrentSpeed * Time.deltaTime) 
                                   + new Vector3(0.0f, mVerticalVelocity, 0.0f) * Time.deltaTime);
     }
     
@@ -1185,7 +1199,9 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     #endregion
 
     #region 스킬 관련 기능
-    
+
+    #region 1번 스킬
+
     public void Skill_1()
     {
         SetCombatState(true);
@@ -1196,23 +1212,43 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     private void Skill_1_Fire()
     {
         Vector3 direction = GetActionDirection(false, false);
-        GameObject prefab = Resources.Load<GameObject>("Player/Effects/SlashEffect");
+        GameObject prefab = Resources.Load<GameObject>("Player/Effects/SlashProjectileEffect");
         if (prefab == null)
         {
             return;
         }
         
-        GameObject slashEffectObject = GameObject.Instantiate(prefab);
-        slashEffectObject.transform.position = transform.position + transform.forward * 2.5f + transform.up;
-        slashEffectObject.transform.rotation = Quaternion.LookRotation(direction);
+        GameObject slashProjectileObject = GameObject.Instantiate(prefab);
+        slashProjectileObject.transform.position = transform.position + transform.forward * 2.5f + transform.up;
+        slashProjectileObject.transform.rotation = Quaternion.LookRotation(direction);
         
         // 검기 스크립트에 방향 및 속도 설정
-        Skill_1 skill_1 = slashEffectObject.GetComponent<Skill_1>();
+        Skill_1 skill_1 = slashProjectileObject.GetComponent<Skill_1>();
         skill_1.Init((int)mPlayerStats.GetAttackDamage(), mSkill_1_DamageMultiplier, mSkill_1_Distance, direction);
 
         mSkill_1_TimeoutDelta = mSkill_1_Timeout;
     }
 
+    #endregion
+
+    #region 2번 스킬
+
+    public void Skill_2()
+    {
+        
+    }
+
+    #endregion
+
+    #region 3번 스킬
+
+    public void Skill_3()
+    {
+        
+    }
+
+    #endregion
+    
     #endregion
     
     #region 디버깅 관련
