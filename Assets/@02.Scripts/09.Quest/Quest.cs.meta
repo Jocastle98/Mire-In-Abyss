@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+<<<<<<<< HEAD:Assets/@02.Scripts/09.Quest/Quest.cs.meta
+guid: 563065751cdf3284cad196414ca8ea6f
+========
+guid: d4ae5dd293ad1a743a07c64130731bee
+>>>>>>>> develop:Assets/@02.Scripts/04.Player/PlayerState/PlayerStateStun.cs.meta
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
