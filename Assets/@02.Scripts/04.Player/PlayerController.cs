@@ -48,9 +48,17 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     public float DashTimeoutDelta => mDashTimeoutDelta;
     private Coroutine mDashCoroutine;
 
+    [FormerlySerializedAs("mAttackSpeed")]
     [Space(10)] 
     [Header("Player Attack Stat")]
-    [SerializeField] private float mAttackSpeed = 1.0f;
+    [SerializeField] private float mAttackSpeedMultiplier = 1.0f;
+
+    [Space(10)] [Header("Player Skill_1 Stat")]
+    [SerializeField] private float mSkill_1_DamageMultiplier = 2.0f;
+    [SerializeField] private float mSkill_1_Distance = 20.0f;
+    [SerializeField] private float mSkill_1_Timeout = 10.0f;
+    [SerializeField] private float mSkill_1_TimeoutDelta;
+    public float Skill_1_TimeoutDelta => mSkill_1_TimeoutDelta;
     
     [Space(10)]
     [Header("Player Grouned Check")]
@@ -109,7 +117,6 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     private PlayerStateSkill_3 mPlayerStateSkill_3;
     private PlayerStateSkill_4 mPlayerStateSkill_4;
     private PlayerStateInteraction mPlayerStateInteraction;
-    private PlayerStateHit mPlayerStateHit;
     private PlayerStateStun mPlayerStateStun;
     private PlayerStateFreeze mPlayerStateFreeze;
     private PlayerStateDead mPlayerStateDead;
@@ -160,7 +167,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         GameManager.Instance.Input.Init(mPlayerInput);
         
         // 공격 속도 설정
-        PlayerAnimator.SetFloat("AttackSpeed", mAttackSpeed);
+        PlayerAnimator.SetFloat("AttackSpeed", mAttackSpeedMultiplier);
         
         // 무기 할당
         SetPlayerWeapon(mRightHandTransform, "Longsword", mLeftHandTransform, "Shield");
@@ -183,7 +190,6 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         mPlayerStateSkill_3 = new PlayerStateSkill_3();
         mPlayerStateSkill_4 = new PlayerStateSkill_4();
         mPlayerStateInteraction = new PlayerStateInteraction();
-        mPlayerStateHit = new PlayerStateHit();
         mPlayerStateStun = new PlayerStateStun();
         mPlayerStateFreeze = new PlayerStateFreeze();
         mPlayerStateDead = new PlayerStateDead();
@@ -205,7 +211,6 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             { PlayerState.Skill_3, mPlayerStateSkill_3 },
             { PlayerState.Skill_4, mPlayerStateSkill_4 },
             { PlayerState.Interaction, mPlayerStateInteraction },
-            { PlayerState.Hit, mPlayerStateHit },
             { PlayerState.Stun, mPlayerStateStun },
             { PlayerState.Freeze, mPlayerStateFreeze },
             { PlayerState.Dead, mPlayerStateDead },
@@ -225,6 +230,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         mFallTimeoutDelta = mFallTimeout;
         mRollTimeoutDelta = 0.0f;
         mDashTimeoutDelta = 0.0f;
+        mSkill_1_TimeoutDelta = 0.0f;
     }
 
     /// <summary>
@@ -338,7 +344,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
                 {
                     Fall();
                 }
-                else if (CurrentPlayerState == PlayerState.Dash)
+                else if (CurrentPlayerState == PlayerState.Dash || CurrentPlayerState == PlayerState.Skill_1)
                 {
                     mVerticalVelocity = 0.0f;
                 }
@@ -369,6 +375,12 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         if (mDashTimeoutDelta >= 0.0f)
         {
             mDashTimeoutDelta -= Time.deltaTime;
+        }
+        
+        // Skill_1 관련 Timeout
+        if (mSkill_1_TimeoutDelta >= 0.0f)
+        {
+            mSkill_1_TimeoutDelta -= Time.deltaTime;
         }
     }
     
@@ -411,48 +423,37 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         
         return cameraForward;
     }
-    
+
     /// <summary>
-    /// 구르기 기능의 방향을 설정해주는 메서드
+    /// 구르기나 돌진기 등의 방향을 설정해 주는 메서드
     /// </summary>
-    /// <returns> 이동 입력이 없으면 카메라 전방, 이동 입력이 있으면 입력 방향 </returns>
-    public Vector3 SetRollDirection()
+    /// <param name="useMoveInput"> 이동 입력을 사용할지 여부 (구르기=O, 돌진=X) </param>
+    /// <param name="isGroundOnly"> 지상 전용 동작인지 여부 (구르기=O, 돌진=X) </param>
+    /// <returns> 방향 벡터 반환 </returns>
+    public Vector3 GetActionDirection(bool useMoveInput, bool isGroundOnly)
     {
         Vector3 targetDirection = Vector3.zero;
         Vector2 moveInput = GameManager.Instance.Input.MoveInput;
         
-        if (moveInput == Vector2.zero)
+        if (isGroundOnly || bIsGrounded)
         {
-            targetDirection = GetCameraForwardDirection(true);
-        }
-        else
-        {
-            Vector3 inputDirection = new Vector3(moveInput.x, 0.0f, moveInput.y).normalized;
-            float targetRotation = Mathf.Atan2(inputDirection.x, inputDirection.z) * Mathf.Rad2Deg + mMainCamera.transform.eulerAngles.y;
+            if (useMoveInput && moveInput != Vector2.zero)
+            {
+                Vector3 inputDirection = new Vector3(moveInput.x, 0.0f, moveInput.y).normalized;
+                float targetRotation = Mathf.Atan2(inputDirection.x, inputDirection.z) * Mathf.Rad2Deg + mMainCamera.transform.eulerAngles.y;
 
-            targetDirection = Quaternion.Euler(0.0f, targetRotation, 0.0f) * Vector3.forward;
-        }
-        
-        return targetDirection;
-    }
-
-    /// <summary>
-    /// 돌진 기능의 방향을 설정해주는 메서드
-    /// </summary>
-    /// <returns> 지상에서는 카메라 수평 전방, 공중에서는 카메라 중앙전방(수직+수평) </returns>
-    public Vector3 SetDashDirection()
-    {
-        var targetDirection = Vector3.zero;
-        
-        if (bIsGrounded)
-        {
-            targetDirection = GetCameraForwardDirection(true);
+                targetDirection = Quaternion.Euler(0.0f, targetRotation, 0.0f) * Vector3.forward;
+            }
+            else
+            {
+                targetDirection = GetCameraForwardDirection(true);
+            }
         }
         else
         {
             targetDirection = GetCameraForwardDirection(false);
         }
-        
+
         return targetDirection;
     }
     
@@ -885,8 +886,8 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     // 플레이어 캐릭터의 공격속도 설정 및 애니메이션에 반영
     public void SetAttackSpeed(float speed)
     {
-        mAttackSpeed = speed;
-        PlayerAnimator.SetFloat("AttackSpeed", mAttackSpeed);
+        mAttackSpeedMultiplier = speed;
+        PlayerAnimator.SetFloat("AttackSpeed", mAttackSpeedMultiplier);
     }
     
     // 공격 상태 중 캐릭터의 움직임을 설정하는 메서드
@@ -932,18 +933,21 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         }
     }
     
-    // 공격 애니메이션의 공격 모션 시작 시 호출 메서드
+    // 공격 애니메이션 중 공격 행동 시작 시점에 호출되는 메서드
     public void MeleeAttackStart()
     {
         mWeaponController.AttackStart();
+        mPlayerStateAttack.HasReceivedNextAttackInput = false;
+        mPlayerStateAttack.bIsComboActive = true;
     }
 
-    // 공격 애니메이션의 공격 모션 종료 시 호출되는 메서드
+    // 공격 애니메이션 중 공격 행동 종료 시점에 호출되는 메서드
     public void MeleeAttackEnd()
     {
         mWeaponController.AttackEnd();
     }
 
+    // 공격 애니메이션의 종료 직전 호출되는 메서드
     public void EndCombo()
     {
         mPlayerStateAttack.bIsComboActive = false;
@@ -953,12 +957,12 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
 
         public void OnNext(GameObject value)
         {
-            var enemyController = value.GetComponent<TestEnemyController>();
+            var enemyController = value.GetComponent<EnemyBTController>();
             if (enemyController)
             {
                 //공격력을 PlayerStats에서 가져와 데미지 계산
                 float damage = mPlayerStats.GetAttackDamage();
-                enemyController.SetHit(this);
+                enemyController.SetHit((int)damage);
                 //피해적용 후 흡혈효과 처리
                 mPlayerStats.OnDamageDealt(damage);
             }
@@ -986,6 +990,8 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         
         if (!GameManager.Instance.Input.IsDefending)
         {
+            Defending(false);
+            
             PlayerAnimator.SetBool("Idle", false);
             PlayerAnimator.SetBool("Move", false);
             PlayerAnimator.SetBool("Defend", false);
@@ -994,7 +1000,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         else
         {
             // 피해감소 or 방어력 증가 기능 메서드
-            Defending();
+            Defending(true);
             
             // 이동 방어시 하반신(Base Layer) 애니메이션
             if (GameManager.Instance.Input.MoveInput == Vector2.zero)
@@ -1012,9 +1018,18 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         }
     }
     
-    private void Defending()
+    private void Defending(bool isDefending)
     {
-        mPlayerStats.OnGuardSuccess();
+        if (isDefending)
+        {
+            // todo: 임시[테스트용]
+            // mPlayerStats.EnableDefenceBuff(90.0f);
+            mPlayerStats.OnGuardSuccess();
+        }
+        else
+        {
+            mPlayerStats.EnableDefenceBuff(0.0f);
+        }
     }
 
     #endregion
@@ -1054,14 +1069,20 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     
     #region 피격/사망 관련 기능
 
-    public void SetHit(TestEnemyController enemyController, Vector3 direction)
+    public void SetHit(EnemyBTController enemyController, Vector3 direction)
     {
-        if (CurrentPlayerState != PlayerState.Hit)
+        // 플레이어가 죽은 상태일 때는 공격을 받지 않음
+        if (CurrentPlayerState == PlayerState.Dead)
         {
-            //PlayerState의 TakeDamage 메서드 사용
-            var enemyPower = enemyController.EnemyAttackPower;
-            mPlayerStats.TakeDamage(enemyPower);
+            return; // 사망 상태에서는 더 이상 피해를 받지 않음
         }
+        
+        /*//PlayerState의 TakeDamage 메서드 사용
+        var enemyPower = enemyController.~~~~~;
+        if (enemyPower != null)
+        {
+            mPlayerStats.TakeDamage(enemyPower.Damage);
+        }*/
         
         // 체력 UI 업데이트
         // GameManager.Instance.SetHP((float)mPlayerStats.GetCurrentHP() / mPlayerStats.GetMaxHP());
@@ -1074,11 +1095,20 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         {
             SetCombatState(true);
             
-            SetPlayerState(PlayerState.Hit);
-            // 방향에 따라 맞는 애니메이션이 없으므로 현재는 효과가 없는 것이나 마찬가지인 상태, 일단 대기
-            // 플레이어 캐릭터의 방향을 회전시켜주는 수동적인 방식을 사용하거나?
-            PlayerAnimator.SetFloat("HitPosX", -direction.x);
-            PlayerAnimator.SetFloat("HitPosY", -direction.z);
+            if (CurrentPlayerState == PlayerState.Defend)
+            {
+                PlayerAnimator.SetTrigger("DefendHit");
+            }
+            // 공격 관련 동작들이 끊기지 않도록
+            else if(CurrentPlayerState == PlayerState.Idle || CurrentPlayerState == PlayerState.Move)
+            {
+                PlayerAnimator.SetTrigger("Hit");
+                
+                // 방향에 따라 맞는 애니메이션이 없으므로 현재는 효과가 없는 것이나 마찬가지인 상태, 일단 대기
+                // 플레이어 캐릭터의 방향을 회전시켜주는 수동적인 방식을 사용하거나?
+                PlayerAnimator.SetFloat("HitPosX", -direction.x);
+                PlayerAnimator.SetFloat("HitPosY", -direction.z);
+            }
         }
     }
 
@@ -1142,6 +1172,37 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     public bool CheckSkillReset()
     {
         return mPlayerStats.OnSkillUse();
+    }
+
+    #endregion
+
+    #region 스킬 관련 기능
+    
+    public void Skill_1()
+    {
+        SetCombatState(true);
+        
+        Invoke("Skill_1_Fire", 0.55f); // 애니메이션 선딜
+    }
+
+    private void Skill_1_Fire()
+    {
+        Vector3 direction = GetActionDirection(false, false);
+        GameObject prefab = Resources.Load<GameObject>("Player/Effects/SlashEffect");
+        if (prefab == null)
+        {
+            return;
+        }
+        
+        GameObject slashEffectObject = GameObject.Instantiate(prefab);
+        slashEffectObject.transform.position = transform.position + transform.forward * 2.5f + transform.up;
+        slashEffectObject.transform.rotation = Quaternion.LookRotation(direction);
+        
+        // 검기 스크립트에 방향 및 속도 설정
+        Skill_1 skill_1 = slashEffectObject.GetComponent<Skill_1>();
+        skill_1.Init((int)mPlayerStats.GetAttackDamage(), mSkill_1_DamageMultiplier, mSkill_1_Distance, direction);
+
+        mSkill_1_TimeoutDelta = mSkill_1_Timeout;
     }
 
     #endregion
