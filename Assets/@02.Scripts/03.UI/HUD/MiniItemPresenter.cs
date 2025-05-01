@@ -4,8 +4,6 @@ using Cysharp.Threading.Tasks;
 using Events.Item;
 using R3;
 using UnityEngine;
-using UnityEngine.AddressableAssets;
-using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.UI;
 
 public sealed class ItemSummaryPresenter : HudPresenterBase
@@ -13,7 +11,6 @@ public sealed class ItemSummaryPresenter : HudPresenterBase
     [SerializeField] MiniItemView mSlotPrefab;
     [SerializeField] RectTransform mMiniItemRoot;
     private readonly Dictionary<int, MiniItemView> mSlotsMap = new();
-    private Dictionary<int, Sprite> mItemIconMap = null;
     private Dictionary<int, int> mPendingItems = new();
     private ObjectPool<MiniItemView> mPool;
     private int mMaxMiniViewCount;
@@ -31,26 +28,20 @@ public sealed class ItemSummaryPresenter : HudPresenterBase
     void Start()
     {
         subscribeEvents();
-        setItemSprites().Forget();
     }
 
     private void subscribeEvents()
     {
         R3EventBus.Instance.Receive<ItemAdded>()
-            .Subscribe(e => addItem(e).Forget())
+            .Subscribe(e => addItem(e))
             .AddTo(mCD);
         R3EventBus.Instance.Receive<ItemSubTracked>()
             .Subscribe(e => subTrack(e))
             .AddTo(mCD);
     }
 
-    private async UniTaskVoid addItem(ItemAdded itemInfo)
+    private void addItem(ItemAdded itemInfo)
     {
-        if (mItemIconMap == null)
-        {
-            await setItemSprites();
-        }
-
         // 미니 아이템 뷰가 가득 찼을 경우 대기열에 추가
         if (mSlotsMap.Count >= mMaxMiniViewCount)
         {
@@ -69,7 +60,7 @@ public sealed class ItemSummaryPresenter : HudPresenterBase
         if (!mSlotsMap.ContainsKey(itemInfo.ID))
         {
             var slot = mPool.Rent();
-            slot.Bind(mItemIconMap[itemInfo.ID], itemInfo.Count);
+            slot.Bind(itemInfo.ID, itemInfo.Count);
             mSlotsMap[itemInfo.ID] = slot;
         }
         else
@@ -101,31 +92,9 @@ public sealed class ItemSummaryPresenter : HudPresenterBase
         while (mSlotsMap.Count < mMaxMiniViewCount && mPendingItems.Count > 0)
         {
             var itemInfo = mPendingItems.First();
-            addItem(new ItemAdded(itemInfo.Key, itemInfo.Value)).Forget();
+            addItem(new ItemAdded(itemInfo.Key, itemInfo.Value));
             mPendingItems.Remove(itemInfo.Key);
         }
-    }
-
-
-    private async UniTask setItemSprites()
-    {
-        mItemIconMap = new();
-        var handle = Addressables.LoadAssetsAsync<Sprite>
-        (
-            "Item_Icons",
-            sp =>
-            {
-                int id = int.Parse(sp.name.Split('_')[1]); // "icon_101"
-                mItemIconMap[id] = sp;
-            }
-        );
-        await handle.Task;
-
-        if (handle.Status != AsyncOperationStatus.Succeeded)
-        {
-            Debug.LogError("Failed to load item icons");
-        }
-        Addressables.Release(handle);
     }
 
     protected override void OnDisable()
@@ -135,7 +104,6 @@ public sealed class ItemSummaryPresenter : HudPresenterBase
         {
             mPool.Return(s);
         }
-        mItemIconMap = null;
         mSlotsMap.Clear();
     }
 }

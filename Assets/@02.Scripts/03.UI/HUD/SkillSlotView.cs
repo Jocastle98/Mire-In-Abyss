@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Events.HUD;
 using Events.Player;
 using TMPro;
+using UIEnums;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -17,7 +18,7 @@ public sealed class SkillSlotView : MonoBehaviour
     {
         progressSkillCoolTime();
     }
-    public void Bind(float cooldownTime, KeyCode keyCode, Sprite sprite = null)
+    public void Bind(float cooldownTime, KeyCode keyCode, int id)
     {
         mSkillCooldownTime = cooldownTime;
         mSkillTimer = 0;
@@ -31,9 +32,9 @@ public sealed class SkillSlotView : MonoBehaviour
         {
             mSkillKeyText.text = keyCode.ToString();
         }
-        if (sprite != null)
+        if (mSkillImage.sprite == null)
         {
-            mSkillImage.sprite = sprite;
+            mSkillImage.sprite = SpriteCache.Instance.GetSprite(SpriteType.Skill, id);
         }
     }
 

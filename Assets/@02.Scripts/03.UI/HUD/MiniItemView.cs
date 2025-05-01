@@ -1,4 +1,5 @@
 using TMPro;
+using UIEnums;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -8,9 +9,9 @@ public class MiniItemView : MonoBehaviour
     [SerializeField] private TMP_Text mCount;
     public int ItemCount;
 
-    public void Bind(Sprite icon, int count = 1)
+    public void Bind(int itemID, int count = 1)
     {
-        mIcon.sprite = icon;
+        mIcon.sprite = SpriteCache.Instance.GetSprite(SpriteType.Item, itemID);
         ItemCount = count;
         SetCount(ItemCount);
     }

@@ -39,6 +39,16 @@ namespace ItemEnums
     
 }
 
+namespace UIEnums
+{
+    public enum SpriteType
+    {
+        Item,
+        Skill,
+        Buff,
+    }
+}
+
 namespace UIPanelEnums
 {
     public enum UIPanelType

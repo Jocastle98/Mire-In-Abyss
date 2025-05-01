@@ -113,6 +113,22 @@ public class HUDTest : MonoBehaviour
         {
             R3EventBus.Instance.Publish(new SkillUsed(5));
         }
+        if(Input.GetKeyDown(KeyCode.Alpha1))
+        {
+            R3EventBus.Instance.Publish(new SkillUsed(6));
+        }
+        if(Input.GetKeyDown(KeyCode.Alpha2))
+        {
+            R3EventBus.Instance.Publish(new SkillUsed(7));
+        }
+        if(Input.GetKeyDown(KeyCode.Alpha3))
+        {
+            R3EventBus.Instance.Publish(new SkillUsed(8));
+        }
+        if(Input.GetKeyDown(KeyCode.Alpha4))
+        {
+            R3EventBus.Instance.Publish(new SkillUsed(9));
+        }
     }
     
     public void OnTestButtonToggle()

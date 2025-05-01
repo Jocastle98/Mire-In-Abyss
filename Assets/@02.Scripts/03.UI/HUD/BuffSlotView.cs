@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Events.HUD;
 using Events.Player;
 using TMPro;
+using UIEnums;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -25,12 +26,12 @@ public sealed class BuffSlotView : MonoBehaviour
     {
         progressBuffCoolTime();
     }
-    public void Bind(BuffAdded buffInfo, Sprite sprite)
+    public void Bind(BuffAdded buffInfo)
     {
         if (mID != buffInfo.ID)
         {
             mID = buffInfo.ID;
-            mBuffImage.sprite = sprite;
+            mBuffImage.sprite = SpriteCache.Instance.GetSprite(SpriteType.Buff, buffInfo.ID);
         }
 
         mBuffImageBG.color = buffInfo.IsDebuff ? mDebuffColor : mBuffColor;
