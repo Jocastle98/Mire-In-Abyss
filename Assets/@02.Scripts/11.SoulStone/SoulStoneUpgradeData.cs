@@ -126,7 +126,7 @@ public class SoulStoneUpgradeData : ScriptableObject
         {
             UpgradeId = "itemDropRate",
             Title = "아이템 드랍",
-            Description = "아이템 드롭 확률이 증가합니다.",
+            Description = "아이템 드랍 확률이 증가합니다.",
             Costs = new int[] { 130, 260, 520, 900, 1400 },
             Values = new float[] { 0.05f, 0.1f, 0.15f, 0.2f, 0.3f },
             ValueType = "percent"
