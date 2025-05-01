@@ -28,7 +28,7 @@ public sealed class QuestCardView : MonoBehaviour
 
     public void ApplyQuestComplete()
     {
-        QuestInfo = new TempQuestInfo(QuestInfo.Id, QuestInfo.Title, QuestInfo.ShortDesc, QuestState.Completed);
+        QuestInfo = new TempQuestInfo(QuestInfo.ID, QuestInfo.Title, QuestInfo.ShortDesc, QuestState.Completed);
         mBG.color = CompletedColor;
     }
 }

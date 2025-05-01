@@ -13,10 +13,10 @@ public class HUDTest : MonoBehaviour
 {
     [SerializeField] private CanvasGroup mTestButtonGroup;
     [Header("Minimap")]
-    [SerializeField] private GameObject mEnemyDummy;
-    [SerializeField] private GameObject mPortalDummy;
-    [SerializeField] private GameObject mShopDummy;
-    [SerializeField] private GameObject mBossDummy;
+    [SerializeField] private TestEnemy mEnemyDummy;
+    [SerializeField] private TestPortal mPortalDummy;
+    [SerializeField] private TestShop mShopDummy;
+    [SerializeField] private TestBoss mBossDummy;
     [Header("Difficulty")]
     [SerializeField] private int mDifficultyLevel = 1;
     [SerializeField] private float mDifficultyProgress = 0;
@@ -60,8 +60,6 @@ public class HUDTest : MonoBehaviour
     [SerializeField] private int mItemCount;
 
     [Header("Combat")]
-    [SerializeField] private GameObject mEnemyDummy2;
-    [SerializeField] private GameObject mEnemyDummy2UIAnchor;
     [SerializeField] private int mEnemyHp;
     [SerializeField] private int mEnemyMaxHp;
     [SerializeField] private int mWeaponDamageMin;
@@ -116,6 +114,7 @@ public class HUDTest : MonoBehaviour
             R3EventBus.Instance.Publish(new SkillUsed(5));
         }
     }
+    
     public void OnTestButtonToggle()
     {
         mIsTestButtonGroupActive = !mIsTestButtonGroupActive;
@@ -129,18 +128,18 @@ public class HUDTest : MonoBehaviour
         if (mIsSpawned)
         {
             mIsSpawned = false;
-            R3EventBus.Instance.Publish(new EnemyDied(mEnemyDummy.transform, mEnemyDummy.transform));
-            R3EventBus.Instance.Publish(new BossDied(mBossDummy.transform));
-            R3EventBus.Instance.Publish(new PortalClosed(mPortalDummy.transform));
-            R3EventBus.Instance.Publish(new ShopClosed(mShopDummy.transform));
+            TrackableEventHelper.PublishDestroyed(mEnemyDummy);
+            TrackableEventHelper.PublishDestroyed(mBossDummy);
+            TrackableEventHelper.PublishDestroyed(mPortalDummy);
+            TrackableEventHelper.PublishDestroyed(mShopDummy);
         }
         else
         {
             mIsSpawned = true;
-            R3EventBus.Instance.Publish(new EnemySpawned(mEnemyDummy.transform));
-            R3EventBus.Instance.Publish(new BossSpawned(mBossDummy.transform));
-            R3EventBus.Instance.Publish(new PortalSpawned(mPortalDummy.transform));
-            R3EventBus.Instance.Publish(new ShopSpawned(mShopDummy.transform));
+            TrackableEventHelper.PublishSpawned(mEnemyDummy);
+            TrackableEventHelper.PublishSpawned(mBossDummy);
+            TrackableEventHelper.PublishSpawned(mPortalDummy);
+            TrackableEventHelper.PublishSpawned(mShopDummy);
         }
     }
 
@@ -234,22 +233,13 @@ public class HUDTest : MonoBehaviour
 
     public void OnAttackDummy()
     {
-        if(mEnemyHp == mEnemyMaxHp)
-        {
-            R3EventBus.Instance.Publish(new EnemySpawned(mEnemyDummy2.transform));
-        }
-
         int damage = UnityEngine.Random.Range(mWeaponDamageMin, mWeaponDamageMax);
         mEnemyHp -= damage;
-        R3EventBus.Instance.Publish(new DamagePopup(mEnemyDummy2.transform.position, damage));
+        R3EventBus.Instance.Publish(new DamagePopup(mEnemyDummy.transform.position, damage));
         if (mEnemyHp < 0)
         {
             mEnemyHp = mEnemyMaxHp;
-            R3EventBus.Instance.Publish(new EnemyDied(mEnemyDummy2.transform, mEnemyDummy2UIAnchor.transform));
         }
-        else
-        {
-            R3EventBus.Instance.Publish(new EnemyHpChanged(mEnemyDummy2UIAnchor.transform, mEnemyHp, mEnemyMaxHp));
-        }
+        R3EventBus.Instance.Publish(new EnemyHpChanged(mEnemyDummy.GetInstanceID(), mEnemyHp, mEnemyMaxHp));
     }
 }

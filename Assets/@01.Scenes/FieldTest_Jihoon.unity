@@ -523,11 +523,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 176675896}
   m_CullTransparentMesh: 1
---- !u!1 &196239197 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 2304139275706850596, guid: c50f9a2b1fa1d6c48a35949eef4060a0, type: 3}
-  m_PrefabInstance: {fileID: 519342927}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &209636636
 GameObject:
   m_ObjectHideFlags: 0
@@ -2753,6 +2748,7 @@ GameObject:
   - component: {fileID: 776763363}
   - component: {fileID: 776763362}
   - component: {fileID: 776763361}
+  - component: {fileID: 776763365}
   m_Layer: 9
   m_Name: ShopDummy
   m_TagString: Untagged
@@ -2846,6 +2842,19 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &776763365
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 776763360}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3254dd6e21133c848897725343e995e0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mMapAnchor: {fileID: 776763364}
 --- !u!1 &874013108
 GameObject:
   m_ObjectHideFlags: 0
@@ -3071,6 +3080,7 @@ GameObject:
   - component: {fileID: 888382135}
   - component: {fileID: 888382134}
   - component: {fileID: 888382133}
+  - component: {fileID: 888382137}
   m_Layer: 9
   m_Name: BossDummy
   m_TagString: Untagged
@@ -3164,6 +3174,19 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &888382137
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 888382132}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3c8193588023d894d8a8bf125e30564a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mMapAnchor: {fileID: 888382136}
 --- !u!1 &893893630
 GameObject:
   m_ObjectHideFlags: 0
@@ -3216,10 +3239,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mTestButtonGroup: {fileID: 2138711629}
-  mEnemyDummy: {fileID: 196239197}
-  mPortalDummy: {fileID: 1884469464}
-  mShopDummy: {fileID: 776763360}
-  mBossDummy: {fileID: 888382132}
+  mEnemyDummy: {fileID: 2051617890}
+  mPortalDummy: {fileID: 1884469469}
+  mShopDummy: {fileID: 776763365}
+  mBossDummy: {fileID: 888382137}
   mDifficultyLevel: 1
   mDifficultyProgress: 0
   mQuestTitle: "\uC2EC\uC5F0\uC758 \uBB38\uC9C0\uAE30 \uCC98\uCE58"
@@ -3246,8 +3269,6 @@ MonoBehaviour:
   mToastMessage: "\uC5C5\uC801: \uC2EC\uC5F0\uC758 \uC9C0\uBC30\uC790 \uB2EC\uC131!"
   mItemID: 0
   mItemCount: 1
-  mEnemyDummy2: {fileID: 2051617885}
-  mEnemyDummy2UIAnchor: {fileID: 725807704}
   mEnemyHp: 100
   mEnemyMaxHp: 100
   mWeaponDamageMin: 5
@@ -5887,6 +5908,7 @@ GameObject:
   - component: {fileID: 1884469467}
   - component: {fileID: 1884469466}
   - component: {fileID: 1884469465}
+  - component: {fileID: 1884469469}
   m_Layer: 9
   m_Name: PortalDummy
   m_TagString: Untagged
@@ -5980,6 +6002,19 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1884469469
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1884469464}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8603e3c8b8631d54eafb8ccc018ce315, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mMapAnchor: {fileID: 1884469468}
 --- !u!1 &1887450608
 GameObject:
   m_ObjectHideFlags: 0
@@ -6493,6 +6528,7 @@ GameObject:
   - component: {fileID: 2051617888}
   - component: {fileID: 2051617887}
   - component: {fileID: 2051617886}
+  - component: {fileID: 2051617890}
   m_Layer: 9
   m_Name: Combat EnemyDummy
   m_TagString: Untagged
@@ -6587,6 +6623,20 @@ Transform:
   - {fileID: 725807705}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2051617890
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2051617885}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6f80f0f324d220f4faf71e1375930ecb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mMapAnchor: {fileID: 2051617889}
+  mHpAnchor: {fileID: 725807705}
 --- !u!1 &2052943841
 GameObject:
   m_ObjectHideFlags: 0

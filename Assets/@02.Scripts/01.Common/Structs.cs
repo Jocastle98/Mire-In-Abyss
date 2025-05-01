@@ -19,7 +19,7 @@ namespace Events.Player
         public readonly int Gold;
         public GoldChanged(int gold) => Gold = gold;
     }
-    
+
     public readonly struct SoulChanged
     {
         public readonly int Soul;
@@ -75,35 +75,35 @@ namespace Events.Player
 
 namespace Events.Combat
 {
-    public readonly struct BossHpChanged     // 보스 전투 진입
+    public readonly struct BossHpChanged
     {
         public readonly int ID;
         public readonly string Name;
         public readonly string SubName;
-        public readonly int    MaxHp;
-        public readonly int    CurrentHp;
-        public BossHpChanged(int id, string n, string subName, int hp, int curHp)=>(ID,Name,SubName,MaxHp,CurrentHp)=(id,n,subName,hp,curHp);
+        public readonly int MaxHp;
+        public readonly int CurrentHp;
+        public BossHpChanged(int id, string n, string subName, int hp, int curHp) => (ID, Name, SubName, MaxHp, CurrentHp) = (id, n, subName, hp, curHp);
     }
     public readonly struct BossDisengage    // 보스 이탈 or 처치
     {
         public readonly int ID;
-        public BossDisengage(int id)=>ID=id;
+        public BossDisengage(int id) => ID = id;
     }
     public readonly struct DamagePopup
     {
         public readonly Vector3 WorldPos;
-        public readonly int     Amount;
-        public readonly Color   Color;
-        public DamagePopup(Vector3 pos,int amt, Color color = default)
-            => (WorldPos,Amount,Color)=(pos,amt,color);
+        public readonly int Amount;
+        public readonly Color Color;
+        public DamagePopup(Vector3 pos, int amt, Color color = default)
+            => (WorldPos, Amount, Color) = (pos, amt, color);
     }
-    public readonly struct EnemyHpChanged
+    public readonly struct EnemyHpChanged   // 일반몹 체력 변경
     {
-        public readonly Transform Anchor;   // Enemy UI Anchor transform
+        public readonly int ID;
         public readonly int Current;
         public readonly int Max;
-        public EnemyHpChanged(Transform t,int cur,int max)
-            => (Anchor,Current,Max)=(t,cur,max);
+        public EnemyHpChanged(int id, int cur, int max)
+            => (ID, Current, Max) = (id, cur, max);
     }
 
 }
@@ -152,60 +152,6 @@ namespace Events.Abyss
         public DifficultyChanged(int difficultyLevel)
             => DifficultyLevel = difficultyLevel;
     }
-
-    #region Object Spawn Despawn
-
-    /// 전투지역(어비스)에서의 적, 상점, 포탈 등이 소환, 소멸 이벤트
-    public readonly struct EnemySpawned
-    {
-        public readonly Transform Transform;
-        public EnemySpawned(Transform transform) => Transform = transform;
-    }
-
-    public readonly struct EnemyDied
-    {
-        public readonly Transform Transform;
-        public readonly Transform UIAnchor;
-        public EnemyDied(Transform transform, Transform uiAnchor) => (Transform, UIAnchor) = (transform, uiAnchor);
-    }
-
-    public readonly struct BossSpawned
-    {
-        public readonly Transform Transform;
-        public BossSpawned(Transform transform) => Transform = transform;
-    }
-
-    public readonly struct BossDied
-    {
-        public readonly Transform Transform;
-        public BossDied(Transform transform) => Transform = transform;
-    }
-
-    public readonly struct ShopSpawned
-    {
-        public readonly Transform Transform;
-        public ShopSpawned(Transform transform) => Transform = transform;
-    }
-
-    public readonly struct ShopClosed
-    {
-        public readonly Transform Transform;
-        public ShopClosed(Transform transform) => Transform = transform;
-    }
-
-    public readonly struct PortalSpawned
-    {
-        public readonly Transform Transform;
-        public PortalSpawned(Transform transform) => Transform = transform;
-    }
-
-    public readonly struct PortalClosed
-    {
-        public readonly Transform Transform;
-        public PortalClosed(Transform transform) => Transform = transform;
-    }
-
-    #endregion Object Spawn Despawn
 }
 
 namespace Events.Quest
@@ -213,13 +159,13 @@ namespace Events.Quest
     // TODO: 아래의 QuestInfo를 퀘스트 담당자가 작성한 타입으로 대체(여기 작성할 필요 없음)
     public readonly struct TempQuestInfo
     {
-        public readonly int Id;
+        public readonly int ID;
         public readonly string Title;
         public readonly string ShortDesc;
         public readonly QuestState State;
 
         public TempQuestInfo(int id, string title, string desc, QuestState state)
-            => (Id, Title, ShortDesc, State) = (id, title, desc, state);
+            => (ID, Title, ShortDesc, State) = (id, title, desc, state);
     }
 
     public readonly struct QuestAddedOrUpdated
@@ -233,7 +179,7 @@ namespace Events.Quest
         public readonly int QuestId;
         public QuestCompleted(int id) => QuestId = id;
     }
-    
+
     public readonly struct QuestRemoved
     {
         public readonly int QuestId;
@@ -257,5 +203,19 @@ namespace Events.HUD
         public readonly Color Color;
         public ToastPopup(string message, float duration = 2f, Color color = default)
             => (Message, Duration, Color) = (message, duration, color);
+    }
+
+    public readonly struct EntitySpawned<T> where T : class
+    {
+        public readonly int ID;
+        public readonly T Entity;
+        public EntitySpawned(int id, T e) => (ID, Entity) = (id, e);
+    }
+
+    public readonly struct EntityDestroyed<T> where T : class
+    {
+        public readonly int ID;
+        public readonly T Entity;
+        public EntityDestroyed(int id, T e) => (ID, Entity) = (id, e);
     }
 }

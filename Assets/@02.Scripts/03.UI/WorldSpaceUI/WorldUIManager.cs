@@ -3,6 +3,7 @@ using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using Events.Abyss;
 using Events.Combat;
+using Events.HUD;
 using R3;
 using UnityEngine;
 
@@ -29,7 +30,9 @@ public sealed class WorldUIManager : MonoBehaviour
     private ObjectPool<HpBarUI> mHpPool;
 
     /* Active track */
-    private readonly Dictionary<Transform, HpBarUI> mHpBars = new();
+    private readonly Dictionary<int, Transform> mEnemyAnchors = new();
+    private readonly Dictionary<int, HpBarUI> mActiveHpBars = new();
+    private readonly Dictionary<int, HpBarUI> mPendingHpBars = new();
     private readonly CompositeDisposable mCD = new();
     private Camera mWorldCam;
 
@@ -37,7 +40,7 @@ public sealed class WorldUIManager : MonoBehaviour
     void Awake()
     {
         mDmgPool = new(mDmgTextPrefab, mDamageTextRoot, 32);
-        mHpPool = new(mHpBarPrefab, mHpBarRoot, 8);
+        mHpPool = new(mHpBarPrefab, mHpBarRoot, 16);
         mWorldCam = Camera.main;
     }
 
@@ -49,12 +52,12 @@ public sealed class WorldUIManager : MonoBehaviour
     void LateUpdate()
     {
         /* follow targets */
-        foreach (var kv in mHpBars)
+        foreach (var kv in mActiveHpBars)
         {
-            var t = kv.Key;
-            if (t != null)
+            var enemyAnchor = mEnemyAnchors[kv.Key];
+            if (enemyAnchor != null)
             {
-                kv.Value.transform.position = t.position;
+                kv.Value.transform.position = enemyAnchor.position;
             }
         }
     }
@@ -71,8 +74,12 @@ public sealed class WorldUIManager : MonoBehaviour
             .Subscribe(e => UpdateHpBar(e))
             .AddTo(mCD);
 
-        R3EventBus.Instance.Receive<EnemyDied>()
-            .Subscribe(e => DeleteHpBar(e.UIAnchor))
+        R3EventBus.Instance.Receive<EntitySpawned<IHpTrackable>>()
+            .Subscribe(e => AddHpBar(e.ID, e.Entity.HpAnchor))
+            .AddTo(mCD);
+
+        R3EventBus.Instance.Receive<EntityDestroyed<IHpTrackable>>()
+            .Subscribe(e => DeleteHpBar(e.ID))
             .AddTo(mCD);
     }
 
@@ -83,7 +90,7 @@ public sealed class WorldUIManager : MonoBehaviour
         view.GetComponent<Billboard>().enabled = true;
         var start = getSpawnPos(p);
         view.transform.position = start;
-        if(p.Color == default)
+        if (p.Color == default)
         {
             view.SetText(p.Amount, mDefaultDamageTextColor);
         }
@@ -100,7 +107,7 @@ public sealed class WorldUIManager : MonoBehaviour
 
         // 페이드
         var fadeTask = view.Text.DOFade(0, mDmgTextFadeTime)
-                 .SetDelay(mDmgTextFadeDelay)     
+                 .SetDelay(mDmgTextFadeDelay)
                  .SetEase(Ease.InQuad).ToUniTask();
 
         await UniTask.WhenAll(moveTask, fadeTask);
@@ -120,39 +127,78 @@ public sealed class WorldUIManager : MonoBehaviour
     }
 
     /* -------- HP Bar -------- */
+    void AddHpBar(int id, Transform anchor)
+    {
+        if (mPendingHpBars.ContainsKey(id) || mActiveHpBars.ContainsKey(id))
+        {
+            return;
+        }
+
+        var bar = mHpPool.Rent(false);
+        mPendingHpBars[id] = bar;
+        mEnemyAnchors[id] = anchor;
+    }
     void UpdateHpBar(EnemyHpChanged e)
     {
-        if (!mHpBars.TryGetValue(e.Anchor, out var bar))
+        if (mActiveHpBars.TryGetValue(e.ID, out var activeBar))
         {
-            bar = mHpPool.Rent();
-            bar.GetComponent<Billboard>().enabled = true;
-            mHpBars[e.Anchor] = bar;
-        }
-        bar.SetProgress(e.Current / (float)e.Max);
+            activeBar.SetProgress(e.Current / (float)e.Max);
 
-        if (e.Current <= 0)
+            if (e.Current <= 0)
+            {
+                DeleteHpBar(e.ID);
+            }
+        }
+        else if (mPendingHpBars.TryGetValue(e.ID, out var pendingBar))
         {
-            DeleteHpBar(e.Anchor);
+            mActiveHpBars[e.ID] = pendingBar;
+
+            pendingBar.GetComponent<Billboard>().enabled = true;
+            pendingBar.transform.position = mEnemyAnchors[e.ID].position;
+            pendingBar.gameObject.SetActive(true);
+            pendingBar.SetProgress(e.Current / (float)e.Max);
+
+            mPendingHpBars.Remove(e.ID);
+
+            if (e.Current <= 0)
+            {
+                DeleteHpBar(e.ID);
+            }
         }
     }
 
-    void DeleteHpBar(Transform target)
+    void DeleteHpBar(int id)
     {
-        if (mHpBars.TryGetValue(target, out var bar))
+        if (mActiveHpBars.TryGetValue(id, out var bar))
         {
             bar.GetComponent<Billboard>().enabled = false;
             mHpPool.Return(bar);
-            mHpBars.Remove(target);
+            mActiveHpBars.Remove(id);
+        }
+        else if (mPendingHpBars.TryGetValue(id, out var pendingBar))
+        {
+            mPendingHpBars.Remove(id);
+            mHpPool.Return(pendingBar);
+        }
+
+        if (mEnemyAnchors.TryGetValue(id, out var anchor))
+        {
+            mEnemyAnchors.Remove(id);
         }
     }
 
     void OnDisable()
     {
         mCD.Dispose();
-        foreach (var v in mHpBars.Values)
+        foreach (var v in mActiveHpBars.Values)
         {
             mHpPool.Return(v);
         }
-        mHpBars.Clear();
+        foreach (var v in mPendingHpBars.Values)
+        {
+            mHpPool.Return(v);
+        }
+        mActiveHpBars.Clear();
+        mPendingHpBars.Clear();
     }
 }

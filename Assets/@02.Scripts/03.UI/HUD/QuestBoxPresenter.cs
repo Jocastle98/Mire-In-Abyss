@@ -52,18 +52,18 @@ public sealed class QuestBoxPresenter : HudPresenterBase
         // Completed Quest
         if (info.State == QuestState.Completed)
         {
-            onQuestComplete(info.Id);
+            onQuestComplete(info.ID);
             return;
         }
 
         // Quest Update
-        if (mVisibleCards.TryGetValue(info.Id, out var card))
+        if (mVisibleCards.TryGetValue(info.ID, out var card))
         {
             card.Bind(info);
             return;
         }
 
-        int index = mPendingActive.FindIndex(q => q.Id == info.Id);
+        int index = mPendingActive.FindIndex(q => q.ID == info.ID);
         if (index >= 0)
         {
             mPendingActive[index] = info;
@@ -128,7 +128,7 @@ public sealed class QuestBoxPresenter : HudPresenterBase
         var card = mCardPool.Rent();
         card.Bind(info);
         card.transform.SetAsFirstSibling();
-        mVisibleCards[info.Id] = card;
+        mVisibleCards[info.ID] = card;
         return card;
     }
 
@@ -146,7 +146,7 @@ public sealed class QuestBoxPresenter : HudPresenterBase
 
     private void moveVisibleCardToCompleted(QuestCardView card)
     {
-        mVisibleCards.Remove(card.QuestInfo.Id);
+        mVisibleCards.Remove(card.QuestInfo.ID);
         mCardPool.Return(card);
         mPendingComplete.Add(card.QuestInfo);
     }
@@ -191,7 +191,7 @@ public sealed class QuestBoxPresenter : HudPresenterBase
     private void promotePendingToCompleted(int id)
     {
         // Active 리스트 ⇒ Completed 리스트 이동
-        int index = mPendingActive.FindIndex(q => q.Id == id);
+        int index = mPendingActive.FindIndex(q => q.ID == id);
         if (index >= 0)
         {
             mPendingComplete.Add(mPendingActive[index]);
@@ -202,7 +202,7 @@ public sealed class QuestBoxPresenter : HudPresenterBase
 
     private void removeFromPendingList(int id)
     {
-        int index = mPendingActive.FindIndex(q => q.Id == id);
+        int index = mPendingActive.FindIndex(q => q.ID == id);
         if (index >= 0)
         {
             mPendingActive[index] = mPendingActive[^1];
@@ -210,7 +210,7 @@ public sealed class QuestBoxPresenter : HudPresenterBase
             return;
         }
 
-        index = mPendingComplete.FindIndex(q => q.Id == id);
+        index = mPendingComplete.FindIndex(q => q.ID == id);
         if (index >= 0)
         {
             mPendingComplete[index] = mPendingComplete[^1];
