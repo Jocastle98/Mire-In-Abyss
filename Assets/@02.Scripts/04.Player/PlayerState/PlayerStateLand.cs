@@ -20,16 +20,7 @@ public class PlayerStateLand : IPlayerState
             return;
         }
         
-        if (GameManager.Instance.Input.MoveInput == Vector2.zero)
-        {
-            mPlayerController.SetPlayerState(PlayerState.Idle);
-            return;
-        }
-        else
-        {
-            mPlayerController.SetPlayerState(PlayerState.Move);
-            return;
-        }
+        mPlayerController.Land();
     }
 
     public void OnExit()

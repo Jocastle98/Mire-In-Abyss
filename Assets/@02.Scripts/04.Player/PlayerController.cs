@@ -169,7 +169,6 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         }
         
         GroundedCheck();
-        //NearbyInteractablesCheck();
         TimeoutCheck();
     }
 
@@ -614,15 +613,12 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     
     public void Jump()
     {
-        if (mJumpTimeoutDelta < 0.0f)
-        {
-            mVerticalVelocity = 0.0f;
-            mVerticalVelocity = Mathf.Sqrt(mJumpHeight * -2.0f * mGravity);
+        mVerticalVelocity = 0.0f;
+        mVerticalVelocity = Mathf.Sqrt(mJumpHeight * -2.0f * mGravity);
 
-            Vector3 targetDirection = Quaternion.Euler(0.0f, mTargetRotation, 0.0f) * Vector3.forward;
-            mCharacterController.Move(targetDirection.normalized * (mCurrentSpeed * Time.deltaTime) 
-                                      + new Vector3(0.0f, mVerticalVelocity, 0.0f) * Time.deltaTime);
-        }
+        Vector3 targetDirection = Quaternion.Euler(0.0f, mTargetRotation, 0.0f) * Vector3.forward;
+        mCharacterController.Move(targetDirection.normalized * (mCurrentSpeed * Time.deltaTime) 
+                                  + new Vector3(0.0f, mVerticalVelocity, 0.0f) * Time.deltaTime);
     }
     
     public void Fall()
@@ -630,6 +626,17 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         Vector3 targetDirection = Quaternion.Euler(0.0f, mTargetRotation, 0.0f) * Vector3.forward;
         mCharacterController.Move(targetDirection.normalized * (mCurrentSpeed * Time.deltaTime) 
                                   + new Vector3(0.0f, mVerticalVelocity, 0.0f) * Time.deltaTime);
+    }
+
+    public void Land()
+    {
+        // 착지 후 딜레이
+        Invoke("Landing", 0.3f);
+    }
+
+    private void Landing()
+    {
+        SetPlayerState(PlayerState.Idle);
     }
     
     #endregion
@@ -656,7 +663,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
 
     private IEnumerator RollCoroutine(Vector3 targetDirection)
     {
-        float rollEndOffset = 0.5f;
+        float rollEndOffset = 0.2f;
         float firstDelay = 0.2f;
         
         mRollTimeoutDelta = mRollTimeout;
