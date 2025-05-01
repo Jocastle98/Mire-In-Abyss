@@ -72,3 +72,34 @@ namespace UIHUDEnums
         RoundedRect,
     }
 }
+
+namespace BattleAreaEnums
+{
+    public enum DungeonCellType
+    {
+        None,
+        Room,
+        Corridor,
+        Entrance,
+    }
+
+    public enum DungeonRoomType
+    {
+        None,
+        SafeRoom,
+        MonsterRoom,
+        BossRoom,
+        EventRoom,
+        ShopRoom,
+    }
+    
+    public enum SpawnType
+    {
+        None,
+        Mage,
+        Ranger,
+        Rogue,
+        Warrior,
+        Boss,
+    }
+}
