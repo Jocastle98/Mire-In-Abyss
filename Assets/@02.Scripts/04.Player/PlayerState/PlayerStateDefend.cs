@@ -32,6 +32,7 @@ public class PlayerStateDefend : IPlayerState
 
     public void OnExit()
     {
+        mPlayerController.PlayerAnimator.SetBool("Defend", false);
         mPlayerController = null;
     }
 }

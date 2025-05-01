@@ -71,7 +71,7 @@ public class PlayerStateIdle : IPlayerState
                 return;
             }
             
-            if (GameManager.Instance.Input.JumpInput)
+            if (GameManager.Instance.Input.JumpInput && mPlayerController.JumpTimeoutDelta < 0.0f)
             {
                 mPlayerController.SetPlayerState(PlayerState.Jump);
                 return;

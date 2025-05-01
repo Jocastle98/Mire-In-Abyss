@@ -28,8 +28,10 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     [SerializeField] private float mJumpHeight = 5.0f;
     [SerializeField] private float mJumpTimeout = 0.5f;
     [SerializeField] private float mJumpTimeoutDelta;
+    public float JumpTimeoutDelta => mJumpTimeoutDelta;
     [SerializeField] private float mFallTimeout = 0.15f;
     [SerializeField] private float mFallTimeoutDelta;
+    public float FallTimeoutDelta => mFallTimeoutDelta;
     
     [Space(10)]
     [Header("Player Roll Stat")]
@@ -370,7 +372,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
                     Fall();
                 }
                 else if (CurrentPlayerState == PlayerState.Dash || CurrentPlayerState == PlayerState.Skill_1 ||
-                         CurrentPlayerState == PlayerState.Skill_4)
+                         CurrentPlayerState == PlayerState.Skill_3 || CurrentPlayerState == PlayerState.Skill_4)
                 {
                     mVerticalVelocity = 0.0f;
                 }
@@ -534,7 +536,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             }
             else
             {
-                 targetSpeed = mPlayerStats.GetMoveSpeed();
+                targetSpeed = mPlayerStats.GetMoveSpeed();
             }
         }
         else
@@ -638,6 +640,8 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             mCharacterController.Move(new Vector3(0.0f, mVerticalVelocity, 0.0f) * Time.deltaTime);
         }
         
+        PlayerAnimator.SetFloat("Vertical", 0.0f);
+        PlayerAnimator.SetFloat("Horizontal", 0.0f);
         PlayerAnimator.SetFloat("Speed", mCurrentSpeed);
     }
 
@@ -917,7 +921,6 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     // 전투돌입 상태를 설정해주는 메서드
     private void SetCombatState(bool inCombat)
     {
-        Debug.Log("컴뱃 상태 변경");
         mbInCombat = inCombat;
         mInCombatTimeoutDelta = inCombat ? mInCombatTimeout : 0.0f;
 
@@ -962,7 +965,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             }
             
             // 공격 중 점프 상태
-            if (GameManager.Instance.Input.JumpInput)
+            if (GameManager.Instance.Input.JumpInput && mJumpTimeoutDelta < 0.0f)
             {
                 Jump();
                 
@@ -1034,11 +1037,15 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         if (!GameManager.Instance.Input.IsDefending)
         {
             Defending(false);
-            
-            PlayerAnimator.SetBool("Idle", false);
-            PlayerAnimator.SetBool("Move", false);
-            PlayerAnimator.SetBool("Defend", false);
-            SetPlayerState(PlayerState.Idle);
+
+            if (GameManager.Instance.Input.MoveInput == Vector2.zero)
+            {
+                SetPlayerState(PlayerState.Idle);
+            }
+            else
+            {
+                SetPlayerState(PlayerState.Move);
+            }
         }
         else
         {
@@ -1049,14 +1056,10 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             if (GameManager.Instance.Input.MoveInput == Vector2.zero)
             {
                 Idle();
-                PlayerAnimator.SetBool("Idle", true);
-                PlayerAnimator.SetBool("Move", false);
             }
             else
             {
                 BattleMove();
-                PlayerAnimator.SetBool("Idle", false);
-                PlayerAnimator.SetBool("Move", true);
             }
         }
     }
@@ -1066,7 +1069,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         if (isDefending)
         {
             // todo: 임시[테스트용]
-            // mPlayerStats.EnableDefenceBuff(90.0f);
+            mPlayerStats.EnableDefenceBuff(90.0f);
             mPlayerStats.OnGuardSuccess();
         }
         else
@@ -1278,8 +1281,33 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         Invoke("Skill_3_Fire", 0.5f);
     }
 
+    private Coroutine fallCoroutine;
     private void Skill_3_Fire()
     {
+        if (!bIsGrounded)
+        {
+            if (fallCoroutine != null)
+            {
+                StopCoroutine(fallCoroutine);
+            }
+            
+            RaycastHit hit;
+            if (Physics.Raycast(transform.position, Vector3.down, out hit, 100f, LayerMask.GetMask("Ground")))
+            {
+                fallCoroutine = StartCoroutine(FallToGround(hit.point));
+            }
+            else
+            {
+                // 레이 실패 시 그냥 낙하
+                SetPlayerState(PlayerState.Fall);
+            }
+        }
+        else
+        {
+            StopCoroutine(fallCoroutine);
+            fallCoroutine = null;
+        }
+        
         // 주변 적에게 데미지 주는 로직
         Collider[] hitColliders = Physics.OverlapSphere(transform.position, mSkill_3_Radius);
         foreach (var hitCollider in hitColliders)
@@ -1298,7 +1326,24 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         
         mSkill_3_TimeoutDelta = mSkill_3_Timeout;
     }
+    
+    private IEnumerator FallToGround(Vector3 groundPosition)
+    {
+        float duration = 0.3f; // 떨어지는 시간
+        float timer = 0.0f;
+        Vector3 startPosition = transform.position;
 
+        while (timer < duration)
+        {
+            transform.position = Vector3.Lerp(startPosition, groundPosition, timer / duration);
+            timer += Time.deltaTime;
+            yield return null;
+        }
+
+        transform.position = groundPosition;
+        fallCoroutine = null;
+    }
+    
     #endregion
 
     #region 4번 스킬

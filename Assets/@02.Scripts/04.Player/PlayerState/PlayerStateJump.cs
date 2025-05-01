@@ -52,7 +52,7 @@ public class PlayerStateJump : IPlayerState
             mPlayerController.SetPlayerState(PlayerState.Attack);
             return;
         }
-        
+
         mPlayerController.Jump();
     }
 
