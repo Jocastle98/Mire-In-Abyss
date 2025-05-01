@@ -1,5 +1,58 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &1622624497834401325
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 553313902239449064}
+  - component: {fileID: 3688606605661197591}
+  m_Layer: 0
+  m_Name: Spawner (1)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &553313902239449064
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1622624497834401325}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 1.24, y: -0.2, z: 1.12}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2588057412251179967}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &3688606605661197591
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1622624497834401325}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f0054c23ad3af544c81dd7ec9b6519e7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  radius: 1
+  spawnType: 0
+  mageList: {fileID: 0}
+  rangerList: {fileID: 0}
+  warriorList: {fileID: 0}
+  eliteMageList: {fileID: 0}
+  eliteRangerList: {fileID: 0}
+  eliteWarriorList: {fileID: 0}
+  bossList: {fileID: 0}
 --- !u!1 &1690487973243082076
 GameObject:
   m_ObjectHideFlags: 0
@@ -126,6 +179,59 @@ TilemapRenderer:
   m_Mode: 0
   m_DetectChunkCullingBounds: 0
   m_MaskInteraction: 0
+--- !u!1 &1748567690379395379
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2745664075665024542}
+  - component: {fileID: 5162810214363479767}
+  m_Layer: 0
+  m_Name: Spawner (3)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2745664075665024542
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1748567690379395379}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 1.38, y: -0.1, z: 5.63}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2588057412251179967}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &5162810214363479767
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1748567690379395379}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f0054c23ad3af544c81dd7ec9b6519e7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  radius: 1
+  spawnType: 0
+  mageList: {fileID: 0}
+  rangerList: {fileID: 0}
+  warriorList: {fileID: 0}
+  eliteMageList: {fileID: 0}
+  eliteRangerList: {fileID: 0}
+  eliteWarriorList: {fileID: 0}
+  bossList: {fileID: 0}
 --- !u!1 &2880435771854911196
 GameObject:
   m_ObjectHideFlags: 0
@@ -252,6 +358,59 @@ TilemapRenderer:
   m_Mode: 0
   m_DetectChunkCullingBounds: 0
   m_MaskInteraction: 0
+--- !u!1 &4208440694923855624
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4076228865873530832}
+  - component: {fileID: 317458260552881496}
+  m_Layer: 0
+  m_Name: Spawner
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4076228865873530832
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4208440694923855624}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 5.68, y: 0.2, z: 1.32}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2588057412251179967}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &317458260552881496
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4208440694923855624}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f0054c23ad3af544c81dd7ec9b6519e7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  radius: 1
+  spawnType: 0
+  mageList: {fileID: 0}
+  rangerList: {fileID: 0}
+  warriorList: {fileID: 0}
+  eliteMageList: {fileID: 0}
+  eliteRangerList: {fileID: 0}
+  eliteWarriorList: {fileID: 0}
+  bossList: {fileID: 0}
 --- !u!1 &5104467879641789638
 GameObject:
   m_ObjectHideFlags: 0
@@ -402,6 +561,59 @@ TilemapRenderer:
   m_Mode: 0
   m_DetectChunkCullingBounds: 0
   m_MaskInteraction: 0
+--- !u!1 &5151160919252014504
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6044508953637728088}
+  - component: {fileID: 2030280342079802958}
+  m_Layer: 0
+  m_Name: Spawner (2)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6044508953637728088
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5151160919252014504}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 5.62, y: -0.08, z: 5.7}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2588057412251179967}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2030280342079802958
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5151160919252014504}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f0054c23ad3af544c81dd7ec9b6519e7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  radius: 1
+  spawnType: 0
+  mageList: {fileID: 0}
+  rangerList: {fileID: 0}
+  warriorList: {fileID: 0}
+  eliteMageList: {fileID: 0}
+  eliteRangerList: {fileID: 0}
+  eliteWarriorList: {fileID: 0}
+  bossList: {fileID: 0}
 --- !u!1 &6721582049527035228
 GameObject:
   m_ObjectHideFlags: 0
@@ -434,6 +646,10 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 7178395897015187302}
+  - {fileID: 4076228865873530832}
+  - {fileID: 553313902239449064}
+  - {fileID: 6044508953637728088}
+  - {fileID: 2745664075665024542}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!65 &-5606533070704763175
@@ -471,7 +687,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   IsClear: 0
   spawnTypeList: {fileID: 11400000, guid: 5612ed7ddfb067e4e8b9cfd7777d0f63, type: 2}
-  roomType: 0
+  roomType: 2
 --- !u!1 &7941659863971215110
 GameObject:
   m_ObjectHideFlags: 0
