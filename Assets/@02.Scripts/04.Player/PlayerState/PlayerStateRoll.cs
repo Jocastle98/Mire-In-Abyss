@@ -14,7 +14,7 @@ public class PlayerStateRoll : IPlayerState
         mPlayerController = playerController;
         mPlayerController.PlayerAnimator.SetTrigger("Roll");
 
-        mRollDirection = mPlayerController.SetRollDirection();
+        mRollDirection = mPlayerController.GetActionDirection(true, true);
         mPlayerController.transform.rotation = Quaternion.LookRotation(mRollDirection);
         mPlayerController.StartRoll(mRollDirection);
     }

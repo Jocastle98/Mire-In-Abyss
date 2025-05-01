@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Cinemachine;
 using PlayerEnums;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -14,10 +15,10 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
 {
     [Header("Reference")]
     [SerializeField] private PlayerStats mPlayerStats;
-
+    
     [Space(10)]
     [Header("Player Movement Stat")]
-    [SerializeField] private float mSpeed;
+    [SerializeField] private float mCurrentSpeed;
     [SerializeField] private float mSpeedChangeRate = 10.0f;
     [SerializeField] private float mRotationSmoothTime = 0.12f;
     
@@ -47,10 +48,37 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     [SerializeField] private float mDashTimeoutDelta;
     public float DashTimeoutDelta => mDashTimeoutDelta;
     private Coroutine mDashCoroutine;
-
+    
     [Space(10)] 
     [Header("Player Attack Stat")]
-    [SerializeField] private float mAttackSpeed = 1.0f;
+    [SerializeField] private float mAttackSpeedMultiplier = 1.0f;
+
+    [Space(10)] 
+    [Header("Player Skill_1 Stat")]
+    [SerializeField] private float mSkill_1_DamageMultiplier = 1.5f;
+    [SerializeField] private float mSkill_1_Distance = 20.0f;
+    [SerializeField] private float mSkill_1_Timeout = 10.0f;
+    [SerializeField] private float mSkill_1_TimeoutDelta;
+    public float Skill_1_TimeoutDelta => mSkill_1_TimeoutDelta;
+    
+    [Space(10)] 
+    [Header("Player Skill_2 Stat")]
+    
+    [Space(10)] 
+    [Header("Player Skill_3 Stat")]
+    [SerializeField] private float mSkill_3_DamageMultiplier = 2.0f;
+    [SerializeField] private float mSkill_3_Radius = 5.0f;
+    [SerializeField] private float mSkill_3_Timeout = 12.0f;
+    [SerializeField] private float mSkill_3_TimeoutDelta;
+    public float Skill_3_TimeoutDelta => mSkill_3_TimeoutDelta;
+    
+    [Space(10)] 
+    [Header("Player Skill_4 Stat")]
+    [SerializeField] private float mSkill_4_DamageMultiplier = 2.5f;
+    [SerializeField] private float mSkill_4_Radius = 5.0f;
+    [SerializeField] private float mSkill_4_Timeout = 30.0f;
+    [SerializeField] private float mSkill_4_TimeoutDelta;
+    public float Skill_4_TimeoutDelta => mSkill_4_TimeoutDelta;
     
     [Space(10)]
     [Header("Player Grouned Check")]
@@ -109,7 +137,6 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     private PlayerStateSkill_3 mPlayerStateSkill_3;
     private PlayerStateSkill_4 mPlayerStateSkill_4;
     private PlayerStateInteraction mPlayerStateInteraction;
-    private PlayerStateHit mPlayerStateHit;
     private PlayerStateStun mPlayerStateStun;
     private PlayerStateFreeze mPlayerStateFreeze;
     private PlayerStateDead mPlayerStateDead;
@@ -146,7 +173,10 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
 
     private void FixedUpdate()
     {
-        CalculateGravity();
+        if (CurrentPlayerState != PlayerState.Skill_4)
+        {
+            CalculateGravity();
+        }
     }
 
     /// <summary>
@@ -160,7 +190,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         GameManager.Instance.Input.Init(mPlayerInput);
         
         // 공격 속도 설정
-        PlayerAnimator.SetFloat("AttackSpeed", mAttackSpeed);
+        PlayerAnimator.SetFloat("AttackSpeed", mAttackSpeedMultiplier);
         
         // 무기 할당
         SetPlayerWeapon(mRightHandTransform, "Longsword", mLeftHandTransform, "Shield");
@@ -183,7 +213,6 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         mPlayerStateSkill_3 = new PlayerStateSkill_3();
         mPlayerStateSkill_4 = new PlayerStateSkill_4();
         mPlayerStateInteraction = new PlayerStateInteraction();
-        mPlayerStateHit = new PlayerStateHit();
         mPlayerStateStun = new PlayerStateStun();
         mPlayerStateFreeze = new PlayerStateFreeze();
         mPlayerStateDead = new PlayerStateDead();
@@ -205,7 +234,6 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             { PlayerState.Skill_3, mPlayerStateSkill_3 },
             { PlayerState.Skill_4, mPlayerStateSkill_4 },
             { PlayerState.Interaction, mPlayerStateInteraction },
-            { PlayerState.Hit, mPlayerStateHit },
             { PlayerState.Stun, mPlayerStateStun },
             { PlayerState.Freeze, mPlayerStateFreeze },
             { PlayerState.Dead, mPlayerStateDead },
@@ -225,6 +253,9 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         mFallTimeoutDelta = mFallTimeout;
         mRollTimeoutDelta = 0.0f;
         mDashTimeoutDelta = 0.0f;
+        mSkill_1_TimeoutDelta = 0.0f;
+        mSkill_3_TimeoutDelta = 0.0f;
+        mSkill_4_TimeoutDelta = 0.0f;
     }
 
     /// <summary>
@@ -338,7 +369,8 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
                 {
                     Fall();
                 }
-                else if (CurrentPlayerState == PlayerState.Dash)
+                else if (CurrentPlayerState == PlayerState.Dash || CurrentPlayerState == PlayerState.Skill_1 ||
+                         CurrentPlayerState == PlayerState.Skill_4)
                 {
                     mVerticalVelocity = 0.0f;
                 }
@@ -369,6 +401,24 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         if (mDashTimeoutDelta >= 0.0f)
         {
             mDashTimeoutDelta -= Time.deltaTime;
+        }
+        
+        // Skill_1 관련 Timeout
+        if (mSkill_1_TimeoutDelta >= 0.0f)
+        {
+            mSkill_1_TimeoutDelta -= Time.deltaTime;
+        }
+        
+        // Skill_3 관련 Timeout
+        if (mSkill_3_TimeoutDelta >= 0.0f)
+        {
+            mSkill_3_TimeoutDelta -= Time.deltaTime;
+        }
+        
+        // Skill_4 관련 Timeout
+        if (mSkill_4_TimeoutDelta >= 0.0f)
+        {
+            mSkill_4_TimeoutDelta -= Time.deltaTime;
         }
     }
     
@@ -411,48 +461,37 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         
         return cameraForward;
     }
-    
+
     /// <summary>
-    /// 구르기 기능의 방향을 설정해주는 메서드
+    /// 구르기나 돌진기 등의 방향을 설정해 주는 메서드
     /// </summary>
-    /// <returns> 이동 입력이 없으면 카메라 전방, 이동 입력이 있으면 입력 방향 </returns>
-    public Vector3 SetRollDirection()
+    /// <param name="useMoveInput"> 이동 입력을 사용할지 여부 (구르기=O, 돌진=X) </param>
+    /// <param name="isGroundOnly"> 지상 전용 동작인지 여부 (구르기=O, 돌진=X) </param>
+    /// <returns> 방향 벡터 반환 </returns>
+    public Vector3 GetActionDirection(bool useMoveInput, bool isGroundOnly)
     {
         Vector3 targetDirection = Vector3.zero;
         Vector2 moveInput = GameManager.Instance.Input.MoveInput;
         
-        if (moveInput == Vector2.zero)
+        if (isGroundOnly || bIsGrounded)
         {
-            targetDirection = GetCameraForwardDirection(true);
-        }
-        else
-        {
-            Vector3 inputDirection = new Vector3(moveInput.x, 0.0f, moveInput.y).normalized;
-            float targetRotation = Mathf.Atan2(inputDirection.x, inputDirection.z) * Mathf.Rad2Deg + mMainCamera.transform.eulerAngles.y;
+            if (useMoveInput && moveInput != Vector2.zero)
+            {
+                Vector3 inputDirection = new Vector3(moveInput.x, 0.0f, moveInput.y).normalized;
+                float targetRotation = Mathf.Atan2(inputDirection.x, inputDirection.z) * Mathf.Rad2Deg + mMainCamera.transform.eulerAngles.y;
 
-            targetDirection = Quaternion.Euler(0.0f, targetRotation, 0.0f) * Vector3.forward;
-        }
-        
-        return targetDirection;
-    }
-
-    /// <summary>
-    /// 돌진 기능의 방향을 설정해주는 메서드
-    /// </summary>
-    /// <returns> 지상에서는 카메라 수평 전방, 공중에서는 카메라 중앙전방(수직+수평) </returns>
-    public Vector3 SetDashDirection()
-    {
-        var targetDirection = Vector3.zero;
-        
-        if (bIsGrounded)
-        {
-            targetDirection = GetCameraForwardDirection(true);
+                targetDirection = Quaternion.Euler(0.0f, targetRotation, 0.0f) * Vector3.forward;
+            }
+            else
+            {
+                targetDirection = GetCameraForwardDirection(true);
+            }
         }
         else
         {
             targetDirection = GetCameraForwardDirection(false);
         }
-        
+
         return targetDirection;
     }
     
@@ -468,7 +507,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         float targetSpeed = SetSpeed();
         
         // 2. 현재 속도 측정 (수평 이동만 고려) 및 목표 속도로 증감
-        mSpeed = HandleSpeed(targetSpeed);
+        mCurrentSpeed = HandleSpeed(targetSpeed);
         
         // 3. 플레이어 캐릭터 회전
         HandleRotation(allowRotation);
@@ -546,11 +585,11 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         
         if (CurrentPlayerState == PlayerState.Move)
         {
-            mCharacterController.Move(targetDirection.normalized * (mSpeed * Time.deltaTime) + new Vector3(0.0f, mGravity, 0.0f) * Time.deltaTime);
+            mCharacterController.Move(targetDirection.normalized * (mCurrentSpeed * Time.deltaTime) + new Vector3(0.0f, mGravity, 0.0f) * Time.deltaTime);
         }
         else
         {
-            mCharacterController.Move(targetDirection.normalized * (mSpeed * Time.deltaTime) + new Vector3(0.0f, mVerticalVelocity, 0.0f) * Time.deltaTime);
+            mCharacterController.Move(targetDirection.normalized * (mCurrentSpeed * Time.deltaTime) + new Vector3(0.0f, mVerticalVelocity, 0.0f) * Time.deltaTime);
         }
     }
     
@@ -576,7 +615,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         
         // 애니메이션의 이동 속도 블랜드
         float currentSpeed = PlayerAnimator.GetFloat("Speed");
-        float smoothedSpeed = Mathf.Lerp(currentSpeed, mSpeed, Time.deltaTime * mSpeedChangeRate);
+        float smoothedSpeed = Mathf.Lerp(currentSpeed, mCurrentSpeed, Time.deltaTime * mSpeedChangeRate);
         if (smoothedSpeed < 0.01f)
         {
             smoothedSpeed = 0f;
@@ -588,7 +627,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     
     public void Idle()
     {
-        mSpeed = 0.0f;
+        mCurrentSpeed = 0.0f;
         
         if (CurrentPlayerState == PlayerState.Idle)
         {
@@ -599,7 +638,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             mCharacterController.Move(new Vector3(0.0f, mVerticalVelocity, 0.0f) * Time.deltaTime);
         }
         
-        PlayerAnimator.SetFloat("Speed", mSpeed);
+        PlayerAnimator.SetFloat("Speed", mCurrentSpeed);
     }
 
     public void Move()
@@ -624,7 +663,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             mVerticalVelocity = Mathf.Sqrt(mJumpHeight * -2.0f * mGravity);
 
             Vector3 targetDirection = Quaternion.Euler(0.0f, mTargetRotation, 0.0f) * Vector3.forward;
-            mCharacterController.Move(targetDirection.normalized * (mSpeed * Time.deltaTime) 
+            mCharacterController.Move(targetDirection.normalized * (mCurrentSpeed * Time.deltaTime) 
                                       + new Vector3(0.0f, mVerticalVelocity, 0.0f) * Time.deltaTime);
         }
     }
@@ -632,7 +671,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     public void Fall()
     {
         Vector3 targetDirection = Quaternion.Euler(0.0f, mTargetRotation, 0.0f) * Vector3.forward;
-        mCharacterController.Move(targetDirection.normalized * (mSpeed * Time.deltaTime) 
+        mCharacterController.Move(targetDirection.normalized * (mCurrentSpeed * Time.deltaTime) 
                                   + new Vector3(0.0f, mVerticalVelocity, 0.0f) * Time.deltaTime);
     }
     
@@ -878,21 +917,26 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     // 전투돌입 상태를 설정해주는 메서드
     private void SetCombatState(bool inCombat)
     {
+        Debug.Log("컴뱃 상태 변경");
         mbInCombat = inCombat;
         mInCombatTimeoutDelta = inCombat ? mInCombatTimeout : 0.0f;
+
+        if (mbInCombat)
+        {
+            GameManager.Instance.Input.SprintOff();
+        }
     }
 
     // 플레이어 캐릭터의 공격속도 설정 및 애니메이션에 반영
     public void SetAttackSpeed(float speed)
     {
-        mAttackSpeed = speed;
-        PlayerAnimator.SetFloat("AttackSpeed", mAttackSpeed);
+        mAttackSpeedMultiplier = speed;
+        PlayerAnimator.SetFloat("AttackSpeed", mAttackSpeedMultiplier);
     }
     
     // 공격 상태 중 캐릭터의 움직임을 설정하는 메서드
     public void Attack()
     {
-        GameManager.Instance.Input.SprintOff();
         SetCombatState(true);
         
         PlayerAnimator.SetBool("Idle", false);
@@ -932,18 +976,21 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         }
     }
     
-    // 공격 애니메이션의 공격 모션 시작 시 호출 메서드
+    // 공격 애니메이션 중 공격 행동 시작 시점에 호출되는 메서드
     public void MeleeAttackStart()
     {
         mWeaponController.AttackStart();
+        mPlayerStateAttack.HasReceivedNextAttackInput = false;
+        mPlayerStateAttack.bIsComboActive = true;
     }
 
-    // 공격 애니메이션의 공격 모션 종료 시 호출되는 메서드
+    // 공격 애니메이션 중 공격 행동 종료 시점에 호출되는 메서드
     public void MeleeAttackEnd()
     {
         mWeaponController.AttackEnd();
     }
 
+    // 공격 애니메이션의 종료 직전 호출되는 메서드
     public void EndCombo()
     {
         mPlayerStateAttack.bIsComboActive = false;
@@ -953,12 +1000,12 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
 
         public void OnNext(GameObject value)
         {
-            var enemyController = value.GetComponent<TestEnemyController>();
+            var enemyController = value.GetComponent<EnemyBTController>();
             if (enemyController)
             {
                 //공격력을 PlayerStats에서 가져와 데미지 계산
                 float damage = mPlayerStats.GetAttackDamage();
-                enemyController.SetHit(this);
+                enemyController.SetHit((int)damage);
                 //피해적용 후 흡혈효과 처리
                 mPlayerStats.OnDamageDealt(damage);
             }
@@ -982,10 +1029,12 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
 
     public void Defend()
     {
-        GameManager.Instance.Input.SprintOff();
+        SetCombatState(true);
         
         if (!GameManager.Instance.Input.IsDefending)
         {
+            Defending(false);
+            
             PlayerAnimator.SetBool("Idle", false);
             PlayerAnimator.SetBool("Move", false);
             PlayerAnimator.SetBool("Defend", false);
@@ -994,7 +1043,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         else
         {
             // 피해감소 or 방어력 증가 기능 메서드
-            Defending();
+            Defending(true);
             
             // 이동 방어시 하반신(Base Layer) 애니메이션
             if (GameManager.Instance.Input.MoveInput == Vector2.zero)
@@ -1012,9 +1061,18 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         }
     }
     
-    private void Defending()
+    private void Defending(bool isDefending)
     {
-        mPlayerStats.OnGuardSuccess();
+        if (isDefending)
+        {
+            // todo: 임시[테스트용]
+            // mPlayerStats.EnableDefenceBuff(90.0f);
+            mPlayerStats.OnGuardSuccess();
+        }
+        else
+        {
+            mPlayerStats.EnableDefenceBuff(0.0f);
+        }
     }
 
     #endregion
@@ -1023,7 +1081,6 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
 
     public void Parry()
     {
-        GameManager.Instance.Input.SprintOff();
         SetCombatState(true);
 
         // 패리 성공 시 행동 메서드
@@ -1054,14 +1111,22 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     
     #region 피격/사망 관련 기능
 
-    public void SetHit(TestEnemyController enemyController, Vector3 direction)
+    /// <summary>
+    /// 플레이어 캐릭터에 피격 적용하는 메서드
+    /// </summary>
+    /// <param name="enemyAttackPower"> 적의 공격력 </param>
+    /// <param name="enemyTransform"> 적의 위치(현재 사용안해서 없어도 됨) </param>
+    /// <param name="hitPower"> 피격 단계 0 = 살짝 휘청, 1 = 크게 휘청 </param>
+    public void SetHit(int enemyAttackPower, Transform enemyTransform = null, int hitPower = 0)
     {
-        if (CurrentPlayerState != PlayerState.Hit)
+        // 플레이어가 죽은 상태일 때는 공격을 받지 않음
+        if (CurrentPlayerState == PlayerState.Dead)
         {
-            //PlayerState의 TakeDamage 메서드 사용
-            var enemyPower = enemyController.EnemyAttackPower;
-            mPlayerStats.TakeDamage(enemyPower);
+            return; // 사망 상태에서는 더 이상 피해를 받지 않음
         }
+        
+        //PlayerState의 TakeDamage 메서드 사용
+        mPlayerStats.TakeDamage(enemyAttackPower);
         
         // 체력 UI 업데이트
         // GameManager.Instance.SetHP((float)mPlayerStats.GetCurrentHP() / mPlayerStats.GetMaxHP());
@@ -1074,11 +1139,26 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         {
             SetCombatState(true);
             
-            SetPlayerState(PlayerState.Hit);
-            // 방향에 따라 맞는 애니메이션이 없으므로 현재는 효과가 없는 것이나 마찬가지인 상태, 일단 대기
-            // 플레이어 캐릭터의 방향을 회전시켜주는 수동적인 방식을 사용하거나?
-            PlayerAnimator.SetFloat("HitPosX", -direction.x);
-            PlayerAnimator.SetFloat("HitPosY", -direction.z);
+            if (CurrentPlayerState == PlayerState.Defend)
+            {
+                PlayerAnimator.SetTrigger("DefendHit");
+            }
+            // 공격 관련 동작들이 끊기지 않도록
+            else if(CurrentPlayerState == PlayerState.Idle || CurrentPlayerState == PlayerState.Move)
+            {
+                PlayerAnimator.SetFloat("HitPower", hitPower);
+                PlayerAnimator.SetTrigger("Hit");
+                
+                // 방향에 따라 맞는 애니메이션이 없으므로 현재는 효과가 없는 것이나 마찬가지인 상태, 일단 대기
+                // 플레이어 캐릭터의 방향을 회전시켜주는 수동적인 방식을 사용하거나?
+                if (enemyTransform != null)
+                {
+                    Vector3 direction = enemyTransform.transform.position - transform.position;
+                    
+                    PlayerAnimator.SetFloat("HitPosX", -direction.x);
+                    PlayerAnimator.SetFloat("HitPosY", -direction.z);
+                }
+            }
         }
     }
 
@@ -1144,6 +1224,303 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         return mPlayerStats.OnSkillUse();
     }
 
+    #endregion
+
+    #region 스킬 관련 기능
+
+    #region 1번 스킬
+
+    public void Skill_1()
+    {
+        SetCombatState(true);
+        
+        Invoke("Skill_1_Fire", 0.55f); // 애니메이션 선딜
+    }
+
+    private void Skill_1_Fire()
+    {
+        GameObject projectilePrefab = Resources.Load<GameObject>("Player/Effects/SlashProjectileEffect");
+        if (projectilePrefab == null)
+        {
+            return;
+        }
+        Vector3 firePosition = transform.position + transform.forward * 2.0f + Vector3.up;
+        Vector3 direction = GetActionDirection(false, false);
+        
+        GameObject projectileObject = GameObject.Instantiate(projectilePrefab,
+                                                             firePosition,
+                                                             Quaternion.LookRotation(direction));
+        
+        // 검기 스크립트에 방향 및 속도 설정
+        Skill_1 skill_1 = projectileObject.GetComponent<Skill_1>();
+        skill_1.Init((int)mPlayerStats.GetAttackDamage(), mSkill_1_DamageMultiplier, mSkill_1_Distance, direction);
+
+        mSkill_1_TimeoutDelta = mSkill_1_Timeout;
+    }
+
+    #endregion
+
+    #region 2번 스킬
+
+    public void Skill_2()
+    {
+        
+    }
+
+    #endregion
+
+    #region 3번 스킬
+
+    public void Skill_3()
+    {
+        SetCombatState(true);
+
+        Invoke("Skill_3_Fire", 0.5f);
+    }
+
+    private void Skill_3_Fire()
+    {
+        // 주변 적에게 데미지 주는 로직
+        Collider[] hitColliders = Physics.OverlapSphere(transform.position, mSkill_3_Radius);
+        foreach (var hitCollider in hitColliders)
+        {
+            if (hitCollider.transform.gameObject.layer == LayerMask.NameToLayer("Enemy"))
+            {
+                //TODO: enemy범위 공격 로직
+                // 데미지 처리
+                EnemyBTController enemy = hitCollider.GetComponent<EnemyBTController>();
+                if (enemy != null)
+                {
+                    enemy.SetHit((int)(mPlayerStats.GetAttackDamage() * mSkill_3_DamageMultiplier));
+                }
+            }
+        }
+        
+        mSkill_3_TimeoutDelta = mSkill_3_Timeout;
+    }
+
+    #endregion
+
+    #region 4번 스킬
+
+    private Coroutine mSkill4Coroutine;
+    private Coroutine mCameraCoroutine;
+    private Coroutine mAimAndFireCoroutine;
+    private Coroutine mProjectileCoroutine;
+    
+    private float originCameraDistance = 0.0f;
+    private bool mbIsCameraResetting = false;
+    
+    public void Start_Skill_4()
+    {
+        StartCoroutine(Skill_4());
+    }
+
+    public void Stop_Skill_4()
+    {
+        if (mSkill4Coroutine != null)
+        {
+            StopCoroutine(mSkill4Coroutine);
+            mSkill4Coroutine = null;
+        }
+
+        if (mCameraCoroutine != null)
+        {
+            StopCoroutine(mCameraCoroutine);
+            mCameraCoroutine = null;
+        }
+
+        if (mAimAndFireCoroutine != null)
+        {
+            StopCoroutine(mAimAndFireCoroutine);
+            mAimAndFireCoroutine = null;
+        }
+
+        if (mProjectileCoroutine != null)
+        {
+            StopCoroutine(mProjectileCoroutine);
+            mProjectileCoroutine = null;
+        }
+    }
+    
+    private IEnumerator Skill_4()
+    {
+        mSkill4Coroutine = StartCoroutine(Skill_4_Stance());
+        mCameraCoroutine = StartCoroutine(Skill_4_Camera(true));
+        yield return mSkill4Coroutine;
+        yield return mCameraCoroutine;
+
+        mAimAndFireCoroutine = StartCoroutine(Skill_4_AimAndFire());
+        yield return mAimAndFireCoroutine;
+    }
+    
+    private IEnumerator Skill_4_Stance()
+    {
+        Vector3 groundPosition = transform.position;
+        if (Physics.Raycast(transform.position + Vector3.up * 2.0f, Vector3.down, out RaycastHit hit, 100.0f, mGroundLayers))
+        {
+            groundPosition = hit.point;
+        }
+        
+        float jumpSpeed = 20.0f;
+        float jumpHeight = 10.0f;
+        float targetHeight = groundPosition.y + jumpHeight;
+        
+        PlayerAnimator.SetBool("Jump", true);
+        
+        while (transform.position.y < targetHeight)
+        {
+            float jumpAmount = jumpSpeed * Time.deltaTime;
+
+            if (transform.position.y + jumpAmount > targetHeight)
+            {
+                jumpAmount = targetHeight - transform.position.y;
+            }
+            
+            
+            mCharacterController.Move(Vector3.up * jumpAmount);
+            yield return null;
+        }
+        
+        PlayerAnimator.SetBool("Jump", false);
+    }
+
+    private IEnumerator Skill_4_Camera(bool isStance)
+    {
+        if (!isStance && mbIsCameraResetting)
+        {
+            yield break;
+        }
+        
+        var camera = mMainCamera.GetComponent<CameraController>();
+        var virtualCamera = camera.GetComponent<CinemachineVirtualCamera>();
+        var threePersonFollow = virtualCamera.GetCinemachineComponent<Cinemachine3rdPersonFollow>();
+        
+        if (isStance)
+        {
+            originCameraDistance = threePersonFollow.CameraDistance;
+            mbIsCameraResetting = false;
+            
+            float timeElapsed = 0f;
+            while (timeElapsed < 1.0f)
+            {
+                threePersonFollow.CameraDistance = Mathf.Lerp(originCameraDistance, 20.0f, timeElapsed / 1.0f);
+                timeElapsed += Time.deltaTime;
+                yield return null;
+            }
+
+            threePersonFollow.CameraDistance = 20.0f;
+        }
+        else
+        {
+            mbIsCameraResetting = true;
+            float startDistance = threePersonFollow.CameraDistance;
+            
+            float timeElapsed = 0f;
+            while (timeElapsed < 1.0f)
+            {
+                threePersonFollow.CameraDistance = Mathf.Lerp(startDistance, originCameraDistance, timeElapsed / 1.0f);
+                timeElapsed += Time.deltaTime;
+                yield return null;
+            }
+
+            threePersonFollow.CameraDistance = originCameraDistance;
+        }
+    }
+    
+    private IEnumerator Skill_4_AimAndFire()
+    {
+        GameObject rangeIndicatorObject = Resources.Load<GameObject>("Player/Effects/Skill_4_RangeIndicator");
+        GameObject rangeIndicator = GameObject.Instantiate(rangeIndicatorObject);
+
+        float timer = 5.0f;
+        bool isAttackCompleted = false;
+        Vector3 finalTargetPoint = Vector3.zero;
+        
+        while (timer > 0.0f)
+        {
+            timer -= Time.deltaTime;
+            
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            RaycastHit hit;
+            if (Physics.Raycast(ray, out hit, 100.0f, mGroundLayers))
+            {
+                rangeIndicator.transform.position = hit.point;
+                finalTargetPoint = hit.point;
+            }
+
+            Vector3 cameraForward = GetCameraForwardDirection(true);
+            Quaternion cameraRotation = Quaternion.LookRotation(cameraForward);
+            transform.rotation = Quaternion.Slerp(transform.rotation, cameraRotation, 10.0f * Time.deltaTime);
+            
+            if (GameManager.Instance.Input.AttackInput)
+            {
+                FireProjectile(finalTargetPoint);
+                isAttackCompleted = true;
+                break;
+            }
+            
+            // 취소 입력 시
+            if (GameManager.Instance.Input.DefendInput)
+            {
+                CancelSkill();
+                isAttackCompleted = true;
+                break;
+            }
+            
+            yield return null;
+        }
+        
+        // 자동 발사
+        if (!isAttackCompleted)
+        {
+            FireProjectile(finalTargetPoint);
+        }
+        
+        Destroy(rangeIndicator);
+        rangeIndicator = null;
+        
+        SetCombatState(true);
+    }
+    
+    private void FireProjectile(Vector3 targetPoint)
+    {
+        mProjectileCoroutine = StartCoroutine(FireProjectileCoroutine(targetPoint));
+        
+        mSkill_4_TimeoutDelta = mSkill_4_Timeout;
+    }
+
+    private IEnumerator FireProjectileCoroutine(Vector3 targetPoint)
+    {
+        PlayerAnimator.SetTrigger("Skill");
+        PlayerAnimator.SetInteger("Skill_Index", 4);
+        
+        yield return new WaitForSeconds(0.8f); // 애니메이션 선딜
+        
+        GameObject projectilePrefab = Resources.Load<GameObject>("Player/Effects/Skill_4_Projectile");
+        if (projectilePrefab == null)
+        {
+            yield break;
+        }
+        Vector3 firePosition = targetPoint + Vector3.up * 10.0f;
+        
+        GameObject projectileObject = GameObject.Instantiate(projectilePrefab, firePosition, Quaternion.identity);
+        
+        Skill_4 skill_4 = projectileObject.GetComponent<Skill_4>();
+        skill_4.Init((int)mPlayerStats.GetAttackDamage(), mSkill_4_DamageMultiplier, mSkill_4_Radius, targetPoint);
+        
+        StartCoroutine(Skill_4_Camera(false));
+    }
+
+    private void CancelSkill()
+    {
+        StartCoroutine(Skill_4_Camera(false));
+        
+        SetPlayerState(PlayerState.Fall);
+    }
+    
+    #endregion
+    
     #endregion
     
     #region 디버깅 관련
