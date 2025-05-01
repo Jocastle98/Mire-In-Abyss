@@ -185,10 +185,9 @@ public class QuestBoardPanelController : PopupPanelController
     /// </summary>
     public void OnClickCloseButton()
     {
-        PlayerController mPlayerController = FindObjectOfType<PlayerController>();
         Hide(() =>
         {
-            mPlayerController.SetPlayerState(PlayerState.Idle);
+            mPlayer.SetPlayerState(PlayerState.Idle);
         });
     }
 }

@@ -6301,7 +6301,7 @@ GameObject:
   - component: {fileID: 902060139327430959}
   - component: {fileID: 7316706582714305800}
   m_Layer: 5
-  m_Name: Text (TMP)
+  m_Name: cost
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -8156,7 +8156,7 @@ GameObject:
   - component: {fileID: 3151432537096810121}
   - component: {fileID: 1962728233051483519}
   m_Layer: 5
-  m_Name: Text (TMP)
+  m_Name: currentSoul
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -10253,6 +10253,124 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mPanelRectTransform: {fileID: 8079597294651733177}
+  mUpgradeData: {fileID: 11400000, guid: 578899d986a38b04e8b7e2f9dc79c6ce, type: 2}
+  mUpgradeInfos: []
+  mUpgradeButtons:
+  - Background: {fileID: 6827915553216200962}
+    SelectorImage: {fileID: 3678764329565773780}
+    UpgradeButtonUI: {fileID: 3055432151384029906}
+    TitleText: {fileID: 1368677649536929610}
+    IconImage: {fileID: 8565048526338891115}
+    LevelImages:
+    - {fileID: 1035050347814755201}
+    - {fileID: 4050244909005108022}
+    - {fileID: 1985569867003226697}
+    - {fileID: 2255076312896277097}
+    - {fileID: 513432998127532372}
+  - Background: {fileID: 8437694427354479197}
+    SelectorImage: {fileID: 8207596841459358574}
+    UpgradeButtonUI: {fileID: 2953899639256189217}
+    TitleText: {fileID: 807287904692733197}
+    IconImage: {fileID: 3399832568462473398}
+    LevelImages:
+    - {fileID: 166445240389287485}
+    - {fileID: 100691116910561298}
+    - {fileID: 8576187440510982421}
+    - {fileID: 6827815577129168722}
+    - {fileID: 8951840523567338600}
+  - Background: {fileID: 3626653026832559356}
+    SelectorImage: {fileID: 2754355947907688179}
+    UpgradeButtonUI: {fileID: 4103575215058102194}
+    TitleText: {fileID: 5476868305546458029}
+    IconImage: {fileID: 1332054136800458678}
+    LevelImages:
+    - {fileID: 7746467864523566954}
+    - {fileID: 1294865067040250411}
+    - {fileID: 3590967204639391866}
+    - {fileID: 2176173784112292258}
+    - {fileID: 5122254501307626744}
+  - Background: {fileID: 8961498664184873503}
+    SelectorImage: {fileID: 2437403162942169771}
+    UpgradeButtonUI: {fileID: 3849830350862221705}
+    TitleText: {fileID: 7276464916573530780}
+    IconImage: {fileID: 8304184110155576731}
+    LevelImages:
+    - {fileID: 8377878051460078348}
+    - {fileID: 6502911420606154651}
+    - {fileID: 2380527294096244557}
+    - {fileID: 656733905308844349}
+    - {fileID: 7406649856835239282}
+  - Background: {fileID: 919867493159275954}
+    SelectorImage: {fileID: 4603266295647652163}
+    UpgradeButtonUI: {fileID: 2285889136086889599}
+    TitleText: {fileID: 2673969971092054791}
+    IconImage: {fileID: 1165863834467759643}
+    LevelImages:
+    - {fileID: 8820793390253213673}
+    - {fileID: 2293847211049755315}
+    - {fileID: 6667731765349436156}
+    - {fileID: 1737956090120944207}
+    - {fileID: 3331061213875887490}
+  - Background: {fileID: 6988503639560238928}
+    SelectorImage: {fileID: 7728009303756370181}
+    UpgradeButtonUI: {fileID: 4855990217575436712}
+    TitleText: {fileID: 5369674311676018667}
+    IconImage: {fileID: 7802737658193622046}
+    LevelImages:
+    - {fileID: 43044538801755966}
+    - {fileID: 7201352006276287655}
+    - {fileID: 711025220707323030}
+    - {fileID: 4374715201844989449}
+    - {fileID: 1402944704744253591}
+  - Background: {fileID: 3798673712840265214}
+    SelectorImage: {fileID: 796259306050246213}
+    UpgradeButtonUI: {fileID: 2667691083894139873}
+    TitleText: {fileID: 8056822746237238055}
+    IconImage: {fileID: 3477333182461682366}
+    LevelImages:
+    - {fileID: 6280421798598402790}
+    - {fileID: 2075244295742847408}
+    - {fileID: 2697785499908261738}
+    - {fileID: 8195114242623208025}
+    - {fileID: 4638728260748740162}
+  - Background: {fileID: 6321283449958648926}
+    SelectorImage: {fileID: 8471474890458639423}
+    UpgradeButtonUI: {fileID: 2260392880168952768}
+    TitleText: {fileID: 8152102330247707366}
+    IconImage: {fileID: 5321084406832045784}
+    LevelImages:
+    - {fileID: 2957402269100086225}
+    - {fileID: 6521510573715047581}
+    - {fileID: 6351438875695632928}
+    - {fileID: 770696399809286651}
+    - {fileID: 198340904436038278}
+  - Background: {fileID: 3951534722502191279}
+    SelectorImage: {fileID: 8561542584654135732}
+    UpgradeButtonUI: {fileID: 2559879825294354085}
+    TitleText: {fileID: 3002134108231990962}
+    IconImage: {fileID: 7445783466031960572}
+    LevelImages:
+    - {fileID: 1858503409393823065}
+    - {fileID: 6924605499295778042}
+    - {fileID: 718777295900987243}
+    - {fileID: 1602437519672187023}
+    - {fileID: 4374993343698829216}
+  - Background: {fileID: 1511997774186198609}
+    SelectorImage: {fileID: 6819364552576716906}
+    UpgradeButtonUI: {fileID: 6530944103141694834}
+    TitleText: {fileID: 7662934965958776548}
+    IconImage: {fileID: 5694906374733676657}
+    LevelImages:
+    - {fileID: 7318772292932947772}
+    - {fileID: 1000234367613302308}
+    - {fileID: 7864443097481063336}
+    - {fileID: 5320053760207312077}
+    - {fileID: 5582804293881195130}
+  mDescriptionText: {fileID: 5633324990149869029}
+  mSoulStoneCountText: {fileID: 1962728233051483519}
+  mCostText: {fileID: 7316706582714305800}
+  mUpgradeApplyButton: {fileID: 5006930589283825903}
+  mPlayerStats: {fileID: 0}
 --- !u!1 &8951840523567338600
 GameObject:
   m_ObjectHideFlags: 0
