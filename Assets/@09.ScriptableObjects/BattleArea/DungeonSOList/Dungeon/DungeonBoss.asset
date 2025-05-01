@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c48f993023d9dd341bb8d7e4b534c813, type: 3}
+  m_Name: DungeonBoss
+  m_EditorClassIdentifier: 
+  name: DungeonPrefab Boss
+  width: 7
+  height: 7
+  dungeonScale: {x: 1, y: 1, z: 1}
+  entranceYPos: 00000000000000000000000000000000
+  dungeonPrefab: {fileID: 2841456041571238598, guid: 6472162891c5a47439e1f791558e8f25, type: 3}
+  prefabType: 1

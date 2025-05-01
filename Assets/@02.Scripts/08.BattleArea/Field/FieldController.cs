@@ -30,15 +30,7 @@ public class FieldController : BattleArea
     [Header("보물상자 스폰 관리")]
     public int treasureSpawnAmount = 10;
     public int treasureDistance = 150;
-    [Range(5,25)]
     public int poissonResearchLimit = 10;
-    
-    //몬스터 프리팹
-    [Space(10)] 
-    public List<GameObject> commonMonsters = new List<GameObject>();
-    public List<GameObject> flyingMonsters = new List<GameObject>();
-    public List<GameObject> uniqueMonsters = new List<GameObject>();
-    public List<GameObject> bossMonsters = new List<GameObject>();
 
     //보물상자 프리팹
     [Space(10)] 
@@ -79,18 +71,26 @@ public class FieldController : BattleArea
     private GameObject mFieldMonsterParent;
     private GameObject mRandomTreasureParent;
 
+    public GameObject playerrrrrr;
+    public int levelDesignnnnnn = 1;
+
+    //임시
+    private void Start()
+    {
+        FieldInit(playerrrrrr,levelDesignnnnnn);
+    }
+
     private void FixedUpdate()
     {
         mCurrentTime += Time.fixedDeltaTime;
         //Debug.Log("Current Time: " + mCurrentTime + " / " + spawnInterval);
         if (mCurrentTime > spawnInterval)
         {
-            Debug.Log("spawnInterval: " +  + spawnInterval);
             mCurrentTime = 0;
             SpawnMonsters();
         }
     }
-    
+
     public override void BattleAreaInit(GameObject player, int levelDesign)
     {
         FieldInit(player, levelDesign);
@@ -100,10 +100,7 @@ public class FieldController : BattleArea
     {
         ClearField();
         OnClearBattleArea.Invoke();
-        Destroy(gameObject);
     }
-
-
 
     /// <summary>
     /// 제작된 맵 프리팹의 필요한 오브젝트들을 불러옴.
@@ -112,7 +109,7 @@ public class FieldController : BattleArea
     /// </summary>
     /// <param name="player"></param>
     /// <param name="levelDesign"></param>
-    public void FieldInit(GameObject player, int levelDesign)
+    void FieldInit(GameObject player, int levelDesign)
     {
         this.player = player;
         mLevelDesign = levelDesign;
@@ -189,30 +186,23 @@ public class FieldController : BattleArea
         {
             if (monsterMaxField <= mMonsterCurrentField) return;
             
-            int unique = Mathf.Min(mLevelDesign / uniqueSpawnMaxChance, uniqueSpawnMaxChance);
-            
-            //일반 , 유니크 확률 소환
-            GameObject monsterPrefab = Random.Range(0, 100) > unique
-                ? commonMonsters[Random.Range(0, commonMonsters.Count)]
-                : uniqueMonsters[Random.Range(0, uniqueMonsters.Count)];
-            
             //가까운 스폰장소를 찾음
             GameObject spawner = FindClosestSpawnController();
             if (spawner != null)
             {
                 SpawnController spawnController = spawner.GetComponent<SpawnController>();
-                spawnController.SpawnObj(monsterPrefab, mFieldMonsterParent);
+                spawnController.SpawnByType(uniqueSpawnMaxChance,mLevelDesign, mFieldMonsterParent);
             }
             else //없으면 플레이어 주위로 비행 몬스터 소환
             {
-                Vector3 randomPointOnCircle = Random.insideUnitSphere;
-                randomPointOnCircle.Normalize(); // 방향만 남김 (길이 1)
-                randomPointOnCircle *= Random.Range(5, 10); // 원하는 반지름으로 스케일 조정
-
-                GameObject monster = Instantiate(flyingMonsters[Random.Range(0, flyingMonsters.Count)],
-                    player.transform.position + randomPointOnCircle,
-                    Quaternion.identity);
-                monster.transform.SetParent(mFieldMonsterParent.transform);
+                // Vector3 randomPointOnCircle = Random.insideUnitSphere;
+                // randomPointOnCircle.Normalize(); // 방향만 남김 (길이 1)
+                // randomPointOnCircle *= Random.Range(5, 10); // 원하는 반지름으로 스케일 조정
+                //
+                // GameObject monster = Instantiate(flyingMonsters[Random.Range(0, flyingMonsters.Count)],
+                //     player.transform.position + randomPointOnCircle,
+                //     Quaternion.identity);
+                // monster.transform.SetParent(mFieldMonsterParent.transform);
             }
 
             mMonsterCurrentField++;
@@ -224,7 +214,7 @@ public class FieldController : BattleArea
     /// </summary>
     void SpawnTreasure()
     {
-        int treasureAmount = treasureSpawnAmount + Random.Range(-5, 5);
+        int treasureAmount = treasureSpawnAmount + Random.Range(-5, treasureSpawnAmount);
         int whileLoop = 0;
         int whileMaxLoop = 0;
 
@@ -281,9 +271,8 @@ public class FieldController : BattleArea
 
     void BossSpawn()
     {
-        GameObject bossPrefab = bossMonsters[Random.Range(0, bossMonsters.Count)];
         SpawnController spawnController = mBossSpawner.GetComponent<SpawnController>();
-        spawnController.SpawnObj(bossPrefab, mFieldMonsterParent);
+        spawnController.SpawnByType(0,0,mFieldMonsterParent);
     }
 
     /// <summary>
