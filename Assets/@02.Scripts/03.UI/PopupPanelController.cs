@@ -11,10 +11,17 @@ public class PopupPanelController : MonoBehaviour
     [SerializeField] private RectTransform mPanelRectTransform;  // 팝업될 Panel 자신의 RectTransform
     
     private CanvasGroup mBackgroundCanvasGroup;                 // Panel 뒤를 가릴 (검은)배경
+    protected PlayerController mPlayer;
+
     
     private void Awake()
     {
         mBackgroundCanvasGroup = GetComponent<CanvasGroup>();
+    }
+    
+    public void SetPlayer(PlayerController player)
+    {
+        mPlayer = player;
     }
     
     /// <summary>
@@ -56,4 +63,6 @@ public class PopupPanelController : MonoBehaviour
             Destroy(gameObject);
         });
     }
+    
+    
 }
