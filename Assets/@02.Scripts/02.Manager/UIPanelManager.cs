@@ -42,6 +42,27 @@ public class UIPanelManager : Singleton<UIPanelManager>
         }
     }
 
+    public void OpenPanelWithPlayer(UIPanelType type, PlayerController player)
+    {
+        PanelInfo panelInfo = panels.Find(p => p.type == type);
+        if (panelInfo != null && panelInfo.panelPrefab != null)
+        {
+            PopupPanelController panelInstance = Instantiate(panelInfo.panelPrefab, panelParent);
+            
+            panelInstance.SetPlayer(player);
+            
+            if (type == UIPanelType.QuestBoard)
+            {
+                if (panelInstance is QuestBoardPanelController questPanel)
+                {
+                    questPanel.SetQuestDatabase(mQuestDatabase);
+                }
+            }
+            panelInstance.Show();
+            PushPopup(panelInstance);
+        }
+    }
+
     public void CloseAllPanels()
     {
         while (activePopups.Count > 0)

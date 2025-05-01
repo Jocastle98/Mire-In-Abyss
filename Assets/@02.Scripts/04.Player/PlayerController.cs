@@ -169,7 +169,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         }
         
         GroundedCheck();
-        NearbyInteractablesCheck();
+        //NearbyInteractablesCheck();
         TimeoutCheck();
     }
 
@@ -288,57 +288,10 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
 
         mMainCamera.GetComponent<CameraController>().SendPlayerGrounded(bIsGrounded);
     }
-
-    /// <summary>
-    /// 인접한 상호작용 개체 중 가장 근접한 상호작용 개체의 <InteractableObject>에 접근
-    /// </summary>
-    private void NearbyInteractablesCheck()
+   
+    public void SetNearestInteractable(InteractableObject obj)
     {
-        // 감지된 Interactable 콜라이더의 수
-        int InteractableCount = Physics.OverlapSphereNonAlloc(transform.position, mInteractableRadius, mDetectedInteractables, mInteractableLayers, QueryTriggerInteraction.Ignore);
-        
-        // 현재 감지된 콜라이더들을 해시셋으로 변환
-        HashSet<Collider> currentDetected  = new HashSet<Collider>();
-        for (int i = 0; i < InteractableCount; i++)
-        {
-            currentDetected.Add(mDetectedInteractables[i]);
-        }
-
-        // 이전 리스트 중, 더 이상 감지되지 않는 것은 제거
-        mActiveInteractables.RemoveAll(InteractableCollider => !currentDetected.Contains(InteractableCollider));
-        
-        // 현재 감지된 것 중, 새로 들어온 것은 추가
-        foreach (Collider detectCollider in currentDetected)
-        {
-            if (!mActiveInteractables.Contains(detectCollider))
-            {
-                mActiveInteractables.Add(detectCollider);
-            }
-        }
-
-        // 가장 가까운 상호작용 오브젝트 계산
-        if (mActiveInteractables.Count > 0)
-        {
-            float shortestDistance = float.MaxValue;
-            Collider nearest = null;
-
-            foreach (var currentInteractable in mActiveInteractables)
-            {
-                float distance = Vector3.Distance(transform.position, currentInteractable.transform.position);
-                if (distance < shortestDistance)
-                {
-                    shortestDistance = distance;
-                    nearest = currentInteractable;
-                }
-            }
-            
-            // 상호작용 가능한 오브젝트 캐싱
-            NearestInteractableObject = nearest?.GetComponent<InteractableObject>();
-        }
-        else
-        {
-            NearestInteractableObject = null;
-        }
+        NearestInteractableObject = obj;
     }
     
     #endregion
