@@ -41,15 +41,9 @@ public class InteractableObject : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// 플레이어가 범위 내에 있고 상호작용 입력을 했을 때 패널 열기
-    /// </summary>
-    private void Update()
+    public UIPanelType GetPanelType()
     {
-        if (playerInRange && GameManager.Instance.Input.InteractionInput)
-        {
-            UIPanelManager.Instance.OpenPanel(mPanelType);
-        }
+        return mPanelType;
     }
 
     /// <summary>
@@ -63,6 +57,12 @@ public class InteractableObject : MonoBehaviour
             SetInteractionText();
             playerInRange = true;
             mInteractionTextUI.SetActive(true);
+
+            PlayerController playerController = other.GetComponent<PlayerController>();
+            if (playerController != null)
+            {
+                playerController.SetNearestInteractable(this);
+            }
         }
     }
 
@@ -76,6 +76,12 @@ public class InteractableObject : MonoBehaviour
         {
             playerInRange = false;
             mInteractionTextUI.SetActive(false);
+            
+            PlayerController playerController = other.GetComponent<PlayerController>();
+            if (playerController != null && playerController.NearestInteractableObject == this)
+            {
+                playerController.SetNearestInteractable(null);
+            }
         }
     }
 }
