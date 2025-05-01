@@ -9,21 +9,28 @@ using UnityEngine.Serialization;
 /// </summary>
 public class BattleAreaManager : MonoBehaviour
 {
-    public GameObject[] battleFields;
-    public Vector2Int dungeonMaxSize;
     
+    //매니저
     public int battleAreaClearLimit = 5;
     
     private int mLevelDesign = 1;
     private GameObject mPlayer;
     private GameObject mCurrentArea;
-    private GameObject mBattleDungeons;
-    private Vector2Int mDungeonMinSize;
-    
     private int mBattleAreaClearCount = 0;
     
-    private BattleArea TestArea;
+    //필드
+    public GameObject[] battleFields;
+    
+    //던전
+    public int dungeonMinSize;
+    public int dungeonDivideWidth;
+    public int dungeonMinRoomCount;
+    
+    private GameObject mBattleDungeons;
+    private Vector2Int mDungeonMinSize;
 
+    private BattleArea TestArea;
+    
     //매개변수를 어떻게 받을지는 게임매니저에 따라 달라질 수 있음
     public void BattleAreaManagerInit(GameObject player, int levelDesign)
     {
