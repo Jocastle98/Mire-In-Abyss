@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using JetBrains.Annotations;
+using PlayerEnums;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -184,6 +185,9 @@ public class QuestBoardPanelController : PopupPanelController
     /// </summary>
     public void OnClickCloseButton()
     {
-        Hide();
+        Hide(() =>
+        {
+            mPlayer.SetPlayerState(PlayerState.Idle);
+        });
     }
 }
