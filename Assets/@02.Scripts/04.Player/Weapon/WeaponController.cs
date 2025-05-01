@@ -6,10 +6,9 @@ public class WeaponController : MonoBehaviour, IObservable<GameObject>
 {
     [Header("Attack Settings")]
     [SerializeField] private int mWeaponPower = 10;
-    [SerializeField] private float mAttackDistance = 2.0f;
-    [SerializeField] private Vector3 mAttackBoxSize = new Vector3(2.0f, 2.0f, 1.0f); // 박스 크기
+    [SerializeField] private float mAttackDistance = 1.0f;
+    [SerializeField] private Vector3 mAttackBoxSize = new Vector3(2.0f, 2.0f, 2.0f); // 박스 크기
     [SerializeField] private LayerMask mTargetLayerMask;
-    [SerializeField] private float mAttackArcHeight = 2.0f;
 
     private PlayerController mPlayerController;
     private List<IObserver<GameObject>> mObservers = new List<IObserver<GameObject>>();
@@ -75,7 +74,7 @@ public class WeaponController : MonoBehaviour, IObservable<GameObject>
         
         // 3. 반원 좌표 계산
         float x = Mathf.Sin(rad) * mAttackDistance;
-        float y = Mathf.Cos(rad) * mAttackArcHeight;
+        float y = Mathf.Cos(rad) * mAttackDistance;
         Vector3 localOffset = new Vector3(0.0f, y, x); // Z축으로 전방 이동
 
         // 4. 월드 좌표 변환

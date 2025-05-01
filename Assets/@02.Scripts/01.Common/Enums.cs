@@ -18,7 +18,6 @@ namespace PlayerEnums
         Skill_3,
         Skill_4,
         Interaction,
-        Hit,
         Stun,
         Freeze,
         Dead
@@ -50,6 +49,7 @@ namespace UIPanelEnums
     }
 }
 
+
 namespace BattleAreaEnum
 {
     public enum DungeonCellType
@@ -77,5 +77,28 @@ namespace BattleAreaEnum
         Rogue,
         Warrior,
         Boss,
+    }}
+namespace UIHUDEnums
+{
+    public enum MiniMapIconType
+    {
+        Player,
+        Enemy,
+        Boss,
+        Shop,
+        Portal,
+    }
+
+    public enum QuestState
+    {
+        Active,
+        Completed
+    }
+
+    public enum ProgressBarImageType
+    {
+        Rect,
+        RoundedRect,
+ develop
     }
 }
