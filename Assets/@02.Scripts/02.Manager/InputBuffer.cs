@@ -5,9 +5,7 @@ public class InputBuffer
     private float mBufferTime;
     private float mTimer;
     private bool mbIsBuffered;
-    public bool bIsBuffered => mbIsBuffered;
     private bool mbIsHolding;
-    public bool bIsHolding => mbIsHolding;
 
     public InputBuffer(float bufferTime = 0.3f)
     {
@@ -47,4 +45,7 @@ public class InputBuffer
         
         return false;
     }
+    
+    public bool IsBuffered => mbIsBuffered;
+    public bool IsHolding => mbIsHolding;
 }

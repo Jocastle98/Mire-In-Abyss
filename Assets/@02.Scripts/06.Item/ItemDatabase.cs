@@ -4,16 +4,14 @@ using System.Linq;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
-/// <summary>
-/// 게임 내 모든 아이템의 정보를 CSV파일에서 로드하고 관리하는 클래스
-/// </summary>
 public class ItemDatabase : MonoBehaviour
 {
-    public TextAsset itemCsvFile;                           //item_list.csv를 인스펙터에 할당
-    private string mItemCsvFilePath = "Items/item_list";    //Resources 폴더 내 경로
-    private Dictionary<string, Item> mItemDatabase = new Dictionary<string, Item>(); //아이템 이름을 키로 사용하는 데이터베이스
-    public int ItemCount => mItemDatabase.Count; //데이터 베이스에 있는 아이템 수
-    public List<string> ItemNames => mItemDatabase.Keys.ToList(); //모든 아이템 이름 목록
+    public TextAsset itemCsvFile;//item_list.csv를 인스펙터에 할당
+    private string mItemCsvFilePath = "Item/item_list"; //Resources 폴더 내 경로
+
+    private Dictionary<string, Item> mItemDatabase = new Dictionary<string, Item>();
+    public int ItemCount => mItemDatabase.Count;
+    public List<string> ItemNames => mItemDatabase.Keys.ToList();
     
     private void Awake()
     {

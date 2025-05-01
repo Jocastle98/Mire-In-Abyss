@@ -199,13 +199,14 @@ public class PlayerStats : MonoBehaviour
         {
             if (hitCollider.CompareTag("Enemy"))
             {
-                //TODO: enemy범위 공격 로직
-                // 데미지 처리
-                EnemyBTController enemy = hitCollider.GetComponent<EnemyBTController>();
+                /*// 데미지 처리
+                Enemy enemy = hitCollider.GetComponent<Enemy>();
                 if (enemy != null)
                 {
-                    enemy.SetHit((int)mAoeDamageValue);
-                }
+                    enemy.TakeDamage(mAoeDamageValue);
+                }*/
+                
+                //TODO: enemy범위 공격 로직
             }
         }
         

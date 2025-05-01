@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7172ce7a0574539428ab04d470464ebd, type: 3}
+  m_Name: New SODungeon Tile
+  m_EditorClassIdentifier: 
+  name: 
+  floorPrefabs:
+  - {fileID: 8754955938343320185, guid: a1bec2a158b0e3e489a9633561e7bbd6, type: 3}
+  - {fileID: 8754955938343320185, guid: 86a8230413f307543a1ea4eb0e368af8, type: 3}
+  - {fileID: 8754955938343320185, guid: d9c1d6ff91423574d9ade9e124057bda, type: 3}
+  - {fileID: 8754955938343320185, guid: 4f6effb74fae56d478fd6d5cff6fb0bc, type: 3}
+  - {fileID: 8754955938343320185, guid: 252f32953475fb14aa0d2b9472b6d747, type: 3}
+  - {fileID: 8754955938343320185, guid: 2b22eb149efe17347a44db3c5d333785, type: 3}
+  - {fileID: 8754955938343320185, guid: 7dadd491f71ae204cb34c9ad7d4611b1, type: 3}
+  - {fileID: 8754955938343320185, guid: a1bec2a158b0e3e489a9633561e7bbd6, type: 3}
+  - {fileID: 8754955938343320185, guid: a1bec2a158b0e3e489a9633561e7bbd6, type: 3}
+  - {fileID: 8754955938343320185, guid: a1bec2a158b0e3e489a9633561e7bbd6, type: 3}
+  wallPrefabs:
+  - {fileID: 8754955938343320185, guid: 8f5fad885cbe87c4494b27768c3a3af9, type: 3}
+  - {fileID: 8754955938343320185, guid: b4a07b1b214f47847b557a4b3a64daf5, type: 3}
+  - {fileID: 8754955938343320185, guid: 10b9d332a2d3f4d4d8b520b3cd3fa609, type: 3}
+  - {fileID: 8754955938343320185, guid: 8577460fac5f8a8478e9b4167b1ffacd, type: 3}
+  - {fileID: 8754955938343320185, guid: 8c8ea61de3016394ea768646b2d57254, type: 3}
+  - {fileID: 8754955938343320185, guid: 76c0f7c4ac79ac64d84e8e490bcd5841, type: 3}
+  entrancePrefabs:
+  - {fileID: 8754955938343320185, guid: 6b1c69b9208df6143a9d7031573a1960, type: 3}
+  trapPrefabs: []
+  floorPrefabsScale: {x: 1, y: 1, z: 1}
+  wallPrefabsScale: {x: 1, y: 1, z: 1}
+  entrancePrefabsScale: {x: 1, y: 1, z: 1}
+  trapPrefabsScale: {x: 0, y: 0, z: 0}
+  prefabType: 0

@@ -6,9 +6,24 @@ public class PlayerAnimatorStateAttack : StateMachineBehaviour
     // OnStateExit is called when a transition ends and the state machine finishes evaluating this state
     override public void OnStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
-        if (!GameManager.Instance.Input.IsAttacking)
+        PlayerController playerController = animator.gameObject.GetComponent<PlayerController>();
+        
+        playerController.PlayerAnimator.ResetTrigger("Attack");
+        
+        if (playerController.bIsGrounded)
         {
-            animator.ResetTrigger("Attack");
+            if (GameManager.Instance.Input.MoveInput == Vector2.zero)
+            {
+                playerController.SetPlayerState(PlayerState.Idle);
+            }
+            else
+            {
+                playerController.SetPlayerState(PlayerState.Move);
+            }
+        }
+        else
+        {
+            playerController.SetPlayerState(PlayerState.Fall);
         }
     }
 }
