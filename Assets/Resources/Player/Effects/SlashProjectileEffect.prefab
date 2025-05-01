@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 6909645054119689654}
   - component: {fileID: -345574960193543372}
   m_Layer: 0
-  m_Name: SlashEffect
+  m_Name: SlashProjectileEffect
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
