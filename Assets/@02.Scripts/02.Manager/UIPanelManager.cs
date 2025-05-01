@@ -17,8 +17,6 @@ public class UIPanelManager : Singleton<UIPanelManager>
     [SerializeField] private Transform panelParent;
     private Stack<PopupPanelController> activePopups = new Stack<PopupPanelController>();
     
-    [SerializeField] private QuestDatabase mQuestDatabase;
-    
     protected override void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
         CloseAllPanels();
@@ -30,15 +28,7 @@ public class UIPanelManager : Singleton<UIPanelManager>
         if (panelInfo != null && panelInfo.panelPrefab != null)
         {
             PopupPanelController panelInstance = Instantiate(panelInfo.panelPrefab, panelParent);
-            if (type == UIPanelType.QuestBoard)
-            {
-                if (panelInstance is QuestBoardPanelController questPanel)
-                {
-                    questPanel.SetQuestDatabase(mQuestDatabase);
-                }
-            }
             panelInstance.Show();
-            PushPopup(panelInstance);
         }
     }
 

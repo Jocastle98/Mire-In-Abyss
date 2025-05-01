@@ -16,7 +16,7 @@ public class CameraController : MonoBehaviour
     // 공중 시야 제한 완화(90로도 하면 공격감지 콜라이더에 문제 생김)
     private float mAirTopClamp = 89f;
     private float mAirBottomClamp = -89f;
-
+    
     // cinemachine
     private float mCinemachineTargetYaw;
     private float mCinemachineTargetPitch;
@@ -24,20 +24,34 @@ public class CameraController : MonoBehaviour
 
     private void Awake()
     {
+        Cursor.visible = false;
+        Cursor.lockState = CursorLockMode.Locked;
+        
         mCinemachineCameraTarget = GetComponent<CinemachineVirtualCamera>().Follow.gameObject;
         mCinemachineTargetYaw = mCinemachineCameraTarget.transform.rotation.eulerAngles.y;
     }
-
+    
     private void LateUpdate()
     {
+        SetCursor();
         CameraRotation();
     }
 
+    private void SetCursor()
+    {
+        if (GameManager.Instance.Input.CursorToggleInput)
+        {
+            Cursor.visible = !Cursor.visible;
+            Cursor.lockState = Cursor.visible ? CursorLockMode.None : CursorLockMode.Locked;
+        }
+    }
+    
+    
     public void SendPlayerGrounded(bool isGround)
     {
         mbIsGround = isGround;
     }
-
+    
     private void CameraRotation()
     {
         if (GameManager.Instance.Input.LookInput.sqrMagnitude >= mThreshold)
@@ -45,7 +59,7 @@ public class CameraController : MonoBehaviour
             mCinemachineTargetYaw += GameManager.Instance.Input.LookInput.x * mRotationSensitivity;
             mCinemachineTargetPitch -= GameManager.Instance.Input.LookInput.y * mRotationSensitivity;
         }
-
+    
         mCinemachineTargetYaw = ClampAngle(mCinemachineTargetYaw, float.MinValue, float.MaxValue);
         if (mbIsGround)
         {
@@ -55,7 +69,7 @@ public class CameraController : MonoBehaviour
         {
             mCinemachineTargetPitch = ClampAngle(mCinemachineTargetPitch, mAirBottomClamp, mAirTopClamp);
         }
-
+        
         mCinemachineCameraTarget.transform.rotation = Quaternion.Euler(mCinemachineTargetPitch + mCameraAngleOverride,
             mCinemachineTargetYaw, 0.0f);
     }

@@ -97,8 +97,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mWeaponPower: 10
-  mAttackDistance: 1
-  mAttackBoxSize: {x: 2, y: 2, z: 2}
+  mAttackDistance: 2
+  mAttackBoxSize: {x: 2, y: 2, z: 1}
   mTargetLayerMask:
     serializedVersion: 2
     m_Bits: 512
+  mAttackArcHeight: 2

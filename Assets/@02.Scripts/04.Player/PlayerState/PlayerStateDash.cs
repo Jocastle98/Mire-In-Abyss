@@ -15,7 +15,7 @@ public class PlayerStateDash : IPlayerState
         mPlayerController = playerController;
         mPlayerController.PlayerAnimator.SetTrigger("Dash");
 
-        mCameraCenterDirection = mPlayerController.GetActionDirection(false, false);
+        mCameraCenterDirection = mPlayerController.SetDashDirection();
         mLookDirection = new Vector3(mCameraCenterDirection.x, 0, mCameraCenterDirection.z);
         mPlayerController.transform.rotation = Quaternion.LookRotation(mLookDirection);
         mPlayerController.StartDash(mCameraCenterDirection);

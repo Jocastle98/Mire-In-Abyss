@@ -46,6 +46,9 @@ public class PlayerControllerEditor : Editor
             case PlayerState.Parry:
                 GUI.backgroundColor = new Color(0.0f, 0.0f, 0.5f);
                 break;
+            case PlayerState.Hit:
+                GUI.backgroundColor = new Color(0.5f, 0.0f, 1.0f);
+                break;
             case PlayerState.Stun:
                 GUI.backgroundColor = new Color(0.5f, 0.5f, 0.5f);
                 break;
@@ -105,6 +108,10 @@ public class PlayerControllerEditor : Editor
         if (GUILayout.Button("Parry"))
         {
             playerController.SetPlayerState(PlayerState.Parry);
+        }
+        if (GUILayout.Button("Hit"))
+        {
+            playerController.SetPlayerState(PlayerState.Hit);
         }
         if (GUILayout.Button("Stun"))
         {
