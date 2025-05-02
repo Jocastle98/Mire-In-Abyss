@@ -2,9 +2,8 @@ using System;
 using Events.Abyss;
 using Events.Combat;
 using Events.HUD;
-using Events.Item;
 using Events.Player;
-using Events.Quest;
+using Events.Player.Modules;
 using UIHUDEnums;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -27,8 +26,6 @@ public class HUDTest : MonoBehaviour
 
     [Header("QuestUpdate")]
     [SerializeField] private int mUpdatedQuestID;
-    [SerializeField] private string mUpdatedQuestTitle;
-    [SerializeField] private string mUpdatedQuestDesc;
     [SerializeField] private QuestState mUpdatedQuestState;
 
     [Header("Currency")]
@@ -170,8 +167,7 @@ public class HUDTest : MonoBehaviour
     public void OnAddQuest()
     {
         mLastQuestID++;
-        TempQuestInfo questInfo = new TempQuestInfo(mLastQuestID, mQuestTitle, mQuestDesc, QuestState.Active);
-        R3EventBus.Instance.Publish(new QuestAddedOrUpdated(questInfo));
+        TempPlayerHub.Instance.QuestLog.Accept(mLastQuestID, 1);
     }
 
     public void OnQuestUpdated()
@@ -182,24 +178,18 @@ public class HUDTest : MonoBehaviour
             return;
         }
 
-        TempQuestInfo questInfo = new TempQuestInfo(mUpdatedQuestID, mUpdatedQuestTitle, mUpdatedQuestDesc, QuestState.Active);
-        R3EventBus.Instance.Publish(new QuestAddedOrUpdated(questInfo));
+        TempPlayerHub.Instance.QuestLog.AddProgress(mUpdatedQuestID, 1);
     }
 
     public void OnQuestCompleted()
     {
-        R3EventBus.Instance.Publish(new QuestCompleted(mUpdatedQuestID));
-    }
-
-    public void OnRemoveQuest()
-    {
-        R3EventBus.Instance.Publish(new QuestRemoved(mUpdatedQuestID));
+        TempPlayerHub.Instance.QuestLog.Reward(mUpdatedQuestID);
     }
 
     public void OnCurrencyChanged()
     {
-        R3EventBus.Instance.Publish(new GoldChanged(mGold));
-        R3EventBus.Instance.Publish(new SoulChanged(mSoul));
+        TempPlayerHub.Instance.Inventory.AddGold(mGold);
+        TempPlayerHub.Instance.Inventory.AddSoul(mSoul);
     }
 
     public void OnBossHpChanged()
@@ -229,7 +219,7 @@ public class HUDTest : MonoBehaviour
 
     public void OnBuffAdded()
     {
-        R3EventBus.Instance.Publish(new BuffAdded(mBuffID, mBuffDuration, mBuffIsDebuff));
+        TempPlayerHub.Instance.BuffController.AddBuff(mBuffID, mBuffDuration, mBuffIsDebuff);
     }
 
     public void OnToastPopup()
@@ -239,12 +229,12 @@ public class HUDTest : MonoBehaviour
 
     public void OnItemAdded()
     {
-        R3EventBus.Instance.Publish(new ItemAdded(mItemID, mItemCount));
+        TempPlayerHub.Instance.Inventory.AddItem(mItemID, mItemCount);
     }
 
     public void OnItemSubTracked()
     {
-        R3EventBus.Instance.Publish(new ItemSubTracked(mItemID, mItemCount));
+        TempPlayerHub.Instance.Inventory.RemoveItem(mItemID, mItemCount);
     }
 
     public void OnAttackDummy()

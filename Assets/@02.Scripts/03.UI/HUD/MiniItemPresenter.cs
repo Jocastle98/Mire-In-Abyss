@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Cysharp.Threading.Tasks;
-using Events.Item;
+using Events.Player.Modules;
 using R3;
 using UnityEngine;
 using UnityEngine.UI;
@@ -35,7 +35,7 @@ public sealed class ItemSummaryPresenter : HudPresenterBase
         R3EventBus.Instance.Receive<ItemAdded>()
             .Subscribe(e => addItem(e))
             .AddTo(mCD);
-        R3EventBus.Instance.Receive<ItemSubTracked>()
+        R3EventBus.Instance.Receive<ItemSubtracked>()
             .Subscribe(e => subTrack(e))
             .AddTo(mCD);
     }
@@ -45,36 +45,27 @@ public sealed class ItemSummaryPresenter : HudPresenterBase
         // 미니 아이템 뷰가 가득 찼을 경우 대기열에 추가
         if (mSlotsMap.Count >= mMaxMiniViewCount)
         {
-            if (mPendingItems.TryGetValue(itemInfo.ID, out int existing))
-            {
-                mPendingItems[itemInfo.ID] = existing + itemInfo.Count;
-            }
-            else
-            {
-                mPendingItems[itemInfo.ID] = itemInfo.Count;
-            }
-
+            mPendingItems[itemInfo.ID] = itemInfo.Total;
             return;
         }
 
         if (!mSlotsMap.ContainsKey(itemInfo.ID))
         {
             var slot = mPool.Rent();
-            slot.Bind(itemInfo.ID, itemInfo.Count);
+            slot.Bind(itemInfo.ID, itemInfo.Total);
             mSlotsMap[itemInfo.ID] = slot;
         }
         else
         {
-            mSlotsMap[itemInfo.ID].IncreaseCount(itemInfo.Count);
+            mSlotsMap[itemInfo.ID].SetCount(itemInfo.Total);
         }
     }
 
-    private void subTrack(ItemSubTracked itemInfo)
+    private void subTrack(ItemSubtracked itemInfo)
     {
         if (mSlotsMap.ContainsKey(itemInfo.ID))
         {
-            int newItemCount = mSlotsMap[itemInfo.ID].ItemCount - itemInfo.Count;
-            if (newItemCount <= 0)
+            if (itemInfo.Total <= 0)
             {
                 mPool.Return(mSlotsMap[itemInfo.ID]);
                 mSlotsMap.Remove(itemInfo.ID);
@@ -82,8 +73,12 @@ public sealed class ItemSummaryPresenter : HudPresenterBase
             }
             else
             {
-                mSlotsMap[itemInfo.ID].SubTrack(itemInfo.Count);
+                mSlotsMap[itemInfo.ID].SetCount(itemInfo.Total);
             }
+        }
+        else
+        {
+            mPendingItems[itemInfo.ID] = itemInfo.Total;
         }
     }
 
@@ -92,7 +87,7 @@ public sealed class ItemSummaryPresenter : HudPresenterBase
         while (mSlotsMap.Count < mMaxMiniViewCount && mPendingItems.Count > 0)
         {
             var itemInfo = mPendingItems.First();
-            addItem(new ItemAdded(itemInfo.Key, itemInfo.Value));
+            addItem(new ItemAdded(itemInfo.Key, itemInfo.Value, itemInfo.Value));
             mPendingItems.Remove(itemInfo.Key);
         }
     }
@@ -105,5 +100,6 @@ public sealed class ItemSummaryPresenter : HudPresenterBase
             mPool.Return(s);
         }
         mSlotsMap.Clear();
+        mPendingItems.Clear();
     }
 }

@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Events.HUD;
 using Events.Player;
+using Events.Player.Modules;
 using TMPro;
 using UIEnums;
 using UnityEngine;
@@ -28,14 +29,17 @@ public sealed class BuffSlotView : MonoBehaviour
     }
     public void Bind(BuffAdded buffInfo)
     {
-        if (mID != buffInfo.ID)
-        {
-            mID = buffInfo.ID;
-            mBuffImage.sprite = SpriteCache.Instance.GetSprite(SpriteType.Buff, buffInfo.ID);
-        }
-
+        mID = buffInfo.ID;
+        mBuffImage.sprite = SpriteCache.Instance.GetSprite(SpriteType.Buff, buffInfo.ID);
         mBuffImageBG.color = buffInfo.IsDebuff ? mDebuffColor : mBuffColor;
         mBuffDurationTime = buffInfo.Duration;
+        mBuffTimer = 0;
+        mBuffImage.fillAmount = 0;
+    }
+
+    public void Refresh(float newDuration)
+    {
+        mBuffDurationTime = newDuration;
         mBuffTimer = 0;
         mBuffImage.fillAmount = 0;
     }
@@ -46,16 +50,6 @@ public sealed class BuffSlotView : MonoBehaviour
         {
             mBuffTimer += Time.deltaTime;
             mBuffCoolMask.fillAmount = mBuffTimer / mBuffDurationTime;
-            if (mBuffTimer >= mBuffDurationTime)
-            {
-                PublishBuffEnd();
-            }
         }
-    }
-
-    private void PublishBuffEnd()
-    {
-        R3EventBus.Instance.Publish(new BuffEnded(mID));
-        mID = -1;
     }
 }

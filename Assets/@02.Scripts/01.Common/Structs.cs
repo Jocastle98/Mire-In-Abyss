@@ -14,26 +14,6 @@ namespace Events.Player
             => (Current, Max) = (current, max);
     }
 
-    public readonly struct GoldChanged
-    {
-        public readonly int Gold;
-        public GoldChanged(int gold) => Gold = gold;
-    }
-
-    public readonly struct SoulChanged
-    {
-        public readonly int Soul;
-        public SoulChanged(int soul) => Soul = soul;
-    }
-
-    public readonly struct BuffAdded
-    {
-        public readonly int ID;
-        public readonly int Duration;
-        public readonly bool IsDebuff;
-        public BuffAdded(int id, int duration, bool isDebuff)
-            => (ID, Duration, IsDebuff) = (id, duration, isDebuff);
-    }
     public readonly struct PlayerExpChanged
     {
         public readonly int Current;
@@ -108,22 +88,95 @@ namespace Events.Combat
 
 }
 
-namespace Events.Item
+namespace Events.Player.Modules
 {
-    public readonly struct ItemAdded
+     /* ─── Item ─── */
+    public readonly struct ItemAdded     
     {
         public readonly int ID;
-        public readonly int Count;
-        public ItemAdded(int id, int count = 1)
-            => (ID, Count) = (id, count);
+        public readonly int AddedAmount;
+        public readonly int Total;
+        public ItemAdded(int id, int amt, int total) => (ID, AddedAmount, Total) = (id, amt, total);
+    }
+    public readonly struct ItemSubtracked
+    {
+        public readonly int ID;
+        public readonly int RemovedAmount;
+        public readonly int Total;
+        public ItemSubtracked(int id, int amt, int total) => (ID, RemovedAmount, Total) = (id, amt, total);
     }
 
-    public readonly struct ItemSubTracked
+    /* ─── Buff ─── */
+    public readonly struct BuffAdded      
     {
         public readonly int ID;
-        public readonly int Count;
-        public ItemSubTracked(int id, int count = 1)
-            => (ID, Count) = (id, count);
+        public readonly float Duration;
+        public readonly bool IsDebuff;
+        public BuffAdded(int id, float duration, bool isDebuff = false) => (ID, Duration, IsDebuff) = (id, duration, isDebuff);
+    }
+    public readonly struct BuffRefreshed 
+    {
+        public readonly int ID;
+        public readonly float NewRemain;
+        public BuffRefreshed(int id, float newRemain) => (ID, NewRemain) = (id, newRemain);
+    }
+    public readonly struct BuffEnded      
+    {
+        public readonly int ID;
+        public BuffEnded(int id) => ID = id;
+    }
+
+    /* ─── Quest ─── */
+    public readonly struct QuestAccepted 
+    {
+        public readonly int ID;
+        public readonly int Cur;
+        public readonly int Target;
+        public QuestAccepted(int id, int cur, int target) => (ID, Cur, Target) = (id, cur, target);
+    }
+    public readonly struct QuestUpdated  
+    {
+        public readonly int ID;
+        public readonly int Cur;
+        public readonly int Target;
+        public QuestUpdated(int id, int cur, int target) => (ID, Cur, Target) = (id, cur, target);
+    }
+    public readonly struct QuestCompleted 
+    {
+        public readonly int ID;
+        public QuestCompleted(int id) => ID = id;
+    }
+    public readonly struct QuestRewarded // Remove와 같은 경우
+    {
+        public readonly int ID;
+        public QuestRewarded(int id) => ID = id;
+    }
+
+    public readonly struct GoldAdded 
+    {
+        public readonly int AddedAmount;
+        public readonly int Total;
+        public GoldAdded(int amount, int total) => (AddedAmount, Total) = (amount, total);
+    }
+    public readonly struct GoldSubTracked 
+    {
+        public readonly int RemovedAmount;
+        public readonly int Total;
+        public GoldSubTracked(int amount, int total) => (RemovedAmount, Total) = (amount, total);
+    }
+
+    /* ─── Soul ─── */
+    public readonly struct SoulAdded 
+    {
+        public readonly int AddedAmount;
+        public readonly int Total;
+        public SoulAdded(int amount, int total) => (AddedAmount, Total) = (amount, total);
+    }
+    public readonly struct SoulSubTracked 
+    {
+        public readonly int RemovedAmount;
+        public readonly int Total;
+        public SoulSubTracked(int amount, int total) => (RemovedAmount, Total) = (amount, total);
     }
 }
 
@@ -154,48 +207,8 @@ namespace Events.Abyss
     }
 }
 
-namespace Events.Quest
-{
-    // TODO: 아래의 QuestInfo를 퀘스트 담당자가 작성한 타입으로 대체(여기 작성할 필요 없음)
-    public readonly struct TempQuestInfo
-    {
-        public readonly int ID;
-        public readonly string Title;
-        public readonly string ShortDesc;
-        public readonly QuestState State;
-
-        public TempQuestInfo(int id, string title, string desc, QuestState state)
-            => (ID, Title, ShortDesc, State) = (id, title, desc, state);
-    }
-
-    public readonly struct QuestAddedOrUpdated
-    {
-        public readonly TempQuestInfo Info;
-        public QuestAddedOrUpdated(TempQuestInfo i) => Info = i;
-    }
-
-    public readonly struct QuestCompleted
-    {
-        public readonly int QuestId;
-        public QuestCompleted(int id) => QuestId = id;
-    }
-
-    public readonly struct QuestRemoved
-    {
-        public readonly int QuestId;
-        public QuestRemoved(int id) => QuestId = id;
-    }
-}
-
 namespace Events.HUD
 {
-    // HUD안에서 buff slot -> Player Info UI로의 알림용 struct
-    public readonly struct BuffEnded
-    {
-        public readonly int ID;
-        public BuffEnded(int id) => ID = id;
-    }
-
     public readonly struct ToastPopup
     {
         public readonly string Message;

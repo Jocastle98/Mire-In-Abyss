@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using Events.HUD;
 using Events.Player;
+using Events.Player.Modules;
 using R3;
 using TMPro;
 using UIEnums;
@@ -61,6 +62,10 @@ public sealed class PlayerStatusPresenter : HudPresenterBase
             .Subscribe(e => addBuff(e))
             .AddTo(mCD);
 
+        R3EventBus.Instance.Receive<BuffRefreshed>()
+            .Subscribe(e => refreshBuff(e))
+            .AddTo(mCD);
+
         R3EventBus.Instance.Receive<BuffEnded>()
             .Subscribe(e => removeBuff(e.ID))
             .AddTo(mCD);
@@ -69,15 +74,23 @@ public sealed class PlayerStatusPresenter : HudPresenterBase
     /* ────── Buff helpers ────── */
     private void addBuff(BuffAdded buffInfo)
     {
-        if (mBuffSlots.ContainsKey(buffInfo.ID))
+        if (mBuffSlots.TryGetValue(buffInfo.ID, out var buffSlot))
         {
-            mBuffSlots[buffInfo.ID].Bind(buffInfo);
+            buffSlot.Refresh(buffInfo.Duration);
             return;
         }
 
-        var buffSlot = mPool.Rent();
-        buffSlot.Bind(buffInfo);
-        mBuffSlots[buffInfo.ID] = buffSlot;
+        var newBuffSlot = mPool.Rent();
+        newBuffSlot.Bind(buffInfo);
+        mBuffSlots[buffInfo.ID] = newBuffSlot;
+    }
+
+    private void refreshBuff(BuffRefreshed buffInfo)
+    {
+        if (mBuffSlots.TryGetValue(buffInfo.ID, out var buffSlot))
+        {
+            buffSlot.Refresh(buffInfo.NewRemain);
+        }
     }
 
     private void removeBuff(int id)

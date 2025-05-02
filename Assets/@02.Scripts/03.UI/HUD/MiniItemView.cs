@@ -9,33 +9,33 @@ public class MiniItemView : MonoBehaviour
     [SerializeField] private TMP_Text mCount;
     public int ItemCount;
 
-    public void Bind(int itemID, int count = 1)
+    public void Bind(int itemID, int total = 1)
     {
         mIcon.sprite = SpriteCache.Instance.GetSprite(SpriteType.Item, itemID);
-        ItemCount = count;
+        ItemCount = total;
         SetCount(ItemCount);
     }
 
-    public void SetCount(int count)
+    public void SetCount(int total)
     {
-        ItemCount = count;
+        ItemCount = total;
         mCount.text = $"x{ItemCount}";
     }
 
-    public void IncreaseCount(int count = 1)
+    public void IncreaseCount(int addedAmount = 1)
     {
-        SetCount(ItemCount + count);
+        SetCount(ItemCount + addedAmount);
     }
 
-    public void SubTrack(int count = 1)
+    public void SubTrack(int removedAmount = 1)
     {
-        if (ItemCount - count < 0)
+        if (ItemCount - removedAmount < 0)
         {
             SetCount(0);
         }
         else
         {
-            SetCount(ItemCount - count);
+            SetCount(ItemCount - removedAmount);
         }
     }
 }

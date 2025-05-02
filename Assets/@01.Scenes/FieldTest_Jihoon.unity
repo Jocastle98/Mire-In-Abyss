@@ -741,7 +741,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 893893632}
         m_TargetAssemblyTypeName: HUDTest, Assembly-CSharp
-        m_MethodName: OnRemoveQuest
+        m_MethodName: OnQuestCompleted
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -1616,6 +1616,89 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: c50f9a2b1fa1d6c48a35949eef4060a0, type: 3}
+--- !u!1 &547555330
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 547555331}
+  - component: {fileID: 547555335}
+  - component: {fileID: 547555334}
+  - component: {fileID: 547555333}
+  - component: {fileID: 547555332}
+  m_Layer: 0
+  m_Name: PlayerHub
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &547555331
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 547555330}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &547555332
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 547555330}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0825ac4aea30e6a419c82a8e13a2bd7e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &547555333
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 547555330}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fd6a243ddc9a3904795d16c593ebe683, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &547555334
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 547555330}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 71613ad9102af714cae8c77f651c8897, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &547555335
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 547555330}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 95746420c08fa2e43a4b70d2842ed2b4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &567339293
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3400,8 +3483,6 @@ MonoBehaviour:
   mQuestTitle: "\uC2EC\uC5F0\uC758 \uBB38\uC9C0\uAE30 \uCC98\uCE58"
   mQuestDesc: "\uC77C\uBC18\uBAB9 3 / 10 \uCC98\uCE58"
   mUpdatedQuestID: 0
-  mUpdatedQuestTitle: "\uC2EC\uC5F0\uC758 \uBB38\uC9C0\uAE30 \uCC98\uCE58"
-  mUpdatedQuestDesc: "\uBCF4\uC2A4 \uC2EC\uC5F0\uC758 \uBB38\uC9C0\uAE30 0 / 1 \uCC98"
   mUpdatedQuestState: 0
   mGold: 100
   mSoul: 10
@@ -7109,3 +7190,4 @@ SceneRoots:
   - {fileID: 746110207}
   - {fileID: 1593130082}
   - {fileID: 1600845865}
+  - {fileID: 547555331}
