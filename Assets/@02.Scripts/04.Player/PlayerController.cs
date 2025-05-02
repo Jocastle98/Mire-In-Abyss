@@ -678,7 +678,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         RollFunction(false);
 
         yield return null;
-        var rollAnimationInfo = PlayerAnimator.GetCurrentAnimatorStateInfo(0);
+        var rollAnimationInfo = PlayerAnimator.GetCurrentAnimatorStateInfo(2);
         if (rollAnimationInfo.IsName("Roll"))
         {
             float rollAnimationLength = rollAnimationInfo.length;
@@ -909,6 +909,20 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         
         if (bIsGrounded)
         {
+            if (GameManager.Instance.Input.RollInput && mRollTimeoutDelta < 0.0f)
+            {
+                SetPlayerState(PlayerState.Roll);
+                return;
+            }
+            
+            // 공격 중 점프 상태
+            if (GameManager.Instance.Input.JumpInput && mJumpTimeoutDelta < 0.0f)
+            {
+                Jump();
+                
+                PlayerAnimator.SetBool("Jump", true);
+            }
+            
             if (GameManager.Instance.Input.MoveInput == Vector2.zero)
             {
                 Idle();
@@ -922,14 +936,6 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
                 
                 // 공격 중 이동 상태
                 PlayerAnimator.SetBool("Move", true);
-            }
-            
-            // 공격 중 점프 상태
-            if (GameManager.Instance.Input.JumpInput && mJumpTimeoutDelta < 0.0f)
-            {
-                Jump();
-                
-                PlayerAnimator.SetBool("Jump", true);
             }
         }
         else
@@ -1023,7 +1029,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         if (isDefending)
         {
             // todo: 임시[테스트용]
-            mPlayerStats.EnableDefenceBuff(90.0f);
+            mPlayerStats.EnableDefenceBuff(0.9f);
             mPlayerStats.OnGuardSuccess();
         }
         else

@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using JetBrains.Annotations;
 using PlayerEnums;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -9,6 +10,7 @@ public class PlayerStateAttack : IPlayerState
     private PlayerController mPlayerController;
     private Vector3 mAttackDirection;
     private int mMaxCombo = 3;
+    private int mCurrentCombo = 0;
     public bool HasReceivedNextAttackInput;
     public bool bIsComboActive;
     
@@ -18,6 +20,7 @@ public class PlayerStateAttack : IPlayerState
     public void OnEnter(PlayerController playerController)
     {
         mPlayerController = playerController;
+        mPlayerController.PlayerAnimator.SetLayerWeight(1, 1.0f);
         mPlayerController.PlayerAnimator.SetTrigger("Attack");
         
         mAttackDirection = mPlayerController.GetCameraForwardDirection(true);
@@ -82,13 +85,21 @@ public class PlayerStateAttack : IPlayerState
     public void OnExit()
     {
         AttackCount = 0;
+        mPlayerController.PlayerAnimator.SetLayerWeight(1, 0.0f);
         mPlayerController = null;
     }
 
     private int AttackCount
     {
-        get => mPlayerController.PlayerAnimator.GetInteger("Attack_Count");
-        set => mPlayerController.PlayerAnimator.SetInteger("Attack_Count", value);
+        get => mCurrentCombo;
+        set
+        {
+            mCurrentCombo = value;
+            if (mPlayerController != null)
+            {
+                mPlayerController.PlayerAnimator.SetInteger("Attack_Count", value);
+            }
+        }
     }
 
     // todo: 콤보별 공격력 배율(무기 공격력 기준) // 임시 기능(사용할지 말지)

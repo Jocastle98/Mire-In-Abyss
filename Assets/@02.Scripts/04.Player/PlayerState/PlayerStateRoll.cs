@@ -12,6 +12,7 @@ public class PlayerStateRoll : IPlayerState
     public void OnEnter(PlayerController playerController)
     {
         mPlayerController = playerController;
+        mPlayerController.PlayerAnimator.SetLayerWeight(2, 1.0f);
         mPlayerController.PlayerAnimator.SetTrigger("Roll");
 
         mRollDirection = mPlayerController.GetActionDirection(true, true);
@@ -26,6 +27,7 @@ public class PlayerStateRoll : IPlayerState
 
     public void OnExit()
     {
+        mPlayerController.PlayerAnimator.SetLayerWeight(2, 0.0f);
         mPlayerController?.StopRoll();
         mPlayerController = null;
     }
