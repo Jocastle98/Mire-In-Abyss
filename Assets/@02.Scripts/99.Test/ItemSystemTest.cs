@@ -54,7 +54,7 @@ public class ItemSystemTest : MonoBehaviour
         int itemID;
         if (int.TryParse(selectedItem, out itemID))
         {
-            itemEffectSystem.AcquireItem(itemID);
+            PlayerHub.Instance.Inventory.AddItem(itemID, 1);
             PrintPlayerStats();
         }
         else
@@ -70,7 +70,7 @@ public class ItemSystemTest : MonoBehaviour
         int itemID;
         if (int.TryParse(selectedItem, out itemID))
         {
-            itemEffectSystem.RemoveItem(itemID);
+            PlayerHub.Instance.Inventory.RemoveItem(itemID, 1);
             PrintPlayerStats();
         }
         else

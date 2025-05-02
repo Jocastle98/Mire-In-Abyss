@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using TMPro;
 using R3;
 using Events.Player;
+using Events.Player.Modules;
 
 public sealed class CurrencyPresenter : HudPresenterBase
 {
@@ -16,11 +17,11 @@ public sealed class CurrencyPresenter : HudPresenterBase
 
     private void subscribeEvents()
     {
-        R3EventBus.Instance.Receive<GoldChanged>()
-            .Subscribe(e => mGoldText.text = e.Gold.ToString())
+        R3EventBus.Instance.Receive<GoldAdded>()
+            .Subscribe(e => mGoldText.text = PlayerHub.Instance.Inventory.Gold.ToString())
             .AddTo(mCD);
-        R3EventBus.Instance.Receive<SoulChanged>()
-            .Subscribe(e => mSoulText.text = e.Soul.ToString())
+        R3EventBus.Instance.Receive<SoulAdded>()
+            .Subscribe(e => mSoulText.text = PlayerHub.Instance.Inventory.Soul.ToString())
             .AddTo(mCD);
     }
 }

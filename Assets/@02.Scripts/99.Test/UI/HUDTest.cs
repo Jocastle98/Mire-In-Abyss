@@ -2,9 +2,8 @@ using System;
 using Events.Abyss;
 using Events.Combat;
 using Events.HUD;
-using Events.Item;
 using Events.Player;
-using Events.Quest;
+using Events.Player.Modules;
 using UIHUDEnums;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -13,10 +12,10 @@ public class HUDTest : MonoBehaviour
 {
     [SerializeField] private CanvasGroup mTestButtonGroup;
     [Header("Minimap")]
-    [SerializeField] private GameObject mEnemyDummy;
-    [SerializeField] private GameObject mPortalDummy;
-    [SerializeField] private GameObject mShopDummy;
-    [SerializeField] private GameObject mBossDummy;
+    [SerializeField] private TestEnemy mEnemyDummy;
+    [SerializeField] private TestPortal mPortalDummy;
+    [SerializeField] private TestShop mShopDummy;
+    [SerializeField] private TestBoss mBossDummy;
     [Header("Difficulty")]
     [SerializeField] private int mDifficultyLevel = 1;
     [SerializeField] private float mDifficultyProgress = 0;
@@ -27,8 +26,6 @@ public class HUDTest : MonoBehaviour
 
     [Header("QuestUpdate")]
     [SerializeField] private int mUpdatedQuestID;
-    [SerializeField] private string mUpdatedQuestTitle;
-    [SerializeField] private string mUpdatedQuestDesc;
     [SerializeField] private QuestState mUpdatedQuestState;
 
     [Header("Currency")]
@@ -60,8 +57,6 @@ public class HUDTest : MonoBehaviour
     [SerializeField] private int mItemCount;
 
     [Header("Combat")]
-    [SerializeField] private GameObject mEnemyDummy2;
-    [SerializeField] private GameObject mEnemyDummy2UIAnchor;
     [SerializeField] private int mEnemyHp;
     [SerializeField] private int mEnemyMaxHp;
     [SerializeField] private int mWeaponDamageMin;
@@ -115,7 +110,24 @@ public class HUDTest : MonoBehaviour
         {
             R3EventBus.Instance.Publish(new SkillUsed(5));
         }
+        if(Input.GetKeyDown(KeyCode.Alpha1))
+        {
+            R3EventBus.Instance.Publish(new SkillUsed(6));
+        }
+        if(Input.GetKeyDown(KeyCode.Alpha2))
+        {
+            R3EventBus.Instance.Publish(new SkillUsed(7));
+        }
+        if(Input.GetKeyDown(KeyCode.Alpha3))
+        {
+            R3EventBus.Instance.Publish(new SkillUsed(8));
+        }
+        if(Input.GetKeyDown(KeyCode.Alpha4))
+        {
+            R3EventBus.Instance.Publish(new SkillUsed(9));
+        }
     }
+    
     public void OnTestButtonToggle()
     {
         mIsTestButtonGroupActive = !mIsTestButtonGroupActive;
@@ -129,18 +141,18 @@ public class HUDTest : MonoBehaviour
         if (mIsSpawned)
         {
             mIsSpawned = false;
-            R3EventBus.Instance.Publish(new EnemyDied(mEnemyDummy.transform, mEnemyDummy.transform));
-            R3EventBus.Instance.Publish(new BossDied(mBossDummy.transform));
-            R3EventBus.Instance.Publish(new PortalClosed(mPortalDummy.transform));
-            R3EventBus.Instance.Publish(new ShopClosed(mShopDummy.transform));
+            TrackableEventHelper.PublishDestroyed(mEnemyDummy);
+            TrackableEventHelper.PublishDestroyed(mBossDummy);
+            TrackableEventHelper.PublishDestroyed(mPortalDummy);
+            TrackableEventHelper.PublishDestroyed(mShopDummy);
         }
         else
         {
             mIsSpawned = true;
-            R3EventBus.Instance.Publish(new EnemySpawned(mEnemyDummy.transform));
-            R3EventBus.Instance.Publish(new BossSpawned(mBossDummy.transform));
-            R3EventBus.Instance.Publish(new PortalSpawned(mPortalDummy.transform));
-            R3EventBus.Instance.Publish(new ShopSpawned(mShopDummy.transform));
+            TrackableEventHelper.PublishSpawned(mEnemyDummy);
+            TrackableEventHelper.PublishSpawned(mBossDummy);
+            TrackableEventHelper.PublishSpawned(mPortalDummy);
+            TrackableEventHelper.PublishSpawned(mShopDummy);
         }
     }
 
@@ -155,8 +167,7 @@ public class HUDTest : MonoBehaviour
     public void OnAddQuest()
     {
         mLastQuestID++;
-        TempQuestInfo questInfo = new TempQuestInfo(mLastQuestID, mQuestTitle, mQuestDesc, QuestState.Active);
-        R3EventBus.Instance.Publish(new QuestAddedOrUpdated(questInfo));
+        PlayerHub.Instance.QuestLog.Accept(mLastQuestID, 1);
     }
 
     public void OnQuestUpdated()
@@ -167,24 +178,18 @@ public class HUDTest : MonoBehaviour
             return;
         }
 
-        TempQuestInfo questInfo = new TempQuestInfo(mUpdatedQuestID, mUpdatedQuestTitle, mUpdatedQuestDesc, QuestState.Active);
-        R3EventBus.Instance.Publish(new QuestAddedOrUpdated(questInfo));
+        PlayerHub.Instance.QuestLog.AddProgress(mUpdatedQuestID, 1);
     }
 
     public void OnQuestCompleted()
     {
-        R3EventBus.Instance.Publish(new QuestCompleted(mUpdatedQuestID));
-    }
-
-    public void OnRemoveQuest()
-    {
-        R3EventBus.Instance.Publish(new QuestRemoved(mUpdatedQuestID));
+        PlayerHub.Instance.QuestLog.Reward(mUpdatedQuestID);
     }
 
     public void OnCurrencyChanged()
     {
-        R3EventBus.Instance.Publish(new GoldChanged(mGold));
-        R3EventBus.Instance.Publish(new SoulChanged(mSoul));
+        PlayerHub.Instance.Inventory.AddGold(mGold);
+        PlayerHub.Instance.Inventory.AddSoul(mSoul);
     }
 
     public void OnBossHpChanged()
@@ -214,7 +219,7 @@ public class HUDTest : MonoBehaviour
 
     public void OnBuffAdded()
     {
-        R3EventBus.Instance.Publish(new BuffAdded(mBuffID, mBuffDuration, mBuffIsDebuff));
+        PlayerHub.Instance.BuffController.AddBuff(mBuffID, mBuffDuration, mBuffIsDebuff);
     }
 
     public void OnToastPopup()
@@ -224,32 +229,23 @@ public class HUDTest : MonoBehaviour
 
     public void OnItemAdded()
     {
-        R3EventBus.Instance.Publish(new ItemAdded(mItemID, mItemCount));
+        PlayerHub.Instance.Inventory.AddItem(mItemID, mItemCount);
     }
 
     public void OnItemSubTracked()
     {
-        R3EventBus.Instance.Publish(new ItemSubTracked(mItemID, mItemCount));
+        PlayerHub.Instance.Inventory.RemoveItem(mItemID, mItemCount);
     }
 
     public void OnAttackDummy()
     {
-        if(mEnemyHp == mEnemyMaxHp)
-        {
-            R3EventBus.Instance.Publish(new EnemySpawned(mEnemyDummy2.transform));
-        }
-
         int damage = UnityEngine.Random.Range(mWeaponDamageMin, mWeaponDamageMax);
         mEnemyHp -= damage;
-        R3EventBus.Instance.Publish(new DamagePopup(mEnemyDummy2.transform.position, damage));
+        R3EventBus.Instance.Publish(new DamagePopup(mEnemyDummy.transform.position, damage));
         if (mEnemyHp < 0)
         {
             mEnemyHp = mEnemyMaxHp;
-            R3EventBus.Instance.Publish(new EnemyDied(mEnemyDummy2.transform, mEnemyDummy2UIAnchor.transform));
         }
-        else
-        {
-            R3EventBus.Instance.Publish(new EnemyHpChanged(mEnemyDummy2UIAnchor.transform, mEnemyHp, mEnemyMaxHp));
-        }
+        R3EventBus.Instance.Publish(new EnemyHpChanged(mEnemyDummy.GetInstanceID(), mEnemyHp, mEnemyMaxHp));
     }
 }

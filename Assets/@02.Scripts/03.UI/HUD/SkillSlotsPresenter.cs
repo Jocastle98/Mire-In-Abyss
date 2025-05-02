@@ -4,8 +4,6 @@ using Cysharp.Threading.Tasks;
 using Events.Player;
 using R3;
 using UnityEngine;
-using UnityEngine.AddressableAssets;
-using UnityEngine.ResourceManagement.AsyncOperations;
 
 public sealed class SkillSlotsPresenter : HudPresenterBase
 {
@@ -18,7 +16,13 @@ public sealed class SkillSlotsPresenter : HudPresenterBase
     void Start()
     {
         subscribeEvents();
-        setSkillInfos().Forget();
+        initializeAsync().Forget();
+    }
+
+    private async UniTaskVoid initializeAsync()
+    {
+        await SpriteCache.Instance.PreloadAsync();
+        setSkillSlots();
     }
 
     private void subscribeEvents()
@@ -28,7 +32,9 @@ public sealed class SkillSlotsPresenter : HudPresenterBase
             .Subscribe(e =>
             {
                 if (mSlots.TryGetValue(e.ID, out var slot))
+                {
                     slot.SkillUsed();
+                }
             })
             .AddTo(mCD);
 
@@ -37,21 +43,21 @@ public sealed class SkillSlotsPresenter : HudPresenterBase
             .Subscribe(e =>
             {
                 if (mSlots.TryGetValue(e.ID, out var slot))
-                    slot.Bind(e.CooldownTime, e.KeyCode);
+                {
+                    slot.Bind(e.CooldownTime, e.KeyCode, e.ID);
+                }
             })
             .AddTo(mCD);
     }
 
-    private async UniTaskVoid setSkillInfos()
+    private void setSkillSlots()
     {
         List<TempSkillInfo> skillInfos = getSkillInfos();
-
-        Dictionary<int, Sprite> skillIcons = await getSkillIcons(skillInfos);
 
         // 기본 스킬 정보 등록
         for (int i = 0; i < mDefaultSkillSlots.Count; i++)
         {
-            mDefaultSkillSlots[i].Bind(skillInfos[i].CooldownTime, skillInfos[i].KeyCode, skillIcons[skillInfos[i].ID]);
+            mDefaultSkillSlots[i].Bind(skillInfos[i].CooldownTime, skillInfos[i].KeyCode, skillInfos[i].ID);
             mSlots[skillInfos[i].ID] = mDefaultSkillSlots[i];
         }
 
@@ -59,48 +65,26 @@ public sealed class SkillSlotsPresenter : HudPresenterBase
         for (int i = mDefaultSkillSlots.Count; i < skillInfos.Count; i++)
         {
             var slot = Instantiate(mSlotPrefab, mSkillSlotRoot);
-            slot.Bind(skillInfos[i].CooldownTime, skillInfos[i].KeyCode, skillIcons[skillInfos[i].ID]);
+            slot.Bind(skillInfos[i].CooldownTime, skillInfos[i].KeyCode, skillInfos[i].ID);
             mSlots[skillInfos[i].ID] = slot;
         }
 
-    }
-
-    private async UniTask<Dictionary<int, Sprite>> getSkillIcons(List<TempSkillInfo> skillInfos)
-    {
-        Dictionary<int, Sprite> skillIcons = new();
-        var handle = Addressables.LoadAssetsAsync<Sprite>
-        (
-            "Skill_Icons",
-            sp =>
-            {
-                int id = int.Parse(sp.name.Split('_')[1]);
-                if (skillInfos.Any(info => info.ID == id))
-                {
-                    skillIcons.Add(id, sp);
-                }
-            }
-        );
-        await handle.Task;
-
-        if (handle.Status != AsyncOperationStatus.Succeeded)
-        {
-            Debug.LogError("Failed to load skill icons");
-        }
-
-        Addressables.Release(handle);
-        return skillIcons;
     }
 
     private List<TempSkillInfo> getSkillInfos()
     {
         //TODO: 사용할 스킬들 한 번에 받아오기(여기서는 임시 작성)
         List<TempSkillInfo> skillInfos = new();
-        skillInfos.Add(new TempSkillInfo(0, KeyCode.LeftControl, 0f));
-        skillInfos.Add(new TempSkillInfo(1, KeyCode.Mouse0, 0f));
+        skillInfos.Add(new TempSkillInfo(0, KeyCode.Mouse0, 0f));
+        skillInfos.Add(new TempSkillInfo(1, KeyCode.Mouse1, 0f));
         skillInfos.Add(new TempSkillInfo(2, KeyCode.Mouse1, 0f));
-        skillInfos.Add(new TempSkillInfo(3, KeyCode.Mouse1, 0f));
+        skillInfos.Add(new TempSkillInfo(3, KeyCode.LeftControl, 0f));
         skillInfos.Add(new TempSkillInfo(4, KeyCode.LeftShift, 3f));
         skillInfos.Add(new TempSkillInfo(5, KeyCode.F, 5f));
+        skillInfos.Add(new TempSkillInfo(6, KeyCode.Alpha1, 5f));
+        skillInfos.Add(new TempSkillInfo(7, KeyCode.Alpha2, 5f));
+        skillInfos.Add(new TempSkillInfo(8, KeyCode.Alpha3, 5f));
+        skillInfos.Add(new TempSkillInfo(9, KeyCode.Alpha4, 5f));
 
         return skillInfos;
     }
