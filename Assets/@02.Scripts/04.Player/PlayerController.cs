@@ -953,12 +953,6 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         mWeaponController.AttackEnd();
     }
 
-    // 공격 애니메이션의 종료 직전 호출되는 메서드
-    public void EndCombo()
-    {
-        mPlayerStateAttack.bIsComboActive = false;
-    }
-
     #region 옵저버 패턴 관련 기능
 
         public void OnNext(GameObject value)
@@ -983,7 +977,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         {
             mWeaponController.Unsubscribe(this);
         }
-        
+            
     #endregion
     
     #endregion

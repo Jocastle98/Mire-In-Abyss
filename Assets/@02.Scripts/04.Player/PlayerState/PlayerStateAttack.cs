@@ -8,8 +8,12 @@ public class PlayerStateAttack : IPlayerState
 {
     private PlayerController mPlayerController;
     private Vector3 mAttackDirection;
+    private int mMaxCombo = 3;
     public bool HasReceivedNextAttackInput;
     public bool bIsComboActive;
+    
+    private float mComboInputWindow = 2.0f;
+    private float mComboInputTimer;
     
     public void OnEnter(PlayerController playerController)
     {
@@ -21,6 +25,7 @@ public class PlayerStateAttack : IPlayerState
         
         HasReceivedNextAttackInput = true;
         bIsComboActive = true;
+        mComboInputTimer = 0.0f;
     }
 
     public void OnUpdate()
@@ -30,17 +35,25 @@ public class PlayerStateAttack : IPlayerState
             return;
         }
         
-        if ((GameManager.Instance.Input.AttackInput || GameManager.Instance.Input.IsAttacking) && bIsComboActive && !HasReceivedNextAttackInput)
+        mComboInputTimer += Time.deltaTime;
+        if (bIsComboActive && mComboInputTimer > mComboInputWindow)
+        {
+            bIsComboActive = false;
+        }
+        
+        if ((GameManager.Instance.Input.AttackInput || GameManager.Instance.Input.IsAttacking) 
+            && bIsComboActive && !HasReceivedNextAttackInput)
         {
             AttackCount++;
             mPlayerController.PlayerAnimator.SetTrigger("Attack");
             HasReceivedNextAttackInput = true;
+            mComboInputTimer = 0.0f; // 콤보 연속 입력 받았으므로 타이머 리셋
         }
         
         mPlayerController.Attack();
 
         // 콤보가 끝날 때 HasReceivedNextAttackInput을 false로 설정
-        if (AttackCount > 3)
+        if (AttackCount > mMaxCombo)
         {
             HasReceivedNextAttackInput = false;
             bIsComboActive = false;
