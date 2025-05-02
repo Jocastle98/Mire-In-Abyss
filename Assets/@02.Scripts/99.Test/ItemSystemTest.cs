@@ -28,10 +28,11 @@ public class ItemSystemTest : MonoBehaviour
     {
         itemDropdown.ClearOptions();
 
-        List<string> itemNames = itemDatabase.ItemNames;
-        if (itemNames != null && itemNames.Count > 0)
+        List<int> itemIDs = itemDatabase.ItemIDs;
+        if (itemIDs != null && itemIDs.Count > 0)
         {
-            itemDropdown.AddOptions(itemNames);
+            List<string> itemIDStrings = itemIDs.ConvertAll(id => id.ToString());
+            itemDropdown.AddOptions(itemIDStrings);
         }
         else
         {
@@ -50,15 +51,33 @@ public class ItemSystemTest : MonoBehaviour
     private void AcquireSelectedItem()
     {
         string selectedItem = itemDropdown.options[itemDropdown.value].text;
-        itemEffectSystem.AcquireItem(selectedItem);
-        PrintPlayerStats();
+        int itemID;
+        if (int.TryParse(selectedItem, out itemID))
+        {
+            itemEffectSystem.AcquireItem(itemID);
+            PrintPlayerStats();
+        }
+        else
+        {
+            Debug.LogWarning("선택한 아이템 ID를 정수로 변환할 수 없습니다");
+        }
+        
     }
 
     private void RemoveSelectedItem()
     {
         string selectedItem = itemDropdown.options[itemDropdown.value].text;
-        itemEffectSystem.RemoveItem(selectedItem);
-        PrintPlayerStats();
+        int itemID;
+        if (int.TryParse(selectedItem, out itemID))
+        {
+            itemEffectSystem.RemoveItem(itemID);
+            PrintPlayerStats();
+        }
+        else
+        {
+            Debug.LogWarning("선택한 아이템 ID를 정수로 변환할 수 없습니다");
+        }
+        
     }
 
     private void PrintPlayerStats()

@@ -28,7 +28,7 @@ public class DungeonEntranceController : MonoBehaviour
     PlayerEnter playerEnter;
 
     private Quaternion originRot;
-    private bool IsClear;
+    public bool IsClear;
 
     public void EntranceInit(DungeonRoomController roomCon)
     {
@@ -62,7 +62,7 @@ public class DungeonEntranceController : MonoBehaviour
 
     void EntranceOpen(GameObject door,GameObject block)
     {
-        door.transform.rotation = Quaternion.Euler(-90, 270, 0);
+        door.transform.localRotation = Quaternion.Euler(-90, 0, 0);
         block.gameObject.SetActive(false);
     }
 

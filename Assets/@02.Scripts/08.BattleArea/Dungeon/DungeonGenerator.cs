@@ -141,7 +141,7 @@ public class DungeonGenerator
         if (count == 0)
         {
             mDungeonCells[node.x, node.y].SetDungeon(mDungeonCells, DungeonRoomType.SafeRoom);
-            Vector3 safeRoomCenter = new Vector3(7, 0, 7) * .5f;
+            Vector3 safeRoomCenter = new Vector3(7, 1, 7) * .5f;
             mPlayer.transform.position = (new Vector3(node.x, 0, node.y) + safeRoomCenter) * mCellSize;
         }
         else if (mLeafRooms.Count - 1 == count)

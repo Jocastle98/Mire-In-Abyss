@@ -11,9 +11,9 @@ public class ItemDatabase : MonoBehaviour
 {
     public TextAsset itemCsvFile;                           //item_list.csv를 인스펙터에 할당
     private string mItemCsvFilePath = "Items/item_list";    //Resources 폴더 내 경로
-    private Dictionary<string, Item> mItemDatabase = new Dictionary<string, Item>(); //아이템 이름을 키로 사용하는 데이터베이스
+    private Dictionary<int, Item> mItemDatabase = new Dictionary<int, Item>(); //아이템 이름을 키로 사용하는 데이터베이스
     public int ItemCount => mItemDatabase.Count; //데이터 베이스에 있는 아이템 수
-    public List<string> ItemNames => mItemDatabase.Keys.ToList(); //모든 아이템 이름 목록
+    public List<int> ItemIDs => mItemDatabase.Keys.ToList(); //모든 아이템 이름 목록
     
     private void Awake()
     {
@@ -70,7 +70,7 @@ public class ItemDatabase : MonoBehaviour
             Item newItem = ParseItemFromCSV(line);
             if (newItem != null)
             {
-                mItemDatabase[newItem.ItemName] = newItem;
+                mItemDatabase[newItem.ID] = newItem;
             }
         }
     }
@@ -85,8 +85,7 @@ public class ItemDatabase : MonoBehaviour
         try
         {
             List<string> values = CSVParser(line);
-
-            if (values.Count < 9)
+            if (values.Count < 10)
             {
                 Debug.LogWarning($"CSV 라인 형식이 올바르지 않음: {line}");
                 return null;
@@ -94,15 +93,16 @@ public class ItemDatabase : MonoBehaviour
 
             Item item = new Item
             {
-                ItemName = values[0],
-                Tier = values[1],
-                Description = values[2],
-                EffectType = values[3],
-                Value = float.Parse(values[4]),
-                ValueType = values[5]
+                ID = ParseItemId(values[0]),
+                ItemName = values[1],
+                Tier = values[2],
+                Description = values[3],
+                EffectType = values[4],
+                Value = float.Parse(values[5]),
+                ValueType = values[6]
             };
 
-            string dropSourcesStr = values[6].Replace(" ", "");
+            string dropSourcesStr = values[7].Replace(" ", "");
             if (!string.IsNullOrEmpty(dropSourcesStr))
             {
                 string[] sources = dropSourcesStr.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
@@ -112,8 +112,8 @@ public class ItemDatabase : MonoBehaviour
                 }
             }
 
-            item.DropRateMonster = float.Parse(values[7]);
-            item.DropRateShop = float.Parse(values[8]);
+            item.DropRateMonster = float.Parse(values[8]);
+            item.DropRateShop = float.Parse(values[9]);
 
             return item;
         }
@@ -158,23 +158,38 @@ public class ItemDatabase : MonoBehaviour
         return result;
     }
 
+    private int ParseItemId(string idString)
+    {
+        if (idString.StartsWith("I"))
+        {
+            string numericPart = idString.Substring(1);
+            if (int.TryParse(numericPart, out int id))
+            {
+                return id;
+            }
+        }
+
+        Debug.LogWarning("아이템 ID 파싱 실패");
+        return -1;
+    }
+
     #endregion
 
     #region 아이템 조회 관련
     
     /// <summary>
-    /// 아이템을 이름을 통해 찾을 때 사용(사용예시 : 도감)
+    /// 아이템을 ID를 통해 찾을 때 사용(사용예시 : 도감)
     /// </summary>
-    /// <param name="itemName"></param>
+    /// <param name="itemId"></param>
     /// <returns></returns>
-    public Item GetItemByName(string itemName)
+    public Item GetItemByID(int itemId)
     {
-        if (mItemDatabase.TryGetValue(itemName, out Item item))
+        if (mItemDatabase.TryGetValue(itemId, out Item item))
         {
             return item;
         }
 
-        Debug.LogWarning($"아이템을 찾을 수 없음: {itemName}");
+        Debug.LogWarning($"아이템을 찾을 수 없음: {itemId}");
         return null;
     }
 
