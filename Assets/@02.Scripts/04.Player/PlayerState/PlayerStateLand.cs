@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using PlayerEnums;
+using UnityEditor.Timeline.Actions;
 using UnityEngine;
 
 public class PlayerStateLand : IPlayerState
@@ -19,19 +20,7 @@ public class PlayerStateLand : IPlayerState
             return;
         }
         
-        if (mPlayerController.bIsGrounded)
-        {
-            if (GameManager.Instance.Input.MoveInput == Vector2.zero)
-            {
-                mPlayerController.SetPlayerState(PlayerState.Idle);
-                return;
-            }
-            else
-            {
-                mPlayerController.SetPlayerState(PlayerState.Move);
-                return;
-            }
-        }
+        mPlayerController.Land();
     }
 
     public void OnExit()

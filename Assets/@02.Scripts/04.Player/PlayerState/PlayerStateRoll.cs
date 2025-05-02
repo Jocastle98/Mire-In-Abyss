@@ -6,12 +6,15 @@ using UnityEngine;
 public class PlayerStateRoll : IPlayerState
 {
     private PlayerController mPlayerController;
+    private int mobilityLayer;
     private Vector3 mRollDirection;
     public bool bIsRoll { get; set; }
     
     public void OnEnter(PlayerController playerController)
     {
         mPlayerController = playerController;
+        mobilityLayer = mPlayerController.PlayerAnimator.GetLayerIndex("Mobility Layer");
+        mPlayerController.PlayerAnimator.SetLayerWeight(mobilityLayer, 1.0f);
         mPlayerController.PlayerAnimator.SetTrigger("Roll");
 
         mRollDirection = mPlayerController.GetActionDirection(true, true);
@@ -26,6 +29,7 @@ public class PlayerStateRoll : IPlayerState
 
     public void OnExit()
     {
+        mPlayerController.PlayerAnimator.SetLayerWeight(mobilityLayer, 0.0f);
         mPlayerController?.StopRoll();
         mPlayerController = null;
     }
