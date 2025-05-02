@@ -39,12 +39,12 @@ namespace Events.HUD
 
     public interface IMapTrackable   // ─ 미니맵 아이콘용
     {
-        Transform MapAnchor { get; }
-        MiniMapIconType Icon { get; }
+        public Transform MapAnchor { get; }
+        public MiniMapIconType Icon { get; }
     }
 
     public interface IHpTrackable    // ─ HP 바 필요할 때만
     {
-        Transform HpAnchor { get; }
+        public Transform HpAnchor { get; }
     }
 }
