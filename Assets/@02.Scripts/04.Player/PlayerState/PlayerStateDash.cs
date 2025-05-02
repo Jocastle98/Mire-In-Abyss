@@ -6,6 +6,7 @@ using UnityEngine;
 public class PlayerStateDash : IPlayerState
 {
     private PlayerController mPlayerController;
+    private int mobilityLayer;
     private Vector3 mCameraCenterDirection;
     private Vector3 mLookDirection;
     public bool bIsDashing { get; set; }
@@ -13,6 +14,8 @@ public class PlayerStateDash : IPlayerState
     public void OnEnter(PlayerController playerController)
     {
         mPlayerController = playerController;
+        mobilityLayer = mPlayerController.PlayerAnimator.GetLayerIndex("Mobility Layer");
+        mPlayerController.PlayerAnimator.SetLayerWeight(mobilityLayer, 1.0f);
         mPlayerController.PlayerAnimator.SetTrigger("Dash");
 
         mCameraCenterDirection = mPlayerController.GetActionDirection(false, false);
@@ -28,6 +31,7 @@ public class PlayerStateDash : IPlayerState
 
     public void OnExit()
     {
+        mPlayerController.PlayerAnimator.SetLayerWeight(mobilityLayer, 0.0f);
         mPlayerController?.StopDash();
         mPlayerController = null;
     }

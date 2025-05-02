@@ -56,6 +56,12 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     [SerializeField] private float mAttackSpeedMultiplier = 1.0f;
 
     [Space(10)] 
+    [Header("Player Parry Stat")]
+    [SerializeField] private float mParryTimeout = 10.0f;
+    [SerializeField] private float mParryTimeoutDelta;
+    public float ParryTimeoutDelta => mParryTimeoutDelta;
+    
+    [Space(10)] 
     [Header("Player Skill_1 Stat")]
     [SerializeField] private float mSkill_1_DamageMultiplier = 1.5f;
     [SerializeField] private float mSkill_1_Distance = 20.0f;
@@ -357,6 +363,12 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             mDashTimeoutDelta -= Time.deltaTime;
         }
         
+        // Parry 관련 Timeout
+        if (mParryTimeoutDelta >= 0.0f)
+        {
+            mParryTimeoutDelta -= Time.deltaTime;
+        }
+        
         // Skill_1 관련 Timeout
         if (mSkill_1_TimeoutDelta >= 0.0f)
         {
@@ -621,10 +633,17 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
                                   + new Vector3(0.0f, mVerticalVelocity, 0.0f) * Time.deltaTime);
     }
     
+    private bool mbInDirection = false;
     public void Fall()
     {
-        Vector3 targetDirection = Quaternion.Euler(0.0f, mTargetRotation, 0.0f) * Vector3.forward;
-        mCharacterController.Move(targetDirection.normalized * (mCurrentSpeed * Time.deltaTime) 
+        Vector3 moveDirection = Vector3.zero;
+        
+        if (!mbInDirection)
+        {
+            Vector3 targetDirection = Quaternion.Euler(0.0f, mTargetRotation, 0.0f) * Vector3.forward;
+            moveDirection = targetDirection.normalized * mCurrentSpeed;
+        }
+        mCharacterController.Move(moveDirection * Time.deltaTime 
                                   + new Vector3(0.0f, mVerticalVelocity, 0.0f) * Time.deltaTime);
     }
 
@@ -636,6 +655,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
 
     private void Landing()
     {
+        mbInDirection = false;
         SetPlayerState(PlayerState.Idle);
     }
     
@@ -678,7 +698,8 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         RollFunction(false);
 
         yield return null;
-        var rollAnimationInfo = PlayerAnimator.GetCurrentAnimatorStateInfo(2);
+        int mobilityLayer = PlayerAnimator.GetLayerIndex("Mobility Layer");
+        var rollAnimationInfo = PlayerAnimator.GetCurrentAnimatorStateInfo(mobilityLayer);
         if (rollAnimationInfo.IsName("Roll"))
         {
             float rollAnimationLength = rollAnimationInfo.length;
@@ -776,8 +797,8 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         mDashTimeoutDelta = mDashTimeout;
         mPlayerStateDash.bIsDashing = true;
         
-        // 애니메이션 초기 구간 기다림
-        yield return new WaitForSeconds(firstDelay); // 선딜
+        // 애니메이션 선딜
+        yield return new WaitForSeconds(firstDelay);
         DashFunction(true);
         
         StartCoroutine(DashingCoroutine(cameraCenterDirection));
@@ -786,7 +807,8 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         DashFunction(false);
         
         yield return null;
-        var dashAnimationInfo = PlayerAnimator.GetCurrentAnimatorStateInfo(0);
+        int mobilityLayer = PlayerAnimator.GetLayerIndex("Mobility Layer");
+        var dashAnimationInfo = PlayerAnimator.GetCurrentAnimatorStateInfo(mobilityLayer);
         if (dashAnimationInfo.IsName("Dash"))
         {
             float dashAnimationLength = dashAnimationInfo.length;
@@ -808,6 +830,8 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             }
             else
             {
+                mbInDirection = true;
+                
                 SetPlayerState(PlayerState.Fall);
             }
         }
@@ -906,6 +930,33 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         PlayerAnimator.SetBool("Move", false);
         PlayerAnimator.SetBool("Jump", false);
         PlayerAnimator.SetBool("Fall", false);
+        
+        if (GameManager.Instance.Input.DashInput && mDashTimeoutDelta < 0.0f)
+        {
+            SetPlayerState(PlayerState.Dash);
+            return;
+        }
+            
+        if (GameManager.Instance.Input.Skill_1Input && mSkill_1_TimeoutDelta < 0.0f)
+        {
+            SetPlayerState(PlayerState.Skill_1);
+            return;
+        }
+        else if (GameManager.Instance.Input.Skill_2Input)
+        {
+            SetPlayerState(PlayerState.Skill_2);
+            return;
+        }
+        else if (GameManager.Instance.Input.Skill_3Input && mSkill_3_TimeoutDelta < 0.0f)
+        {
+            SetPlayerState(PlayerState.Skill_3);
+            return;
+        }
+        else if (GameManager.Instance.Input.Skill_4Input && mSkill_4_TimeoutDelta < 0.0f)
+        {
+            SetPlayerState(PlayerState.Skill_4);
+            return;
+        }
         
         if (bIsGrounded)
         {
@@ -1063,6 +1114,8 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             BattleMove();
             PlayerAnimator.SetBool("Move", true);
         }
+
+        mParryTimeoutDelta = mParryTimeout;
     }
 
     private void ParrySuccess()
@@ -1109,6 +1162,9 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             // 공격 관련 동작들이 끊기지 않도록
             else if(CurrentPlayerState == PlayerState.Idle || CurrentPlayerState == PlayerState.Move)
             {
+                int upperBodyLayer = PlayerAnimator.GetLayerIndex("UpperBody Layer");
+                PlayerAnimator.SetLayerWeight(upperBodyLayer, 1.0f);
+               
                 PlayerAnimator.SetFloat("HitPower", hitPower);
                 PlayerAnimator.SetTrigger("Hit");
                 
@@ -1197,7 +1253,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     {
         SetCombatState(true);
         
-        Invoke("Skill_1_Fire", 0.55f); // 애니메이션 선딜
+        Invoke("Skill_1_Fire", 0.2f); // 애니메이션 선딜
     }
 
     private void Skill_1_Fire()
@@ -1218,6 +1274,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         Skill_1 skill_1 = projectileObject.GetComponent<Skill_1>();
         skill_1.Init((int)mPlayerStats.GetAttackDamage(), mSkill_1_DamageMultiplier, mSkill_1_Distance, direction);
 
+        mbInDirection = true;
         mSkill_1_TimeoutDelta = mSkill_1_Timeout;
     }
 
@@ -1264,8 +1321,11 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         }
         else
         {
-            StopCoroutine(fallCoroutine);
-            fallCoroutine = null;
+            if (fallCoroutine != null)
+            {
+                StopCoroutine(fallCoroutine);
+                fallCoroutine = null;
+            }
         }
         
         // 주변 적에게 데미지 주는 로직
@@ -1301,6 +1361,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         }
 
         transform.position = groundPosition;
+        
         fallCoroutine = null;
     }
     
@@ -1351,11 +1412,12 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     private IEnumerator Skill_4()
     {
         mSkill4Coroutine = StartCoroutine(Skill_4_Stance());
-        mCameraCoroutine = StartCoroutine(Skill_4_Camera(true));
         yield return mSkill4Coroutine;
-        yield return mCameraCoroutine;
 
+        mCameraCoroutine = StartCoroutine(Skill_4_Camera(true));
         mAimAndFireCoroutine = StartCoroutine(Skill_4_AimAndFire());
+        
+        yield return mCameraCoroutine;
         yield return mAimAndFireCoroutine;
     }
     
@@ -1367,7 +1429,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             groundPosition = hit.point;
         }
         
-        float jumpSpeed = 20.0f;
+        float jumpSpeed = 25.0f;
         float jumpHeight = 10.0f;
         float targetHeight = groundPosition.y + jumpHeight;
         
@@ -1392,44 +1454,57 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
 
     private IEnumerator Skill_4_Camera(bool isStance)
     {
-        if (!isStance && mbIsCameraResetting)
-        {
-            yield break;
-        }
-        
         var camera = mMainCamera.GetComponent<CameraController>();
         var virtualCamera = camera.GetComponent<CinemachineVirtualCamera>();
         var threePersonFollow = virtualCamera.GetCinemachineComponent<Cinemachine3rdPersonFollow>();
         
         if (isStance)
         {
+            // 카메라 복원 중이면 대기
+            while (mbIsCameraResetting)
+            {
+                yield return null;
+            }
+            
             originCameraDistance = threePersonFollow.CameraDistance;
             mbIsCameraResetting = false;
             
-            float timeElapsed = 0f;
+            float timeElapsed = 0.0f;
+            float duration = 0.5f;
+            float targetDistance = 20.0f;
+            
             while (timeElapsed < 1.0f)
             {
-                threePersonFollow.CameraDistance = Mathf.Lerp(originCameraDistance, 20.0f, timeElapsed / 1.0f);
+                threePersonFollow.CameraDistance = Mathf.Lerp(originCameraDistance, targetDistance, timeElapsed / duration);
                 timeElapsed += Time.deltaTime;
                 yield return null;
             }
 
-            threePersonFollow.CameraDistance = 20.0f;
+            threePersonFollow.CameraDistance = targetDistance;
         }
         else
         {
+            // 이미 복원 중이면 종료
+            if (mbIsCameraResetting)
+            {
+                yield break;
+            }
+            
             mbIsCameraResetting = true;
+            
+            float timeElapsed = 0.0f;
+            float duration = 0.5f;
             float startDistance = threePersonFollow.CameraDistance;
             
-            float timeElapsed = 0f;
             while (timeElapsed < 1.0f)
             {
-                threePersonFollow.CameraDistance = Mathf.Lerp(startDistance, originCameraDistance, timeElapsed / 1.0f);
+                threePersonFollow.CameraDistance = Mathf.Lerp(startDistance, originCameraDistance, timeElapsed / duration);
                 timeElapsed += Time.deltaTime;
                 yield return null;
             }
 
             threePersonFollow.CameraDistance = originCameraDistance;
+            mbIsCameraResetting = false;
         }
     }
     
@@ -1445,7 +1520,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         while (timer > 0.0f)
         {
             timer -= Time.deltaTime;
-            
+
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
             RaycastHit hit;
             if (Physics.Raycast(ray, out hit, 100.0f, mGroundLayers))
@@ -1457,14 +1532,14 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             Vector3 cameraForward = GetCameraForwardDirection(true);
             Quaternion cameraRotation = Quaternion.LookRotation(cameraForward);
             transform.rotation = Quaternion.Slerp(transform.rotation, cameraRotation, 10.0f * Time.deltaTime);
-            
+
             if (GameManager.Instance.Input.AttackInput)
             {
                 FireProjectile(finalTargetPoint);
                 isAttackCompleted = true;
                 break;
             }
-            
+
             // 취소 입력 시
             if (GameManager.Instance.Input.DefendInput)
             {
@@ -1472,7 +1547,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
                 isAttackCompleted = true;
                 break;
             }
-            
+
             yield return null;
         }
         
@@ -1490,6 +1565,8 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     
     private void FireProjectile(Vector3 targetPoint)
     {
+        mbInDirection = true;
+        
         mProjectileCoroutine = StartCoroutine(FireProjectileCoroutine(targetPoint));
         
         mSkill_4_TimeoutDelta = mSkill_4_Timeout;
@@ -1520,7 +1597,8 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     private void CancelSkill()
     {
         StartCoroutine(Skill_4_Camera(false));
-        
+
+        mbInDirection = true;
         SetPlayerState(PlayerState.Fall);
     }
     
