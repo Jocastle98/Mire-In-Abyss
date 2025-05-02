@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4a74f30d51664362b2e5a9b1f3892512, type: 3}
+  m_Name: DragonAttackBehavior
+  m_EditorClassIdentifier: 
+  TailRange: 3
+  TailDamage: 10
+  FireballRange: 8
+  ProjectilePrefab: {fileID: 4865309214770636011, guid: 5ef8112459c5b9c448083f706c9ea5cb, type: 3}
+  HitLayer:
+    serializedVersion: 2
+    m_Bits: 256
+  FireballDamage: 20
+  Cooldown: 5
+  ProjectileSpeed: 20
+  BreathRange: 10
+  BreathProjectorPrefab: {fileID: 0}
+  BreathVFXPrefab: {fileID: 0}
+  BreathHitLayer:
+    serializedVersion: 2
+    m_Bits: 0
+  BreathDamage: 30
+  BreathCooldown: 15

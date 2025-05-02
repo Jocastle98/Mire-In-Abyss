@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -27,19 +28,13 @@ public class EnemyBTController : MonoBehaviour
     [SerializeField] private ScriptableObject mAttackBehaviorAsset;
     private IAttackBehavior mAttackBehavior;
 
-    [Header("원거리 발사 위치 (원거리 스켈레톤)")]
+    [Header("원거리 발사 위치 (원거리 스켈레톤, 드래곤)")]
     [SerializeField] private Transform mFirePoint;
     public Transform FirePoint => mFirePoint;
     
-
     [Header("임팩트 설정 (골렘)")]
     [SerializeField] private GameObject ImpactProjectorPrefab;
     [SerializeField] private LayerMask ImpactHitLayer;
-    
-    [Header("드래곤 비행 설정")]
-    [SerializeField] private float mFlightDuration = 10f;
-    private bool mbIsFlying;
-    private float mFlightStartTime;
 
     [Header("렌더러 설정")]
     [SerializeField] private Renderer[] mRenderers;
@@ -198,11 +193,20 @@ public class EnemyBTController : MonoBehaviour
         else if (mAttackBehaviorAsset is DragonAttackBehavior)
         {
             var dragon = mAttackBehavior as DragonAttackBehavior;
+            var fireballSeq = new BTSequence(
+                new BTCondition(() => !mbIsAttacking && mTarget != null && dragon.CanFireball(transform, mTarget)),
+                new BTAction(() =>
+                {
+                    mbIsAttacking = true;
+                    ClearAllBools();
+                    mAgent.isStopped = true;
+                    FaceTarget();
+                    mAttackBehavior.Attack(transform, mTarget);
+                })
+            );
 
-            // 1) 지상 브레스
             var breathSeq = new BTSequence(
-                new BTCondition(() => !mbIsFlying && !mbIsAttacking &&
-                                   mTarget != null && dragon.CanBreath(transform, mTarget)),
+                new BTCondition(() => !mbIsAttacking && mTarget != null && dragon.CanBreath(transform, mTarget)),
                 new BTAction(() =>
                 {
                     mbIsAttacking = true;
@@ -213,10 +217,8 @@ public class EnemyBTController : MonoBehaviour
                 })
             );
 
-            // 2) 지상 꼬리
             var tailSeq = new BTSequence(
-                new BTCondition(() => !mbIsFlying && !mbIsAttacking &&
-                                   mTarget != null && dragon.CanTail(transform, mTarget)),
+                new BTCondition(() => !mbIsAttacking && mTarget != null && dragon.CanTail(transform, mTarget)),
                 new BTAction(() =>
                 {
                     mbIsAttacking = true;
@@ -227,66 +229,7 @@ public class EnemyBTController : MonoBehaviour
                 })
             );
 
-            // 3) 범위 벗어나면 이륙
-            var takeOffSeq = new BTSequence(
-                new BTCondition(() => !mbIsFlying &&
-                                   mTarget != null &&
-                                   Vector3.Distance(transform.position, mTarget.position) > dragon.TailRange),
-                new BTAction(() =>
-                {
-                    mbIsFlying = true;
-                    mFlightStartTime = Time.time;
-                    ClearAllBools();
-                    mAgent.isStopped = true;
-                    mAnim.SetTrigger("TakeOff");
-                })
-            );
-
-            // 4) 공중 공격
-            var airAttackSeq = new BTSequence(
-                new BTCondition(() => mbIsFlying &&
-                                   Time.time < mFlightStartTime + mFlightDuration &&
-                                   mTarget != null && dragon.CanAirFire(transform, mTarget)),
-                new BTAction(() =>
-                {
-                    mbIsAttacking = true;
-                    ClearAllBools();
-                    mAgent.isStopped = true;
-                    FaceTarget();
-                    mAttackBehavior.Attack(transform, mTarget);
-                })
-            );
-
-            // 5) 공중 추적
-            var airTrace = new BTAction(() =>
-            {
-                if (!mbIsFlying || mbIsAttacking || mTarget == null) return;
-                ClearAllBools();
-                mAnim.SetBool("Trace", true);
-                mAgent.isStopped = false;
-                mAgent.SetDestination(mTarget.position);
-            });
-
-            // 6) 착지
-            var landSeq = new BTSequence(
-                new BTCondition(() => mbIsFlying && Time.time >= mFlightStartTime + mFlightDuration),
-                new BTAction(() =>
-                {
-                    mbIsFlying = false;
-                    ClearAllBools();
-                    mAgent.isStopped = true;
-                    mAnim.SetTrigger("Land");
-                })
-            );
-
-            engage = new BTSelector(
-                breathSeq,
-                tailSeq,
-                takeOffSeq,
-                airAttackSeq,
-                airTrace,
-                landSeq
-            );
+            engage = new BTSelector(fireballSeq, breathSeq, tailSeq);
         }
         else
         {
@@ -465,45 +408,96 @@ public class EnemyBTController : MonoBehaviour
     public void FireProjectile()
     {
         if (mAttackBehaviorAsset is RangedAttackBehavior ranged)
-            ranged.FireLastPosition(transform, mTarget != null ? mTarget.position : transform.position + transform.forward * 10f);
+        {
+            // Ranger 스타일 (레이캐스트 or 투사체)
+            ranged.FireLastPosition(transform,
+                mTarget != null
+                    ? mTarget.position
+                    : transform.position + transform.forward * 10f);
+        }
+        else if (mAttackBehaviorAsset is DragonAttackBehavior dragon)
+        {
+            // Dragon 스타일 (ProjectileSkeleton)
+            dragon.FireLastPosition(transform,
+                mTarget != null
+                    ? mTarget.position
+                    : transform.position + transform.forward * 10f);
+        }
     }
-
     public void OnImpactIndicator()
     {
-        if (ImpactProjectorPrefab == null || !(mAttackBehaviorAsset is GolemAttackBehavior golem) || mTarget == null) return;
+        if (ImpactProjectorPrefab == null || !(mAttackBehaviorAsset is GolemAttackBehavior) || mTarget == null)
+            return;
         var go = Instantiate(ImpactProjectorPrefab);
         currentProjector = go.GetComponent<Projector>();
         go.transform.position = mTarget.position + Vector3.up * 5f;
         go.transform.rotation = Quaternion.Euler(90f, 0f, 0f);
-        StartCoroutine(ScaleUpProjector(golem));
+        StartCoroutine(ScaleUpProjector());
     }
 
-    private IEnumerator ScaleUpProjector(GolemAttackBehavior golem)
+    public void OnBreathIndicator()
     {
+        if (!(mAttackBehaviorAsset is DragonAttackBehavior)) return;
+        var go = Instantiate(BreathProjectorPrefab);
+        currentProjector = go.GetComponent<Projector>();
+        go.transform.position = transform.position + Vector3.up * 5f;
+        go.transform.rotation = Quaternion.Euler(90f, 0f, 0f);
+        StartCoroutine(ScaleUpProjector());
+    }
+
+    private IEnumerator ScaleUpProjector()
+    {
+        float range, duration;
+        System.Action onComplete;
+        if (mAttackBehaviorAsset is GolemAttackBehavior golem)
+        {
+            range = golem.ImpactRange;
+            duration = golem.ImpactChargeTime;
+            onComplete = OnImpactLand;
+        }
+        else if (mAttackBehaviorAsset is DragonAttackBehavior dragon)
+        {
+            range = dragon.BreathRange;
+            duration = dragon.BreathCooldown;
+            onComplete = OnBreathLand;
+        }
+        else yield break;
+
         float elapsed = 0f;
-        while (elapsed < golem.ImpactChargeTime)
+        while (elapsed < duration)
         {
             elapsed += Time.deltaTime;
-            currentProjector.orthographicSize = Mathf.Lerp(0f, golem.ImpactRange, elapsed / golem.ImpactChargeTime);
+            currentProjector.orthographicSize = Mathf.Lerp(0f, range, elapsed / duration);
             yield return null;
         }
-        currentProjector.orthographicSize = golem.ImpactRange;
-        OnImpactLand();
+        currentProjector.orthographicSize = range;
+        onComplete?.Invoke();
+        Destroy(currentProjector.gameObject, 0.5f);
     }
 
     public void OnImpactLand()
     {
-        if (!(mAttackBehaviorAsset is GolemAttackBehavior golem)) return;
+        var golem = mAttackBehaviorAsset as GolemAttackBehavior;
         var hits = Physics.OverlapSphere(transform.position, golem.ImpactRange, ImpactHitLayer);
         foreach (var col in hits)
             if (col.CompareTag("Player"))
-            {
-                GolemAttackBehavior golemAttackPower = mAttackBehaviorAsset as GolemAttackBehavior;
-                col.GetComponent<PlayerController>().SetHit(golemAttackPower.ImpactDamage, this.transform, 1);
-                Debug.Log("임팩트 데미지 적용");
-            }
+                col.GetComponent<PlayerController>().SetHit(golem.ImpactDamage, transform, 1);
+    }
+
+    public void OnBreathLand()
+    {
+        var dragon = mAttackBehaviorAsset as DragonAttackBehavior;
+        if (BreathVFXPrefab != null)
+        {
+            var vfx = Instantiate(BreathVFXPrefab, transform.position, Quaternion.identity);
+            
+            //TODO: 브레스 프리팹의 스크립트 가져와서 설정 
+            // if (vfx.TryGetComponent<BreathVFX>(out var script))
+            //     script.Initialize(dragon.BreathRange, dragon.BreathDamage, mPlayerMask);
+        }
         if (currentProjector) Destroy(currentProjector.gameObject, 0.5f);
     }
+
 
     public void OnSwingAttack()
     {

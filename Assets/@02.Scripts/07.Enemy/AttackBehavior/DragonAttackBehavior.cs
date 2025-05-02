@@ -1,60 +1,105 @@
-﻿// DragonAttackBehavior.cs
-using System;
+﻿using System.Collections;
 using UnityEngine;
 
 [CreateAssetMenu(menuName = "AI/Attack Behaviors/Dragon")]
 public class DragonAttackBehavior : ScriptableObject, IAttackBehavior
 {
-    [Header("지상 브레스")]
-    public float BreathRange;
-    public float BreathCooldown = 10f;
+    [Header("꼬리 공격 (기본)")]
+    public float TailRange = 3f;
+    public int TailDamage = 10;
+
+    [Header("파이어볼 공격")]
+    public float FireballRange = 8f;
+    public GameObject ProjectilePrefab;
+    public LayerMask HitLayer;
+    public int FireballDamage = 20;
+    public float Cooldown = 5f;
+    public float ProjectileSpeed = 20f;
+
+    private Transform mSelf;
+    private Transform mTarget;
+    private EnemyBTController mController;
+    private bool mbReady = true;
+
+    [Header("브레스 공격")]
+    public float BreathRange = 10f;
+    public GameObject BreathProjectorPrefab;
+    public GameObject BreathVFXPrefab;
+    public LayerMask BreathHitLayer;
+    public int BreathDamage = 30;
+    public float BreathCooldown = 15f;
     private float mLastBreathTime = -Mathf.Infinity;
 
-    [Header("지상 꼬리")]
-    public float TailRange;
-
-    [Header("공중 불발사")]
-    public float AirFireRange;
+    public bool CanFireball(Transform self, Transform target)
+    {
+        return mbReady
+               && target != null
+               && Vector3.Distance(self.position, target.position) <= FireballRange;
+    }
 
     public bool CanBreath(Transform self, Transform target)
     {
         return Time.time >= mLastBreathTime + BreathCooldown
+               && target != null
                && Vector3.Distance(self.position, target.position) <= BreathRange;
     }
 
     public bool CanTail(Transform self, Transform target)
     {
-        return Vector3.Distance(self.position, target.position) <= TailRange;
-    }
-
-    public bool CanAirFire(Transform self, Transform target)
-    {
-        return Vector3.Distance(self.position, target.position) <= AirFireRange;
+        return target != null
+               && Vector3.Distance(self.position, target.position) <= TailRange;
     }
 
     public bool IsInRange(Transform self, Transform target)
     {
-        float dist = Vector3.Distance(self.position, target.position);
-        return dist <= BreathRange
-               || dist <= TailRange
-               || dist <= AirFireRange;
+        if (target == null) return false;
+        float d = Vector3.Distance(self.position, target.position);
+        return d <= TailRange || d <= FireballRange || d <= BreathRange;
     }
 
     public void Attack(Transform self, Transform target)
     {
+        mSelf = self;
+        mTarget = target;
+        mController = self.GetComponent<EnemyBTController>();
         var anim = self.GetComponent<Animator>();
-        if (CanBreath(self, target))
+
+        if (CanFireball(self, target))
+        {
+            mbReady = false;
+            anim.SetTrigger("FireBall");
+            mController.StartCoroutine(ResetReady());
+        }
+        else if (CanBreath(self, target))
         {
             mLastBreathTime = Time.time;
             anim.SetTrigger("Breath");
         }
         else if (CanTail(self, target))
         {
-            anim.SetTrigger("Tail");
+            anim.SetTrigger("TailAttack");
         }
-        else if (CanAirFire(self, target))
-        {
-            anim.SetTrigger("AirFire");
-        }
+    }
+
+    private IEnumerator ResetReady()
+    {
+        yield return new WaitForSeconds(Cooldown);
+        mbReady = true;
+    }
+
+    // Ranger 참고해서 설정
+    public void FireLastPosition(Transform self, Vector3 targetPosition)
+    {
+        var fp = self.GetComponent<EnemyBTController>().FirePoint;
+        if (fp == null || ProjectilePrefab == null) return;
+
+        Vector3 dir = targetPosition - fp.position;
+        dir.y = 0;
+        if (dir.sqrMagnitude < 0.01f) dir = self.forward;
+        dir.Normalize();
+
+        var proj = Instantiate(ProjectilePrefab, fp.position, Quaternion.LookRotation(dir));
+        if (proj.TryGetComponent<Projectile>(out var ps))
+            ps.Initialize(dir, ProjectileSpeed, HitLayer, FireballDamage);
     }
 }
