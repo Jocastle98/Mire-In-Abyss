@@ -9,7 +9,7 @@ public class ItemEffectSystem : MonoBehaviour
     [SerializeField] private PlayerStats mPlayerStats;
 
     // 획득한 아이템과 그 수량을 저장하는 딕셔너리
-    private Dictionary<string, int> mAcquiredItems = new Dictionary<string, int>();
+    private Dictionary<int, int> mAcquiredItems = new Dictionary<int, int>();
 
     private void Awake()
     {
@@ -37,25 +37,25 @@ public class ItemEffectSystem : MonoBehaviour
     /// 아이템을 획득시 호출하는 메서드
     /// 아이템을 획득하고 효과를 적용. 동일 아이템 재획득 시 효과가 중첩.
     /// </summary>
-    /// <param name="itemName">획득할 아이템 이름</param>
-    public void AcquireItem(string itemName)
+    /// <param name="itemId">획득할 아이템 아이디</param>
+    public void AcquireItem(int itemId)
     {
-        Item item = mItemDatabase.GetItemByName(itemName);
+        Item item = mItemDatabase.GetItemByID(itemId);
         if(item == null) return;
         
         // 이미 가지고 있는 아이템이면 수량 증가
-        if (mAcquiredItems.ContainsKey(itemName))
+        if (mAcquiredItems.ContainsKey(itemId))
         {
-            mAcquiredItems[itemName]++;
+            mAcquiredItems[itemId]++;
         }
         else
         {
-            mAcquiredItems[itemName] = 1;
+            mAcquiredItems[itemId] = 1;
         }
         
         ApplyItemEffect(item);
         
-        Debug.Log($"아이템 획득: {item.ItemName}, 보유 수량: {mAcquiredItems[itemName]}");
+        Debug.Log($"아이템 획득: {item.ItemName}, 보유 수량: {mAcquiredItems[itemId]}");
     }
 
     /// <summary>
@@ -63,27 +63,27 @@ public class ItemEffectSystem : MonoBehaviour
     /// 아이템, 효과 제거.
     /// </summary>
     /// <param name="itemName">제거할 아이템 이름</param>
-    public void RemoveItem(string itemName)
+    public void RemoveItem(int itemID)
     {
-        Item item = mItemDatabase.GetItemByName(itemName);
+        Item item = mItemDatabase.GetItemByID(itemID);
         if (item == null) return;
 
-        if (mAcquiredItems.ContainsKey(itemName) && mAcquiredItems[itemName] > 0)
+        if (mAcquiredItems.ContainsKey(itemID) && mAcquiredItems[itemID] > 0)
         {
-            mAcquiredItems[itemName]--;
+            mAcquiredItems[itemID]--;
             RemoveItemEffect(item);
             
-            Debug.Log($"아이템 제거: {item.ItemName}, 남은 수량: {mAcquiredItems[itemName]}");
+            Debug.Log($"아이템 제거: {item.ItemName}, 남은 수량: {mAcquiredItems[itemID]}");
             
             // 수량이 0이 되면 딕셔너리에서 제거
-            if (mAcquiredItems[itemName] <= 0)
+            if (mAcquiredItems[itemID] <= 0)
             {
-                mAcquiredItems.Remove(itemName);
+                mAcquiredItems.Remove(itemID);
             }
         }
         else
         {
-            Debug.LogWarning($"제거할 아이템이 없음: {itemName}");
+            Debug.LogWarning($"제거할 아이템이 없음: {itemID}");
         }
     }
     #endregion
@@ -219,21 +219,21 @@ public class ItemEffectSystem : MonoBehaviour
                 
             case "lifeSteal":
                 // 다른 lifeSteal 아이템이 없는 경우에만 제거
-                if (!HasOtherItemsOfType(item.ItemName, "lifeSteal"))
+                if (!HasOtherItemsOfType(item.ID, "lifeSteal"))
                 {
                     mPlayerStats.ResetLifeSteal();
                 }
                 break;
                 
             case "defenceBuff":
-                if (!HasOtherItemsOfType(item.ItemName, "defenceBuff"))
+                if (!HasOtherItemsOfType(item.ID, "defenceBuff"))
                 {
                     mPlayerStats.DisableDefenceBuff();
                 }
                 break;
                 
             case "moveSpeedBuff":
-                if (!HasOtherItemsOfType(item.ItemName, "moveSpeedBuff"))
+                if (!HasOtherItemsOfType(item.ID, "moveSpeedBuff"))
                 {
                     mPlayerStats.DisableMoveSpeedBuff();
                 }
@@ -241,7 +241,7 @@ public class ItemEffectSystem : MonoBehaviour
                 
             case "revive":
                 // 다른 revive 아이템이 없는 경우에만 제거
-                if (!HasOtherItemsOfType(item.ItemName, "revive"))
+                if (!HasOtherItemsOfType(item.ID, "revive"))
                 {
                     mPlayerStats.DisableRevive();
                 }
@@ -250,28 +250,28 @@ public class ItemEffectSystem : MonoBehaviour
             // Epic 등급 아이템 (11-15)
             case "critBoost":
                 RemoveStatEffect(item, mPlayerStats.ModifyCritChance);
-                if (!HasOtherItemsOfType(item.ItemName, "critBoost"))
+                if (!HasOtherItemsOfType(item.ID, "critBoost"))
                 {
                     mPlayerStats.ResetCritDamageMultiplier();
                 }
                 break;
                 
             case "skillReset":
-                if (!HasOtherItemsOfType(item.ItemName, "skillReset"))
+                if (!HasOtherItemsOfType(item.ID, "skillReset"))
                 {
                     mPlayerStats.DisableSkillReset();
                 }
                 break;
                 
             case "aoeDamage":
-                if (!HasOtherItemsOfType(item.ItemName, "aoeDamage"))
+                if (!HasOtherItemsOfType(item.ID, "aoeDamage"))
                 {
                     mPlayerStats.DisableAoeDamage();
                 }
                 break;
                 
             case "lastStand":
-                if (!HasOtherItemsOfType(item.ItemName, "lastStand"))
+                if (!HasOtherItemsOfType(item.ID, "lastStand"))
                 {
                     mPlayerStats.DisableLastStand();
                 }
@@ -298,16 +298,16 @@ public class ItemEffectSystem : MonoBehaviour
     /// <summary>
     /// 특정 효과 타입의 다른 아이템이 있는지 확인합니다.
     /// </summary>
-    /// <param name="currentItemName">현재 아이템 이름</param>
+    /// <param name="currentItemID">현재 아이템 이름</param>
     /// <param name="effectType">확인할 효과 타입</param>
     /// <returns>다른 아이템이 있으면 true, 없으면 false</returns>
-    private bool HasOtherItemsOfType(string currentItemName, string effectType)
+    private bool HasOtherItemsOfType(int currentItemID, string effectType)
     {
         foreach (var pair in mAcquiredItems)
         {
-            if (pair.Key != currentItemName && pair.Value > 0)
+            if (pair.Key != currentItemID && pair.Value > 0)
             {
-                Item otherItem = mItemDatabase.GetItemByName(pair.Key);
+                Item otherItem = mItemDatabase.GetItemByID(pair.Key);
                 if (otherItem != null && otherItem.EffectType == effectType)
                 {
                     return true;
@@ -360,11 +360,11 @@ public class ItemEffectSystem : MonoBehaviour
     /// <summary>
     /// 특정 아이템의 보유 수량을 반환
     /// </summary>
-    /// <param name="itemName">확인할 아이템 이름</param>
+    /// <param name="itemID">확인할 아이템 아이디</param>
     /// <returns>해당 아이템의 보유 수량, 없으면 0</returns>
-    public int GetItemCount(string itemName)
+    public int GetItemCount(int itemID)
     {
-        if (mAcquiredItems.TryGetValue(itemName, out int count))
+        if (mAcquiredItems.TryGetValue(itemID, out int count))
         {
             return count;
         }
@@ -375,9 +375,9 @@ public class ItemEffectSystem : MonoBehaviour
     /// 모든 획득한 아이템 목록을 반환
     /// </summary>
     /// <returns>아이템 이름과 수량을 포함한 딕셔너리</returns>
-    public Dictionary<string, int> GetAllAcquiredItems()
+    public Dictionary<int, int> GetAllAcquiredItems()
     {
-        return new Dictionary<string, int>(mAcquiredItems);
+        return new Dictionary<int, int>(mAcquiredItems);
     }
     
     /// <summary>
@@ -391,7 +391,7 @@ public class ItemEffectSystem : MonoBehaviour
         {
             if (pair.Value > 0)
             {
-                Item item = mItemDatabase.GetItemByName(pair.Key);
+                Item item = mItemDatabase.GetItemByID(pair.Key);
                 if (item != null && item.EffectType.Contains(effectType))
                 {
                     return true;
@@ -411,7 +411,7 @@ public class ItemEffectSystem : MonoBehaviour
         Debug.Log($"===== 획득한 아이템 목록 ({mAcquiredItems.Count}개) =====");
         foreach (var pair in mAcquiredItems)
         {
-            Item item = mItemDatabase.GetItemByName(pair.Key);
+            Item item = mItemDatabase.GetItemByID(pair.Key);
             if (item != null)
             {
                 Debug.Log($"이름: {item.ItemName}, 수량: {pair.Value}, 효과: {item.EffectType}, 값: {item.Value}, 유형: {item.ValueType}");
