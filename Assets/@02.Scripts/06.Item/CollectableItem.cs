@@ -6,11 +6,12 @@ using UnityEngine;
 public class CollectableItem : MonoBehaviour
 {
     [SerializeField] private int mItemID;
-    [SerializeField] private string mItemDescription;
-    [SerializeField] private float displayDuration = 2f;
-    [SerializeField] private Color toastColor = Color.white;
+    [SerializeField] private float mDisplayDuration = 2f;
+    [SerializeField] private Color mToastColor = Color.white;
+    [SerializeField] private float mRotationSpeed = 30f;
 
-    [SerializeField] private ItemEffectSystem itemEffectSystem;
+    [SerializeField] private ItemEffectSystem mItemEffectSystem;
+    [SerializeField] private ItemDatabase mItemDatabase;
 
     private void OnTriggerEnter(Collider other)
     {
@@ -22,31 +23,20 @@ public class CollectableItem : MonoBehaviour
 
     private void CollectItem(GameObject player)
     {
-        itemEffectSystem.AcquireItem(mItemID);
+        mItemEffectSystem.AcquireItem(mItemID);
 
-        string message = $"{mItemID} : {mItemDescription}";
-        R3EventBus.Instance.Publish(new Events.HUD.ToastPopup(message, displayDuration, toastColor));
+        Item item = mItemDatabase.GetItemByID(mItemID);
 
-        int itemID = FindItemID(mItemID);
-        if (itemID > 0)
-        {
-            R3EventBus.Instance.Publish(new Events.Item.ItemAdded(itemID, 1));
-        }
+        string message = $"{item.ItemName} : {item.Description}";
+        R3EventBus.Instance.Publish(new Events.HUD.ToastPopup(message, mDisplayDuration, mToastColor));
 
+        R3EventBus.Instance.Publish(new Events.Item.ItemAdded(item.ID, 1));
+        
         Destroy(gameObject);
     }
 
-    private int FindItemID(int itemID)
+    private void Update()
     {
-        if (name.Contains("_"))
-        {
-            string[] parts = name.Split('_');
-            if (parts.Length > 1 && int.TryParse(parts[1], out int id))
-            {
-                return id;
-            }
-        }
-
-        return 101;
+        transform.Rotate(0, mRotationSpeed * Time.deltaTime, 0);
     }
 }
