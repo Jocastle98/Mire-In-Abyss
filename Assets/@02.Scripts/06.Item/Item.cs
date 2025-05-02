@@ -9,6 +9,7 @@ using UnityEngine;
 [System.Serializable]
 public class Item
 {
+    public int ID;                                          //아이템의 고유 ID
     public string ItemName;                                 //아이템의 이름
     public string Tier;                                     //아이템의 등급
     public string Description;                              //아이템의 상세 설명
