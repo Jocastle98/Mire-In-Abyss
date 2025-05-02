@@ -84,7 +84,7 @@ public class DungeonRoomController : MonoBehaviour
 
         while (spawnedCount < spwanMonsterAmount)
         {
-            if (index >= spawnControllers.Count)
+            if (index >= (int)(spawnControllers.Count * .5f))
                 index = 0;
 
             int rand = Random.Range(0, 10);
