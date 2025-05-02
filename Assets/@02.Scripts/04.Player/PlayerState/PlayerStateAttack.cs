@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using JetBrains.Annotations;
 using PlayerEnums;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -7,13 +8,21 @@ using UnityEngine.Rendering;
 public class PlayerStateAttack : IPlayerState
 {
     private PlayerController mPlayerController;
+    private int upperBodyLayer;
     private Vector3 mAttackDirection;
+    private int mMaxCombo = 3;
+    private int mCurrentCombo = 0;
     public bool HasReceivedNextAttackInput;
     public bool bIsComboActive;
+    
+    private float mComboInputWindow = 2.0f;
+    private float mComboInputTimer;
     
     public void OnEnter(PlayerController playerController)
     {
         mPlayerController = playerController;
+        upperBodyLayer = mPlayerController.PlayerAnimator.GetLayerIndex("UpperBody Layer");
+        mPlayerController.PlayerAnimator.SetLayerWeight(upperBodyLayer, 1.0f);
         mPlayerController.PlayerAnimator.SetTrigger("Attack");
         
         mAttackDirection = mPlayerController.GetCameraForwardDirection(true);
@@ -21,6 +30,7 @@ public class PlayerStateAttack : IPlayerState
         
         HasReceivedNextAttackInput = true;
         bIsComboActive = true;
+        mComboInputTimer = 0.0f;
     }
 
     public void OnUpdate()
@@ -30,17 +40,25 @@ public class PlayerStateAttack : IPlayerState
             return;
         }
         
-        if ((GameManager.Instance.Input.AttackInput || GameManager.Instance.Input.IsAttacking) && bIsComboActive && !HasReceivedNextAttackInput)
+        mComboInputTimer += Time.deltaTime;
+        if (bIsComboActive && mComboInputTimer > mComboInputWindow)
+        {
+            bIsComboActive = false;
+        }
+        
+        if ((GameManager.Instance.Input.AttackInput || GameManager.Instance.Input.IsAttacking) 
+            && bIsComboActive && !HasReceivedNextAttackInput)
         {
             AttackCount++;
             mPlayerController.PlayerAnimator.SetTrigger("Attack");
             HasReceivedNextAttackInput = true;
+            mComboInputTimer = 0.0f; // 콤보 연속 입력 받았으므로 타이머 리셋
         }
         
         mPlayerController.Attack();
 
         // 콤보가 끝날 때 HasReceivedNextAttackInput을 false로 설정
-        if (AttackCount > 3)
+        if (AttackCount > mMaxCombo)
         {
             HasReceivedNextAttackInput = false;
             bIsComboActive = false;
@@ -69,13 +87,21 @@ public class PlayerStateAttack : IPlayerState
     public void OnExit()
     {
         AttackCount = 0;
+        mPlayerController.PlayerAnimator.SetLayerWeight(upperBodyLayer, 0.0f);
         mPlayerController = null;
     }
 
     private int AttackCount
     {
-        get => mPlayerController.PlayerAnimator.GetInteger("Attack_Count");
-        set => mPlayerController.PlayerAnimator.SetInteger("Attack_Count", value);
+        get => mCurrentCombo;
+        set
+        {
+            mCurrentCombo = value;
+            if (mPlayerController != null)
+            {
+                mPlayerController.PlayerAnimator.SetInteger("Attack_Count", value);
+            }
+        }
     }
 
     // todo: 콤보별 공격력 배율(무기 공격력 기준) // 임시 기능(사용할지 말지)

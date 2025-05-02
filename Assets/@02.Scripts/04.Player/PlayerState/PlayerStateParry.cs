@@ -5,11 +5,14 @@ using UnityEngine;
 public class PlayerStateParry : IPlayerState
 {
     private PlayerController mPlayerController;
+    private int upperBodyLayer;
     private Vector3 mParryDirection;
     
     public void OnEnter(PlayerController playerController)
     {
         mPlayerController = playerController;
+        upperBodyLayer = mPlayerController.PlayerAnimator.GetLayerIndex("UpperBody Layer");
+        mPlayerController.PlayerAnimator.SetLayerWeight(upperBodyLayer, 1.0f);
         mPlayerController.PlayerAnimator.SetTrigger("Parry");
         
         mParryDirection = mPlayerController.GetCameraForwardDirection(true);
@@ -31,6 +34,7 @@ public class PlayerStateParry : IPlayerState
 
     public void OnExit()
     {
+        mPlayerController.PlayerAnimator.SetLayerWeight(upperBodyLayer, 0.0f);
         mPlayerController = null;
     }
 }
