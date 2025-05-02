@@ -1,15 +1,15 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using Events.Player.Modules;
 using UnityEngine;
+using R3;
 
 public class ItemEffectSystem : MonoBehaviour
 {
     [SerializeField] private ItemDatabase mItemDatabase;
     [SerializeField] private PlayerStats mPlayerStats;
-
-    // 획득한 아이템과 그 수량을 저장하는 딕셔너리
-    private Dictionary<int, int> mAcquiredItems = new Dictionary<int, int>();
 
     private void Awake()
     {
@@ -21,7 +21,7 @@ public class ItemEffectSystem : MonoBehaviour
                 mPlayerStats = FindObjectOfType<PlayerStats>();
             }
         }
-        
+
         if (mItemDatabase == null)
         {
             mItemDatabase = GetComponent<ItemDatabase>();
@@ -32,30 +32,35 @@ public class ItemEffectSystem : MonoBehaviour
         }
     }
 
+    void Start()
+    {
+        subscribeEvents();
+    }
+
+    void subscribeEvents()
+    {
+        R3EventBus.Instance.Receive<ItemAdded>()
+            .Subscribe(e => AcquireItem(e))
+            .AddTo(this);
+        R3EventBus.Instance.Receive<ItemSubtracked>()
+            .Subscribe(e => RemoveItem(e))
+            .AddTo(this);
+    }
+
     #region 아이템 획득 및 제거
     /// <summary>
     /// 아이템을 획득시 호출하는 메서드
     /// 아이템을 획득하고 효과를 적용. 동일 아이템 재획득 시 효과가 중첩.
     /// </summary>
     /// <param name="itemId">획득할 아이템 아이디</param>
-    public void AcquireItem(int itemId)
+    public void AcquireItem(ItemAdded itemInfo)
     {
-        Item item = mItemDatabase.GetItemByID(itemId);
-        if(item == null) return;
-        
-        // 이미 가지고 있는 아이템이면 수량 증가
-        if (mAcquiredItems.ContainsKey(itemId))
-        {
-            mAcquiredItems[itemId]++;
-        }
-        else
-        {
-            mAcquiredItems[itemId] = 1;
-        }
-        
+        Item item = mItemDatabase.GetItemByID(itemInfo.ID);
+        if (item == null) return;
+
         ApplyItemEffect(item);
-        
-        Debug.Log($"아이템 획득: {item.ItemName}, 보유 수량: {mAcquiredItems[itemId]}");
+
+        Debug.Log($"아이템 획득: {item.ItemName}, 보유 수량: {itemInfo.Total}");
     }
 
     /// <summary>
@@ -63,28 +68,13 @@ public class ItemEffectSystem : MonoBehaviour
     /// 아이템, 효과 제거.
     /// </summary>
     /// <param name="itemName">제거할 아이템 이름</param>
-    public void RemoveItem(int itemID)
+    public void RemoveItem(ItemSubtracked itemInfo)
     {
-        Item item = mItemDatabase.GetItemByID(itemID);
+        Item item = mItemDatabase.GetItemByID(itemInfo.ID);
         if (item == null) return;
 
-        if (mAcquiredItems.ContainsKey(itemID) && mAcquiredItems[itemID] > 0)
-        {
-            mAcquiredItems[itemID]--;
-            RemoveItemEffect(item);
-            
-            Debug.Log($"아이템 제거: {item.ItemName}, 남은 수량: {mAcquiredItems[itemID]}");
-            
-            // 수량이 0이 되면 딕셔너리에서 제거
-            if (mAcquiredItems[itemID] <= 0)
-            {
-                mAcquiredItems.Remove(itemID);
-            }
-        }
-        else
-        {
-            Debug.LogWarning($"제거할 아이템이 없음: {itemID}");
-        }
+        RemoveItemEffect(item);
+        Debug.Log($"아이템 제거: {item.ItemName}, 남은 수량: {itemInfo.Total}");
     }
     #endregion
 
@@ -107,60 +97,60 @@ public class ItemEffectSystem : MonoBehaviour
             case "maxHP":
                 ApplyStatEffect(item, mPlayerStats.ModifyMaxHP);
                 break;
-                
+
             case "moveSpeed":
                 ApplyStatEffect(item, mPlayerStats.ModifyMoveSpeed);
                 break;
-                
+
             case "attackPower":
                 ApplyStatEffect(item, mPlayerStats.ModifyAttackPower);
                 break;
-                
+
             case "damageReduction":
                 ApplyStatEffect(item, mPlayerStats.ModifyDamageReduction);
                 break;
-                
+
             case "critChance":
                 ApplyStatEffect(item, mPlayerStats.ModifyCritChance);
                 break;
-                
+
             // Special 등급 아이템 (6-10)
             // 붉은 월계관은 attackPower 효과를 사용하므로 이미 위에서 처리
-            
+
             case "lifeSteal":
                 mPlayerStats.SetLifeSteal(item.Value);
                 break;
-                
+
             case "defenceBuff":
                 mPlayerStats.EnableDefenceBuff(item.Value);
                 break;
-                
+
             case "moveSpeedBuff":
                 mPlayerStats.EnableMoveSpeedBuff(item.Value);
                 break;
-                
+
             case "revive":
                 mPlayerStats.EnableRevive();
                 break;
-                
+
             // Epic 등급 아이템 (11-15)
             case "critBoost":
                 ApplyStatEffect(item, mPlayerStats.ModifyCritChance);
                 mPlayerStats.SetCritDamageMultiplier(2f);
                 break;
-                
+
             case "skillReset":
                 mPlayerStats.EnableSkillReset(item.Value);
                 break;
-                
+
             case "aoeDamage":
                 mPlayerStats.EnableAoeDamage(item.Value);
                 break;
-                
+
             case "lastStand":
                 mPlayerStats.EnableLastStand(item.Value);
                 break;
-            
+
             default:
                 // 복합 효과(쉼표로 구분된 여러 효과) 처리 (현재는 epic 전설의 대지만 사용)
                 if (item.EffectType.Contains(","))
@@ -182,7 +172,7 @@ public class ItemEffectSystem : MonoBehaviour
                 break;
         }
     }
-    
+
     /// <summary>
     /// 아이템 효과를 제거. 중첩된 경우 한 번만 제거
     /// </summary>
@@ -190,33 +180,33 @@ public class ItemEffectSystem : MonoBehaviour
     private void RemoveItemEffect(Item item)
     {
         if (mPlayerStats == null) return;
-        
+
         switch (item.EffectType)
         {
             // Common 등급 아이템 (1-5)
             case "maxHP":
                 RemoveStatEffect(item, mPlayerStats.ModifyMaxHP);
                 break;
-                
+
             case "moveSpeed":
                 RemoveStatEffect(item, mPlayerStats.ModifyMoveSpeed);
                 break;
-                
+
             case "attackPower":
                 RemoveStatEffect(item, mPlayerStats.ModifyAttackPower);
                 break;
-                
+
             case "damageReduction":
                 RemoveStatEffect(item, mPlayerStats.ModifyDamageReduction);
                 break;
-                
+
             case "critChance":
                 RemoveStatEffect(item, mPlayerStats.ModifyCritChance);
                 break;
-                
+
             // Special 등급 아이템 (6-10)
             // 붉은 월계관은 위에서 처리
-                
+
             case "lifeSteal":
                 // 다른 lifeSteal 아이템이 없는 경우에만 제거
                 if (!HasOtherItemsOfType(item.ID, "lifeSteal"))
@@ -224,21 +214,21 @@ public class ItemEffectSystem : MonoBehaviour
                     mPlayerStats.ResetLifeSteal();
                 }
                 break;
-                
+
             case "defenceBuff":
                 if (!HasOtherItemsOfType(item.ID, "defenceBuff"))
                 {
                     mPlayerStats.DisableDefenceBuff();
                 }
                 break;
-                
+
             case "moveSpeedBuff":
                 if (!HasOtherItemsOfType(item.ID, "moveSpeedBuff"))
                 {
                     mPlayerStats.DisableMoveSpeedBuff();
                 }
                 break;
-                
+
             case "revive":
                 // 다른 revive 아이템이 없는 경우에만 제거
                 if (!HasOtherItemsOfType(item.ID, "revive"))
@@ -246,7 +236,7 @@ public class ItemEffectSystem : MonoBehaviour
                     mPlayerStats.DisableRevive();
                 }
                 break;
-                
+
             // Epic 등급 아이템 (11-15)
             case "critBoost":
                 RemoveStatEffect(item, mPlayerStats.ModifyCritChance);
@@ -255,28 +245,28 @@ public class ItemEffectSystem : MonoBehaviour
                     mPlayerStats.ResetCritDamageMultiplier();
                 }
                 break;
-                
+
             case "skillReset":
                 if (!HasOtherItemsOfType(item.ID, "skillReset"))
                 {
                     mPlayerStats.DisableSkillReset();
                 }
                 break;
-                
+
             case "aoeDamage":
                 if (!HasOtherItemsOfType(item.ID, "aoeDamage"))
                 {
                     mPlayerStats.DisableAoeDamage();
                 }
                 break;
-                
+
             case "lastStand":
                 if (!HasOtherItemsOfType(item.ID, "lastStand"))
                 {
                     mPlayerStats.DisableLastStand();
                 }
                 break;
-            
+
             default:
                 // 복합 효과 처리
                 if (item.EffectType.Contains(","))
@@ -294,7 +284,7 @@ public class ItemEffectSystem : MonoBehaviour
                 break;
         }
     }
-    
+
     /// <summary>
     /// 특정 효과 타입의 다른 아이템이 있는지 확인합니다.
     /// </summary>
@@ -303,7 +293,7 @@ public class ItemEffectSystem : MonoBehaviour
     /// <returns>다른 아이템이 있으면 true, 없으면 false</returns>
     private bool HasOtherItemsOfType(int currentItemID, string effectType)
     {
-        foreach (var pair in mAcquiredItems)
+        foreach (var pair in PlayerHub.Instance.Inventory.Items)
         {
             if (pair.Key != currentItemID && pair.Value > 0)
             {
@@ -316,7 +306,7 @@ public class ItemEffectSystem : MonoBehaviour
         }
         return false;
     }
-    
+
     /// <summary>
     /// 기본 스탯 효과를 적용합니다.
     /// </summary>
@@ -326,7 +316,7 @@ public class ItemEffectSystem : MonoBehaviour
     {
         modifyFunction(item.Value, item.ValueType);
     }
-    
+
     /// <summary>
     /// 기본 스탯 효과를 제거합니다.
     /// </summary>
@@ -364,22 +354,22 @@ public class ItemEffectSystem : MonoBehaviour
     /// <returns>해당 아이템의 보유 수량, 없으면 0</returns>
     public int GetItemCount(int itemID)
     {
-        if (mAcquiredItems.TryGetValue(itemID, out int count))
+        if (PlayerHub.Instance.Inventory.Items.TryGetValue(itemID, out int count))
         {
             return count;
         }
         return 0;
     }
-    
+
     /// <summary>
     /// 모든 획득한 아이템 목록을 반환
     /// </summary>
     /// <returns>아이템 이름과 수량을 포함한 딕셔너리</returns>
     public Dictionary<int, int> GetAllAcquiredItems()
     {
-        return new Dictionary<int, int>(mAcquiredItems);
+        return new Dictionary<int, int>(PlayerHub.Instance.Inventory.Items);
     }
-    
+
     /// <summary>
     /// 특정 효과 타입의 아이템을 보유하고 있는지 확인
     /// </summary>
@@ -387,7 +377,7 @@ public class ItemEffectSystem : MonoBehaviour
     /// <returns>해당 효과 타입의 아이템이 있으면 true, 없으면 false</returns>
     public bool HasItemWithEffectType(string effectType)
     {
-        foreach (var pair in mAcquiredItems)
+        foreach (var pair in PlayerHub.Instance.Inventory.Items)
         {
             if (pair.Value > 0)
             {
@@ -401,15 +391,15 @@ public class ItemEffectSystem : MonoBehaviour
         return false;
     }
     #endregion
-    
+
     #region 디버깅 용
     /// <summary>
     /// 디버깅용: 획득한 모든 아이템을 로그로 출력합니다.
     /// </summary>
     public void DebugPrintAcquiredItems()
     {
-        Debug.Log($"===== 획득한 아이템 목록 ({mAcquiredItems.Count}개) =====");
-        foreach (var pair in mAcquiredItems)
+        Debug.Log($"===== 획득한 아이템 목록 ({PlayerHub.Instance.Inventory.Items.Count}개) =====");
+        foreach (var pair in PlayerHub.Instance.Inventory.Items)
         {
             Item item = mItemDatabase.GetItemByID(pair.Key);
             if (item != null)

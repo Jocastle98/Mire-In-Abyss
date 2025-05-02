@@ -23,14 +23,11 @@ public class CollectableItem : MonoBehaviour
 
     private void CollectItem(GameObject player)
     {
-        mItemEffectSystem.AcquireItem(mItemID);
-
+        PlayerHub.Instance.Inventory.AddItem(mItemID, 1);
         Item item = mItemDatabase.GetItemByID(mItemID);
 
         string message = $"{item.ItemName} : {item.Description}";
         R3EventBus.Instance.Publish(new Events.HUD.ToastPopup(message, mDisplayDuration, mToastColor));
-
-        R3EventBus.Instance.Publish(new Events.Item.ItemAdded(item.ID, 1));
         
         Destroy(gameObject);
     }

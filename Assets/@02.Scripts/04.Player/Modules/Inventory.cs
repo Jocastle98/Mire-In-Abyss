@@ -3,7 +3,7 @@ using Events.Player.Modules;
 using R3;
 using UnityEngine;
 
-public sealed class TempInventory : MonoBehaviour
+public sealed class Inventory : MonoBehaviour
 {
     readonly Dictionary<int, int> mItems = new(); // ID, amount
 

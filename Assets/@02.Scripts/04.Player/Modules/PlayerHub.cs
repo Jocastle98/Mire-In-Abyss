@@ -3,20 +3,20 @@ using R3;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-[RequireComponent(typeof(TempInventory))]
-[RequireComponent(typeof(TempBuffController))]
-[RequireComponent(typeof(TempQuestLog))]
-public class TempPlayerHub : Singleton<TempPlayerHub>
+[RequireComponent(typeof(Inventory))]
+[RequireComponent(typeof(BuffController))]
+[RequireComponent(typeof(QuestLog))]
+public class PlayerHub : Singleton<PlayerHub>
 {
-    public TempInventory Inventory { get; private set; }
-    public TempBuffController BuffController { get; private set; }
-    public TempQuestLog QuestLog { get; private set; }
+    public Inventory Inventory { get; private set; }
+    public BuffController BuffController { get; private set; }
+    public QuestLog QuestLog { get; private set; }
 
     void Awake()
     {
-        Inventory = GetComponent<TempInventory>();
-        BuffController = GetComponent<TempBuffController>();
-        QuestLog = GetComponent<TempQuestLog>();
+        Inventory = GetComponent<Inventory>();
+        BuffController = GetComponent<BuffController>();
+        QuestLog = GetComponent<QuestLog>();
     }
 
     void Start()

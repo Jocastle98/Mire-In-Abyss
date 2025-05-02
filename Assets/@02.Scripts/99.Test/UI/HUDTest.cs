@@ -167,7 +167,7 @@ public class HUDTest : MonoBehaviour
     public void OnAddQuest()
     {
         mLastQuestID++;
-        TempPlayerHub.Instance.QuestLog.Accept(mLastQuestID, 1);
+        PlayerHub.Instance.QuestLog.Accept(mLastQuestID, 1);
     }
 
     public void OnQuestUpdated()
@@ -178,18 +178,18 @@ public class HUDTest : MonoBehaviour
             return;
         }
 
-        TempPlayerHub.Instance.QuestLog.AddProgress(mUpdatedQuestID, 1);
+        PlayerHub.Instance.QuestLog.AddProgress(mUpdatedQuestID, 1);
     }
 
     public void OnQuestCompleted()
     {
-        TempPlayerHub.Instance.QuestLog.Reward(mUpdatedQuestID);
+        PlayerHub.Instance.QuestLog.Reward(mUpdatedQuestID);
     }
 
     public void OnCurrencyChanged()
     {
-        TempPlayerHub.Instance.Inventory.AddGold(mGold);
-        TempPlayerHub.Instance.Inventory.AddSoul(mSoul);
+        PlayerHub.Instance.Inventory.AddGold(mGold);
+        PlayerHub.Instance.Inventory.AddSoul(mSoul);
     }
 
     public void OnBossHpChanged()
@@ -219,7 +219,7 @@ public class HUDTest : MonoBehaviour
 
     public void OnBuffAdded()
     {
-        TempPlayerHub.Instance.BuffController.AddBuff(mBuffID, mBuffDuration, mBuffIsDebuff);
+        PlayerHub.Instance.BuffController.AddBuff(mBuffID, mBuffDuration, mBuffIsDebuff);
     }
 
     public void OnToastPopup()
@@ -229,12 +229,12 @@ public class HUDTest : MonoBehaviour
 
     public void OnItemAdded()
     {
-        TempPlayerHub.Instance.Inventory.AddItem(mItemID, mItemCount);
+        PlayerHub.Instance.Inventory.AddItem(mItemID, mItemCount);
     }
 
     public void OnItemSubTracked()
     {
-        TempPlayerHub.Instance.Inventory.RemoveItem(mItemID, mItemCount);
+        PlayerHub.Instance.Inventory.RemoveItem(mItemID, mItemCount);
     }
 
     public void OnAttackDummy()

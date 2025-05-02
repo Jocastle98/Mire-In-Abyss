@@ -3,7 +3,7 @@ using Events.Player.Modules;
 using R3;
 using UnityEngine;
 
-public sealed class TempBuffController : MonoBehaviour
+public sealed class BuffController : MonoBehaviour
 {
     public class BuffState { public float remain; public float dur; }
 

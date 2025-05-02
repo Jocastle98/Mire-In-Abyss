@@ -18,10 +18,10 @@ public sealed class CurrencyPresenter : HudPresenterBase
     private void subscribeEvents()
     {
         R3EventBus.Instance.Receive<GoldAdded>()
-            .Subscribe(e => mGoldText.text = TempPlayerHub.Instance.Inventory.Gold.ToString())
+            .Subscribe(e => mGoldText.text = PlayerHub.Instance.Inventory.Gold.ToString())
             .AddTo(mCD);
         R3EventBus.Instance.Receive<SoulAdded>()
-            .Subscribe(e => mSoulText.text = TempPlayerHub.Instance.Inventory.Soul.ToString())
+            .Subscribe(e => mSoulText.text = PlayerHub.Instance.Inventory.Soul.ToString())
             .AddTo(mCD);
     }
 }

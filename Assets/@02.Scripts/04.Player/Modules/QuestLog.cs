@@ -5,7 +5,7 @@ using UIHUDEnums;
 using UnityEngine;
 
 
-public sealed class TempQuestLog : MonoBehaviour
+public sealed class QuestLog : MonoBehaviour
 {
     public class QuestProgress { public int cur, target;}
 
