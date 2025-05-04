@@ -55,7 +55,9 @@ namespace UIPanelEnums
     {
         SoulStoneShop,
         QuestBoard,
-        EnterPortal
+        EnterPortal,
+        Setting,
+        Codex,
     }
 }
 

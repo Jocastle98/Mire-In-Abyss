@@ -1,14 +1,25 @@
 using System.Collections;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
+using UIPanelEnums;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.Serialization;
 
-public class UIManager : MonoBehaviour
+public class UIManager : Singleton<UIManager>
 {
     readonly Stack<BaseUIPanel> mStack = new();
     [SerializeField] Canvas mPanelCanvas;
     [SerializeField] BaseUIPanel mPausePrefab;
+    [SerializeField] BaseUIPanel mSettingPrefab;
+    //[SerializeField] BaseUIPanel mCodexPrefab;
+
+    private Dictionary<UIPanelType, BaseUIPanel> mPanels = new();
+    void Awake()
+    {
+        mPanels.Add(UIPanelType.Setting, mSettingPrefab);
+        //mPanels.Add(UIPanelType.Codex, mCodexPrefab);
+    }
 
     public async UniTask Push(BaseUIPanel prefab)
     {
@@ -21,6 +32,15 @@ public class UIManager : MonoBehaviour
         mStack.Push(inst);
         await inst.Show();
     }
+
+    public async UniTask Push(UIPanelType type)
+    {
+        if (mPanels.TryGetValue(type, out var prefab))
+        {
+            await Push(prefab);
+        }
+    }
+
     public async UniTask Pop()
     {
         if (mStack.Count == 0)
@@ -38,7 +58,7 @@ public class UIManager : MonoBehaviour
     void Update()
     {
         //Temp
-        if (Input.GetKeyDown(KeyCode.Escape))
+        if (Input.GetKeyDown(KeyCode.F1))
         {
             newMethod();
         }
@@ -48,11 +68,15 @@ public class UIManager : MonoBehaviour
     {
         if (mStack.Count == 0)
         {
-            Push(mPausePrefab).Forget();
+            //Push(mPausePrefab).Forget();
         }
         else
         {
             Pop().Forget();
         }
+    }
+
+    protected override void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
     }
 }
