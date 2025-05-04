@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Serialization;
 
-[CreateAssetMenu(menuName = "CreateSO/SODungeonList", fileName = "New SODungeonList")]
+[CreateAssetMenu(menuName = "BattleAreaSo/SODungeonList", fileName = "New SODungeonList")]
 public class SODungeonList : ScriptableObject
 {
     public SODungeonTile dungeonTileSO;

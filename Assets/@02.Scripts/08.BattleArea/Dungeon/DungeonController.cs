@@ -1,10 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 using BattleAreaEnums;
 
-public class DungeonGenerator
+public class DungeonController : BattleArea
 {
     //BSP
     private int mCellSize;
@@ -22,18 +21,53 @@ public class DungeonGenerator
     private int mDivideLineWidth;
     private int mEventRoomChance;
     private GameObject mPlayer;
-    private GameObject mPrefabFolder;
-    private SODungeonList dungeonListSO;
+    
+    private SODungeonList dungeonListSo;
+    
+    private GameObject mTileFolder;
+    private GameObject mStanderFolder;
+    private GameObject mDungeonFolder;
+    
+    public override void BattleAreaClear()
+    {
+        ClearField();
+        OnClearBattleArea.Invoke();
+        Destroy(gameObject);
+    }
+    
+    public override void SetPortal(GameObject portal)
+    {
+        this.portal = portal;
+        BattleAreaMoveController moveCon = portal.GetComponent<BattleAreaMoveController>();
+        moveCon.battleAreaMoveDelegate = BattleAreaClear;
+        DeActivatePortal();
+    }
+    /// <summary>
+    /// 보스를 잡고 맵을 이동할 때 필드의 모든 요소들을 정리
+    /// </summary>
+    public void ClearField()
+    {
+        ClearObjs(mTileFolder);
+        ClearObjs(mStanderFolder);
+        ClearObjs(mDungeonFolder);
+    }
 
     //최대 방 크기, 최소 방 크기, 방 개수, 보물상자, 함정
-    public DungeonGenerator(int cellSize, int minDungeonSize, int divideLineWidth, int minRoomCount, int levelDesign,
-        int eventRoomChance, SODungeonList dungeonListSO,GameObject player)
+    public void DungeonInit(int cellSize, int minDungeonSize, int divideLineWidth, int minRoomCount, int levelDesign,
+        int eventRoomChance, SODungeonList dungeonListSo,GameObject player)
     {
         mCellSize = cellSize;
         mMinDungeonSize = minDungeonSize;
         mDivideLineWidth = divideLineWidth;
         mEventRoomChance = eventRoomChance;
         mPlayer = player;
+        
+        mTileFolder = new GameObject("TileFolder");
+        mStanderFolder = new GameObject("StanderFolder");
+        mDungeonFolder = new GameObject("DungeonFolder");
+        mTileFolder.transform.parent = gameObject.transform;
+        mStanderFolder.transform.parent = gameObject.transform;
+        mDungeonFolder.transform.parent = gameObject.transform;
         
         mCreateSize = mMinDungeonSize * (minRoomCount / 3 + 1);
         mMinRoomCount = Mathf.Max(2,
@@ -42,6 +76,12 @@ public class DungeonGenerator
         int whileCount = 0;
         while (mLeafRooms.Count <= mMinRoomCount)
         {
+            ClearObjs(mTileFolder);
+            ClearObjs(mStanderFolder);
+            ClearObjs(mDungeonFolder);
+            mLeafRooms.Clear();
+            mDungeonCells = null;
+            
             whileCount++;
             if (10 < whileCount)
             {
@@ -49,19 +89,15 @@ public class DungeonGenerator
                 mCreateSize += minDungeonSize;
             }
 
-            if (mPrefabFolder != null) GameObject.DestroyImmediate(mPrefabFolder);
-            mLeafRooms.Clear();
-            mDungeonCells = null;
-
             mDungeonCells = new DungeonCells[mCreateSize, mCreateSize];
-            mPrefabFolder = new GameObject("DungeonFolder");
-
+            
             for (int i = 0; i < mCreateSize; i++)
             {
                 for (int j = 0; j < mCreateSize; j++)
                 {
                     mDungeonCells[i, j] = new DungeonCells();
-                    mDungeonCells[i, j].SetDungeonCells(new Vector2Int(i, j), mCellSize, mPrefabFolder, dungeonListSO);
+                    mDungeonCells[i, j].SetDungeonCells(new Vector2Int(i, j),
+                        mCellSize,mTileFolder,mStanderFolder, mDungeonFolder, dungeonListSo);
                 }
             }
 
@@ -146,6 +182,7 @@ public class DungeonGenerator
         }
         else if (mLeafRooms.Count - 1 == count)
         {
+            mDungeonCells[node.x, node.y].SetPortal(portal);
             mDungeonCells[node.x, node.y].SetDungeon(mDungeonCells, DungeonRoomType.BossRoom);
         }
         else if (count == (int)(mLeafRooms.Count * 0.5f))
@@ -343,24 +380,5 @@ public class DungeonGenerator
             corridor.Add(mDungeonCells[(int)to.x, y]);
 
         return PathConnectable(corridor, fromRoom, toRoom, isSet);
-    }
-
-
-    void GizmoSphereInSetRoom(DungeonNode node)
-    {
-        float sphereRadius = 1f;
-        Vector2 cellSize = new Vector2(1, 1); // 셀 간격
-        for (int x = node.x; x < node.w; x++)
-        {
-            for (int y = node.y; y < node.h; y++)
-            {
-                // 셀 위치 계산
-                Vector3 pos = new Vector3(x * cellSize.x, 0, y * cellSize.y);
-                // 공을 생성해서 해당 위치에 둔다.
-                GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-                sphere.transform.position = pos;
-                sphere.transform.localScale = Vector3.one * sphereRadius; // 공 크기 설정
-            }
-        }
     }
 }

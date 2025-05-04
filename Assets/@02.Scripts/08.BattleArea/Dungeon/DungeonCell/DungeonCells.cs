@@ -13,8 +13,7 @@ public class DungeonCells
     private int mCellSize;
     private DungeonCellType mCellType;
     private DungeonCellType[] mNeighbourCellType = new DungeonCellType[4];
-
-    private GameObject mPrefabFolder;
+    
     private GameObject mCurrentDungeonPrefab;
     private GameObject mCurrentTilePrefab;
     private GameObject[] mDungeonStanderPrefab = new GameObject[4];
@@ -23,6 +22,11 @@ public class DungeonCells
     private SODungeonList mDungeonListSO;
 
     private DungeonRoomController roomCon;
+
+    public GameObject portal;
+    public GameObject tileFolder;
+    public GameObject standerFolder;
+    public GameObject dungeonFolder;
 
     public DungeonNode dungeonNode
     {
@@ -44,18 +48,15 @@ public class DungeonCells
         get { return mCellType; }
     }
 
-    public GameObject prefabFolder
-    {
-        get { return mPrefabFolder; }
-    }
-
-
-    public void SetDungeonCells(Vector2Int cellpos, int cellSize, GameObject prefabFolder, SODungeonList dungeonListSO)
+    public void SetDungeonCells(Vector2Int cellpos, int cellSize,
+        GameObject tileFolder,GameObject standerFolder, GameObject dungeonFolder, SODungeonList dungeonListSO)
     {
         mCellPos = cellpos;
         mCellType = DungeonCellType.None;
         mCellSize = cellSize;
-        mPrefabFolder = prefabFolder;
+        this.tileFolder = tileFolder;
+        this.standerFolder = standerFolder;
+        this.dungeonFolder = dungeonFolder;
         mDungeonListSO = dungeonListSO;
     }
 
@@ -100,6 +101,11 @@ public class DungeonCells
         }
     }
 
+    public void SetPortal(GameObject portal)
+    {
+        this.portal = portal;
+    }
+
     public void SetDungeonTileType(DungeonCellType setType, DungeonCells[,] cells)
     {
 
@@ -140,7 +146,9 @@ public class DungeonCells
     {
         SetRoomPrefabs(cells, node, soDungeon);
         roomCon = cells[dungeonNode.x, dungeonNode.y].mCurrentDungeonPrefab.GetComponent<DungeonRoomController>();
-        roomCon.DungeonRoomInit();
+        Vector3 roomCenter = (new Vector3(dungeonNode.x, 0, dungeonNode.y) +
+                              (new Vector3(currentSODungeon.width, 0, currentSODungeon.height) * 0.5f)) * cellSize;
+        roomCon.DungeonRoomInit(portal, roomCenter);
     }
 
     void SetRoomPrefabs(DungeonCells[,] cells, DungeonNode node, SODungeon soDungeon)
@@ -189,8 +197,8 @@ public class DungeonCells
             GetDungeonRotationOffset(dungeonEuler, soDungeon.width, soDungeon.height) * cellSize,
             dungeonRotation);
 
-        mCurrentDungeonPrefab.transform.localScale = soDungeon.dungeonScale * cellSize;
-        mCurrentDungeonPrefab.transform.SetParent(prefabFolder.transform);
+        mCurrentDungeonPrefab.transform.localScale *= cellSize;
+        mCurrentDungeonPrefab.transform.SetParent(dungeonFolder.transform);
 
         //임시 확인용
         // Dungeon temptDungeon = mCurrentDungeonPrefab.GetComponent<Dungeon>();
@@ -229,9 +237,8 @@ public class DungeonCells
             new Vector3(cellPos.x * cellSize, 0, cellPos.y * cellSize),
             floorPrefab.transform.rotation);
 
-        mCurrentTilePrefab.transform.localScale = dungeonTileSo.floorPrefabsScale * cellSize;
-
-        mCurrentTilePrefab.transform.SetParent(prefabFolder.transform);
+        mCurrentTilePrefab.transform.localScale *= cellSize;
+        mCurrentTilePrefab.transform.SetParent(tileFolder.transform);
     }
 
     void SetCorridor(DungeonCells[,] cells, Vector2Int cellPos, SODungeonTile dungeonTileSo)
@@ -258,7 +265,7 @@ public class DungeonCells
             mNeighbourCellType[dir] = DungeonCellType.None;
             if (mDungeonStanderPrefab[dir] == null)
             {
-                mDungeonStanderPrefab[dir] = GetCorridorPrefab(dir, dungeonTileSo);
+                mDungeonStanderPrefab[dir] = GetStanderPrefab(dir, dungeonTileSo.wallPrefabs);
             }
 
             return;
@@ -268,31 +275,6 @@ public class DungeonCells
 
         mNeighbourCellType[dir] = dungeonOffset.mCellType;
         DestroyStander(dir);
-    }
-
-    GameObject GetCorridorPrefab(int dir, SODungeonTile dungeonTileSo)
-    {
-
-        Vector3 offset = dir switch //신기허넹
-        {
-            0 => new Vector3(0, 0, 1), // 상
-            1 => new Vector3(1, 0, 1), // 우
-            2 => new Vector3(1, 0, 0), // 하
-            3 => new Vector3(0, 0, 0), // 좌
-            _ => Vector3.zero
-        };
-
-        float eulerY = (90 + 90 * dir) % 360;
-        Quaternion rotation = Quaternion.Euler(0, eulerY, 0);
-        Vector3 position = new Vector3(mCellPos.x * cellSize, 0, mCellPos.y * cellSize) + offset * cellSize;
-
-        GameObject prefab =
-            GameObject.Instantiate(dungeonTileSo.wallPrefabs[Random.Range(0, dungeonTileSo.wallPrefabs.Count)],
-                position, rotation);
-        prefab.transform.SetParent(prefabFolder.transform);
-
-        prefab.transform.localScale = dungeonTileSo.wallPrefabsScale * cellSize;
-        return prefab;
     }
 
     #endregion
@@ -323,7 +305,7 @@ public class DungeonCells
         if (dungeonOffset == null || dungeonOffset.mCellType == DungeonCellType.None)
         {
             mNeighbourCellType[dir] = DungeonCellType.None;
-            mDungeonStanderPrefab[dir] = GetCorridorPrefab(dir, dungeonTileSo);
+            mDungeonStanderPrefab[dir] = GetStanderPrefab(dir, dungeonTileSo.wallPrefabs);
             return;
         }
 
@@ -339,7 +321,7 @@ public class DungeonCells
 
         if (dungeonOffset.mCellType == DungeonCellType.Corridor)
         {
-            mDungeonStanderPrefab[dir] = GetEntrancePrefab(dir, dungeonTileSo);
+            mDungeonStanderPrefab[dir] = GetStanderPrefab(dir, dungeonTileSo.entrancePrefabs);
 
             DungeonEntranceController enCon = mDungeonStanderPrefab[dir].AddComponent<DungeonEntranceController>();
             roomCon = cells[dungeonNode.x, dungeonNode.y].mCurrentDungeonPrefab.GetComponent<DungeonRoomController>();
@@ -348,7 +330,9 @@ public class DungeonCells
         }
     }
 
-    GameObject GetEntrancePrefab(int dir, SODungeonTile dungeonTileSo)
+    #endregion
+
+    GameObject GetStanderPrefab(int dir, List<GameObject> dungeonTileSo)
     {
 
         Vector3 offset = dir switch //신기허넹
@@ -365,18 +349,13 @@ public class DungeonCells
         Vector3 position = new Vector3(mCellPos.x * cellSize, 0, mCellPos.y * cellSize) + offset * cellSize;
 
         GameObject prefab =
-            GameObject.Instantiate(dungeonTileSo.entrancePrefabs[Random.Range(0, dungeonTileSo.entrancePrefabs.Count)],
+            GameObject.Instantiate(dungeonTileSo[Random.Range(0, dungeonTileSo.Count)],
                 position, rotation);
-        prefab.transform.SetParent(prefabFolder.transform);
-
-
-        prefab.transform.localScale = dungeonTileSo.entrancePrefabsScale * cellSize;
-
+        prefab.transform.localScale *= cellSize;
+        prefab.transform.SetParent(standerFolder.transform);
+        
         return prefab;
     }
-
-    #endregion
-
 
     DungeonCells SearchNeighboursCellType(int dir, Vector2Int cellPos, DungeonCells[,] cells)
     {
