@@ -1,13 +1,19 @@
 using System.Collections.Generic;
 using System.Linq;
-using Events.Quest;
+using Events.Player.Modules;
 using R3;
-using UIHUDEnums;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 public sealed class QuestBoxPresenter : HudPresenterBase
 {
+    class PendingQuestInfo
+    {
+        public int ID;
+        public int Progress;
+        public int Target;
+        public bool IsCompleted => Progress >= Target;
+    }
+
     [Header("Set in Inspector")] [SerializeField]
     RectTransform mContentRoot;
 
@@ -15,8 +21,8 @@ public sealed class QuestBoxPresenter : HudPresenterBase
 
     private ObjectPool<QuestCardView> mCardPool = null;
     private Dictionary<int, QuestCardView> mVisibleCards = new();
-    private List<TempQuestInfo>  mPendingActive    = new();
-    private List<TempQuestInfo>  mPendingComplete  = new();
+    private Dictionary<int, PendingQuestInfo>  mPendingActive    = new();
+    private Dictionary<int, PendingQuestInfo>  mPendingComplete  = new();
     private int mMaxCardNumber;
 
     void Awake()
@@ -33,47 +39,29 @@ public sealed class QuestBoxPresenter : HudPresenterBase
 
     private void subscribeEvents()
     {
-        R3EventBus.Instance.Receive<QuestAddedOrUpdated>()
-            .Subscribe(e => onQuestAddOrUpdate(e.Info))
+        R3EventBus.Instance.Receive<QuestAccepted>()
+            .Subscribe(e => onQuestAccepted(e))
+            .AddTo(mCD);
+
+        R3EventBus.Instance.Receive<QuestUpdated>()
+            .Subscribe(e => onQuestUpdated(e))
             .AddTo(mCD);
 
         R3EventBus.Instance.Receive<QuestCompleted>()
-            .Subscribe(e => onQuestComplete(e.QuestId))
+            .Subscribe(e => onQuestComplete(e.ID))
             .AddTo(mCD);
         
-        R3EventBus.Instance.Receive<QuestRemoved>()
-            .Subscribe(e => onQuestRemove(e.QuestId))
+        R3EventBus.Instance.Receive<QuestRewarded>()
+            .Subscribe(e => onQuestRemove(e.ID))
             .AddTo(mCD);
     }
 
-
-    private void onQuestAddOrUpdate(TempQuestInfo info)
+    private void onQuestAccepted(QuestAccepted e)
     {
-        // Completed Quest
-        if (info.State == QuestState.Completed)
-        {
-            onQuestComplete(info.Id);
-            return;
-        }
-
-        // Quest Update
-        if (mVisibleCards.TryGetValue(info.Id, out var card))
-        {
-            card.Bind(info);
-            return;
-        }
-
-        int index = mPendingActive.FindIndex(q => q.Id == info.Id);
-        if (index >= 0)
-        {
-            mPendingActive[index] = info;
-            return;
-        }
-
         // Quest Add 1. 빈자리 있는 경우
         if (mVisibleCards.Count < mMaxCardNumber)
         {
-            spawnCard(info);
+            spawnCard(e.ID, e.Cur, e.Target);
             return;
         }
 
@@ -82,19 +70,31 @@ public sealed class QuestBoxPresenter : HudPresenterBase
         if (firstCompleted != null)
         {
             moveVisibleCardToCompleted(firstCompleted);
-            spawnCard(info);
+            spawnCard(e.ID, e.Cur, e.Target);
             return;
         }
 
         // 3. 빈 자리 없는 경우 Pending 리스트에 추가
-        addPending(info);
+        addPending(new PendingQuestInfo { ID = e.ID, Progress = e.Cur, Target = e.Target });
+    }
+
+    private void onQuestUpdated(QuestUpdated e)
+    {
+        if (mVisibleCards.TryGetValue(e.ID, out var card))
+        {
+            card.QuestUpdated(e.Cur);
+        }
+        else if(mPendingActive.TryGetValue(e.ID, out var pending))
+        {
+            pending.Progress = e.Cur;
+        }
     }
 
     private void onQuestComplete(int id)
     {
         if (mVisibleCards.TryGetValue(id, out var card))
         {
-            card.ApplyQuestComplete();
+            card.QuestCompleted();
             card.transform.SetAsLastSibling();
             if(mVisibleCards.Count == mMaxCardNumber && mPendingActive.Count > 0)
             {
@@ -123,12 +123,19 @@ public sealed class QuestBoxPresenter : HudPresenterBase
     }
 
     /* ============  Helper Methods  =============== */
-    private QuestCardView spawnCard(TempQuestInfo info)
+    private QuestCardView spawnCard(int id, int progress, int target)
     {
         var card = mCardPool.Rent();
-        card.Bind(info);
-        card.transform.SetAsFirstSibling();
-        mVisibleCards[info.Id] = card;
+        card.Bind(id, progress, target);
+        if(progress >= target)
+        {
+            card.transform.SetAsLastSibling();
+        }
+        else
+        {
+            card.transform.SetAsFirstSibling();
+        }
+        mVisibleCards[id] = card;
         return card;
     }
 
@@ -146,20 +153,20 @@ public sealed class QuestBoxPresenter : HudPresenterBase
 
     private void moveVisibleCardToCompleted(QuestCardView card)
     {
-        mVisibleCards.Remove(card.QuestInfo.Id);
+        mVisibleCards.Remove(card.ID);
+        addPending(new PendingQuestInfo { ID = card.ID, Progress = card.Progress, Target = card.Target });
         mCardPool.Return(card);
-        mPendingComplete.Add(card.QuestInfo);
     }
 
-    private void addPending(TempQuestInfo info)
+    private void addPending(PendingQuestInfo info)
     {
-        if (info.State == QuestState.Completed)
+        if (info.IsCompleted)
         {
-             mPendingComplete.Add(info);
+            mPendingComplete[info.ID] = info;
         }
         else
         {
-             mPendingActive.Add(info);
+            mPendingActive[info.ID] = info;
         }
     }
 
@@ -167,55 +174,43 @@ public sealed class QuestBoxPresenter : HudPresenterBase
     {
         while (mVisibleCards.Count < mMaxCardNumber)
         {
-            TempQuestInfo? next = null;
             if (mPendingActive.Count > 0)  
             {
-                 next = mPendingActive.Last();
-                 mPendingActive.RemoveAt(mPendingActive.Count - 1);
+                int id = mPendingActive.First().Key;
+                mPendingActive.Remove(id);
+                spawnCard(id, mPendingActive[id].Progress, mPendingActive[id].Target);
             }
             else if (mPendingComplete.Count > 0) 
             {
-                next = mPendingComplete.Last();
-                mPendingComplete.RemoveAt(mPendingComplete.Count - 1);
+                int id = mPendingComplete.First().Key;
+                mPendingComplete.Remove(id);
+                spawnCard(id, mPendingComplete[id].Progress, mPendingComplete[id].Target);
             }
             else 
             {
                 break;
             }
-
-            var card = spawnCard(next.Value);
-            card.transform.SetAsFirstSibling();
         }
     }
 
     private void promotePendingToCompleted(int id)
     {
-        // Active 리스트 ⇒ Completed 리스트 이동
-        int index = mPendingActive.FindIndex(q => q.Id == id);
-        if (index >= 0)
+        if (mPendingActive.TryGetValue(id, out var pending))
         {
-            mPendingComplete.Add(mPendingActive[index]);
-            mPendingActive[index] = mPendingActive[^1];
-            mPendingActive.RemoveAt(mPendingActive.Count - 1);
+            mPendingComplete[id] = pending;
+            mPendingActive.Remove(id);
         }
     }
 
     private void removeFromPendingList(int id)
     {
-        int index = mPendingActive.FindIndex(q => q.Id == id);
-        if (index >= 0)
+        if (mPendingActive.TryGetValue(id, out _))
         {
-            mPendingActive[index] = mPendingActive[^1];
-            mPendingActive.RemoveAt(mPendingActive.Count - 1);
-            return;
+            mPendingActive.Remove(id);
         }
-
-        index = mPendingComplete.FindIndex(q => q.Id == id);
-        if (index >= 0)
+        else if (mPendingComplete.TryGetValue(id, out _))
         {
-            mPendingComplete[index] = mPendingComplete[^1];
-            mPendingComplete.RemoveAt(mPendingComplete.Count - 1);
-            return;
+            mPendingComplete.Remove(id);
         }
     }
 

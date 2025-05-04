@@ -25,6 +25,18 @@ public class PlayerStateDefend : IPlayerState
         {
             mDefendDirection = mPlayerController.GetCameraForwardDirection(true);
             mPlayerController.transform.rotation = Quaternion.LookRotation(mDefendDirection);
+
+            if (GameManager.Instance.Input.RollInput && mPlayerController.RollTimeoutDelta < 0.0f)
+            {
+                mPlayerController.SetPlayerState(PlayerState.Roll);
+                return;
+            }
+
+            if (GameManager.Instance.Input.ParryInput && mPlayerController.ParryTimeoutDelta < 0.0f)
+            {
+                mPlayerController.SetPlayerState(PlayerState.Parry);
+                return;
+            }
             
             mPlayerController.Defend();
         }
@@ -32,6 +44,7 @@ public class PlayerStateDefend : IPlayerState
 
     public void OnExit()
     {
+        mPlayerController.PlayerAnimator.SetBool("Defend", false);
         mPlayerController = null;
     }
 }

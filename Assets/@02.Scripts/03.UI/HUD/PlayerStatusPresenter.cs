@@ -2,11 +2,11 @@ using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using Events.HUD;
 using Events.Player;
+using Events.Player.Modules;
 using R3;
 using TMPro;
+using UIEnums;
 using UnityEngine;
-using UnityEngine.AddressableAssets;
-using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.UI;
 
 public sealed class PlayerStatusPresenter : HudPresenterBase
@@ -22,7 +22,6 @@ public sealed class PlayerStatusPresenter : HudPresenterBase
 
     private ObjectPool<BuffSlotView> mPool;
     private Dictionary<int, BuffSlotView> mBuffSlots = new();
-    private Dictionary<int, Sprite> mBuffIconMap = null;
 
     void Awake()
     {
@@ -32,7 +31,6 @@ public sealed class PlayerStatusPresenter : HudPresenterBase
     void Start()
     {
         subscribeEvents();
-        setBuffSprites().Forget();
     }
 
     private void subscribeEvents()
@@ -47,7 +45,7 @@ public sealed class PlayerStatusPresenter : HudPresenterBase
             .AddTo(mCD);
 
         /* ─── EXP ─── */
-        _ = R3EventBus.Instance.Receive<PlayerExpChanged>()
+        R3EventBus.Instance.Receive<PlayerExpChanged>()
             .Subscribe(e =>
             {
                 mExpBarUI.SetProgress(e.Current / (float)e.Max);
@@ -61,7 +59,11 @@ public sealed class PlayerStatusPresenter : HudPresenterBase
 
         /* ─── 버프 아이콘 ─── */
         R3EventBus.Instance.Receive<BuffAdded>()
-            .Subscribe(e => addBuff(e).Forget())
+            .Subscribe(e => addBuff(e))
+            .AddTo(mCD);
+
+        R3EventBus.Instance.Receive<BuffRefreshed>()
+            .Subscribe(e => refreshBuff(e))
             .AddTo(mCD);
 
         R3EventBus.Instance.Receive<BuffEnded>()
@@ -70,43 +72,25 @@ public sealed class PlayerStatusPresenter : HudPresenterBase
     }
 
     /* ────── Buff helpers ────── */
-    private async UniTaskVoid addBuff(BuffAdded buffInfo)
+    private void addBuff(BuffAdded buffInfo)
     {
-        if (mBuffIconMap == null)
+        if (mBuffSlots.TryGetValue(buffInfo.ID, out var buffSlot))
         {
-            await setBuffSprites();
-        }
-
-        if (mBuffSlots.ContainsKey(buffInfo.ID))
-        {
-            mBuffSlots[buffInfo.ID].Bind(buffInfo, mBuffIconMap[buffInfo.ID]);
+            buffSlot.Refresh(buffInfo.Duration);
             return;
         }
 
-        var buffSlot = mPool.Rent();
-        buffSlot.Bind(buffInfo, mBuffIconMap[buffInfo.ID]);
-        mBuffSlots[buffInfo.ID] = buffSlot;
+        var newBuffSlot = mPool.Rent();
+        newBuffSlot.Bind(buffInfo);
+        mBuffSlots[buffInfo.ID] = newBuffSlot;
     }
 
-    private async UniTask setBuffSprites()
+    private void refreshBuff(BuffRefreshed buffInfo)
     {
-        mBuffIconMap = new();
-        var handle = Addressables.LoadAssetsAsync<Sprite>
-        (
-            "Buff_Icons",
-            sp => 
-            {
-                int id = int.Parse(sp.name.Split('_')[1]); // "icon_101"
-                mBuffIconMap[id] = sp;
-            }
-        );
-        await handle.Task;
-
-        if (handle.Status != AsyncOperationStatus.Succeeded)
+        if (mBuffSlots.TryGetValue(buffInfo.ID, out var buffSlot))
         {
-            Debug.LogError("Failed to load buff icons");
+            buffSlot.Refresh(buffInfo.NewRemain);
         }
-        Addressables.Release(handle);
     }
 
     private void removeBuff(int id)
@@ -128,6 +112,5 @@ public sealed class PlayerStatusPresenter : HudPresenterBase
             mPool.Return(v);
         }
         mBuffSlots.Clear();
-        mBuffIconMap = null;
     }
 }
