@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d23594af7bfad36499d4fdb561e59a06, type: 3}
+  m_Name: SOSpawnCompleteList
+  m_EditorClassIdentifier: 
+  monsterSpawnTypeList:
+  - meleeMonster:
+    - {fileID: 11400000, guid: 31b63085e1d5e4a48aae4788d3d45889, type: 2}
+    rangedMonster: []
+    meleeMonsterCount: 03000000
+    rangedMonsterCount: 
+  - meleeMonster:
+    - {fileID: 11400000, guid: 55c7146976ef2c94a95efc1b11748070, type: 2}
+    rangedMonster:
+    - {fileID: 11400000, guid: 31b63085e1d5e4a48aae4788d3d45889, type: 2}
+    meleeMonsterCount: 01000000
+    rangedMonsterCount: 01000000
+  - meleeMonster:
+    - {fileID: 11400000, guid: 10e434374810f134e98a8f539a3eef77, type: 2}
+    rangedMonster: []
+    meleeMonsterCount: 01000000
+    rangedMonsterCount: 

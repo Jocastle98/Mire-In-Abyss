@@ -122,58 +122,6 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
---- !u!1 &204458510
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 204458512}
-  - component: {fileID: 204458511}
-  m_Layer: 0
-  m_Name: DungeonManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &204458511
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 204458510}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 33b044f451842b04faf79af2d89cb626, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  cellSize: 1
-  minDungeonSize: 10
-  divideLineWidth: 2
-  minRoomCount: 6
-  levelDesign: 1
-  eventRoomChance: 10
-  player: {fileID: 3017948563550029470}
-  dungeonListSO: {fileID: 11400000, guid: c8aad2f24d6770c47afffb5587dc849f, type: 2}
---- !u!4 &204458512
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 204458510}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &332270872
 GameObject:
   m_ObjectHideFlags: 0
@@ -286,7 +234,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!65 &472868656
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -663,7 +611,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &1330648539
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -676,12 +624,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9fb84ff51887fb84596bc95a369479ed, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  battleAreaClearLimit: 5
-  battleFields:
-  - {fileID: 1020510874646988792, guid: 5fadc4a4e3bd00441b62ba1818c46426, type: 3}
-  dungeonMinSize: 0
-  dungeonDivideWidth: 0
-  dungeonMinRoomCount: 0
+  mLevelDesign: 1
+  mBattleAreaClearLimit: 5
+  mBattleAreaClearCount: 0
+  mPlayer: {fileID: 3017948563550029470}
+  mCurrentArea: {fileID: 0}
+  mCellSize: 3
+  mMinDungeonRoomSize: 10
+  mEventRoomChance: 10
+  mDivideLineWidth: 2
+  mMinRoomCount: 6
+  mPortalPrefab: {fileID: 731653145237511377, guid: 2d0c8e17c7dedb64e95f33449af90af8, type: 3}
+  mBattleFields:
+  - {fileID: 11400000, guid: 8bad1ddf270ec754292ce2aceb5dc52f, type: 2}
+  mDungeonListSO: {fileID: 11400000, guid: c8aad2f24d6770c47afffb5587dc849f, type: 2}
 --- !u!4 &1330648540
 Transform:
   m_ObjectHideFlags: 0
@@ -3449,7 +3405,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mBaseMaxHP: 100
-  mBaseMoveSpeed: 5
+  mBaseMoveSpeed: 20
   mBaseAttackPower: 10
   mBaseDefence: 0
   mBaseCritChance: 0.05
@@ -5552,5 +5508,4 @@ SceneRoots:
   - {fileID: 332270874}
   - {fileID: 1330648540}
   - {fileID: 472868659}
-  - {fileID: 204458512}
   - {fileID: 3163852202210481646}

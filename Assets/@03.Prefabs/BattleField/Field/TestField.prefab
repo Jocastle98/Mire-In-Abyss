@@ -105,9 +105,6 @@ Transform:
   - {fileID: 903744949764548265}
   - {fileID: 581813237378112961}
   - {fileID: 610611124379819275}
-  - {fileID: 3917469666288619960}
-  - {fileID: 5070646947945388650}
-  - {fileID: 4657660326572286039}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &2940400856063973913
@@ -122,35 +119,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6bfd0baca823f6a47ad9a00f0bed42a2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playTime: 10
-  spawnAmount: 5
-  monsterMaxField: 10
-  spawnAmountDifficult: 0
-  spawnTimeDifficult: 0.1
-  monsterKillMaxCount: 30
-  uniqueSpawnAmount: 0
-  uniqueSpawnMaxChance: 40
-  treasureSpawnAmount: 10
-  treasureDistance: 69
-  poissonResearchLimit: 10
-  commonMonsters:
-  - {fileID: 1696834749189059949, guid: 4a46e821c58b5cd42b14eaab6d197266, type: 3}
-  flyingMonsters:
-  - {fileID: 3136820629370392942, guid: 62dcba975a0bdfe47bef48ea43049412, type: 3}
-  uniqueMonsters:
-  - {fileID: 1845742921716089003, guid: 20818fda9cf85f94ca4d9803d50fb8d8, type: 3}
-  bossMonsters:
-  - {fileID: 3017948563938787297, guid: f1062d26fdeb01b4ab5fd41cbaf09aea, type: 3}
-  treasures:
-  - {fileID: 1011776261738574094, guid: 2a5a700664d895641a78cd62089f72d7, type: 3}
-  playerSpawnZoneName: PlayerSpawnZone
-  bossSpawnZoneName: BossSpawnZone
-  fieldMonstersFolderName: FieldMonsters
-  randomTreasureFolderName: RandomTreasure
-  monsterSpawnZoneName: MonsterSpawnZone
-  environmentName: Environment
-  navGroundsName: NavGrounds
-  player: {fileID: 0}
+  portal: {fileID: 0}
 --- !u!114 &3309192340599035253
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -239,7 +208,7 @@ GameObject:
   - component: {fileID: 4198424569142248950}
   - component: {fileID: 8356153857381779989}
   - component: {fileID: 3585024419210982348}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Ground
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -517,7 +486,7 @@ Transform:
   m_GameObject: {fileID: 4742308219026294700}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 5.43, y: 0, z: 2.47}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -550,7 +519,7 @@ Transform:
   m_GameObject: {fileID: 4994349747814786098}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 13.92, y: 0, z: 11.78}
+  m_LocalPosition: {x: 9.52, y: 0.98, z: 5.74}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -570,37 +539,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   radius: 5
---- !u!1 &5083420977794844555
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 3917469666288619960}
-  m_Layer: 0
-  m_Name: FieldMonsters
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &3917469666288619960
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5083420977794844555}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 3859121863486383816}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &5339603447648189635
 GameObject:
   m_ObjectHideFlags: 0
@@ -925,37 +863,6 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 0}
---- !u!1 &6086828972362678114
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 4657660326572286039}
-  m_Layer: 0
-  m_Name: UnbelievablePlayer
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &4657660326572286039
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6086828972362678114}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 3859121863486383816}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &6094990401015021190
 GameObject:
   m_ObjectHideFlags: 0
@@ -1165,7 +1072,7 @@ Transform:
   m_GameObject: {fileID: 8473396021346447541}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.5, y: -0.81, z: -0.5}
+  m_LocalPosition: {x: -0.5, y: -1.76, z: -0.5}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1490,36 +1397,5 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 6500318017762694827}
-  m_Father: {fileID: 3859121863486383816}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &8939967531556762188
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 5070646947945388650}
-  m_Layer: 0
-  m_Name: RandomTreasure
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &5070646947945388650
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8939967531556762188}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
   m_Father: {fileID: 3859121863486383816}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
