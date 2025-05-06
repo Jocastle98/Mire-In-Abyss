@@ -12,21 +12,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4a74f30d51664362b2e5a9b1f3892512, type: 3}
   m_Name: DragonAttackBehavior
   m_EditorClassIdentifier: 
-  TailRange: 3
+  TailRange: 5
   TailDamage: 10
   FireballRange: 8
-  ProjectilePrefab: {fileID: 4865309214770636011, guid: 5ef8112459c5b9c448083f706c9ea5cb, type: 3}
+  FireBallPrefab: {fileID: 2669515435981036941, guid: 6b953dc147bf97546896075ac48e0243, type: 3}
   HitLayer:
     serializedVersion: 2
     m_Bits: 256
   FireballDamage: 20
   Cooldown: 5
-  ProjectileSpeed: 20
+  FireballSpeed: 20
   BreathRange: 10
-  BreathProjectorPrefab: {fileID: 0}
-  BreathVFXPrefab: {fileID: 0}
+  BreathProjectorPrefab: {fileID: 3286200521227265529, guid: c377597f34a4fbc4f9767c81bb90a4e3, type: 3}
+  BreathVFXPrefab: {fileID: 2931361623723078552, guid: c8fb260bcf620584aa8c4d3ad65052a9, type: 3}
   BreathHitLayer:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 256
   BreathDamage: 30
   BreathCooldown: 15

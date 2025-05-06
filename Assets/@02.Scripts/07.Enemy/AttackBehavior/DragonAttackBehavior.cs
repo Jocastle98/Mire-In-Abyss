@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 [CreateAssetMenu(menuName = "AI/Attack Behaviors/Dragon")]
 public class DragonAttackBehavior : ScriptableObject, IAttackBehavior
@@ -10,11 +11,13 @@ public class DragonAttackBehavior : ScriptableObject, IAttackBehavior
 
     [Header("파이어볼 공격")]
     public float FireballRange = 8f;
-    public GameObject ProjectilePrefab;
+    public GameObject FireBallPrefab;
     public LayerMask HitLayer;
     public int FireballDamage = 20;
-    public float Cooldown = 5f;
-    public float ProjectileSpeed = 20f;
+    public float FireballSpeed = 20f;
+    public float FireballCooldown = 5f;
+    private float mLastFireTime = -Mathf.Infinity;
+
 
     private Transform mSelf;
     private Transform mTarget;
@@ -26,9 +29,17 @@ public class DragonAttackBehavior : ScriptableObject, IAttackBehavior
     public GameObject BreathProjectorPrefab;
     public GameObject BreathVFXPrefab;
     public LayerMask BreathHitLayer;
+    public float BreathAngle = 45f;
     public int BreathDamage = 30;
     public float BreathCooldown = 15f;
     private float mLastBreathTime = -Mathf.Infinity;
+    
+    private void OnEnable()
+    {
+        mLastBreathTime = Time.time;
+        mLastFireTime = Time.time;
+        
+    }
 
     public bool CanFireball(Transform self, Transform target)
     {
@@ -83,7 +94,7 @@ public class DragonAttackBehavior : ScriptableObject, IAttackBehavior
 
     private IEnumerator ResetReady()
     {
-        yield return new WaitForSeconds(Cooldown);
+        yield return new WaitForSeconds(mLastFireTime);
         mbReady = true;
     }
 
@@ -91,15 +102,15 @@ public class DragonAttackBehavior : ScriptableObject, IAttackBehavior
     public void FireLastPosition(Transform self, Vector3 targetPosition)
     {
         var fp = self.GetComponent<EnemyBTController>().FirePoint;
-        if (fp == null || ProjectilePrefab == null) return;
+        if (fp == null || FireBallPrefab == null) return;
 
         Vector3 dir = targetPosition - fp.position;
         dir.y = 0;
         if (dir.sqrMagnitude < 0.01f) dir = self.forward;
         dir.Normalize();
 
-        var proj = Instantiate(ProjectilePrefab, fp.position, Quaternion.LookRotation(dir));
+        var proj = Instantiate(FireBallPrefab, fp.position, Quaternion.LookRotation(dir));
         if (proj.TryGetComponent<Projectile>(out var ps))
-            ps.Initialize(dir, ProjectileSpeed, HitLayer, FireballDamage);
+            ps.Initialize(dir, FireballSpeed, HitLayer, FireballDamage);
     }
 }
