@@ -242,7 +242,7 @@ public class EnemyBTController : MonoBehaviour
                 }
             });
 
-            engage = new BTSelector(fireballSeq, breathSeq, tailSeq, traceSeq);
+            engage = new BTSelector(breathSeq, fireballSeq, tailSeq, traceSeq);
         }
         else
         {
@@ -422,7 +422,6 @@ public class EnemyBTController : MonoBehaviour
     {
         if (mAttackBehaviorAsset is RangedAttackBehavior ranged)
         {
-            // Ranger 스타일 (레이캐스트 or 투사체)
             ranged.FireLastPosition(transform,
                 mTarget != null
                     ? mTarget.position
@@ -430,11 +429,7 @@ public class EnemyBTController : MonoBehaviour
         }
         else if (mAttackBehaviorAsset is DragonAttackBehavior dragon)
         {
-            // Dragon 스타일 (ProjectileSkeleton)
-            dragon.FireLastPosition(transform,
-                mTarget != null
-                    ? mTarget.position
-                    : transform.position + transform.forward * 10f);
+            dragon.FireLastPosition(transform);  
         }
     }
 

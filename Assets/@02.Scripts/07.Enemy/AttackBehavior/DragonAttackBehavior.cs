@@ -17,7 +17,7 @@ public class DragonAttackBehavior : ScriptableObject, IAttackBehavior
     public float FireballSpeed = 20f;
     public float FireballCooldown = 5f;
     private float mLastFireTime = -Mathf.Infinity;
-
+    private Vector3 mLastValidFireballTargetPos;
 
     private Transform mSelf;
     private Transform mTarget;
@@ -43,16 +43,23 @@ public class DragonAttackBehavior : ScriptableObject, IAttackBehavior
 
     public bool CanFireball(Transform self, Transform target)
     {
-        return mbReady
-               && target != null
-               && Vector3.Distance(self.position, target.position) <= FireballRange;
+        if (target == null) return false;
+        float dist = Vector3.Distance(self.position, target.position);
+        bool cool = Time.time >= mLastFireTime + FireballCooldown;
+        if (cool && dist <= FireballRange)
+        {
+            mLastValidFireballTargetPos = target.position;
+            return true;
+        }
+        return false;
     }
 
     public bool CanBreath(Transform self, Transform target)
     {
+        if (target == null) return false;
+        float dist = Vector3.Distance(self.position, target.position);
         return Time.time >= mLastBreathTime + BreathCooldown
-               && target != null
-               && Vector3.Distance(self.position, target.position) <= BreathRange;
+               && dist <= BreathRange;
     }
 
     public bool CanTail(Transform self, Transform target)
@@ -70,21 +77,17 @@ public class DragonAttackBehavior : ScriptableObject, IAttackBehavior
 
     public void Attack(Transform self, Transform target)
     {
-        mSelf = self;
-        mTarget = target;
-        mController = self.GetComponent<EnemyBTController>();
         var anim = self.GetComponent<Animator>();
 
-        if (CanFireball(self, target))
-        {
-            mbReady = false;
-            anim.SetTrigger("FireBall");
-            mController.StartCoroutine(ResetReady());
-        }
-        else if (CanBreath(self, target))
+        if (CanBreath(self, target))
         {
             mLastBreathTime = Time.time;
             anim.SetTrigger("Breath");
+        }
+        else if (CanFireball(self, target))
+        {
+            mLastFireTime = Time.time;
+            anim.SetTrigger("FireBall");
         }
         else if (CanTail(self, target))
         {
@@ -92,21 +95,16 @@ public class DragonAttackBehavior : ScriptableObject, IAttackBehavior
         }
     }
 
-    private IEnumerator ResetReady()
-    {
-        yield return new WaitForSeconds(mLastFireTime);
-        mbReady = true;
-    }
 
     // Ranger 참고해서 설정
-    public void FireLastPosition(Transform self, Vector3 targetPosition)
+    public void FireLastPosition(Transform self)
     {
         var fp = self.GetComponent<EnemyBTController>().FirePoint;
         if (fp == null || FireBallPrefab == null) return;
 
-        Vector3 dir = targetPosition - fp.position;
-        dir.y = 0;
-        if (dir.sqrMagnitude < 0.01f) dir = self.forward;
+        Vector3 dir = mLastValidFireballTargetPos - fp.position;
+        if (dir.sqrMagnitude < 0.01f)
+            dir = self.forward;
         dir.Normalize();
 
         var proj = Instantiate(FireBallPrefab, fp.position, Quaternion.LookRotation(dir));
