@@ -1380,7 +1380,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
 
     private void Skill_1_Fire()
     {
-        GameObject projectilePrefab = Resources.Load<GameObject>("Player/Effects/SlashProjectileEffect");
+        GameObject projectilePrefab = Resources.Load<GameObject>("Player/Effects/Skill_1_Projectile");
         if (projectilePrefab == null)
         {
             return;
@@ -1435,42 +1435,93 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
 
     #region 3번 스킬
 
-    private Coroutine fallCoroutine;
-    public void Skill_3()
-    {
-        SetCombatState(true);
+    private Coroutine mFallToGroundCoroutine;
+    private Coroutine mSkill3Coroutine;
+    private bool mbIsLandSucess = false;
 
-        Invoke("Skill_3_Fire", 0.5f);
+    public void Start_Skill_3()
+    {
+        StartCoroutine(Skill_3());
+    }
+
+    public void Stop_Skill_3()
+    {
+        if (mFallToGroundCoroutine != null)
+        {
+            StopCoroutine(mFallToGroundCoroutine);
+            mFallToGroundCoroutine = null;
+        }
+
+        if (mSkill3Coroutine != null)
+        {
+            StopCoroutine(mSkill3Coroutine);
+            mSkill3Coroutine = null;
+        }
     }
     
-    private void Skill_3_Fire()
+    private IEnumerator Skill_3()
     {
-        if (!bIsGrounded)
+        mbIsLandSucess = false;
+
+        if (bIsGrounded)
         {
-            if (fallCoroutine != null)
-            {
-                StopCoroutine(fallCoroutine);
-            }
-            
-            RaycastHit hit;
-            if (Physics.Raycast(transform.position, Vector3.down, out hit, 100f, LayerMask.GetMask("Ground")))
-            {
-                fallCoroutine = StartCoroutine(FallToGround(hit.point));
-            }
-            else
-            {
-                // 레이 실패 시 그냥 낙하
-                SetPlayerState(PlayerState.Fall);
-            }
+            mbIsLandSucess = true;
         }
         else
         {
-            if (fallCoroutine != null)
-            {
-                StopCoroutine(fallCoroutine);
-                fallCoroutine = null;
-            }
+            mFallToGroundCoroutine = StartCoroutine(Skill_3_Stance());
+            yield return mFallToGroundCoroutine;
         }
+            
+
+        if (mbIsLandSucess)
+        {
+            mSkill3Coroutine = StartCoroutine(Skill_3_Fire());
+            yield return mSkill3Coroutine;
+        }
+    }
+
+    private IEnumerator Skill_3_Stance()
+    {
+        if (Physics.Raycast(transform.position + Vector3.up * 2.0f, Vector3.down, out RaycastHit hit, 100f, mGroundLayers))
+        {
+            mbIsLandSucess = true;
+            
+            float duration = 0.3f; // 떨어지는 시간
+            float timer = 0.0f;
+            Vector3 startPosition = transform.position;
+
+            while (timer < duration)
+            {
+                transform.position = Vector3.Lerp(startPosition, hit.point, timer / duration);
+                timer += Time.deltaTime;
+                yield return null;
+            }
+
+            transform.position = hit.point;
+        }
+        else
+        {
+            // 레이 실패 시 그냥 낙하
+            mbIsLandSucess = false;
+            SetPlayerState(PlayerState.Fall);
+        }
+    }
+    
+    private IEnumerator Skill_3_Fire()
+    {
+        PlayerAnimator.SetTrigger("Skill");
+        PlayerAnimator.SetInteger("Skill_Index", 3);
+        
+        yield return new WaitForSeconds(0.3f); // 애니메이션 선딜
+        
+        GameObject skill_3_Effect_Prefab = Resources.Load<GameObject>("Player/Effects/Skill_3_Effect");
+        if (skill_3_Effect_Prefab == null)
+        {
+            yield break;
+        }
+        
+        GameObject skill_3_Effect_Object = GameObject.Instantiate(skill_3_Effect_Prefab, transform.position, Quaternion.identity);
         
         // 주변 적에게 데미지 주는 로직
         Collider[] hitColliders = Physics.OverlapSphere(transform.position, mSkill_3_Radius);
@@ -1486,25 +1537,10 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             }
         }
         
-        mSkill_3_TimeoutDelta = mSkill_3_Timeout;
-    }
-    
-    private IEnumerator FallToGround(Vector3 groundPosition)
-    {
-        float duration = 0.3f; // 떨어지는 시간
-        float timer = 0.0f;
-        Vector3 startPosition = transform.position;
-
-        while (timer < duration)
-        {
-            transform.position = Vector3.Lerp(startPosition, groundPosition, timer / duration);
-            timer += Time.deltaTime;
-            yield return null;
-        }
-
-        transform.position = groundPosition;
+        yield return new WaitForSeconds(0.8f);
+        Destroy(skill_3_Effect_Object);
         
-        fallCoroutine = null;
+        mSkill_3_TimeoutDelta = mSkill_3_Timeout;
     }
     
     #endregion
@@ -1728,7 +1764,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         }
         Vector3 firePosition = targetPoint + Vector3.up * 10.0f;
         
-        GameObject projectileObject = GameObject.Instantiate(projectilePrefab, firePosition, Quaternion.identity);
+        GameObject projectileObject = GameObject.Instantiate(projectilePrefab, firePosition, Quaternion.LookRotation(- mMainCamera.transform.right));
         
         Skill_4 skill_4 = projectileObject.GetComponent<Skill_4>();
         skill_4.Init((int)mPlayerStats.GetAttackDamage(), mSkill_4_DamageMultiplier, mSkill_4_Radius, targetPoint);
