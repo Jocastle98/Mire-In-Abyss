@@ -8,7 +8,7 @@ public sealed class MiniQuestBoxPresenter : HudPresenterBase
 {
     class PendingQuestInfo
     {
-        public int ID;
+        public string ID;
         public int Progress;
         public int Target;
         public bool IsCompleted => Progress >= Target;
@@ -20,9 +20,9 @@ public sealed class MiniQuestBoxPresenter : HudPresenterBase
     [SerializeField] MiniQuestCardView mCardPrefab;
 
     private ObjectPool<MiniQuestCardView> mCardPool = null;
-    private Dictionary<int, MiniQuestCardView> mVisibleCards = new();
-    private Dictionary<int, PendingQuestInfo>  mPendingActive    = new();
-    private Dictionary<int, PendingQuestInfo>  mPendingComplete  = new();
+    private Dictionary<string, MiniQuestCardView> mVisibleCards = new();
+    private Dictionary<string, PendingQuestInfo>  mPendingActive    = new();
+    private Dictionary<string, PendingQuestInfo>  mPendingComplete  = new();
     private int mMaxCardNumber;
 
     void Awake()
@@ -90,7 +90,7 @@ public sealed class MiniQuestBoxPresenter : HudPresenterBase
         }
     }
 
-    private void onQuestComplete(int id)
+    private void onQuestComplete(string id)
     {
         if (mVisibleCards.TryGetValue(id, out var card))
         {
@@ -108,7 +108,7 @@ public sealed class MiniQuestBoxPresenter : HudPresenterBase
         }
     }
 
-    private void onQuestRemove(int id)
+    private void onQuestRemove(string id)
     {
         if (mVisibleCards.TryGetValue(id, out var card))
         {
@@ -123,7 +123,7 @@ public sealed class MiniQuestBoxPresenter : HudPresenterBase
     }
 
     /* ============  Helper Methods  =============== */
-    private MiniQuestCardView spawnCard(int id, int progress, int target)
+    private MiniQuestCardView spawnCard(string id, int progress, int target)
     {
         var card = mCardPool.Rent();
         card.Bind(id, progress, target);
@@ -176,13 +176,13 @@ public sealed class MiniQuestBoxPresenter : HudPresenterBase
         {
             if (mPendingActive.Count > 0)  
             {
-                int id = mPendingActive.First().Key;
+                string id = mPendingActive.First().Key;
                 mPendingActive.Remove(id);
                 spawnCard(id, mPendingActive[id].Progress, mPendingActive[id].Target);
             }
             else if (mPendingComplete.Count > 0) 
             {
-                int id = mPendingComplete.First().Key;
+                string id = mPendingComplete.First().Key;
                 mPendingComplete.Remove(id);
                 spawnCard(id, mPendingComplete[id].Progress, mPendingComplete[id].Target);
             }
@@ -193,7 +193,7 @@ public sealed class MiniQuestBoxPresenter : HudPresenterBase
         }
     }
 
-    private void promotePendingToCompleted(int id)
+    private void promotePendingToCompleted(string id)
     {
         if (mPendingActive.TryGetValue(id, out var pending))
         {
@@ -202,7 +202,7 @@ public sealed class MiniQuestBoxPresenter : HudPresenterBase
         }
     }
 
-    private void removeFromPendingList(int id)
+    private void removeFromPendingList(string id)
     {
         if (mPendingActive.TryGetValue(id, out _))
         {

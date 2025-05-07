@@ -160,27 +160,27 @@ namespace Events.Player.Modules
     /* ─── Quest ─── */
     public readonly struct QuestAccepted
     {
-        public readonly int ID;
+        public readonly string ID;
         public readonly int Cur;
         public readonly int Target;
-        public QuestAccepted(int id, int cur, int target) => (ID, Cur, Target) = (id, cur, target);
+        public QuestAccepted(string id, int cur, int target) => (ID, Cur, Target) = (id, cur, target);
     }
     public readonly struct QuestUpdated
     {
-        public readonly int ID;
+        public readonly string ID;
         public readonly int Cur;
         public readonly int Target;
-        public QuestUpdated(int id, int cur, int target) => (ID, Cur, Target) = (id, cur, target);
+        public QuestUpdated(string id, int cur, int target) => (ID, Cur, Target) = (id, cur, target);
     }
     public readonly struct QuestCompleted
     {
-        public readonly int ID;
-        public QuestCompleted(int id) => ID = id;
+        public readonly string ID;
+        public QuestCompleted(string id) => ID = id;
     }
     public readonly struct QuestRewarded // Remove와 같은 경우
     {
-        public readonly int ID;
-        public QuestRewarded(int id) => ID = id;
+        public readonly string ID;
+        public QuestRewarded(string id) => ID = id;
     }
 
     public readonly struct GoldAdded

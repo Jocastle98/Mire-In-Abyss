@@ -1603,7 +1603,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mContent: {fileID: 9035047512744831347}
-  mIconPrefab: {fileID: 8146528515825210084, guid: e5976d4bc8cc898449a7f5e66907e318, type: 3}
+  mItemIconPrefab: {fileID: 8146528515825210084, guid: e5976d4bc8cc898449a7f5e66907e318, type: 3}
   mLargeIcon: {fileID: 6603118019391940444}
   mNameText: {fileID: 2408514165214702015}
   mDescText: {fileID: 4054387094136875318}

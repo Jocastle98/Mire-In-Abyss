@@ -5,166 +5,106 @@ using System.Linq;
 using Events.Player.Modules;
 using R3;
 using Cysharp.Threading.Tasks;
+using TMPro;
+using QuestEnums;
 
 public class QuestBoardPanel : BaseUIPanel
 {
-    [Header("퀘스트 패널")] 
-    [SerializeField] private Transform mQuestListContainer; //퀘스트 목록이 표시될 parent Transform
-    [SerializeField] private QuestBlock mQuestListPrefab;   //퀘스트 항목 UI 프리팹
+    [Header("퀘스트 목록")] 
+    [SerializeField] private Transform mContent;            //퀘스트 목록이 표시될 parent Transform
+    [SerializeField] private QuestCardView mQuestViewPrefab;   //퀘스트 항목 UI 프리팹
 
-    [Header("퀘스트 선택 설정")] 
-    [SerializeField] private int mCommonQuestCount = 3;     //일반퀘스트 개수
-    [SerializeField] private int mEpicQuestCount = 1;       //에픽퀘스트 개수
-    [SerializeField] private int mCommonQuestMinID = 1;     //일반 퀘스트 ID 최소 범위
-    [SerializeField] private int mCommonQuestMaxID = 10;    //일반 퀘스트 ID 최대 범위
-    [SerializeField] private int mEpicQuestMinID = 11;      //에픽 퀘스트 ID 최소 범위
-    [SerializeField] private int mEpicQuestMaxID = 15;      //에픽 퀘스트 ID 최대 범위
+    [Header("퀘스트 상세")]
+    [SerializeField] private TMP_Text mQuestTitleText;
+    [SerializeField] private TMP_Text mQuestDescriptionText;
+    [SerializeField] private TMP_Text mQuestRewardText;
+    [SerializeField] private GameObject mAcceptButton;
+    [SerializeField] private GameObject mGetRewardButton;
+
+    private Dictionary<string, QuestCardView> mQuestViews;    // id, questView
+    private string mNowDetailQuestId;
     
-    private List<QuestBlock> mQuestBlocks = new List<QuestBlock>();  //현재 생성된 퀘스트 UI 요소 목록
-    
+    void OnEnable()
+    {
+        if (mQuestViewPrefab == null || mContent == null)
+        {
+            Debug.LogError("퀘스트 목록 UI 프리팹이나 컨테이너가 설정되지 않았습니다.");
+            return;
+        }
+
+        //TODO: 저장된 퀘스트 목록 가져오기
+        //임시로 퀘스트 목록 생성
+        var questList = QuestOfferService.Instance.GenerateQuestList();
+
+        //생성된 퀘스트를 담을 퀘스트 블록 생성
+        mQuestViews = new Dictionary<string, QuestCardView>();
+        foreach (var questId in questList)
+        {
+            CreateQuestView(GameDB.Instance.QuestDatabase.GetQuestById(questId));
+        }
+        showDetail(questList[0]);
+    }
+
+    void OnDisable()
+    {
+        mQuestViews.Clear();
+        mNowDetailQuestId = null;
+        mQuestTitleText.text = "";
+        mQuestDescriptionText.text = "";
+        mQuestRewardText.text = "";
+        mAcceptButton.SetActive(false);
+        mGetRewardButton.SetActive(false);
+    }
+
     private void Start()
     {
-        GenerateQuestList();
-    }
-    
-    /// <summary>
-    /// 패널 표시 시 퀘스트 목록 생성
-    /// </summary>
-    public override async UniTask Show()
-    {
-        GenerateQuestList();
-        await base.Show();
+        subscribeEvents();
     }
 
-    /// <summary>
-    /// 퀘스트 목록을 생성
-    /// 일반 퀘스트와 에픽 퀘스트를 랜덤하게 선택하여 표시
-    /// </summary>
-    private void GenerateQuestList()
+    private void subscribeEvents()
     {
-        //기존 목록 초기화
-        ClearQuestBlocks();
-        if (GameDB.Instance.QuestDatabase == null) return;
-
-        //데이터베이스에서 모든 퀘스트 ID가져오기
-        List<string> allQuestIds = GameDB.Instance.QuestDatabase.QuestIds;
-        if (allQuestIds == null || allQuestIds.Count == 0) return;
-
-        //일반 퀘스트와 에픽 퀘스트 ID를 분류
-        List<string> commonQuestsIds = new List<string>();
-        List<string> epicQuestIds = new List<string>();
-
-        foreach (var questId in allQuestIds)
-        {
-            if (questId.StartsWith("Q"))
-            {
-                string numericPart = questId.Substring(1);
-                int id;
-
-                if (int.TryParse(numericPart, out id))
-                {
-                    if (id >= mCommonQuestMinID && id <= mCommonQuestMaxID)
-                    {
-                        commonQuestsIds.Add(questId);
-                    }
-                    else if (id >= mEpicQuestMinID && id <= mEpicQuestMaxID)
-                    {
-                        epicQuestIds.Add(questId);
-                    }
-                }
-                
-            }
-        }
-
-        //랜덤 퀘스트 생성
-        GenerateRandomQuests(commonQuestsIds, mCommonQuestCount);
-        GenerateRandomQuests(epicQuestIds, mEpicQuestCount);
+        R3EventBus.Instance.Receive<QuestAccepted>()
+        .Subscribe(e => mQuestViews[e.ID].SetQuestState(QuestState.Active));
+        R3EventBus.Instance.Receive<QuestCompleted>()
+        .Subscribe(e => mQuestViews[e.ID].SetQuestState(QuestState.Completed));
+        R3EventBus.Instance.Receive<QuestRewarded>()
+        .Subscribe(e => mQuestViews[e.ID].SetQuestState(QuestState.Rewarded));
     }
 
-    /// <summary>
-    /// 퀘스트 풀에서 지정된 개수만큼 랜덤하게 퀘스트를 선택하여 UI 생성
-    /// </summary>
-    /// <param name="questPool">퀘스트 ID 풀</param>
-    /// <param name="count">선택할 퀘스트 개수</param>
-    private void GenerateRandomQuests(List<string> questPool, int count)
+    private void CreateQuestView(Quest quest)
     {
-        if(questPool.Count == 0) return;
-
-        //퀘스트 ID 섞기
-        for (int i = 0; i < questPool.Count; i++)
-        {
-            string temp = questPool[i];
-            int randomIndex = Random.Range(i, questPool.Count);
-            questPool[i] = questPool[randomIndex];
-            questPool[randomIndex] = temp;
-        }
-
-        //요청된 개수와 실제 가능한 개수 중 작은 값을 선택
-        int numToGenerate = Mathf.Min(count, questPool.Count);
-
-        //선택된 개수만큼 퀘스트 UI생성
-        for (int i = 0; i < numToGenerate; i++)
-        {
-            string questId = questPool[i];
-            Quest quest = GameDB.Instance.QuestDatabase.GetQuestById(questId);
-
-            if (quest != null)
-            {
-                CreateQuestBlock(quest);
-            }
-        }
-    }
-
-    /// <summary>
-    /// 퀘스트 정보를 받아 UI요소를 생성하는 메서드
-    /// </summary>
-    /// <param name="quest">표시할 퀘스트 정보</param>
-    private void CreateQuestBlock(Quest quest)
-    {
-        if (mQuestListPrefab == null || mQuestListContainer == null) return;
-
         //퀘스트 블록 UI 생성 및 초기화
-        QuestBlock questList = Instantiate(mQuestListPrefab, mQuestListContainer);
-        questList.Initialize(quest, OnQuestBlockClicked);
-        mQuestBlocks.Add(questList);
+        QuestCardView questView = Instantiate(mQuestViewPrefab, mContent);
+        questView.Bind(quest, showDetail);
+        mQuestViews.Add(quest.Id, questView);
     }
 
-    /// <summary>
-    /// 모든 퀘스트UI요소를 제거하는 메서드
-    /// </summary>
-    private void ClearQuestBlocks()
+    void showDetail(string id)
     {
-        foreach (var list in mQuestBlocks)
-        {
-            if (list != null)
-            {
-                Destroy(list.gameObject);
-            }
-        }
-        mQuestBlocks.Clear();
+        mNowDetailQuestId = id;
+        Quest quest = GameDB.Instance.QuestDatabase.GetQuestById(id);
+        mQuestTitleText.text = quest.Title;
+        mQuestDescriptionText.text = quest.RequestInformation;
+        mQuestRewardText.text = $"영혼석 {quest.RewardSoul}개";
+        refreshDetailButtons();
     }
 
-    /// <summary>
-    /// 퀘스트 항목 클릭 시 호출되는 콜백 메서드
-    /// </summary>
-    /// <param name="quest"></param>
-    private void OnQuestBlockClicked(Quest quest)
+    void refreshDetailButtons()
     {
-        bool activated = GameDB.Instance.QuestDatabase.ActivateQuest(quest.Id);
+        mAcceptButton.SetActive(QuestOfferService.Instance.GetQuestState(mNowDetailQuestId) == QuestState.Inactive);
+        mGetRewardButton.SetActive(QuestOfferService.Instance.GetQuestState(mNowDetailQuestId) == QuestState.Completed);
+    }
 
-        if (activated)
-        {
-            foreach (var list in mQuestBlocks)
-            {
-                if (list.QuestId == quest.Id)
-                {
-                    list.SetAccepted(true);
-                }
-            }
-        }
-        else
-        {
-            Debug.Log("퀘스트를 수락할 수 없습니다.");
-        }
+    public void OnAcceptQuest()
+    {
+        Quest quest = GameDB.Instance.QuestDatabase.GetQuestById(mNowDetailQuestId);
+        R3EventBus.Instance.Publish(new QuestAccepted(mNowDetailQuestId, 0, quest.TargetAmount));
+        refreshDetailButtons();
+    }
+
+    public void OnGetReward()
+    {
+        R3EventBus.Instance.Publish(new QuestRewarded(mNowDetailQuestId));
+        refreshDetailButtons();
     }
 }

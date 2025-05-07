@@ -35,5 +35,8 @@ public class PanelTest : MonoBehaviour
         UIManager.Instance.Push(UIPanelType.Codex).Forget();
     }
 
-    
+    public void OnQuestBoardPanelTest()
+    {
+        UIManager.Instance.Push(UIPanelType.QuestBoard).Forget();
+    }
 }

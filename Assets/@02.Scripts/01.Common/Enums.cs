@@ -39,6 +39,17 @@ namespace ItemEnums
     
 }
 
+namespace QuestEnums
+{
+    public enum QuestState
+    {
+        Inactive,   // 퀘스트 미수락
+        Active,     // 퀘스트 진행중
+        Completed,  // 퀘스트 조건 완료
+        Rewarded     // 퀘스트 보상 수령
+    }
+}
+
 namespace UIEnums
 {
     public enum SpriteType
@@ -70,12 +81,6 @@ namespace UIHUDEnums
         Boss,
         Shop,
         Portal,
-    }
-
-    public enum QuestState
-    {
-        Active,
-        Completed
     }
 
     public enum ProgressBarImageType

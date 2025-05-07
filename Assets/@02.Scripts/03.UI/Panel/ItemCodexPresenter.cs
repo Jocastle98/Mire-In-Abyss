@@ -11,7 +11,7 @@ using UnityEngine.EventSystems;
 public sealed class ItemCodexPresenter : MonoBehaviour
 {
     [SerializeField] RectTransform mContent;
-    [SerializeField] ItemIconView mIconPrefab;
+    [SerializeField] ItemIconView mItemIconPrefab;
     [SerializeField] Image mLargeIcon;
     [SerializeField] TMP_Text mNameText, mDescText;
     [SerializeField] Sprite mSealedSprite;
@@ -34,25 +34,25 @@ public sealed class ItemCodexPresenter : MonoBehaviour
         var dict = GameDB.Instance.SpriteCache.GetDict(SpriteType.Item);
         foreach (var rec in dict)
         {
-            var v = Instantiate(mIconPrefab, mContent);
+            var v = Instantiate(mItemIconPrefab, mContent);
             if(isUnsealed(rec.Key))
             {
-                v.Bind(rec.Key, rec.Value, ShowDetail);
+                v.Bind(rec.Key, rec.Value, showDetail);
             }
             else
             {
-                v.Bind(rec.Key, mSealedSprite, ShowDetail);
+                v.Bind(rec.Key, mSealedSprite, showDetail);
             }
         }
 
         // 첫 아이템 미리 표시
         if (dict.Count > 0)
         {
-            ShowDetail(dict.Keys.First());
+            showDetail(dict.Keys.First());
         }
     }
 
-    void ShowDetail(int id)
+    void showDetail(int id)
     {
         if (isUnsealed(id))
         {
