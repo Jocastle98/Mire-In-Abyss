@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using BattleAreaEnums;
+using Unity.AI.Navigation;
 
 public class DungeonController : BattleArea
 {
@@ -27,6 +28,8 @@ public class DungeonController : BattleArea
     private GameObject mTileFolder;
     private GameObject mStanderFolder;
     private GameObject mDungeonFolder;
+    
+    private NavMeshSurface mNavMeshSurface;
     
     public override void BattleAreaClear()
     {
@@ -111,6 +114,9 @@ public class DungeonController : BattleArea
         }
 
         FindClosestRoom(mLeafRooms[0]);
+        
+        mNavMeshSurface = gameObject.AddComponent<NavMeshSurface>();
+        mNavMeshSurface.BuildNavMesh();
     }
 
     void DivideNode(DungeonNode node)
@@ -301,28 +307,52 @@ public class DungeonController : BattleArea
 
     void SetCorridorAndExpand(List<DungeonCells> corridorNominate, DungeonNode fromRoom, DungeonNode toRoom)
     {
-        if (!fromRoom.connectedRoom.Contains(toRoom) && !toRoom.connectedRoom.Contains(fromRoom))
+        if (fromRoom.connectedRoom.Contains(toRoom) && toRoom.connectedRoom.Contains(fromRoom)) return;
+
+        DungeonCells firstCell = corridorNominate[0];
+        int lastdir = 0;
+
+        //복도 세팅
+        for (int k = 1; k < corridorNominate.Count; k++)
         {
-            //복도 세팅
-            foreach (DungeonCells cell in corridorNominate)
+            DungeonCells cell = corridorNominate[k];
+            int x = cell.cellPos.x - 1;
+            int y = cell.cellPos.y - 1;
+            for (int i = x; i < x + 3; i++)
             {
-                int x = cell.cellPos.x - 1;
-                int y = cell.cellPos.y - 1;
-                for (int i = x; i < x + 3; i++)
+                for (int j = y; j < y + 3; j++)
                 {
-                    for (int j = y; j < y + 3; j++)
+                    if (mDungeonCells[i, j].cellType == DungeonCellType.None)
                     {
-                        if (mDungeonCells[i, j].cellType == DungeonCellType.None)
-                        {
-                            mDungeonCells[i, j].SetDungeonTileType(DungeonCellType.Corridor, mDungeonCells);
-                        }
+                        mDungeonCells[i, j].SetDungeonTileType(DungeonCellType.Corridor, mDungeonCells);
                     }
                 }
             }
 
-            fromRoom.connectedRoom.Add(toRoom);
-            toRoom.connectedRoom.Add(fromRoom);
+            if (lastdir != 0 && lastdir != CheckDir(corridorNominate[k - 1].cellPos, cell.cellPos))
+            {
+                firstCell.SetCorridorCollider(firstCell.cellPos, corridorNominate[k - 1].cellPos,true);
+                firstCell = corridorNominate[k];
+            }
+
+            if (k == corridorNominate.Count - 1)
+            {
+                firstCell.SetCorridorCollider(firstCell.cellPos, corridorNominate[k].cellPos,false);
+            }
+            
+            lastdir = CheckDir(firstCell.cellPos, cell.cellPos);
         }
+
+        fromRoom.connectedRoom.Add(toRoom);
+        toRoom.connectedRoom.Add(fromRoom);
+
+    }
+
+    int CheckDir(Vector2Int fromRoom, Vector2Int toRoom)
+    {
+        if (toRoom.x != fromRoom.x) return 1;
+        if (toRoom.y != fromRoom.y) return 2;
+        return 0; // 같은 위치
     }
 
     bool TryConnectZHorizontal(Vector2 from, Vector2 to, DungeonNode fromRoom, DungeonNode toRoom, bool isSet)

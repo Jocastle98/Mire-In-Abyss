@@ -373,6 +373,26 @@ public class DungeonCells
         return cells[dirX, dirY];
     }
 
+    public void SetCorridorCollider(Vector2Int fromCoord, Vector2Int toCoord,bool extraForCorner)
+    {
+        BoxCollider boxCol = mCurrentTilePrefab.gameObject.AddComponent<BoxCollider>();
+        boxCol.center += new Vector3(0.5f, -0.5f, 0.5f);
+
+        Vector2 center = toCoord - fromCoord;
+        if (extraForCorner) center += new Vector2(Mathf.Sign(center.x), Mathf.Sign(center.y));
+
+        if (Mathf.Abs(center.x) < Mathf.Abs(center.y))
+        {
+            boxCol.center += new Vector3(0, 0, center.y * 0.5f);
+            boxCol.size = new Vector3(3, 1, center.y + Mathf.Sign(center.y));
+        }
+        else
+        {
+            boxCol.center += new Vector3(center.x * 0.5f, 0, 0);
+            boxCol.size = new Vector3(center.x + Mathf.Sign(center.x), 1, 3);
+        }
+    }
+
     void DestroyStander(int dir)
     {
         if (mDungeonStanderPrefab[dir] != null)

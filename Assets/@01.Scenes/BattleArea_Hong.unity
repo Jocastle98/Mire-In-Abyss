@@ -234,7 +234,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!65 &472868656
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -2823,6 +2823,8 @@ MonoBehaviour:
   mDashTimeout: 5
   mDashTimeoutDelta: 0
   mAttackSpeedMultiplier: 1
+  mParryTimeout: 10
+  mParryTimeoutDelta: 0
   mSkill_1_DamageMultiplier: 1.5
   mSkill_1_Distance: 20
   mSkill_1_Timeout: 10
