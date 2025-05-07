@@ -7,6 +7,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using R3;
 using UnityEngine.EventSystems;
+using System.Collections.Generic;
 
 public sealed class ItemCodexPresenter : MonoBehaviour
 {
@@ -16,17 +17,9 @@ public sealed class ItemCodexPresenter : MonoBehaviour
     [SerializeField] TMP_Text mNameText, mDescText;
     [SerializeField] Sprite mSealedSprite;
 
-    void OnEnable()
+    void Start()
     {
         buildGrid();
-    }
-
-    void OnPreloaded(Preloaded e)
-    {
-        if (e.IsPreloaded)
-        {
-            buildGrid();
-        }
     }
 
     void buildGrid()

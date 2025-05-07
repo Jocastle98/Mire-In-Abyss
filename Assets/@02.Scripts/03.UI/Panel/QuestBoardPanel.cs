@@ -21,7 +21,7 @@ public class QuestBoardPanel : BaseUIPanel
     [SerializeField] private GameObject mAcceptButton;
     [SerializeField] private GameObject mGetRewardButton;
 
-    private Dictionary<string, QuestCardView> mQuestViews;    // id, questView
+    private Dictionary<string, QuestCardView> mQuestViews = new();    // id, questView
     private string mNowDetailQuestId;
     
     void OnEnable()
@@ -37,7 +37,6 @@ public class QuestBoardPanel : BaseUIPanel
         var questList = QuestOfferService.Instance.GenerateQuestList();
 
         //생성된 퀘스트를 담을 퀘스트 블록 생성
-        mQuestViews = new Dictionary<string, QuestCardView>();
         foreach (var questId in questList)
         {
             CreateQuestView(GameDB.Instance.QuestDatabase.GetQuestById(questId));
@@ -64,11 +63,14 @@ public class QuestBoardPanel : BaseUIPanel
     private void subscribeEvents()
     {
         R3EventBus.Instance.Receive<QuestAccepted>()
-        .Subscribe(e => mQuestViews[e.ID].SetQuestState(QuestState.Active));
+        .Subscribe(e => mQuestViews[e.ID].SetQuestState(QuestState.Active))
+        .AddTo(this);
         R3EventBus.Instance.Receive<QuestCompleted>()
-        .Subscribe(e => mQuestViews[e.ID].SetQuestState(QuestState.Completed));
+        .Subscribe(e => mQuestViews[e.ID].SetQuestState(QuestState.Completed))
+        .AddTo(this);
         R3EventBus.Instance.Receive<QuestRewarded>()
-        .Subscribe(e => mQuestViews[e.ID].SetQuestState(QuestState.Rewarded));
+        .Subscribe(e => mQuestViews[e.ID].SetQuestState(QuestState.Rewarded))
+        .AddTo(this);
     }
 
     private void CreateQuestView(Quest quest)
