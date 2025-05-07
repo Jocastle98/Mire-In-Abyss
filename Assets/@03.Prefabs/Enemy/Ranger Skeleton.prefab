@@ -2254,6 +2254,7 @@ GameObject:
   - component: {fileID: 5740730850949934734}
   - component: {fileID: 4720923295094366070}
   - component: {fileID: 7707275969196488713}
+  - component: {fileID: 5738935410241395221}
   m_Layer: 9
   m_Name: Ranger Skeleton
   m_TagString: Untagged
@@ -2335,6 +2336,8 @@ MonoBehaviour:
   - {fileID: 290773638512855979}
   - {fileID: 4733082580195370033}
   - {fileID: 2378559692502613522}
+  mEnemyType: 0
+  mExpRewardController: {fileID: 5738935410241395221}
 --- !u!195 &4720923295094366070
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -2380,6 +2383,19 @@ CapsuleCollider:
   m_Height: 1.8040912
   m_Direction: 1
   m_Center: {x: -0.0073037148, y: 0.908893, z: -0.0292131}
+--- !u!114 &5738935410241395221
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6574461105365415849}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 95542da64f72fc74ca429fd32410025a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mExpRewards: []
 --- !u!1 &6768917661509904439
 GameObject:
   m_ObjectHideFlags: 0
