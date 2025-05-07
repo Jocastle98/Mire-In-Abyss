@@ -51,6 +51,7 @@ public class EnemyBTController : MonoBehaviour
     private bool mbIsHit;
     private Projector currentProjector;
     private bool mExpGiven = false;
+    private ItemDropper itemDropper;
 
     void Awake()
     {
@@ -59,6 +60,7 @@ public class EnemyBTController : MonoBehaviour
         mAttackBehavior = mAttackBehaviorAsset as IAttackBehavior;
         mRenderers = GetComponentsInChildren<Renderer>();
         mExpRewardController = GetComponent<EnemyExpRewardController>();
+        itemDropper = GetComponent<ItemDropper>();
     }
 
     void Start()
@@ -281,6 +283,7 @@ public class EnemyBTController : MonoBehaviour
 
     public void OnDeadAnimationExit()
     {
+        itemDropper.DropItemOnDeadth();
         GiveExpReward();
         StartCoroutine(Dissolve());
     }
