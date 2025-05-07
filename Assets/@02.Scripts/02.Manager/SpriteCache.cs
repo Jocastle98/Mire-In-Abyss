@@ -9,7 +9,7 @@ using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.SceneManagement;
 
-public sealed class SpriteCache : Singleton<SpriteCache>
+public sealed class SpriteCache
 {
     private bool mbIsPreloaded = false;
     private readonly Dictionary<int, Sprite> mItemSpritesMap  = new();
@@ -17,10 +17,6 @@ public sealed class SpriteCache : Singleton<SpriteCache>
     private readonly Dictionary<int, Sprite> mBuffSpritesMap  = new();
     //private readonly Dictionary<int, Sprite> mAchievementSpritesMap = new();
 
-    void Start()
-    {
-        preloadSprites().Forget();
-    }
 
     public Sprite GetSprite(SpriteType type, int id)
     {
@@ -46,7 +42,7 @@ public sealed class SpriteCache : Singleton<SpriteCache>
     //TODO: 로딩창과 연계
     /* ---------- PRELOAD ---------- */
 
-    private async UniTask preloadSprites()
+    public async UniTask PreloadSprites()
     {
         var tasks = new UniTask[]
         {
@@ -58,7 +54,6 @@ public sealed class SpriteCache : Singleton<SpriteCache>
         await UniTask.WhenAll(tasks);
 
         mbIsPreloaded = true;
-        R3EventBus.Instance.Publish(new Preloaded(mbIsPreloaded));
     }
 
     private void checkPreloaded()
@@ -99,6 +94,4 @@ public sealed class SpriteCache : Singleton<SpriteCache>
         //foreach (var sp in mAchievementSpritesMap.Values) Addressables.Release(sp);
         mItemSpritesMap.Clear(); mSkillSpritesMap.Clear(); mBuffSpritesMap.Clear();
     }
-
-    protected override void OnSceneLoaded(Scene scene, LoadSceneMode mode) { }
 }

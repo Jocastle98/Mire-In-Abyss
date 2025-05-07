@@ -11,7 +11,7 @@ public class MiniItemView : MonoBehaviour
 
     public void Bind(int itemID, int total = 1)
     {
-        mIcon.sprite = SpriteCache.Instance.GetSprite(SpriteType.Item, itemID);
+        mIcon.sprite = GameDB.Instance.SpriteCache.GetSprite(SpriteType.Item, itemID);
         ItemCount = total;
         SetCount(ItemCount);
     }

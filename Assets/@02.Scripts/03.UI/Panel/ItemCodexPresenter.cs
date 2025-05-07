@@ -16,11 +16,9 @@ public sealed class ItemCodexPresenter : MonoBehaviour
     [SerializeField] TMP_Text mNameText, mDescText;
     [SerializeField] Sprite mSealedSprite;
 
-    void Start()
+    void OnEnable()
     {
-        R3EventBus.Instance.Receive<Preloaded>()
-            .Subscribe(OnPreloaded)
-            .AddTo(this);
+        buildGrid();
     }
 
     void OnPreloaded(Preloaded e)
@@ -33,7 +31,7 @@ public sealed class ItemCodexPresenter : MonoBehaviour
 
     void buildGrid()
     {
-        var dict = SpriteCache.Instance.GetDict(SpriteType.Item);
+        var dict = GameDB.Instance.SpriteCache.GetDict(SpriteType.Item);
         foreach (var rec in dict)
         {
             var v = Instantiate(mIconPrefab, mContent);
@@ -58,7 +56,7 @@ public sealed class ItemCodexPresenter : MonoBehaviour
     {
         if (isUnsealed(id))
         {
-            mLargeIcon.sprite = SpriteCache.Instance.GetSprite(SpriteType.Item, id);
+            mLargeIcon.sprite = GameDB.Instance.SpriteCache.GetSprite(SpriteType.Item, id);
             //TODO: 아이템 정보 가져오기
             //var rec = GameDatabase.Instance.Item.Get(id);
             // 임시 아이템 정보 생성

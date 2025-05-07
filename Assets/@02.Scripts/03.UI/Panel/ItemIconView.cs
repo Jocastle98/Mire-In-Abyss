@@ -12,7 +12,7 @@ public sealed class ItemIconView : MonoBehaviour, IPointerEnterHandler
     public void Bind(int itemID, System.Action<int> onHover)
     {
         mItemID = itemID;
-        var item = SpriteCache.Instance.GetSprite(SpriteType.Item, itemID);
+        var item = GameDB.Instance.SpriteCache.GetSprite(SpriteType.Item, itemID);
         mIcon.sprite = item;
     }
 

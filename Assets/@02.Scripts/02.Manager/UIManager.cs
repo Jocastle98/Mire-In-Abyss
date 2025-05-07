@@ -13,6 +13,7 @@ public class UIManager : Singleton<UIManager>
     [SerializeField] BaseUIPanel mPausePrefab;
     [SerializeField] BaseUIPanel mSettingPrefab;
     [SerializeField] BaseUIPanel mCodexPrefab;
+    [SerializeField] BaseUIPanel mQuestBoardPrefab;
 
     private Dictionary<UIPanelType, BaseUIPanel> mPanels = new();
     protected override void Awake()
@@ -20,6 +21,7 @@ public class UIManager : Singleton<UIManager>
         base.Awake();
         mPanels.Add(UIPanelType.Setting, mSettingPrefab);
         mPanels.Add(UIPanelType.Codex, mCodexPrefab);
+        mPanels.Add(UIPanelType.QuestBoard, mQuestBoardPrefab);
     }
 
     public async UniTask Push(BaseUIPanel prefab)

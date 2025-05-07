@@ -2,7 +2,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public sealed class QuestCardView : MonoBehaviour
+public sealed class MiniQuestCardView : MonoBehaviour
 {
     [SerializeField] TMP_Text  mTitleText;
     [SerializeField] TMP_Text  mDescText;

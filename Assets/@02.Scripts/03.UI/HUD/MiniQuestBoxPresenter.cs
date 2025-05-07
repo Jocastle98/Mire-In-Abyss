@@ -4,7 +4,7 @@ using Events.Player.Modules;
 using R3;
 using UnityEngine;
 
-public sealed class QuestBoxPresenter : HudPresenterBase
+public sealed class MiniQuestBoxPresenter : HudPresenterBase
 {
     class PendingQuestInfo
     {
@@ -17,10 +17,10 @@ public sealed class QuestBoxPresenter : HudPresenterBase
     [Header("Set in Inspector")] [SerializeField]
     RectTransform mContentRoot;
 
-    [SerializeField] QuestCardView mCardPrefab;
+    [SerializeField] MiniQuestCardView mCardPrefab;
 
-    private ObjectPool<QuestCardView> mCardPool = null;
-    private Dictionary<int, QuestCardView> mVisibleCards = new();
+    private ObjectPool<MiniQuestCardView> mCardPool = null;
+    private Dictionary<int, MiniQuestCardView> mVisibleCards = new();
     private Dictionary<int, PendingQuestInfo>  mPendingActive    = new();
     private Dictionary<int, PendingQuestInfo>  mPendingComplete  = new();
     private int mMaxCardNumber;
@@ -66,7 +66,7 @@ public sealed class QuestBoxPresenter : HudPresenterBase
         }
 
         // 2. 가득 찼는데 Completed 카드가 화면에 있다면 그 자리를 교체
-        QuestCardView firstCompleted = findFirstCompletedVisible();
+        MiniQuestCardView firstCompleted = findFirstCompletedVisible();
         if (firstCompleted != null)
         {
             moveVisibleCardToCompleted(firstCompleted);
@@ -123,7 +123,7 @@ public sealed class QuestBoxPresenter : HudPresenterBase
     }
 
     /* ============  Helper Methods  =============== */
-    private QuestCardView spawnCard(int id, int progress, int target)
+    private MiniQuestCardView spawnCard(int id, int progress, int target)
     {
         var card = mCardPool.Rent();
         card.Bind(id, progress, target);
@@ -139,7 +139,7 @@ public sealed class QuestBoxPresenter : HudPresenterBase
         return card;
     }
 
-    private QuestCardView findFirstCompletedVisible()
+    private MiniQuestCardView findFirstCompletedVisible()
     {
         foreach (var kv in mVisibleCards)
         {
@@ -151,7 +151,7 @@ public sealed class QuestBoxPresenter : HudPresenterBase
         return null;
     }
 
-    private void moveVisibleCardToCompleted(QuestCardView card)
+    private void moveVisibleCardToCompleted(MiniQuestCardView card)
     {
         mVisibleCards.Remove(card.ID);
         addPending(new PendingQuestInfo { ID = card.ID, Progress = card.Progress, Target = card.Target });
