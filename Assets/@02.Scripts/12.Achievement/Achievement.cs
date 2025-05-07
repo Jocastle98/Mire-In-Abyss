@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Achievement : MonoBehaviour
+public class Achievement
 {
     public string Id;                   //업적 고유 ID
     public string Title;                //업적 제목
