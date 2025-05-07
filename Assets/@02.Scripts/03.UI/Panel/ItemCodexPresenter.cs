@@ -14,6 +14,7 @@ public sealed class ItemCodexPresenter : MonoBehaviour
     [SerializeField] ItemIconView mIconPrefab;
     [SerializeField] Image mLargeIcon;
     [SerializeField] TMP_Text mNameText, mDescText;
+    [SerializeField] Sprite mSealedSprite;
 
     void Start()
     {
@@ -36,7 +37,14 @@ public sealed class ItemCodexPresenter : MonoBehaviour
         foreach (var rec in dict)
         {
             var v = Instantiate(mIconPrefab, mContent);
-            v.Bind(rec.Key, rec.Value, ShowDetail);
+            if(isUnsealed(rec.Key))
+            {
+                v.Bind(rec.Key, rec.Value, ShowDetail);
+            }
+            else
+            {
+                v.Bind(rec.Key, mSealedSprite, ShowDetail);
+            }
         }
 
         // 첫 아이템 미리 표시
@@ -48,19 +56,34 @@ public sealed class ItemCodexPresenter : MonoBehaviour
 
     void ShowDetail(int id)
     {
-        mLargeIcon.sprite = SpriteCache.Instance.GetSprite(SpriteType.Item, id);
-
-        //TODO: 아이템 정보 가져오기
-        //var rec = GameDatabase.Instance.Item.Get(id);
-        // 임시 아이템 정보 생성
-        var rec = new Item
+        if (isUnsealed(id))
         {
-            ID = id,
-            ItemName = "아이템 이름",
-            Description = "아이템 설명",
-        };
-        
-        mNameText.text    = rec.ItemName;
-        mDescText.text    = rec.Description;
+            mLargeIcon.sprite = SpriteCache.Instance.GetSprite(SpriteType.Item, id);
+            //TODO: 아이템 정보 가져오기
+            //var rec = GameDatabase.Instance.Item.Get(id);
+            // 임시 아이템 정보 생성
+            var rec = new Item
+            {
+                ID = id,
+                ItemName = "아이템 이름",
+                Description = "아이템 설명",
+            };
+
+            mNameText.text = rec.ItemName;
+            mDescText.text = rec.Description;
+        }
+        else
+        {
+            mLargeIcon.sprite = mSealedSprite;
+            mNameText.text = "???";
+            mDescText.text = "???";
+        }
+    }
+
+    private bool isUnsealed(int id)
+    {
+        //TODO: 아이템 획득 경험 여부 확인
+        // 임시로 짝수만 true 처리
+        return (id & 1) == 0;
     }
 }

@@ -15,7 +15,7 @@ public sealed class SpriteCache : Singleton<SpriteCache>
     private readonly Dictionary<int, Sprite> mItemSpritesMap  = new();
     private readonly Dictionary<int, Sprite> mSkillSpritesMap = new();
     private readonly Dictionary<int, Sprite> mBuffSpritesMap  = new();
-
+    //private readonly Dictionary<int, Sprite> mAchievementSpritesMap = new();
 
     void Start()
     {
@@ -52,7 +52,8 @@ public sealed class SpriteCache : Singleton<SpriteCache>
         {
             LoadLabelAsync(mItemSpritesMap,  "Item_Icons"),
             LoadLabelAsync(mSkillSpritesMap, "Skill_Icons"),
-            LoadLabelAsync(mBuffSpritesMap,  "Buff_Icons")
+            LoadLabelAsync(mBuffSpritesMap,  "Buff_Icons"),
+            //LoadLabelAsync(mAchievementSpritesMap, "Achievement_Icons")
         };
         await UniTask.WhenAll(tasks);
 
@@ -75,6 +76,7 @@ public sealed class SpriteCache : Singleton<SpriteCache>
             SpriteType.Item  => mItemSpritesMap,
             SpriteType.Skill => mSkillSpritesMap,
             SpriteType.Buff  => mBuffSpritesMap,
+            //SpriteType.Achievement => mAchievementSpritesMap,
             _ => null
         };
 
@@ -94,6 +96,7 @@ public sealed class SpriteCache : Singleton<SpriteCache>
         foreach (var sp in mItemSpritesMap.Values)  Addressables.Release(sp);
         foreach (var sp in mSkillSpritesMap.Values) Addressables.Release(sp);
         foreach (var sp in mBuffSpritesMap.Values)  Addressables.Release(sp);
+        //foreach (var sp in mAchievementSpritesMap.Values) Addressables.Release(sp);
         mItemSpritesMap.Clear(); mSkillSpritesMap.Clear(); mBuffSpritesMap.Clear();
     }
 
