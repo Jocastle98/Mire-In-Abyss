@@ -39,6 +39,26 @@ namespace ItemEnums
     
 }
 
+namespace EnemyEnums
+{
+    public enum EnemyType
+    {
+        Common,
+        Elite,
+        Boss
+    }
+}
+
+namespace UIEnums
+{
+    public enum SpriteType
+    {
+        Item,
+        Skill,
+        Buff,
+    }
+}
+
 namespace UIPanelEnums
 {
     public enum UIPanelType

@@ -34,7 +34,7 @@ public class PlayerStateMove : IPlayerState
                 return;
             }
             
-            if (GameManager.Instance.Input.ParryInput)
+            if (GameManager.Instance.Input.ParryInput && mPlayerController.ParryTimeoutDelta < 0.0f)
             {
                 mPlayerController.SetPlayerState(PlayerState.Parry);
                 return;
@@ -67,13 +67,13 @@ public class PlayerStateMove : IPlayerState
                 return;
             }
             
-            if (GameManager.Instance.Input.DefendInput)
+            if (GameManager.Instance.Input.DefendInput || GameManager.Instance.Input.IsDefending)
             {
                 mPlayerController.SetPlayerState(PlayerState.Defend);
                 return;
             }
             
-            if (GameManager.Instance.Input.JumpInput)
+            if (GameManager.Instance.Input.JumpInput && mPlayerController.JumpTimeoutDelta < 0.0f)
             {
                 mPlayerController.SetPlayerState(PlayerState.Jump);
                 return;

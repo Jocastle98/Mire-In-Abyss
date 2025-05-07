@@ -1,13 +1,8 @@
-using System;
 using System.Collections.Generic;
-using Events.Abyss;
-using JetBrains.Annotations;
 using UnityEngine;
-using UnityEngine.UI;
 using R3;
 using UIHUDEnums;
-using Unity.VisualScripting;
-using UnityEngine.Serialization;
+using Events.HUD;
 
 
 public sealed class MiniMapPresenter : HudPresenterBase
@@ -21,7 +16,7 @@ public sealed class MiniMapPresenter : HudPresenterBase
 
     private Camera mMainCam;
     private RectTransform mPlayerIconRT;
-    private readonly Dictionary<int, MiniMapIcon> mIconsMap = new(); // instanceID → icon
+    private readonly Dictionary<int, MiniMapIcon> mIconsMap = new(); // id → icon
     private List<ObjectPool<MiniMapIcon>> mIconPools = new();
     private float mWorldToUIScale;
 
@@ -86,29 +81,11 @@ public sealed class MiniMapPresenter : HudPresenterBase
 
     private void subscribeEvents()
     {
-        R3EventBus.Instance.Receive<EnemySpawned>()
-            .Subscribe(e => spawnIcon(e.Transform, MiniMapIconType.Enemy))
+        R3EventBus.Instance.Receive<EntitySpawned<IMapTrackable>>()
+            .Subscribe(e => spawnIcon(e.Entity.MapAnchor, e.Entity.Icon))
             .AddTo(mCD);
-        R3EventBus.Instance.Receive<EnemyDied>()
-            .Subscribe(e => despawnIcon(e.Transform, MiniMapIconType.Enemy))
-            .AddTo(mCD);
-        R3EventBus.Instance.Receive<BossSpawned>()
-            .Subscribe(e => spawnIcon(e.Transform, MiniMapIconType.Boss))
-            .AddTo(mCD);
-        R3EventBus.Instance.Receive<BossDied>()
-            .Subscribe(e => despawnIcon(e.Transform, MiniMapIconType.Boss))
-            .AddTo(mCD);
-        R3EventBus.Instance.Receive<ShopSpawned>()
-            .Subscribe(e => spawnIcon(e.Transform, MiniMapIconType.Shop))
-            .AddTo(mCD);
-        R3EventBus.Instance.Receive<ShopClosed>()
-            .Subscribe(e => despawnIcon(e.Transform, MiniMapIconType.Shop))
-            .AddTo(mCD);
-        R3EventBus.Instance.Receive<PortalSpawned>()
-            .Subscribe(e => spawnIcon(e.Transform, MiniMapIconType.Portal))
-            .AddTo(mCD);
-        R3EventBus.Instance.Receive<PortalClosed>()
-            .Subscribe(e => despawnIcon(e.Transform, MiniMapIconType.Portal))
+        R3EventBus.Instance.Receive<EntityDestroyed<IMapTrackable>>()
+            .Subscribe(e => despawnIcon(e.Entity.MapAnchor, e.Entity.Icon))
             .AddTo(mCD);
     }
 

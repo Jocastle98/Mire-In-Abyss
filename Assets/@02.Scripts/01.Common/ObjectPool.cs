@@ -25,10 +25,10 @@ public sealed class ObjectPool<T> where T : Component
         return obj;
     }
 
-    public T Rent()
+    public T Rent(bool isActive = true)
     {
         var inst = mStack.Count > 0 ? mStack.Pop() : createInstance();
-        inst.gameObject.SetActive(true);
+        inst.gameObject.SetActive(isActive);
         return inst;
     }
 

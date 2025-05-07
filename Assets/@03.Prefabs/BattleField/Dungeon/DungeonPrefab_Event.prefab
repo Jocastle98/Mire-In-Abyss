@@ -467,7 +467,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   IsClear: 0
-  spawnTypeList: {fileID: 11400000, guid: 5612ed7ddfb067e4e8b9cfd7777d0f63, type: 2}
+  spawnTypeList: {fileID: 11400000, guid: a1a724eed2f269c48bb5c6e4254ea82b, type: 2}
+  bossMonsters: {fileID: 0}
   roomType: 4
 --- !u!1 &7941659863971215110
 GameObject:

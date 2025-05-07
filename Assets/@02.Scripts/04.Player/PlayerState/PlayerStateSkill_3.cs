@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using PlayerEnums;
 using UnityEngine;
 
 public class PlayerStateSkill_3 : IPlayerState
@@ -10,6 +11,7 @@ public class PlayerStateSkill_3 : IPlayerState
     public void OnEnter(PlayerController playerController)
     {
         mPlayerController = playerController;
+        mPlayerController.PlayerAnimator.SetLayerWeight(2, 1.0f);
         mPlayerController.PlayerAnimator.SetTrigger("Skill");
         mPlayerController.PlayerAnimator.SetInteger("Skill_Index", 3);
         
@@ -26,6 +28,7 @@ public class PlayerStateSkill_3 : IPlayerState
 
     public void OnExit()
     {
+        mPlayerController.PlayerAnimator.SetLayerWeight(2, 0.0f);
         mPlayerController.PlayerAnimator.SetInteger("Skill_Index", 0);
         mPlayerController = null;
     }

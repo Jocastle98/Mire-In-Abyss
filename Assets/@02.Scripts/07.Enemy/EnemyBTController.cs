@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using Unity.VisualScripting;
+using EnemyEnums;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -50,6 +51,10 @@ public class EnemyBTController : MonoBehaviour
     private float mLastAirTime = -Mathf.Infinity;
     private bool  mIsFlying    = false;
 
+    [Header("경험치 설정")] 
+    [SerializeField] private EnemyType mEnemyType = EnemyType.Common;
+    [SerializeField] private EnemyExpRewardController mExpRewardController;
+    
     private NavMeshAgent mAgent;
     private Animator mAnim;
     private BTNode mRoot;
@@ -57,6 +62,8 @@ public class EnemyBTController : MonoBehaviour
     private bool mbIsHit;
     private bool mHasTriggeredDead;
     private Projector currentProjector;
+    private bool mExpGiven = false;
+
     
     void Awake()
     {
@@ -64,6 +71,7 @@ public class EnemyBTController : MonoBehaviour
         mAnim = GetComponent<Animator>();
         mAttackBehavior = mAttackBehaviorAsset as IAttackBehavior;
         mRenderers = GetComponentsInChildren<Renderer>();
+        mExpRewardController = GetComponent<EnemyExpRewardController>();
     }
 
     void Start()
@@ -498,6 +506,7 @@ public class EnemyBTController : MonoBehaviour
 
     public void OnDeadAnimationExit()
     {
+        GiveExpReward();
         StartCoroutine(Dissolve());
     }
 
@@ -537,6 +546,29 @@ public class EnemyBTController : MonoBehaviour
             r.SetPropertyBlock(block);
         }
     }
+
+    public void GiveExpReward()
+    {
+        if (mExpGiven || mExpRewardController == null) return;
+        PlayerLevelController playerLevelController = FindPlayerLevelController();
+
+        int expAmount = mExpRewardController.GetExpReward(mEnemyType);
+        
+        playerLevelController.GainExperience(expAmount);
+        mExpGiven = true;
+    }
+
+    private PlayerLevelController FindPlayerLevelController()
+    {
+        GameObject player = GameObject.FindGameObjectWithTag("Player");
+        if (player != null)
+        {
+            return player.GetComponent<PlayerLevelController>();
+        }
+
+        return null;
+    }
+
     #endregion
 
     #region Attack 이벤트
