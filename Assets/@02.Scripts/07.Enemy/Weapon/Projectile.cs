@@ -49,9 +49,9 @@ public class Projectile : MonoBehaviour
             return;
         }
 
-        if (other.TryGetComponent<EnemyBTController>(out var enemy))
+        if (other.TryGetComponent<PlayerController>(out var player))
         {
-            enemy.SetHit(mDamage);
+            player.SetHit(mDamage, transform, 1);
         }
 
         Destroy(gameObject);

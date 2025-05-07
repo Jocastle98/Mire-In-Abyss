@@ -55,8 +55,9 @@ public class EnemyBTController : MonoBehaviour
     private BTNode mRoot;
     private bool mbIsAttacking;
     private bool mbIsHit;
+    private bool mHasTriggeredDead;
     private Projector currentProjector;
-
+    
     void Awake()
     {
         mAgent = GetComponent<NavMeshAgent>();
@@ -70,15 +71,15 @@ public class EnemyBTController : MonoBehaviour
         mCurrentHealth = mMaxHealth;
         
         var deadSeq = new BTSequence(
-            new BTCondition(() => mbIsDead),
+            new BTCondition(() => mbIsDead && !mHasTriggeredDead),
             new BTAction(() =>
             {
+                mHasTriggeredDead = true;
                 ClearAllBools();
                 mAnim.SetTrigger("Dead");
                 if (mAgent != null && mAgent.enabled && mAgent.isOnNavMesh)
                     mAgent.isStopped = true;
                 mAgent.enabled = false;
-                mbIsDead = false;
             })
         );
 
@@ -96,6 +97,33 @@ public class EnemyBTController : MonoBehaviour
         );
 
         var detectCond = new BTCondition(DetectPlayer);
+        var flightSeq = new BTSequence(
+            new BTCondition(() =>
+                !mIsFlying
+                &&!mbIsAttacking 
+                && mAttackBehaviorAsset is DragonAttackBehavior
+                && mCurrentHealth <= mMaxHealth * 0.5f
+                && mTarget != null
+                && (mAttackBehavior as DragonAttackBehavior)
+                .IsInRange(transform, mTarget)
+                && Time.time >= mLastAirTime + airInterval 
+            ),
+            new BTAction(() =>
+            {
+                mbIsAttacking = false;
+                ClearAllBools();
+
+                mIsFlying    = true;
+                mLastAirTime = Time.time;
+                mAnim.SetBool("IsFlying", true);
+                if (mAgent != null && mAgent.enabled && mAgent.isOnNavMesh)
+                    mAgent.isStopped = true;
+                mAgent.enabled = false;
+
+                StartCoroutine(FlyAttackRoutine());
+            })
+        );
+        
 
         BTNode engage;
 
@@ -219,21 +247,6 @@ public class EnemyBTController : MonoBehaviour
         else if (mAttackBehaviorAsset is DragonAttackBehavior)
         {
             var dragon = mAttackBehavior as DragonAttackBehavior;
-            var flightSeq = new BTSequence(
-                new BTCondition(() =>
-                    !mIsFlying
-                    && mCurrentHealth <= mMaxHealth * 0.5f
-                    && Time.time >= mLastAirTime + airInterval
-                ),
-                new BTAction(() =>
-                {
-                    mIsFlying    = true;
-                    mLastAirTime = Time.time;
-                    mAnim.SetBool("IsFlying", true);
-                    mAgent.enabled = false;
-                    StartCoroutine(FlyAttackRoutine());
-                })
-            );
             var fireballSeq = new BTSequence(
                 new BTCondition(() => !mbIsAttacking && mTarget != null && dragon.CanFireball(transform, mTarget)),
                 new BTAction(() =>
@@ -289,7 +302,7 @@ public class EnemyBTController : MonoBehaviour
                 }
             });
 
-            engage = new BTSelector(flightSeq,breathSeq, fireballSeq, tailSeq, traceSeq);
+            engage = new BTSelector(breathSeq, fireballSeq, tailSeq, traceSeq);
         }
         else
         {
@@ -348,10 +361,17 @@ public class EnemyBTController : MonoBehaviour
             mAgent.isStopped = true;
         });
 
-        mRoot = new BTSelector(deadSeq, hitSeq, new BTSequence(detectCond, engage), patrol, idle);
+        mRoot = new BTSelector(deadSeq,flightSeq, hitSeq, new BTSequence(detectCond, engage), patrol, idle);
     }
 
-    void Update() => mRoot.Tick();
+    void Update()
+    {
+        if (mIsFlying)
+            return;
+        if (mHasTriggeredDead)   
+            return;
+        mRoot.Tick();
+    }
 
     private void FaceTarget()
     {
@@ -366,6 +386,7 @@ public class EnemyBTController : MonoBehaviour
         mAnim.SetBool("Patrol", false);
         mAnim.SetBool("Trace", false);
         mAnim.SetBool("Idle", false);
+        mAnim.SetBool("FlyTrace", false);
     }
 
 
@@ -374,7 +395,12 @@ public class EnemyBTController : MonoBehaviour
     private IEnumerator FlyAttackRoutine()
     {
         mAnim.SetBool("IsFlying", true);
-        yield return new WaitForSeconds(1.5f); 
+        yield return new WaitForSeconds(1.5f);
+        
+
+        mAgent.enabled = true;
+        mAgent.isStopped = false;
+        
 
         float t0 = Time.time;
         while (Time.time - t0 < airDuration)
@@ -385,31 +411,35 @@ public class EnemyBTController : MonoBehaviour
 
                 if (dragon.CanFireball(transform, mTarget))
                 {
-                    FaceTarget();
+                    ClearAllBools();
                     mAnim.SetTrigger("FlyFireBall");
-                    yield return new WaitForSeconds(0.8f); 
+                    FaceTarget();
+                    yield return new WaitForSeconds(0.8f);
                 }
                 else
                 {
+                    ClearAllBools();
                     mAnim.SetBool("FlyTrace", true);
                     FaceTarget();
-                    mAgent.enabled = true;
-                    mAgent.SetDestination(mTarget.position);
-                    yield return null; // 매 프레임
-                    mAnim.SetBool("FlyTrace", false);
-                    mAgent.enabled = false;
+                    if (mAgent != null && mAgent.enabled && mAgent.isOnNavMesh)
+                    {
+                        mAgent.SetDestination(mTarget.position);
+                    }
+                    yield return null;
+                    continue;
                 }
             }
-            else yield return null;
+            yield return null;
         }
 
-        // 3) Land
-        mAnim.SetTrigger("Land");
-        yield return new WaitForSeconds(1.2f); // Land 애니 길이
+        mAgent.isStopped = true;
+        mAgent.enabled = false;
+        ClearAllBools();
 
-        // 4) 복귀
+        mAnim.SetTrigger("Land");
+        yield return new WaitForSeconds(1.2f);
+
         mAnim.SetBool("IsFlying", false);
-        mAgent.enabled = true;
         mIsFlying = false;
         ClearAllBools();
     }
@@ -442,7 +472,14 @@ public class EnemyBTController : MonoBehaviour
         int effective = Mathf.Max(0, damage - mDefense);
         mCurrentHealth -= effective;
         Debug.Log($"받은 대미지:{damage} 방어력:{mDefense} 최종:{effective} 남은체력:{mCurrentHealth}");
-        if (mCurrentHealth <= 0) mbIsDead = true; else mbIsHit = true;
+        if (mCurrentHealth <= 0)
+        {
+            mbIsDead = true;
+        }
+        else
+        {
+            mbIsHit = true;
+        }
     }
 
     public void OnHitAnimationExit()
@@ -530,6 +567,27 @@ public class EnemyBTController : MonoBehaviour
         else if (mAttackBehaviorAsset is DragonAttackBehavior dragon) dragon.FireLastPosition(transform);
     }
 
+    public void OnMeleeAttack()
+    {
+        if (!(mAttackBehaviorAsset is MeleeAttackBehavior melee))
+            return;
+
+        // 플레이어 태그만 필터링
+        Collider[] hits = Physics.OverlapSphere(
+            transform.position,
+            melee.Range,
+            mPlayerMask        
+        );
+        foreach (var col in hits)
+        {
+            if (col.CompareTag("Player"))
+            {
+                col.GetComponent<PlayerController>()
+                    .SetHit(melee.Damage, transform, 0);
+            }
+        }
+    }
+
     #region 드래곤 공격
     public void OnBreathIndicator()
     {
@@ -558,6 +616,14 @@ public class EnemyBTController : MonoBehaviour
         if (currentProjector != null) currentProjector.orthographicSize = dragon.BreathRange;
     }
 
+    public void OnTailAttack()
+    {
+        var dragon = mAttackBehavior as DragonAttackBehavior;
+        var hits = Physics.OverlapSphere(transform.position, dragon.TailRange, dragon.HitLayer);
+        foreach (var col in hits)
+            if (col.CompareTag("Player"))
+                col.GetComponent<PlayerController>().SetHit(dragon.TailDamage, transform, 1);
+    }
     public void OnBreathLand()
     {
         if (currentProjector) Destroy(currentProjector.gameObject);
@@ -625,7 +691,7 @@ public class EnemyBTController : MonoBehaviour
         foreach (var col in hits)
             if (col.CompareTag("Player"))
             {
-                col.GetComponent<PlayerController>().SetHit(golem.SwingDamage, transform, 0);
+                col.GetComponent<PlayerController>().SetHit(golem.SwingDamage, transform, 1);
                 Debug.Log("스윙 데미지 적용");
             }
     }

@@ -9,10 +9,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6479443911887935254}
-  - component: {fileID: 8691439018604049686}
   - component: {fileID: 9181930888871096546}
   - component: {fileID: 6792528182640968511}
-  - component: {fileID: 6087574567285132445}
   m_Layer: 9
   m_Name: sword_wood
   m_TagString: Untagged
@@ -35,22 +33,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1120493721194982917}
   m_LocalEulerAnglesHint: {x: 0, y: -90, z: 0}
---- !u!114 &8691439018604049686
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8966919714915043}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ddc520b862e8451089464a019bc0150a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  mHitLayer:
-    serializedVersion: 2
-    m_Bits: 0
-  mDamage: 10
 --- !u!33 &9181930888871096546
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -103,27 +85,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!65 &6087574567285132445
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8966919714915043}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 1
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 0.22787891, y: 0.08938323, z: 0.482627}
-  m_Center: {x: -0.00000003938285, y: -0.00000003517675, z: 0.3421187}
 --- !u!1 &142768097966630548
 GameObject:
   m_ObjectHideFlags: 0
@@ -732,7 +693,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 158916516392278202}
-  - component: {fileID: 2034264869803996864}
   - component: {fileID: 5111684243112721732}
   - component: {fileID: 6354803296981084445}
   - component: {fileID: 22493401646877056}
@@ -764,18 +724,6 @@ Transform:
   - {fileID: 5727794133210267836}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &2034264869803996864
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2304139275706850596}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4cc25f372f5f49119443e74bf35b903d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &5111684243112721732
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -807,6 +755,9 @@ MonoBehaviour:
   - {fileID: 4009753674306402108}
   - {fileID: 8425103675733317816}
   - {fileID: 8453473589168831972}
+  mPatrolWaitTime: 2
+  airInterval: 30
+  airDuration: 10
 --- !u!95 &6354803296981084445
 Animator:
   serializedVersion: 5
