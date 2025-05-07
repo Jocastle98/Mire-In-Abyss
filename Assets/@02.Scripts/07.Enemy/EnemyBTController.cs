@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using EnemyEnums;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -39,12 +40,17 @@ public class EnemyBTController : MonoBehaviour
     [Header("렌더러 설정")]
     [SerializeField] private Renderer[] mRenderers;
 
+    [Header("경험치 설정")] 
+    [SerializeField] private EnemyType mEnemyType = EnemyType.Common;
+    [SerializeField] private EnemyExpRewardController mExpRewardController;
+    
     private NavMeshAgent mAgent;
     private Animator mAnim;
     private BTNode mRoot;
     private bool mbIsAttacking;
     private bool mbIsHit;
     private Projector currentProjector;
+    private bool mExpGiven = false;
 
     void Awake()
     {
@@ -52,6 +58,7 @@ public class EnemyBTController : MonoBehaviour
         mAnim = GetComponent<Animator>();
         mAttackBehavior = mAttackBehaviorAsset as IAttackBehavior;
         mRenderers = GetComponentsInChildren<Renderer>();
+        mExpRewardController = GetComponent<EnemyExpRewardController>();
     }
 
     void Start()
@@ -274,6 +281,7 @@ public class EnemyBTController : MonoBehaviour
 
     public void OnDeadAnimationExit()
     {
+        GiveExpReward();
         StartCoroutine(Dissolve());
     }
     private IEnumerator HitColorChange()
@@ -311,6 +319,28 @@ public class EnemyBTController : MonoBehaviour
             block.SetColor("_Color", color);
             r.SetPropertyBlock(block);
         }
+    }
+
+    public void GiveExpReward()
+    {
+        if (mExpGiven || mExpRewardController == null) return;
+        PlayerLevelController playerLevelController = FindPlayerLevelController();
+
+        int expAmount = mExpRewardController.GetExpReward(mEnemyType);
+        
+        playerLevelController.GainExperience(expAmount);
+        mExpGiven = true;
+    }
+
+    private PlayerLevelController FindPlayerLevelController()
+    {
+        GameObject player = GameObject.FindGameObjectWithTag("Player");
+        if (player != null)
+        {
+            return player.GetComponent<PlayerLevelController>();
+        }
+
+        return null;
     }
 
     #endregion

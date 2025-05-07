@@ -65,7 +65,7 @@ public class PlayerLevelController : MonoBehaviour
         for (int i = 0; i < mMaxLevel; i++)
         {
             int level = i + 1;
-            int expRequired = 100 * level * level; //레벨 제곱에 비례하는 필요 경험치
+            int expRequired = 20 * level; //필요 경험치
 
             mLevelTable[i] = new LevelData
             {
@@ -103,7 +103,7 @@ public class PlayerLevelController : MonoBehaviour
         //경험치 증폭 적용
         int actualAmount = Mathf.RoundToInt(amount * mExpMultiplier);
         mCurrentExp += actualAmount;
-
+        Debug.Log($"경험치 획득 {actualAmount}");
         //레벨업 체크
         CheckForLevelUp();
 
@@ -128,13 +128,14 @@ public class PlayerLevelController : MonoBehaviour
             //레벨업 보너스 적용
             if (mApplyBonusOnLevelUp)
             {
-                ApplyLevelUpBonus();
+                //ApplyLevelUpBonus(); //TODO: 수치 계산 수정 필요
             }
             
             //이벤트
             OnLevelUp?.Invoke(mCurrentLevel);
             PublishLevelInfo();
 
+            Debug.Log($"레벨업 {mCurrentLevel}");
             //다음 레벨 필요 경험치 갱신
             requiredExp = GetRequiredExpForLevel(mCurrentLevel);
         }
