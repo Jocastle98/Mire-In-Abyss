@@ -34,7 +34,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     
     [Space(10)]
     [Header("Player Roll Stat")]
-    [SerializeField] private float mRollDistance = 8.0f;
+    [SerializeField] private float mRollDistance = 10.0f;
     [SerializeField] private float mRollFunctionDuration = 0.3f;
     [SerializeField] private float mRollTimeout = 3.0f;
     [SerializeField] private float mRollTimeoutDelta;
@@ -43,7 +43,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     
     [Space(10)]
     [Header("Player Dash Stat")]
-    [SerializeField] private float mDashDistance = 10.0f;
+    [SerializeField] private float mDashDistance = 15.0f;
     [SerializeField] private float mDashFunctionDuration = 0.3f;
     [SerializeField] private float mDashTimeout = 5.0f;
     [SerializeField] private float mDashTimeoutDelta;
@@ -59,7 +59,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     [SerializeField] private float mParryDamageMultiplier = 3.0f;
     [SerializeField] private float mParryFunctionDuration = 0.2f;
     [SerializeField] private float mParrySuccessFunctionDuration = 0.5f;
-    [SerializeField] private float mParryTimeout = 10.0f;
+    [SerializeField] private float mParryTimeout = 6.0f;
     [SerializeField] private float mParryTimeoutDelta;
     public float ParryTimeoutDelta => mParryTimeoutDelta;
     private bool mbIsParrySucessful = false;
@@ -68,7 +68,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     [Header("Player Skill_1 Stat")]
     [SerializeField] private float mSkill_1_DamageMultiplier = 1.5f;
     [SerializeField] private float mSkill_1_Distance = 20.0f;
-    [SerializeField] private float mSkill_1_Timeout = 10.0f;
+    [SerializeField] private float mSkill_1_Timeout = 8.0f;
     [SerializeField] private float mSkill_1_TimeoutDelta;
     public float Skill_1_TimeoutDelta => mSkill_1_TimeoutDelta;
     
@@ -92,7 +92,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     [Header("Player Skill_4 Stat")]
     [SerializeField] private float mSkill_4_DamageMultiplier = 2.5f;
     [SerializeField] private float mSkill_4_Radius = 5.0f;
-    [SerializeField] private float mSkill_4_Timeout = 30.0f;
+    [SerializeField] private float mSkill_4_Timeout = 25.0f;
     [SerializeField] private float mSkill_4_TimeoutDelta;
     public float Skill_4_TimeoutDelta => mSkill_4_TimeoutDelta;
     
@@ -680,7 +680,6 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
 
     #region 구르기 관련 기능
     
-    // todo: 현재 재사용대기시간 적용 -> 스테미너 소모 형식으로 바꿀지 고민 중 / 재사용대기시간을 적용 한다면 돌진기와 공통기능 통합 가능
     public void StartRoll(Vector3 targetDirection)
     {
         if (mRollCoroutine == null || !mPlayerStateRoll.bIsRoll)
@@ -779,12 +778,14 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             // 무적 시작
             mbIsDamageReduced = true;
             OverrideDamageReduction = 1.0f;
+            Debug.Log("무적 시작");
         }
         else
         {
+            // 무적 끝
             mbIsDamageReduced = false;
             OverrideDamageReduction = 0.0f;
-            // 무적 끝
+            Debug.Log("무적 끝");
         }
     }
     
