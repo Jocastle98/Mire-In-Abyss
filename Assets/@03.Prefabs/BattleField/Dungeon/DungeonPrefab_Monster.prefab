@@ -26,7 +26,7 @@ Transform:
   m_GameObject: {fileID: 1622624497834401325}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 1.24, y: -0.2, z: 1.12}
+  m_LocalPosition: {x: 1.24, y: 0.5, z: 1.12}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -45,14 +45,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   radius: 1
-  spawnType: 0
-  mageList: {fileID: 0}
-  rangerList: {fileID: 0}
-  warriorList: {fileID: 0}
-  eliteMageList: {fileID: 0}
-  eliteRangerList: {fileID: 0}
-  eliteWarriorList: {fileID: 0}
-  bossList: {fileID: 0}
 --- !u!1 &1690487973243082076
 GameObject:
   m_ObjectHideFlags: 0
@@ -205,7 +197,7 @@ Transform:
   m_GameObject: {fileID: 1748567690379395379}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 1.38, y: -0.1, z: 5.63}
+  m_LocalPosition: {x: 1.38, y: 0.5, z: 5.63}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -224,14 +216,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   radius: 1
-  spawnType: 0
-  mageList: {fileID: 0}
-  rangerList: {fileID: 0}
-  warriorList: {fileID: 0}
-  eliteMageList: {fileID: 0}
-  eliteRangerList: {fileID: 0}
-  eliteWarriorList: {fileID: 0}
-  bossList: {fileID: 0}
 --- !u!1 &2880435771854911196
 GameObject:
   m_ObjectHideFlags: 0
@@ -384,7 +368,7 @@ Transform:
   m_GameObject: {fileID: 4208440694923855624}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 5.68, y: 0.2, z: 1.32}
+  m_LocalPosition: {x: 5.68, y: 0.5, z: 1.32}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -403,14 +387,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   radius: 1
-  spawnType: 0
-  mageList: {fileID: 0}
-  rangerList: {fileID: 0}
-  warriorList: {fileID: 0}
-  eliteMageList: {fileID: 0}
-  eliteRangerList: {fileID: 0}
-  eliteWarriorList: {fileID: 0}
-  bossList: {fileID: 0}
 --- !u!1 &5104467879641789638
 GameObject:
   m_ObjectHideFlags: 0
@@ -587,7 +563,7 @@ Transform:
   m_GameObject: {fileID: 5151160919252014504}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 5.62, y: -0.08, z: 5.7}
+  m_LocalPosition: {x: 5.62, y: 0.5, z: 5.7}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -606,14 +582,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   radius: 1
-  spawnType: 0
-  mageList: {fileID: 0}
-  rangerList: {fileID: 0}
-  warriorList: {fileID: 0}
-  eliteMageList: {fileID: 0}
-  eliteRangerList: {fileID: 0}
-  eliteWarriorList: {fileID: 0}
-  bossList: {fileID: 0}
 --- !u!1 &6721582049527035228
 GameObject:
   m_ObjectHideFlags: 0
@@ -686,7 +654,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   IsClear: 0
-  spawnTypeList: {fileID: 11400000, guid: 5612ed7ddfb067e4e8b9cfd7777d0f63, type: 2}
+  spawnTypeList: {fileID: 11400000, guid: a1a724eed2f269c48bb5c6e4254ea82b, type: 2}
+  bossMonsters: {fileID: 0}
   roomType: 2
 --- !u!1 &7941659863971215110
 GameObject:

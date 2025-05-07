@@ -39,6 +39,16 @@ namespace ItemEnums
     
 }
 
+namespace EnemyEnums
+{
+    public enum EnemyType
+    {
+        Common,
+        Elite,
+        Boss
+    }
+}
+
 namespace QuestEnums
 {
     public enum QuestState

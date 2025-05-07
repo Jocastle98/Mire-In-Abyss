@@ -10,90 +10,46 @@ using Random = UnityEngine.Random;
 
 public class FieldController : BattleArea
 {
-    public int playTime = 30;
-    
-    //스폰 수
-    [Header("몬스터 스폰 관리")]
-    public int spawnAmount = 5;
-    public int monsterMaxField = 10;
-    public int spawnAmountDifficult = 0;
-    public float spawnTimeDifficult = 0.1f;
-    public int monsterKillMaxCount = 30;
-    
-    //유니크 스폰
-    [Header("유니크 몬스터")]
-    public int uniqueSpawnAmount = 0;
-    public int uniqueSpawnMaxChance = 40;
-    
-    //보물상자 스폰
-    [Space(10)]
-    [Header("보물상자 스폰 관리")]
-    public int treasureSpawnAmount = 10;
-    public int treasureDistance = 150;
-    [Range(5,25)]
-    public int poissonResearchLimit = 10;
-    
-    //몬스터 프리팹
-    [Space(10)] 
-    public List<GameObject> commonMonsters = new List<GameObject>();
-    public List<GameObject> flyingMonsters = new List<GameObject>();
-    public List<GameObject> uniqueMonsters = new List<GameObject>();
-    public List<GameObject> bossMonsters = new List<GameObject>();
-
-    //보물상자 프리팹
-    [Space(10)] 
-    public List<GameObject> treasures = new List<GameObject>();
-    
-    //필드의 자식 오브젝트드르이 이름과 일치시킬 변수
-    [Space(10)] 
-    public string playerSpawnZoneName = "PlayerSpawnZone";
-    public string bossSpawnZoneName = "BossSpawnZone";
-    public string fieldMonstersFolderName = "FieldMonsters";
-    public string randomTreasureFolderName = "RandomTreasure";
-    public string monsterSpawnZoneName = "MonsterSpawnZone";
-    public string environmentName = "Environment";
-    public string navGroundsName = "NavGrounds";
-    
-    
+    private FieldDataSO mFieldData;
     //스폰 주기
     //역수 기반 감소 (감소 곡선) 스폰주기 = 플레이타임 /((1f+난이도*스폰난이도))
     private float mCurrentTime;
-    private float spawnInterval;
-    
-    public GameObject player;//임시 퍼블릭
+    private float mSpawnInterval;
+    private bool CanSpawn = true;
 
     //스폰 구역
+    private GameObject mPlayer;
+    private GameObject mBoss;
     private GameObject mPlayerSpawner;
     private GameObject mBossSpawner;
-    private List<GameObject> mMonsterSections = new List<GameObject>();
+    private GameObject mMonsterSpawner;
     private List<NavMeshModifierVolume> mNavMeshes = new List<NavMeshModifierVolume>();
-    
+    //private List<GameObject> mMonsterSections = new List<GameObject>();
+
     //레벨디자인
     private int mLevelDesign = 1;
 
     //몬스터 관리
     private int mMonsterCurrentField;
     private int mMonsterKillCurrentCount;
-    
+    private bool IsBossSpawn = false;
+
     //생성된 게임오브젝트들을 하이어라키상 정리용 폴더
-    private GameObject mFieldMonsterParent;
-    private GameObject mRandomTreasureParent;
+    private GameObject mFieldMonsterFolder;
+    private GameObject mRandomTreasureFolder;
 
     private void FixedUpdate()
     {
         mCurrentTime += Time.fixedDeltaTime;
         //Debug.Log("Current Time: " + mCurrentTime + " / " + spawnInterval);
-        if (mCurrentTime > spawnInterval)
+        if (mCurrentTime > mSpawnInterval && CanSpawn)
         {
-            Debug.Log("spawnInterval: " +  + spawnInterval);
-            mCurrentTime = 0;
-            SpawnMonsters();
+            if (SpawnCoolDownUpdate())
+            {
+                mCurrentTime = 0;
+                SpawnMonsters();
+            }
         }
-    }
-    
-    public override void BattleAreaInit(GameObject player, int levelDesign)
-    {
-        FieldInit(player, levelDesign);
     }
 
     public override void BattleAreaClear()
@@ -103,7 +59,13 @@ public class FieldController : BattleArea
         Destroy(gameObject);
     }
 
-
+    public override void SetPortal(GameObject portal)
+    {
+        this.portal = portal;
+        DeActivatePortal();
+        BattleAreaMoveController moveCon = portal.GetComponent<BattleAreaMoveController>();
+        moveCon.battleAreaMoveDelegate = BattleAreaClear;
+    }
 
     /// <summary>
     /// 제작된 맵 프리팹의 필요한 오브젝트들을 불러옴.
@@ -112,19 +74,22 @@ public class FieldController : BattleArea
     /// </summary>
     /// <param name="player"></param>
     /// <param name="levelDesign"></param>
-    public void FieldInit(GameObject player, int levelDesign)
+    public void FieldInit(GameObject player, int levelDesign,FieldDataSO fieldData)
     {
-        this.player = player;
+        mPlayer = player;
         mLevelDesign = levelDesign;
-        GetMonsterSpawnZone();
+        mFieldData = fieldData;
+        mFieldMonsterFolder = new GameObject("FieldMonsterFolder");
+        mRandomTreasureFolder = new GameObject("RandomTreasureFolder");
+
         GetNavGrounds();
-        mFieldMonsterParent = FindChildrenWithName(fieldMonstersFolderName,gameObject);
-        mRandomTreasureParent = FindChildrenWithName(randomTreasureFolderName,gameObject);
-        mPlayerSpawner = FindChildrenWithName(playerSpawnZoneName,gameObject);
-        mBossSpawner = FindChildrenWithName(bossSpawnZoneName,gameObject);
-        
+        mPlayerSpawner = FindChildrenWithName(mFieldData.playerSpawnZoneName, gameObject);
+        mBossSpawner = FindChildrenWithName(mFieldData.bossSpawnZoneName, gameObject);
+        mMonsterSpawner = GetMonsterSpawnZone();
+
         SpawnTreasure();
         PlayerSpawn();
+
     }
 
     /// <summary>
@@ -132,32 +97,38 @@ public class FieldController : BattleArea
     /// </summary>
     public void ClearField()
     {
-        ClearObjs(mFieldMonsterParent);
-        ClearObjs(mRandomTreasureParent);
+        ClearObjs(mFieldMonsterFolder);
+        ClearObjs(mRandomTreasureFolder);
     }
-    
+
     /// <summary>
     /// 몬스터 스폰 구역과 자식 오브젝트들을 가져옴
     /// </summary>
-    void GetMonsterSpawnZone()
+    GameObject GetMonsterSpawnZone()
     {
-        GameObject spawnZone = FindChildrenWithName(monsterSpawnZoneName,this.gameObject);
-        foreach (Transform section in spawnZone.transform)
-        {
-            if (section.name == monsterSpawnZoneName) continue;
-            mMonsterSections.Add(section.gameObject);
-        }
+        GameObject obj = new GameObject("MonsterSpawner");
+        obj.transform.SetParent(transform);
+        obj.AddComponent<SpawnController>();
+        return obj;
+
+        // return Type void
+        // GameObject spawnZone = FindChildrenWithName(monsterSpawnZoneName,gameObject);
+        // foreach (Transform section in spawnZone.transform)
+        // {
+        //     if (section.name == monsterSpawnZoneName) continue;
+        //     mMonsterSections.Add(section.gameObject);
+        // }
     }
-    
+
     /// <summary>
     /// 베이크 된 혹은 베이크할 땅 오브젝트들을 가져옴
     /// </summary>
     void GetNavGrounds()
     {
-        GameObject environment = FindChildrenWithName(environmentName,this.gameObject);
-        GameObject navGround = FindChildrenWithName(navGroundsName,environment);
-        
-        
+        GameObject environment = FindChildrenWithName(mFieldData.environmentName, gameObject);
+        GameObject navGround = FindChildrenWithName(mFieldData.navGroundsName, environment);
+
+
         foreach (Transform navs in navGround.transform)
         {
             NavMeshModifierVolume navMeshModifier = navs.gameObject.GetComponent<NavMeshModifierVolume>();
@@ -166,57 +137,91 @@ public class FieldController : BattleArea
                 mNavMeshes.Add(navMeshModifier);
             }
         }
-        
+
     }
 
     void PlayerSpawn()
     {
-        player.transform.position = mPlayerSpawner.transform.position + Vector3.up * 2f;
+        // Debug.Log("PlayerSpawner1 : " + mPlayerSpawner.transform.position + Vector3.up * 2f);
+        // mPlayer.transform.position = mPlayerSpawner.transform.position + Vector3.up * 2f;
+        // Debug.Log("PlayerSpawner2 : " + mPlayerSpawner.transform.position + Vector3.up * 2f);
+        if (mPlayerSpawner == null)
+        {
+            Debug.LogError("PlayerSpawner is null!");
+            return;
+        }
+
+        Vector3 spawnPosition = mPlayerSpawner.transform.position + Vector3.up * 2f;
+        Debug.Log("Set player position to: " + spawnPosition);
+
+        mPlayer.transform.position = spawnPosition;
+
+        Debug.Log("Actual player position after assign: " + mPlayer.transform.position);
     }
-    
+
     /// <summary>
     /// 몬스터를 스폰하는 함수
     /// 근처 가까운 스폰 구역을 찾고 없으면 비행 본스터를 소환
     /// </summary>
     void SpawnMonsters()
     {
-        //스폰 주기 최신화
-        spawnInterval = playTime / ((1f + mLevelDesign * spawnTimeDifficult));
         //스폰 수 최신화
-        int spawnCount = (int)(spawnAmount + Random.Range(0, mLevelDesign + spawnAmountDifficult * 0.1f));
+        int spawnCount = (int)(mFieldData.spawnAmount +
+                               Random.Range(0, mLevelDesign + mFieldData.spawnAmountDifficult * 0.1f));
 
-        for (int i = 0; i < spawnCount; i++)
+        if (mFieldData.monsterMaxField <= mMonsterCurrentField) return;
+
+        int unique = Mathf.Min(mLevelDesign / mFieldData.uniqueSpawnMaxChance, mFieldData.uniqueSpawnMaxChance);
+
+        //일반 , 유니크 확률 소환
+        SOSpawnTypeList monsterLists = Random.Range(0, 100) > unique
+            ? mFieldData.commonMonsters
+            : mFieldData.eliteMonsters;
+
+        mMonsterSpawner.transform.position = mPlayer.transform.position + Vector3.up * 2f;
+        SpawnController spawnController = mMonsterSpawner.AddComponent<SpawnController>();
+        spawnController.SpawnObjWithSOGruopList(monsterLists, spawnCount, mFieldMonsterFolder.transform,
+            MonsterDeadCounting);
+
+        #region 비행유닛?
+
+        // //가까운 스폰장소를 찾음
+        // GameObject spawner = FindClosestSpawnController();
+        // if (spawner != null)
+        // {
+        //     SpawnController spawnController = spawner.GetComponent<SpawnController>();
+        //     spawnController.SpawnObjWithSOGruopList(monsterLists,spawnCount, mFieldMonsterFolder.transform);
+        // }
+        // else //없으면 플레이어 주위로 비행 몬스터 소환
+        // {
+        //     Vector3 randomPointOnCircle = Random.insideUnitSphere;
+        //     randomPointOnCircle.Normalize(); // 방향만 남김 (길이 1)
+        //     randomPointOnCircle *= Random.Range(5, 10); // 원하는 반지름으로 스케일 조정
+        //
+        //     GameObject monster = Instantiate(commonRanger[Random.Range(0, commonRanger.Count)],
+        //         mPlayer.transform.position + randomPointOnCircle,
+        //         Quaternion.identity);
+        //     monster.transform.SetParent(mFieldMonsterFolder.transform);
+        // }
+        //
+        // mMonsterCurrentField++;
+
+        #endregion
+
+    }
+
+    bool SpawnCoolDownUpdate()
+    {
+        //스폰 주기 최신화
+        float newSpawnTime = mFieldData.playTime /
+                         ((mFieldData.mMinSpawnCount + mLevelDesign * mFieldData.spawnTimeDifficult));
+        if (Mathf.Abs(mSpawnInterval - newSpawnTime) > .1f)
         {
-            if (monsterMaxField <= mMonsterCurrentField) return;
-            
-            int unique = Mathf.Min(mLevelDesign / uniqueSpawnMaxChance, uniqueSpawnMaxChance);
-            
-            //일반 , 유니크 확률 소환
-            GameObject monsterPrefab = Random.Range(0, 100) > unique
-                ? commonMonsters[Random.Range(0, commonMonsters.Count)]
-                : uniqueMonsters[Random.Range(0, uniqueMonsters.Count)];
-            
-            //가까운 스폰장소를 찾음
-            GameObject spawner = FindClosestSpawnController();
-            if (spawner != null)
-            {
-                SpawnController spawnController = spawner.GetComponent<SpawnController>();
-                spawnController.SpawnObj(monsterPrefab, mFieldMonsterParent);
-            }
-            else //없으면 플레이어 주위로 비행 몬스터 소환
-            {
-                Vector3 randomPointOnCircle = Random.insideUnitSphere;
-                randomPointOnCircle.Normalize(); // 방향만 남김 (길이 1)
-                randomPointOnCircle *= Random.Range(5, 10); // 원하는 반지름으로 스케일 조정
-
-                GameObject monster = Instantiate(flyingMonsters[Random.Range(0, flyingMonsters.Count)],
-                    player.transform.position + randomPointOnCircle,
-                    Quaternion.identity);
-                monster.transform.SetParent(mFieldMonsterParent.transform);
-            }
-
-            mMonsterCurrentField++;
+            mSpawnInterval = newSpawnTime;
+            return false;
         }
+
+        return true;
     }
 
     /// <summary>
@@ -224,32 +229,39 @@ public class FieldController : BattleArea
     /// </summary>
     void SpawnTreasure()
     {
-        int treasureAmount = treasureSpawnAmount + Random.Range(-5, 5);
+        int treasureAmount = mFieldData.treasureSpawnAmount; //+ Random.Range(-5, 5)
         int whileLoop = 0;
         int whileMaxLoop = 0;
 
-        int distributedTreasures = 0;
-        int navWeights = 0;
-        int restAmount = treasureAmount;
+        int totalWeight = mNavMeshes.Count * (mNavMeshes.Count + 1) / 2;
+        int rest = treasureAmount;
+        List<int> distributed = new List<int>();
+
         for (int i = 0; i < mNavMeshes.Count; i++)
         {
-            navWeights += i + 1;
+            int weight = mNavMeshes.Count - i;
+            int amount = treasureAmount * weight / totalWeight;
+            distributed.Add(amount);
+            rest -= amount;
+        }
+        
+        for (int i = 0; rest > 0; i = (i + 1) % distributed.Count)
+        {
+            distributed[i]++;
+            rest--;
         }
 
         while (whileMaxLoop < 5)
         {
             for (int i = 0; i < mNavMeshes.Count; i++)
             {
-                int weight = mNavMeshes.Count - i;
-                distributedTreasures = restAmount * weight / navWeights;
-
                 GameObject meshGameObject = mNavMeshes[i].gameObject;
                 NavMeshModifierVolume navMesh = mNavMeshes[i].GetComponent<NavMeshModifierVolume>();
 
                 Vector2 navSize = new Vector2(navMesh.size.x, navMesh.size.z);
-                PoissonGenerator poissonGenerator = new PoissonGenerator(navSize, treasureDistance + whileLoop * 2);
+                PoissonGenerator poissonGenerator = new PoissonGenerator(navSize, mFieldData.treasureDistance + whileLoop * 2);
                 List<Vector2> points =
-                    poissonGenerator.GeneratePoissonList(poissonResearchLimit);
+                    poissonGenerator.GeneratePoissonList(mFieldData.poissonResearchLimit);
 
                 for (int j = 0; j < points.Count; j++)
                 {
@@ -257,33 +269,52 @@ public class FieldController : BattleArea
                     Vector3 worldPoint = meshGameObject.transform.TransformPoint(localPoint);
 
                     NavMeshHit navHit;
-                    if (NavMesh.SamplePosition(worldPoint, out navHit, 5f, 1<<navMesh.area))
+                    if (NavMesh.SamplePosition(worldPoint, out navHit, 5f, 1 << navMesh.area))
                     {
                         int setChance = Random.Range(0, 100);
-                        if (setChance > 20 - whileLoop * 5 && distributedTreasures > 0)
+                        if (setChance > 20 - whileLoop * 5 && distributed[i] > 0)
                         {
-                            GameObject treasure = Instantiate(treasures[Random.Range(0, treasures.Count)],
+                            GameObject treasure = Instantiate(
+                                mFieldData.treasures.monsters[Random.Range(0, mFieldData.treasures.monsters.Count)],
                                 navHit.position, Quaternion.identity);
-                            treasure.transform.SetParent(mRandomTreasureParent.transform);
+                            treasure.transform.SetParent(mRandomTreasureFolder.transform);
 
-                            distributedTreasures--;
+                            distributed[i]--;
                         }
                     }
                 }
 
-                restAmount += distributedTreasures;
+                rest += distributed[i];
             }
 
             whileMaxLoop++;
-            if (restAmount <= 0) break;
+            if (rest <= 0) break;
         }
     }
 
     void BossSpawn()
     {
-        GameObject bossPrefab = bossMonsters[Random.Range(0, bossMonsters.Count)];
+        mBoss = mFieldData.bossMonsters.monsters[Random.Range(0, mFieldData.bossMonsters.monsters.Count)];
         SpawnController spawnController = mBossSpawner.GetComponent<SpawnController>();
-        spawnController.SpawnObj(bossPrefab, mFieldMonsterParent);
+        spawnController.SpawnObj(mBoss, mFieldMonsterFolder.transform,SetPortal);
+    }
+
+    void SetPortal()
+    {
+        Debug.Log("Boss is Dead!");
+        ActivatePortal(portal,mBossSpawner);
+    }
+
+    void MonsterDeadCounting()
+    {
+        mMonsterKillCurrentCount++;
+        if (mMonsterKillCurrentCount >= mFieldData.monsterKillMaxCount && !IsBossSpawn)
+        {
+            BossSpawn();
+            CanSpawn = false;
+            IsBossSpawn = true;
+            mMonsterKillCurrentCount = 0;
+        }
     }
 
     /// <summary>
@@ -292,18 +323,19 @@ public class FieldController : BattleArea
     /// <returns></returns>
     GameObject FindClosestSpawnController()
     {
-        GameObject closestSpawnController = null;
-        foreach (GameObject spawner in mMonsterSections)
-        {
-            float dist = Vector3.Distance(spawner.transform.position, player.transform.position);
-            if (dist < 10)
-            {
-                closestSpawnController = spawner.gameObject;
-                return closestSpawnController;
-            }
-        }
-        
-        return closestSpawnController;
+        // GameObject closestSpawnController = null;
+        // foreach (GameObject spawner in mMonsterSections)
+        // {
+        //     float dist = Vector3.Distance(spawner.transform.position, mPlayer.transform.position);
+        //     if (dist < 10)
+        //     {
+        //         closestSpawnController = spawner.gameObject;
+        //         return closestSpawnController;
+        //     }
+        // }
+        //
+        // return closestSpawnController;
+        return null;
     }
 
     /// <summary>
@@ -317,7 +349,7 @@ public class FieldController : BattleArea
         GameObject obj = null;
         foreach (Transform child in parent.transform)
         {
-            if (child.name == name)
+            if (child.name.Contains(name, StringComparison.OrdinalIgnoreCase))
             {
                 obj = child.gameObject;
                 return obj;
@@ -325,17 +357,5 @@ public class FieldController : BattleArea
         }
 
         return null;
-    }
-
-    /// <summary>
-    /// 해당 오브젝트의 자식들을 파괴
-    /// </summary>
-    /// <param name="obj"></param>
-    void ClearObjs(GameObject obj)
-    {
-        foreach (Transform child in obj.transform)
-        {
-            Destroy(child.gameObject);
-        }
     }
 }

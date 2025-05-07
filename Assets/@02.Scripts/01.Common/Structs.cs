@@ -12,7 +12,7 @@ namespace Events.Common
     }
 }
 
-namespace Achievement
+namespace AchievementStructs
 {
     //TODO: 업적 정보 type과 업적 패널 연결 후 삭제
     // 업적 패널용 임시 업적 정보

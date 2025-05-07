@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using Achievement;
+using AchievementStructs;
 using UnityEngine;
 
 public sealed class AchievementPresenter : MonoBehaviour

@@ -5,7 +5,6 @@ using Events.HUD;
 using Events.Player;
 using Events.Player.Modules;
 using QuestEnums;
-using UIHUDEnums;
 using UnityEngine;
 using UnityEngine.Serialization;
 

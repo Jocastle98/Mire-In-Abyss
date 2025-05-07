@@ -1,4 +1,4 @@
-using Achievement;
+using AchievementStructs;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;

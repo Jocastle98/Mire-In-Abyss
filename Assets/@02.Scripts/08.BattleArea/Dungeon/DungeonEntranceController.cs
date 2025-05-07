@@ -34,7 +34,7 @@ public class DungeonEntranceController : MonoBehaviour
     {
         this.roomCon = roomCon;
         IsClear = roomCon.IsClear;
-        
+
         foreach (Transform trans in transform)
         {
             if (trans.name.Contains("Door", System.StringComparison.OrdinalIgnoreCase))
@@ -50,7 +50,7 @@ public class DungeonEntranceController : MonoBehaviour
         }
 
         roomCon.RegisterEntrancePrefab(gameObject, this,
-            () => EntranceClose(door, block), () => EntranceOpen(door,block));
+            () => EntranceClose(door, block), () => EntranceOpen(door, block));
         EntranceOpen(door, block);
     }
 
@@ -60,7 +60,7 @@ public class DungeonEntranceController : MonoBehaviour
         playerEnter += func;
     }
 
-    void EntranceOpen(GameObject door,GameObject block)
+    void EntranceOpen(GameObject door, GameObject block)
     {
         door.transform.localRotation = Quaternion.Euler(-90, 0, 0);
         block.gameObject.SetActive(false);
@@ -75,8 +75,7 @@ public class DungeonEntranceController : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        Debug.Log(other.gameObject.name);
-        if (!IsClear && other.gameObject.name == "Player")
+        if (!IsClear && other.name.Contains("Player", System.StringComparison.OrdinalIgnoreCase))
         {
             playerEnter.Invoke(other.gameObject.transform);
         }

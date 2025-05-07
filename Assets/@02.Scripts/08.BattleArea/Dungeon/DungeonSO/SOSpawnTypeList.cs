@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-[CreateAssetMenu(menuName = "CreateSO/SOSpawnList", fileName = "New SOSpawnTypeList")]
+[CreateAssetMenu(menuName = "BattleAreaSo/SOSpawnList", fileName = "New SOSpawnTypeList")]
 public class SOSpawnTypeList : ScriptableObject
 {
     public List<SoMonsterCount> monsterSpawnTypeList = new List<SoMonsterCount>();
