@@ -23,14 +23,7 @@ public class PlayerStateSkill_1 : IPlayerState
 
     public void OnUpdate()
     {
-        if (mPlayerController.bIsGrounded)
-        {
-            if (GameManager.Instance.Input.RollInput && mPlayerController.RollTimeoutDelta < 0.0f)
-            {
-                mPlayerController.SetPlayerState(PlayerState.Roll);
-                return;
-            }
-        }
+        
     }
 
     public void OnExit()

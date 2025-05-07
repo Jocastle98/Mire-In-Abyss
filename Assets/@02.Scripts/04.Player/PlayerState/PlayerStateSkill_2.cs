@@ -6,6 +6,7 @@ using UnityEngine;
 public class PlayerStateSkill_2 : IPlayerState
 {
     private PlayerController mPlayerController;
+    private Vector3 mSkillDirection;
     
     public void OnEnter(PlayerController playerController)
     {
@@ -13,18 +14,16 @@ public class PlayerStateSkill_2 : IPlayerState
         mPlayerController.PlayerAnimator.SetLayerWeight(2, 1.0f);
         mPlayerController.PlayerAnimator.SetTrigger("Skill");
         mPlayerController.PlayerAnimator.SetInteger("Skill_Index", 2);
+        
+        mSkillDirection = mPlayerController.GetCameraForwardDirection(true);
+        mPlayerController.transform.rotation = Quaternion.LookRotation(mSkillDirection);
+        
+        mPlayerController.Skill_2();
     }
 
     public void OnUpdate()
     {
-        if (mPlayerController.bIsGrounded)
-        {
-            if (GameManager.Instance.Input.RollInput && mPlayerController.RollTimeoutDelta < 0.0f)
-            {
-                mPlayerController.SetPlayerState(PlayerState.Roll);
-                return;
-            }
-        }
+        
     }
 
     public void OnExit()

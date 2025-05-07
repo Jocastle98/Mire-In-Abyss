@@ -17,6 +17,7 @@ public class PlayerStateParry : IPlayerState
         
         mParryDirection = mPlayerController.GetCameraForwardDirection(true);
         mPlayerController.transform.rotation = Quaternion.LookRotation(mParryDirection);
+        mPlayerController.StartParry();
     }
 
     public void OnUpdate()
@@ -34,6 +35,7 @@ public class PlayerStateParry : IPlayerState
 
     public void OnExit()
     {
+        mPlayerController.StopParry();
         mPlayerController.PlayerAnimator.SetLayerWeight(upperBodyLayer, 0.0f);
         mPlayerController = null;
     }

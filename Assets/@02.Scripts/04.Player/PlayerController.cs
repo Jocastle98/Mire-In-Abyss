@@ -31,7 +31,6 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     public float JumpTimeoutDelta => mJumpTimeoutDelta;
     [SerializeField] private float mFallTimeout = 0.15f;
     [SerializeField] private float mFallTimeoutDelta;
-    public float FallTimeoutDelta => mFallTimeoutDelta;
     
     [Space(10)]
     [Header("Player Roll Stat")]
@@ -57,9 +56,13 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
 
     [Space(10)] 
     [Header("Player Parry Stat")]
+    [SerializeField] private float mParryDamageMultiplier = 3.0f;
+    [SerializeField] private float mParryFunctionDuration = 0.2f;
+    [SerializeField] private float mParrySuccessFunctionDuration = 0.5f;
     [SerializeField] private float mParryTimeout = 10.0f;
     [SerializeField] private float mParryTimeoutDelta;
     public float ParryTimeoutDelta => mParryTimeoutDelta;
+    private bool mbIsParrySucessful = false;
     
     [Space(10)] 
     [Header("Player Skill_1 Stat")]
@@ -71,6 +74,11 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     
     [Space(10)] 
     [Header("Player Skill_2 Stat")]
+    [SerializeField] private float mSkill_2_DamageMultiplier = 0.5f;
+    [SerializeField] private float mSkill_2_Radius = 10.0f;
+    [SerializeField] private float mSkill_2_Timeout = 10.0f;
+    [SerializeField] private float mSkill_2_TimeoutDelta;
+    public float Skill_2_TimeoutDelta => mSkill_2_TimeoutDelta;
     
     [Space(10)] 
     [Header("Player Skill_3 Stat")]
@@ -121,6 +129,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     private float mTerminalVelocity = 53.0f;
     private float mTargetRotation;
     private float mAnimationBlend;
+    private bool mbIsDamageReduced;
     
     // Componenet
     public Animator PlayerAnimator { get; private set; }
@@ -261,6 +270,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         mRollTimeoutDelta = 0.0f;
         mDashTimeoutDelta = 0.0f;
         mSkill_1_TimeoutDelta = 0.0f;
+        mSkill_2_TimeoutDelta = 0.0f;
         mSkill_3_TimeoutDelta = 0.0f;
         mSkill_4_TimeoutDelta = 0.0f;
     }
@@ -329,7 +339,8 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
                 {
                     Fall();
                 }
-                else if (CurrentPlayerState == PlayerState.Dash || CurrentPlayerState == PlayerState.Skill_1 ||
+                else if (CurrentPlayerState == PlayerState.Dash || 
+                         CurrentPlayerState == PlayerState.Skill_1 || CurrentPlayerState == PlayerState.Skill_2 ||
                          CurrentPlayerState == PlayerState.Skill_3 || CurrentPlayerState == PlayerState.Skill_4)
                 {
                     mVerticalVelocity = 0.0f;
@@ -373,6 +384,12 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         if (mSkill_1_TimeoutDelta >= 0.0f)
         {
             mSkill_1_TimeoutDelta -= Time.deltaTime;
+        }
+        
+        // Skill_2 관련 Timeout
+        if (mSkill_2_TimeoutDelta >= 0.0f)
+        {
+            mSkill_2_TimeoutDelta -= Time.deltaTime;
         }
         
         // Skill_3 관련 Timeout
@@ -679,6 +696,8 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             StopCoroutine(mRollCoroutine);
             mRollCoroutine = null;
         }
+        
+        mRollTimeoutDelta = mRollTimeout;
     }
 
     private IEnumerator RollCoroutine(Vector3 targetDirection)
@@ -686,7 +705,6 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         float rollEndOffset = 0.2f;
         float firstDelay = 0.2f;
         
-        mRollTimeoutDelta = mRollTimeout;
         mPlayerStateRoll.bIsRoll = true;
 
         yield return new WaitForSeconds(firstDelay); // 선딜(현재 애니메이션에 맞춤)
@@ -753,12 +771,20 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         }
     }
 
-    // 무적?
+    // 무적
     private void RollFunction(bool isRollFunction)
     {
         if (isRollFunction)
         {
-            
+            // 무적 시작
+            mbIsDamageReduced = true;
+            OverrideDamageReduction = 1.0f;
+        }
+        else
+        {
+            mbIsDamageReduced = false;
+            OverrideDamageReduction = 0.0f;
+            // 무적 끝
         }
     }
     
@@ -776,7 +802,6 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         if (mDashCoroutine == null || !mPlayerStateDash.bIsDashing)
         {
             mDashCoroutine = StartCoroutine(DashCoroutine(cameraCenterDirection));
-            SetCombatState(true);
         }
     }
 
@@ -787,6 +812,8 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             StopCoroutine(mDashCoroutine);
             mDashCoroutine = null;
         }
+        
+        mDashTimeoutDelta = mDashTimeout;
     }
     
     private IEnumerator DashCoroutine(Vector3 cameraCenterDirection)
@@ -794,7 +821,6 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         float dashEndOffset = 0.5f;
         float firstDelay = 0.0f;
         
-        mDashTimeoutDelta = mDashTimeout;
         mPlayerStateDash.bIsDashing = true;
         
         // 애니메이션 선딜
@@ -865,7 +891,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         }
     }
 
-    // 충돌 무시 및 피해감소? 무적?
+    // 적 레이어와 충돌 무시
     private void DashFunction(bool isDashFunction)
     {
         if (isDashFunction)
@@ -1060,7 +1086,6 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         }
         else
         {
-            // 피해감소 or 방어력 증가 기능 메서드
             Defending(true);
             
             // 이동 방어시 하반신(Base Layer) 애니메이션
@@ -1079,26 +1104,51 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     {
         if (isDefending)
         {
-            // todo: 임시[테스트용]
-            mPlayerStats.EnableDefenceBuff(0.9f);
+            //피해감소
+            mbIsDamageReduced = true;
+            OverrideDamageReduction = 0.9f;
             mPlayerStats.OnGuardSuccess();
         }
         else
         {
-            mPlayerStats.EnableDefenceBuff(0.0f);
+            mbIsDamageReduced = false;
+            OverrideDamageReduction = 0.0f;
+            //피해감소 끝
         }
     }
 
     #endregion
 
     #region 패리 관련 기능
+            
+    private Coroutine mParryCoroutine;
+    private Coroutine mParrySuccessInvincibleCoroutine;
+    private bool mbIsParryActive = false;
+    private bool mbIsParrySuccess = false;
 
+    public void StartParry()
+    {
+        if (mParryCoroutine == null)
+        {
+            mParryCoroutine = StartCoroutine(ParryCoroutine());
+        }
+    }
+
+    public void StopParry()
+    {
+        if (mParryCoroutine != null)
+        {
+            StopCoroutine(mParryCoroutine);
+            mParryCoroutine = null;
+        }
+        
+        mbIsDamageReduced = false;
+        ParryCooldownTime();
+    }
+    
     public void Parry()
     {
         SetCombatState(true);
-
-        // 패리 성공 시 행동 메서드
-        ParrySuccess();
         
         PlayerAnimator.SetBool("Idle", false);
         PlayerAnimator.SetBool("Move", false);
@@ -1114,13 +1164,44 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             BattleMove();
             PlayerAnimator.SetBool("Move", true);
         }
-
-        mParryTimeoutDelta = mParryTimeout;
     }
 
-    private void ParrySuccess()
+    private IEnumerator ParryCoroutine()
     {
+        mbIsParryActive = true;
+        mbIsParrySuccess = false;
         
+        yield return new WaitForSeconds(mParryFunctionDuration);
+        
+        mbIsParryActive = false;
+    }
+
+    private IEnumerator ParrySuccessInvincibleCoroutine()
+    {
+        // 무적 시작
+        mbIsDamageReduced = true;
+        OverrideDamageReduction = 1.0f;
+        mbIsParrySuccess = true;
+        
+        yield return new WaitForSeconds(mParrySuccessFunctionDuration);
+        
+        //무적 끝
+        mbIsDamageReduced = false;
+        OverrideDamageReduction = 0.0f;
+    }
+
+    private void ParryCooldownTime()
+    {
+        if (mbIsParrySuccess)
+        {
+            // 패리 성공 시 재사용대기시간 초기화
+            mParryTimeoutDelta = 0.0f;
+        }
+        else
+        {
+            // 패리 실패 시 재사용대기시간 적용
+            mParryTimeoutDelta = mParryTimeout;
+        }
     }
     
     #endregion
@@ -1140,9 +1221,32 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         {
             return; // 사망 상태에서는 더 이상 피해를 받지 않음
         }
+
+        // 패리 판정 활성화 중 SetHit 호출 시
+        if (mbIsParryActive)
+        {
+            mbIsParryActive = false;
+
+            // 적에게 패리 데미지 적용
+            if (enemyTransform != null)
+            {
+                // todo: 적에게 상태이상 기절 부여
+                EnemyBTController enemy = enemyTransform.GetComponent<EnemyBTController>();
+                enemy.SetHit((int)(mPlayerStats.GetAttackDamage() * mParryDamageMultiplier));
+            }
+
+            // 잠시 무적효과
+            if (mParrySuccessInvincibleCoroutine != null)
+            {
+                StopCoroutine(mParrySuccessInvincibleCoroutine);
+            }
+            mParrySuccessInvincibleCoroutine = StartCoroutine(ParrySuccessInvincibleCoroutine());
+            
+            return;
+        }
         
         //PlayerState의 TakeDamage 메서드 사용
-        mPlayerStats.TakeDamage(enemyAttackPower);
+        mPlayerStats.TakeDamage(enemyAttackPower, OverrideDamageReduction);
         
         // 체력 UI 업데이트
         // GameManager.Instance.SetHP((float)mPlayerStats.GetCurrentHP() / mPlayerStats.GetMaxHP());
@@ -1155,6 +1259,9 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         {
             SetCombatState(true);
             
+            int upperBodyLayer = PlayerAnimator.GetLayerIndex("UpperBody Layer");
+            PlayerAnimator.SetLayerWeight(upperBodyLayer, 1.0f);
+            
             if (CurrentPlayerState == PlayerState.Defend)
             {
                 PlayerAnimator.SetTrigger("DefendHit");
@@ -1162,9 +1269,6 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             // 공격 관련 동작들이 끊기지 않도록
             else if(CurrentPlayerState == PlayerState.Idle || CurrentPlayerState == PlayerState.Move)
             {
-                int upperBodyLayer = PlayerAnimator.GetLayerIndex("UpperBody Layer");
-                PlayerAnimator.SetLayerWeight(upperBodyLayer, 1.0f);
-               
                 PlayerAnimator.SetFloat("HitPower", hitPower);
                 PlayerAnimator.SetTrigger("Hit");
                 
@@ -1181,7 +1285,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         }
     }
 
-    // 플레이어의 상태이상 효과
+    // 플레이어의 상태이상 효과를 부여하는 메서드
     public void SetStatusEffect(StatusEffect statusEffectType, float duration)
     {
         switch (statusEffectType)
@@ -1231,6 +1335,23 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         yield return new WaitForSeconds(duration);
         
         onEnd?.Invoke();
+    }
+
+    private float mOverrideDamageReduction = 0.0f;
+    private float OverrideDamageReduction
+    {
+        get
+        {
+            if (mbIsDamageReduced)
+            {
+                return mOverrideDamageReduction;
+            }
+            else
+            {
+                return 0.0f;
+            }
+        } 
+        set { mOverrideDamageReduction = value; }
     }
 
     public void OnEnemyKilled()
@@ -1284,21 +1405,43 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
 
     public void Skill_2()
     {
+        SetCombatState(true);
         
+        Invoke("Skill_2_Fire", 0.5f);
+    }
+
+    private void Skill_2_Fire()
+    {
+        // 주변 적에게 데미지 주는 로직
+        Collider[] hitColliders = Physics.OverlapSphere(transform.position, mSkill_2_Radius);
+        foreach (var hitCollider in hitColliders)
+        {
+            if (hitCollider.transform.gameObject.layer == LayerMask.NameToLayer("Enemy"))
+            {
+                EnemyBTController enemy = hitCollider.GetComponent<EnemyBTController>();
+                if (enemy != null)
+                {
+                    // 상태이상(이속감소? 공격력 감소?) 부여
+                    enemy.SetHit((int)(mPlayerStats.GetAttackDamage() * mSkill_2_DamageMultiplier));
+                }
+            }
+        }
+        
+        mSkill_2_TimeoutDelta = mSkill_2_Timeout;
     }
 
     #endregion
 
     #region 3번 스킬
 
+    private Coroutine fallCoroutine;
     public void Skill_3()
     {
         SetCombatState(true);
 
         Invoke("Skill_3_Fire", 0.5f);
     }
-
-    private Coroutine fallCoroutine;
+    
     private void Skill_3_Fire()
     {
         if (!bIsGrounded)
@@ -1334,8 +1477,6 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         {
             if (hitCollider.transform.gameObject.layer == LayerMask.NameToLayer("Enemy"))
             {
-                //TODO: enemy범위 공격 로직
-                // 데미지 처리
                 EnemyBTController enemy = hitCollider.GetComponent<EnemyBTController>();
                 if (enemy != null)
                 {
