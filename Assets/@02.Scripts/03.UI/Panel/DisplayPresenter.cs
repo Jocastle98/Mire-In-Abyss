@@ -27,7 +27,12 @@ public sealed class DisplayPresenter : MonoBehaviour
 
         /* ─── 2) 해상도 드롭다운 채우기 ─── */
         mResolutions = Screen.resolutions
-                            .Select(r => new Resolution { width = r.width, height = r.height, refreshRate = Screen.currentResolution.refreshRate })
+                            .Select(r => new Resolution
+                            {
+                                width = r.width,
+                                height = r.height,
+                                refreshRateRatio = r.refreshRateRatio
+                            })
                             .Distinct()
                             .OrderBy(r => r.width)
                             .ToArray();
@@ -38,9 +43,9 @@ public sealed class DisplayPresenter : MonoBehaviour
 
         /* ─── 3) 현재 상태 → 드롭다운 값 세팅 ─── */
         int curModeIdx = Array.FindIndex(mModeTable, m => m == Screen.fullScreenMode);
-        if (curModeIdx < 0) 
+        if (curModeIdx < 0)
         {
-            curModeIdx = 0;   
+            curModeIdx = 0;
         }
         mModeDropdown.value = curModeIdx;
 

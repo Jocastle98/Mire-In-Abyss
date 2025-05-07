@@ -1,7 +1,9 @@
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
+using Events.Common;
 using R3;
 using UIEnums;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
@@ -9,16 +11,22 @@ using UnityEngine.SceneManagement;
 
 public sealed class SpriteCache : Singleton<SpriteCache>
 {
-    private UniTask mPreloadTask;
     private bool mbIsPreloaded = false;
     private readonly Dictionary<int, Sprite> mItemSpritesMap  = new();
     private readonly Dictionary<int, Sprite> mSkillSpritesMap = new();
     private readonly Dictionary<int, Sprite> mBuffSpritesMap  = new();
 
 
+    void Start()
+    {
+        preloadSprites().Forget();
+    }
+
     public Sprite GetSprite(SpriteType type, int id)
     {
-        var dict = GetDict(type);
+        checkPreloaded();
+
+        var dict = getDict(type);
         if (dict.TryGetValue(id, out var sp)) 
         {
             return sp;
@@ -28,26 +36,17 @@ public sealed class SpriteCache : Singleton<SpriteCache>
         return null;
     }
 
-    //TODO: 로딩창과 연계
-    /* ---------- PRELOAD ---------- */
-    public UniTask PreloadAsync()
+    public Dictionary<int, Sprite> GetDict(SpriteType type)
     {
-        if (mbIsPreloaded)
-        {
-            return UniTask.CompletedTask;
-        }
-
-        if (mPreloadTask.Status == UniTaskStatus.Pending)
-        {
-            return mPreloadTask;
-        }
-
-        mPreloadTask = actuallyPreloadAsync();       // 모든 Addressables label 로드
-        mbIsPreloaded = true;    
-        return mPreloadTask;
+        checkPreloaded();
+        
+        return getDict(type);
     }
 
-    private async UniTask actuallyPreloadAsync()
+    //TODO: 로딩창과 연계
+    /* ---------- PRELOAD ---------- */
+
+    private async UniTask preloadSprites()
     {
         var tasks = new UniTask[]
         {
@@ -56,10 +55,21 @@ public sealed class SpriteCache : Singleton<SpriteCache>
             LoadLabelAsync(mBuffSpritesMap,  "Buff_Icons")
         };
         await UniTask.WhenAll(tasks);
+
+        mbIsPreloaded = true;
+        R3EventBus.Instance.Publish(new Preloaded(mbIsPreloaded));
+    }
+
+    private void checkPreloaded()
+    {
+        if (!mbIsPreloaded)
+        {
+            Debug.LogWarning("SpriteCache: GetSprite called before preload finished");
+        }
     }
 
     /* ---------- HELPERS ---------- */
-    Dictionary<int, Sprite> GetDict(SpriteType t) =>
+    private Dictionary<int, Sprite> getDict(SpriteType t) =>
         t switch
         {
             SpriteType.Item  => mItemSpritesMap,

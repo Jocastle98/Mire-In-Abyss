@@ -10,6 +10,7 @@ public sealed class TabButtonView : MonoBehaviour,
     [SerializeField] Image mBG;
     [SerializeField] TMP_Text mLabel;
     [SerializeField] Image mUnderline;
+    [SerializeField] bool mbUseBG = false;
 
     static readonly Color COLOR_SELECTED = new(1f, 0.88f, 0.5f, 1f);
     static readonly Color COLOR_UNSELECT = new(1f, 1f, 1f, 0.3f);
@@ -31,6 +32,11 @@ public sealed class TabButtonView : MonoBehaviour,
     void RefreshVisual()
     {
         mLabel.color = mbSelected ? COLOR_SELECTED : COLOR_UNSELECT;
+
+        if (mbUseBG)
+        {
+            mBG.color = mbSelected ? COLOR_SELECTED : Color.clear;
+        }
 
         var underlineColor = mbSelected ? COLOR_SELECTED : (mbHover ? COLOR_UNSELECT : Color.clear);
         mUnderline.color = underlineColor;

@@ -3,6 +3,37 @@ using UIHUDEnums;
 using UnityEngine;
 
 
+namespace Events.Common
+{
+    public readonly struct Preloaded
+    {
+        public readonly bool IsPreloaded;
+        public Preloaded(bool isPreloaded) => IsPreloaded = isPreloaded;
+    }
+}
+
+namespace Achievement
+{
+    //TODO: 업적 정보 type과 업적 패널 연결 후 삭제
+    // 업적 패널용 임시 업적 정보
+    public readonly struct TempAchievementInfo
+    {
+        public readonly int Id;
+        public readonly string Title;
+        public readonly string Description;
+        public readonly bool IsClear;
+        public readonly DateTime ClearDate;
+
+        public TempAchievementInfo(int id,
+                                   string title,
+                                   string desc,
+                                   bool isClear,
+                                   DateTime clearDate = default)
+            => (Id, Title, Description, IsClear, ClearDate)
+               = (id, title, desc, isClear, clearDate);
+    }
+}
+
 namespace Events.Player
 {
     public readonly struct PlayerHpChanged
@@ -90,8 +121,8 @@ namespace Events.Combat
 
 namespace Events.Player.Modules
 {
-     /* ─── Item ─── */
-    public readonly struct ItemAdded     
+    /* ─── Item ─── */
+    public readonly struct ItemAdded
     {
         public readonly int ID;
         public readonly int AddedAmount;
@@ -107,41 +138,41 @@ namespace Events.Player.Modules
     }
 
     /* ─── Buff ─── */
-    public readonly struct BuffAdded      
+    public readonly struct BuffAdded
     {
         public readonly int ID;
         public readonly float Duration;
         public readonly bool IsDebuff;
         public BuffAdded(int id, float duration, bool isDebuff = false) => (ID, Duration, IsDebuff) = (id, duration, isDebuff);
     }
-    public readonly struct BuffRefreshed 
+    public readonly struct BuffRefreshed
     {
         public readonly int ID;
         public readonly float NewRemain;
         public BuffRefreshed(int id, float newRemain) => (ID, NewRemain) = (id, newRemain);
     }
-    public readonly struct BuffEnded      
+    public readonly struct BuffEnded
     {
         public readonly int ID;
         public BuffEnded(int id) => ID = id;
     }
 
     /* ─── Quest ─── */
-    public readonly struct QuestAccepted 
+    public readonly struct QuestAccepted
     {
         public readonly int ID;
         public readonly int Cur;
         public readonly int Target;
         public QuestAccepted(int id, int cur, int target) => (ID, Cur, Target) = (id, cur, target);
     }
-    public readonly struct QuestUpdated  
+    public readonly struct QuestUpdated
     {
         public readonly int ID;
         public readonly int Cur;
         public readonly int Target;
         public QuestUpdated(int id, int cur, int target) => (ID, Cur, Target) = (id, cur, target);
     }
-    public readonly struct QuestCompleted 
+    public readonly struct QuestCompleted
     {
         public readonly int ID;
         public QuestCompleted(int id) => ID = id;
@@ -152,13 +183,13 @@ namespace Events.Player.Modules
         public QuestRewarded(int id) => ID = id;
     }
 
-    public readonly struct GoldAdded 
+    public readonly struct GoldAdded
     {
         public readonly int AddedAmount;
         public readonly int Total;
         public GoldAdded(int amount, int total) => (AddedAmount, Total) = (amount, total);
     }
-    public readonly struct GoldSubTracked 
+    public readonly struct GoldSubTracked
     {
         public readonly int RemovedAmount;
         public readonly int Total;
@@ -166,13 +197,13 @@ namespace Events.Player.Modules
     }
 
     /* ─── Soul ─── */
-    public readonly struct SoulAdded 
+    public readonly struct SoulAdded
     {
         public readonly int AddedAmount;
         public readonly int Total;
         public SoulAdded(int amount, int total) => (AddedAmount, Total) = (amount, total);
     }
-    public readonly struct SoulSubTracked 
+    public readonly struct SoulSubTracked
     {
         public readonly int RemovedAmount;
         public readonly int Total;

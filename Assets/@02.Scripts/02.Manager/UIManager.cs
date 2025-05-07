@@ -12,13 +12,14 @@ public class UIManager : Singleton<UIManager>
     [SerializeField] Canvas mPanelCanvas;
     [SerializeField] BaseUIPanel mPausePrefab;
     [SerializeField] BaseUIPanel mSettingPrefab;
-    //[SerializeField] BaseUIPanel mCodexPrefab;
+    [SerializeField] BaseUIPanel mCodexPrefab;
 
     private Dictionary<UIPanelType, BaseUIPanel> mPanels = new();
-    void Awake()
+    protected override void Awake()
     {
+        base.Awake();
         mPanels.Add(UIPanelType.Setting, mSettingPrefab);
-        //mPanels.Add(UIPanelType.Codex, mCodexPrefab);
+        mPanels.Add(UIPanelType.Codex, mCodexPrefab);
     }
 
     public async UniTask Push(BaseUIPanel prefab)
