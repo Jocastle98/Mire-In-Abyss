@@ -1436,6 +1436,7 @@ MonoBehaviour:
   ImpactHitLayer:
     serializedVersion: 2
     m_Bits: 256
+  mFlightDuration: 10
   mRenderers:
   - {fileID: 4775264756205059350}
   - {fileID: 8464983910157389335}

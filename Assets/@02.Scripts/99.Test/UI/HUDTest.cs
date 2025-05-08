@@ -167,7 +167,7 @@ public class HUDTest : MonoBehaviour
     public void OnAddQuest()
     {
         mLastQuestID++;
-        PlayerHub.Instance.QuestLog.Accept(mLastQuestID.ToString(), 1);
+        PlayerHub.Instance.QuestLog.Accept(mLastQuestID.ToString());
     }
 
     public void OnQuestUpdated()

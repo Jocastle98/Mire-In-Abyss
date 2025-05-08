@@ -1,6 +1,8 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
+using Events.UI;
 using UIPanelEnums;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -10,10 +12,10 @@ public class UIManager : Singleton<UIManager>
 {
     readonly Stack<BaseUIPanel> mStack = new();
     [SerializeField] Canvas mPanelCanvas;
-    [SerializeField] BaseUIPanel mPausePrefab;
     [SerializeField] BaseUIPanel mSettingPrefab;
     [SerializeField] BaseUIPanel mCodexPrefab;
     [SerializeField] BaseUIPanel mQuestBoardPrefab;
+    [SerializeField] BaseUIPanel mEscGroupPrefab;
 
     private Dictionary<UIPanelType, BaseUIPanel> mPanels = new();
     protected override void Awake()
@@ -22,9 +24,10 @@ public class UIManager : Singleton<UIManager>
         mPanels.Add(UIPanelType.Setting, mSettingPrefab);
         mPanels.Add(UIPanelType.Codex, mCodexPrefab);
         mPanels.Add(UIPanelType.QuestBoard, mQuestBoardPrefab);
+        mPanels.Add(UIPanelType.EscGroup, mEscGroupPrefab);
     }
 
-    public async UniTask Push(BaseUIPanel prefab)
+    public async UniTask Push(BaseUIPanel prefab, Action onComplete = null)
     {
         if (mStack.TryPeek(out var top))
         {
@@ -33,14 +36,14 @@ public class UIManager : Singleton<UIManager>
 
         var inst = Instantiate(prefab, mPanelCanvas.transform);
         mStack.Push(inst);
-        await inst.Show();
+        await inst.Show(onComplete);
     }
 
-    public async UniTask Push(UIPanelType type)
+    public async UniTask Push(UIPanelType type, Action onComplete = null)
     {
         if (mPanels.TryGetValue(type, out var prefab))
         {
-            await Push(prefab);
+            await Push(prefab, onComplete);
         }
     }
 
@@ -53,9 +56,14 @@ public class UIManager : Singleton<UIManager>
         var top = mStack.Pop();
         await top.Hide();
         Destroy(top.gameObject);
+        
         if (mStack.TryPeek(out var next))
         {
             next.CG.interactable = true;
+        }
+        else if (mStack.Count == 0)
+        {
+            R3EventBus.Instance.Publish(new LastUIPopup());
         }
     }
     void Update()
@@ -71,7 +79,7 @@ public class UIManager : Singleton<UIManager>
     {
         if (mStack.Count == 0)
         {
-            //Push(mPausePrefab).Forget();
+            Push(UIPanelType.EscGroup).Forget();
         }
         else
         {
