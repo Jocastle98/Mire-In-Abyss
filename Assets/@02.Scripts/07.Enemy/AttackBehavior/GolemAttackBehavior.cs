@@ -44,7 +44,6 @@ public class GolemAttackBehavior : ScriptableObject, IAttackBehavior
         float remaining = nextImpactTime - Time.time;
         
         bool can = Time.time >= nextImpactTime && dist <= mImpactRange;
-        Debug.Log($"임팩트 쿨타임: {remaining}");
         return can;
     }
 

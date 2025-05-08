@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Cysharp.Threading.Tasks;
+using Events.Common;
 using Events.Player;
 using R3;
 using UnityEngine;
@@ -16,13 +17,17 @@ public sealed class SkillSlotsPresenter : HudPresenterBase
     void Start()
     {
         subscribeEvents();
-        initializeAsync().Forget();
+        R3EventBus.Instance.Receive<Preloaded>()
+            .Subscribe(OnPreloaded)
+            .AddTo(this);
     }
 
-    private async UniTaskVoid initializeAsync()
+    private void OnPreloaded(Preloaded e)
     {
-        await SpriteCache.Instance.PreloadAsync();
-        setSkillSlots();
+        if (e.IsPreloaded)
+        {
+            setSkillSlots();
+        }
     }
 
     private void subscribeEvents()
