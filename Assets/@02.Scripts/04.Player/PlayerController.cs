@@ -1019,7 +1019,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             {
                 //공격력을 PlayerStats에서 가져와 데미지 계산
                 float damage = mPlayerStats.GetAttackDamage();
-                enemyController.SetHit((int)damage);
+                enemyController.SetHit((int)damage,1);
                 //피해적용 후 흡혈효과 처리
                 mPlayerStats.OnDamageDealt(damage);
             }
@@ -1339,7 +1339,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
                 EnemyBTController enemy = hitCollider.GetComponent<EnemyBTController>();
                 if (enemy != null)
                 {
-                    enemy.SetHit((int)(mPlayerStats.GetAttackDamage() * mSkill_3_DamageMultiplier));
+                    enemy.SetHit((int)(mPlayerStats.GetAttackDamage() * mSkill_3_DamageMultiplier),1);
                 }
             }
         }

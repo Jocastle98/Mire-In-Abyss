@@ -55,6 +55,10 @@ public class EnemyBTController : MonoBehaviour
     [SerializeField] private EnemyType mEnemyType = EnemyType.Common;
     [SerializeField] private EnemyExpRewardController mExpRewardController;
     
+    [Header("기절 설정")]
+    [SerializeField] private float stunDuration = 2f;
+    private bool mbIsStunned = false;
+    
     private NavMeshAgent mAgent;
     private Animator mAnim;
     private BTNode mRoot;
@@ -374,9 +378,7 @@ public class EnemyBTController : MonoBehaviour
 
     void Update()
     {
-        if (mIsFlying)
-            return;
-        if (mHasTriggeredDead)   
+        if (mIsFlying || mHasTriggeredDead || mbIsStunned)
             return;
         mRoot.Tick();
     }
@@ -477,22 +479,59 @@ public class EnemyBTController : MonoBehaviour
     #endregion
 
     #region Hit & Death 처리
-    public void SetHit(int damage)
+
+    public void SetHit(int damage, int hitType)
     {
-        if (mbIsDead) return;
+        if (mbIsDead)
+            return;
+
+        // hitType == 0: 기절 처리
+        if (hitType == 0)
+        {
+            StartCoroutine(StunRoutine());
+            return;
+        }
+
+        // hitType == 1: 기존 데미지 처리
         int effective = Mathf.Max(0, damage - mDefense);
         mCurrentHealth -= effective;
         Debug.Log($"받은 대미지:{damage} 방어력:{mDefense} 최종:{effective} 남은체력:{mCurrentHealth}");
-        if (mCurrentHealth <= 0)
-        {
-            mbIsDead = true;
-        }
-        else
-        {
-            mbIsHit = true;
-        }
-    }
 
+        if (mCurrentHealth <= 0)
+            mbIsDead = true;
+        else
+            mbIsHit = true;
+    }
+    // 스턴 코루틴
+    private IEnumerator StunRoutine()
+    {
+        mbIsStunned = true;
+
+        // 움직임 멈추기
+        if (mAgent != null && mAgent.enabled && mAgent.isOnNavMesh)
+            mAgent.isStopped = true;
+
+        // 현재 재생 중인 애니메이터 상태 기록
+        var info = mAnim.GetCurrentAnimatorStateInfo(0);
+        int stateHash = info.fullPathHash;
+
+        // 애니메이터 일시정지
+        mAnim.speed = 0f;
+
+        yield return new WaitForSeconds(stunDuration);
+
+        // 애니메이터 재생 속도 복구
+        mAnim.speed = 1f;
+
+        // 같은 상태(Idle, Trace, Attack 등) 애니메이션을 처음부터 다시 실행
+        mAnim.Play(stateHash, 0, 0f);
+
+        // 움직임 복구
+        if (mAgent != null && mAgent.enabled && mAgent.isOnNavMesh)
+            mAgent.isStopped = false;
+
+        mbIsStunned = false;
+    }
     public void OnHitAnimationExit()
     {
         mbIsHit = false;

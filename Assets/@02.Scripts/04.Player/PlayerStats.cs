@@ -204,7 +204,7 @@ public class PlayerStats : MonoBehaviour
                 EnemyBTController enemy = hitCollider.GetComponent<EnemyBTController>();
                 if (enemy != null)
                 {
-                    enemy.SetHit((int)mAoeDamageValue);
+                    enemy.SetHit((int)mAoeDamageValue,1);
                 }
             }
         }
