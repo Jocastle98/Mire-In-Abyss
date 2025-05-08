@@ -13,7 +13,7 @@ public class DungeonController : BattleArea
 
     DungeonNode mRootNode;
     DungeonCells[,] mDungeonCells;
-    private int mCreateRoomChance = 70;
+    private int mCreateRoomChance = 80;
 
     List<DungeonNode> mLeafRooms = new List<DungeonNode>();
 
@@ -172,9 +172,6 @@ public class DungeonController : BattleArea
             mCreateRoomChance < setNodeChance || mMinRoomCount < mLeafRooms.Count) return;
 
         mLeafRooms.Add(node);
-        //Debug.Log(node.x + "," + node.y + "," + node.w + "," + node.h);
-
-        //GizmoSphereInSetRoom(node);
     }
 
     void SetRoom(DungeonNode node, int count)
@@ -185,6 +182,8 @@ public class DungeonController : BattleArea
             mDungeonCells[node.x, node.y].SetDungeon(mDungeonCells, DungeonRoomType.SafeRoom);
             Vector3 safeRoomCenter = new Vector3(7, 1, 7) * .5f;
             mPlayer.transform.position = (new Vector3(node.x, 0, node.y) + safeRoomCenter) * mCellSize;
+            
+            node.SetCell(mDungeonCells[node.x, node.y]);
         }
         else if (mLeafRooms.Count - 1 == count)
         {
@@ -215,7 +214,7 @@ public class DungeonController : BattleArea
 
         for (int i = 0; i < mLeafRooms.Count; i++)
         {
-            if (mLeafRooms[i].IsVisited && i !=mLeafRooms.Count - 1) continue;
+            if (mLeafRooms[i].IsVisited) continue;
 
             float newDistance = new Vector2(mLeafRooms[i].x - startRoom.x, mLeafRooms[i].y - startRoom.y).magnitude;
 
@@ -232,8 +231,13 @@ public class DungeonController : BattleArea
 
             if (ConnectRoom(startRoom, expectRoom, true))
             {
+                if (expectRoom.cell.roomType == DungeonRoomType.BossRoom)
+                {
+                    expectRoom.IsVisited = true;
+                    continue;
+                }
                 FindClosestRoom(expectRoom);
-                break;
+                return;
             }
         }
     }
@@ -272,28 +276,28 @@ public class DungeonController : BattleArea
 
     bool PathConnectable(List<DungeonCells> foundPath, DungeonNode fromRoom, DungeonNode toRoom, bool IsSet)
     {
+        if (toRoom.cell.roomType == DungeonRoomType.BossRoom && toRoom.connectedRoom.Count > 0) return false;
         //이어지는 경로에 방이 있을경우 해당 방과 연결
         foreach (DungeonCells cell in foundPath)
         {
-            if (cell.cellType == DungeonCellType.Room)
+            if (cell.cellType != DungeonCellType.Room) continue;
+
+            if (cell.dungeonNode != fromRoom && cell.dungeonNode != toRoom)
             {
-                if (cell.dungeonNode != fromRoom && cell.dungeonNode != toRoom)
+                if (ConnectRoom(fromRoom, cell.dungeonNode, false) && ConnectRoom(cell.dungeonNode, toRoom, false))
                 {
-                    if (ConnectRoom(fromRoom, cell.dungeonNode, false) && ConnectRoom(cell.dungeonNode, toRoom, false))
-                    {
-                        ConnectRoom(fromRoom, cell.dungeonNode, true);
-                        ConnectRoom(cell.dungeonNode, toRoom, true);
-                        return true;
-                    }
-                    else
-                    {
-                        return false;
-                    }
+                    ConnectRoom(fromRoom, cell.dungeonNode, true);
+                    ConnectRoom(cell.dungeonNode, toRoom, true);
+                    return true;
                 }
                 else
                 {
                     return false;
                 }
+            }
+            else
+            {
+                return false;
             }
         }
 

@@ -13,6 +13,7 @@ public class DungeonCells
     private int mCellSize;
     private DungeonCellType mCellType;
     private DungeonCellType[] mNeighbourCellType = new DungeonCellType[4];
+    private DungeonRoomType mRoomType;
     
     private GameObject mCurrentDungeonPrefab;
     private GameObject mCurrentTilePrefab;
@@ -23,10 +24,10 @@ public class DungeonCells
 
     private DungeonRoomController roomCon;
 
-    public GameObject portal;
-    public GameObject tileFolder;
-    public GameObject standerFolder;
-    public GameObject dungeonFolder;
+    private GameObject portal;
+    private GameObject tileFolder;
+    private GameObject standerFolder;
+    private GameObject dungeonFolder;
 
     public DungeonNode dungeonNode
     {
@@ -46,6 +47,11 @@ public class DungeonCells
     public DungeonCellType cellType
     {
         get { return mCellType; }
+    }
+
+    public DungeonRoomType roomType
+    {
+        get { return mRoomType; }
     }
 
     public void SetDungeonCells(Vector2Int cellpos, int cellSize,
@@ -73,30 +79,37 @@ public class DungeonCells
 
     public void SetDungeon(DungeonCells[,] cells, DungeonRoomType roomType)
     {
+        mNode.SetCell(this);
+        
         switch (roomType)
         {
             case DungeonRoomType.SafeRoom:
                 currentSODungeon = mDungeonListSO.safeDungeon;
                 SetRoom(cells, mNode, currentSODungeon);
+                mRoomType = DungeonRoomType.SafeRoom;
                 break;
             case DungeonRoomType.MonsterRoom:
                 currentSODungeon =
                     mDungeonListSO.monsterDungeonList[Random.Range(0, mDungeonListSO.monsterDungeonList.Count)];
                 SetRoom(cells, mNode, currentSODungeon);
+                mRoomType = DungeonRoomType.MonsterRoom;
                 break;
             case DungeonRoomType.BossRoom:
                 currentSODungeon =
                     mDungeonListSO.bossDungeonList[Random.Range(0, mDungeonListSO.bossDungeonList.Count)];
                 SetRoom(cells, mNode, currentSODungeon);
+                mRoomType = DungeonRoomType.BossRoom;
                 break;
             case DungeonRoomType.EventRoom:
                 currentSODungeon =
                     mDungeonListSO.eventDungeonList[Random.Range(0, mDungeonListSO.eventDungeonList.Count)];
                 SetRoom(cells, mNode, currentSODungeon);
+                mRoomType = DungeonRoomType.EventRoom;
                 break;
             case DungeonRoomType.ShopRoom:
                 currentSODungeon = mDungeonListSO.shopRoom;
                 SetRoom(cells, mNode, currentSODungeon);
+                mRoomType = DungeonRoomType.ShopRoom;
                 break;
         }
     }
@@ -199,14 +212,7 @@ public class DungeonCells
 
         mCurrentDungeonPrefab.transform.localScale *= cellSize;
         mCurrentDungeonPrefab.transform.SetParent(dungeonFolder.transform);
-
-        //임시 확인용
-        // Dungeon temptDungeon = mCurrentDungeonPrefab.GetComponent<Dungeon>();
-        // temptDungeon.x = node.x;
-        // temptDungeon.y = node.y;
-        // temptDungeon.w = node.w;
-        // temptDungeon.h = node.h;
-
+        
         //mCells이 3차원이 될 때 높이값으로 쓰이게됨
         //int entranceCount = dungeon.entranceYPos.GetLength(0);
 
@@ -217,9 +223,9 @@ public class DungeonCells
         return rotation switch
         {
             0 => Vector3.zero,
-            90 => new Vector3(0, 0, height),
-            180 => new Vector3(width, 0, height),
-            270 => new Vector3(width, 0, 0),
+            90 => new Vector3(0, 0, width),
+            180 => new Vector3(height, 0, width),
+            270 => new Vector3(height, 0, 0),
             _ => Vector3.zero
         };
     }
