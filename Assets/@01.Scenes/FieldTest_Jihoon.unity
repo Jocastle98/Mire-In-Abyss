@@ -3913,7 +3913,7 @@ MonoBehaviour:
   mBuffDuration: 10
   mBuffIsDebuff: 1
   mToastMessage: "\uC5C5\uC801: \uC2EC\uC5F0\uC758 \uC9C0\uBC30\uC790 \uB2EC\uC131!"
-  mItemID: 0
+  mItemID: 1
   mItemCount: 1
   mEnemyHp: 100
   mEnemyMaxHp: 100
@@ -6473,10 +6473,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mPanelCanvas: {fileID: 326879311}
-  mPausePrefab: {fileID: 0}
   mSettingPrefab: {fileID: 4892772301156744234, guid: d7cd69c6032d4d94fa4554b6e61e8ade, type: 3}
   mCodexPrefab: {fileID: 1087006600799090707, guid: a905aedf37f44374d874f45e92fb8baa, type: 3}
   mQuestBoardPrefab: {fileID: 2358408809830075226, guid: 4f4c914ca50b8424cb99bfb471646e5a, type: 3}
+  mEscGroupPrefab: {fileID: 1275060947987298349, guid: 477d8dbc582d5694b952f58160eea7f8, type: 3}
 --- !u!114 &1600845868
 MonoBehaviour:
   m_ObjectHideFlags: 0

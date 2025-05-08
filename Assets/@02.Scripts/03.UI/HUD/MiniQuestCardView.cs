@@ -24,9 +24,9 @@ public sealed class MiniQuestCardView : MonoBehaviour
         Target = target;
         Progress = progress;
 
-        var info = getQuestInfo(id);
-        mTitleText.text  = info.Title;
-        mDescText.text   = info.Description;
+        var quest = getQuestInfo(id);
+        mTitleText.text  = quest.Title;
+        mDescText.text   = quest.RequestInformation;
         mProgressText.text = $"{Progress} / {Target}";
         mBG.color        = IsCompleted ? CompletedColor : ActiveColor;
     }
@@ -43,20 +43,8 @@ public sealed class MiniQuestCardView : MonoBehaviour
         mBG.color = CompletedColor;
     }
 
-    //Temp
-    public class TempQuestInfo
+    private Quest getQuestInfo(string id)
     {
-        public string ID;
-        public string Title;
-        public string Description;
-    }
-    private TempQuestInfo getQuestInfo(string id)
-    {
-        return new TempQuestInfo
-        {
-            ID = id,
-            Title = "Quest Title",
-            Description = "Quest Description"
-        };
+        return GameDB.Instance.QuestDatabase.GetQuestById(id);
     }
 }

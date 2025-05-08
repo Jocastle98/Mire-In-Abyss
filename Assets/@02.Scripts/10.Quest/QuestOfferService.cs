@@ -6,6 +6,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using Random = UnityEngine.Random;
 using R3;
+using System.Linq;
 
 public class QuestOfferService: Singleton<QuestOfferService>
 {
@@ -22,6 +23,7 @@ public class QuestOfferService: Singleton<QuestOfferService>
     void Start()
     {
         SubscribeEvents();
+        GenerateQuestList();
     }
 
     private void SubscribeEvents()
@@ -100,6 +102,11 @@ public class QuestOfferService: Singleton<QuestOfferService>
 
         Debug.LogError($"Quest {questId} not found");
         return QuestState.Inactive;
+    }
+
+    public List<string> GetQuestList()
+    {
+        return mGeneratedQuestStates.Keys.ToList();
     }
 
     /// <summary>

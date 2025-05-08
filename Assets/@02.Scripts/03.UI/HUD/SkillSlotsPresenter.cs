@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Cysharp.Threading.Tasks;
-using Events.Common;
+using Events.Data;
 using Events.Player;
 using R3;
 using UnityEngine;
