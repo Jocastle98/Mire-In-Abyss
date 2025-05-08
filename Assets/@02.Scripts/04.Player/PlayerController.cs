@@ -1222,7 +1222,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             return; // 사망 상태에서는 더 이상 피해를 받지 않음
         }
 
-        // 패리 판정 활성화 중 SetHit 호출 시
+        // 패리 성공 시
         if (mbIsParryActive)
         {
             mbIsParryActive = false;
@@ -1230,10 +1230,21 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             // 적에게 패리 데미지 적용
             if (enemyTransform != null)
             {
-                // todo: 적에게 상태이상 기절 부여
                 EnemyBTController enemy = enemyTransform.GetComponent<EnemyBTController>();
-                enemy.SetHit((int)(mPlayerStats.GetAttackDamage() * mParryDamageMultiplier));
-                
+                if (enemy != null)
+                {
+                    enemy.SetHit((int)(mPlayerStats.GetAttackDamage() * mParryDamageMultiplier));
+                    // todo: 적에게 상태이상 기절 부여
+                }
+                else
+                {
+                    // 공격 오브젝트가 발사체라면
+                    Projectile enemyProjectile = enemyTransform.GetComponent<Projectile>();
+                    if (enemyProjectile != null)
+                    {
+                        
+                    }
+                }
             }
 
             // 잠시 무적효과
