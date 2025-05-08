@@ -10,11 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c48f993023d9dd341bb8d7e4b534c813, type: 3}
-  m_Name: DungeonBoss
+  m_Name: MonsterRoom_004
   m_EditorClassIdentifier: 
   name: 
-  width: 15
-  height: 15
+  width: 11
+  height: 11
   entranceYPos: 
-  dungeonPrefab: {fileID: 6721582049527035228, guid: d10025e78c7db2a47b84750ed0871e03, type: 3}
+  dungeonPrefab: {fileID: 6721582049527035228, guid: a78d87db134b01946bc5687dda6ac65b, type: 3}
   prefabType: 1

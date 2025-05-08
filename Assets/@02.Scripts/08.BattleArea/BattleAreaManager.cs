@@ -16,6 +16,7 @@ public class BattleAreaManager : MonoBehaviour
     [SerializeField]private int mLevelDesign = 1;
     [SerializeField]private int mBattleAreaClearLimit = 5;
     [SerializeField]private int mBattleAreaClearCount = 0;
+    [Range(0, 1)] [SerializeField] private int mFieldFirst = 0;
     private GameObject mPortal;
     
     [SerializeField]private GameObject mPlayer;
@@ -63,7 +64,7 @@ public class BattleAreaManager : MonoBehaviour
     private void BattleAreaCreate()
     {
         Debug.Log("Creating...");
-        if (mBattleAreaClearCount % 2 == 1)
+        if (mBattleAreaClearCount % 2 == mFieldFirst)
         {
             Debug.Log("...Field");
             //생성 및 초기화

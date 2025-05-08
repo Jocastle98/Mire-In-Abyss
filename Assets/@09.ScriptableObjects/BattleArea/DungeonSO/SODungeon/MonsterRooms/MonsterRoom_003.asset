@@ -9,7 +9,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8895319a0a549464a901e5d6270713b2, type: 3}
-  m_Name: treasure SOMonster
+  m_Script: {fileID: 11500000, guid: c48f993023d9dd341bb8d7e4b534c813, type: 3}
+  m_Name: MonsterRoom_003
   m_EditorClassIdentifier: 
-  monsters: []
+  name: 
+  width: 11
+  height: 9
+  entranceYPos: 
+  dungeonPrefab: {fileID: 6721582049527035228, guid: 21e08661ae534004185230b7c0ce501e, type: 3}
+  prefabType: 1

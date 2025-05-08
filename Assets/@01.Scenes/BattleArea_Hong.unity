@@ -630,10 +630,10 @@ MonoBehaviour:
   mPlayer: {fileID: 3017948563550029470}
   mCurrentArea: {fileID: 0}
   mCellSize: 1
-  mMinDungeonRoomSize: 12
+  mMinDungeonRoomSize: 15
   mEventRoomChance: 12
   mDivideLineWidth: 2
-  mMinRoomCount: 11
+  mMinRoomCount: 6
   mPortalPrefab: {fileID: 731653145237511377, guid: 2d0c8e17c7dedb64e95f33449af90af8, type: 3}
   mBattleFields:
   - {fileID: 11400000, guid: 8bad1ddf270ec754292ce2aceb5dc52f, type: 2}

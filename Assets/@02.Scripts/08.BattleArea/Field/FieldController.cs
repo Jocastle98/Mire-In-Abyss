@@ -23,6 +23,7 @@ public class FieldController : BattleArea
     private GameObject mPlayerSpawner;
     private GameObject mBossSpawner;
     private GameObject mMonsterSpawner;
+    private SpawnController mSpawnController;
     private List<NavMeshModifierVolume> mNavMeshes = new List<NavMeshModifierVolume>();
     //private List<GameObject> mMonsterSections = new List<GameObject>();
 
@@ -31,6 +32,7 @@ public class FieldController : BattleArea
 
     //몬스터 관리
     private int mMonsterCurrentField;
+    private int mMonsterMaxFieldCount = 10;
     private int mMonsterKillCurrentCount;
     private bool IsBossSpawn = false;
 
@@ -79,6 +81,7 @@ public class FieldController : BattleArea
         mPlayer = player;
         mLevelDesign = levelDesign;
         mFieldData = fieldData;
+        mMonsterMaxFieldCount += Mathf.FloorToInt(levelDesign * .1f);
         mFieldMonsterFolder = new GameObject("FieldMonsterFolder");
         mRandomTreasureFolder = new GameObject("RandomTreasureFolder");
 
@@ -86,6 +89,7 @@ public class FieldController : BattleArea
         mPlayerSpawner = FindChildrenWithName(mFieldData.playerSpawnZoneName, gameObject);
         mBossSpawner = FindChildrenWithName(mFieldData.bossSpawnZoneName, gameObject);
         mMonsterSpawner = GetMonsterSpawnZone();
+        mSpawnController = mMonsterSpawner.GetComponent<SpawnController>();
 
         SpawnTreasure();
         PlayerSpawn();
@@ -168,9 +172,13 @@ public class FieldController : BattleArea
         //스폰 수 최신화
         int spawnCount = (int)(mFieldData.spawnAmount +
                                Random.Range(0, mLevelDesign + mFieldData.spawnAmountDifficult * 0.1f));
-
-        if (mFieldData.monsterMaxField <= mMonsterCurrentField) return;
-
+        
+        spawnCount = mMonsterMaxFieldCount < mMonsterCurrentField + spawnCount ?
+            mMonsterMaxFieldCount - mMonsterCurrentField : spawnCount;
+        if (spawnCount == 0) return;
+        
+        mMonsterCurrentField += spawnCount;
+        
         int unique = Mathf.Min(mLevelDesign / mFieldData.uniqueSpawnMaxChance, mFieldData.uniqueSpawnMaxChance);
 
         //일반 , 유니크 확률 소환
@@ -179,8 +187,7 @@ public class FieldController : BattleArea
             : mFieldData.eliteMonsters;
 
         mMonsterSpawner.transform.position = mPlayer.transform.position + Vector3.up * 2f;
-        SpawnController spawnController = mMonsterSpawner.AddComponent<SpawnController>();
-        spawnController.SpawnObjWithSOGruopList(monsterLists, spawnCount, mFieldMonsterFolder.transform,
+        mSpawnController.SpawnObjWithSoGroupList(monsterLists, spawnCount, mFieldMonsterFolder.transform,
             MonsterDeadCounting);
 
         #region 비행유닛?
@@ -308,6 +315,7 @@ public class FieldController : BattleArea
     void MonsterDeadCounting()
     {
         mMonsterKillCurrentCount++;
+        mMonsterCurrentField--;
         if (mMonsterKillCurrentCount >= mFieldData.monsterKillMaxCount && !IsBossSpawn)
         {
             BossSpawn();

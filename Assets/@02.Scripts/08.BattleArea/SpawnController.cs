@@ -35,7 +35,7 @@ public class SpawnController : MonoBehaviour
         Debug.Log(" Spawn Failed.. / Monster name : " + obj.name);
     }
 
-    public void SpawnObjWithSOGruopList(SOSpawnTypeList monsterLists, int spawnMonsterAmount, Transform parent,
+    public void SpawnObjWithSoGroupList(SOSpawnTypeList monsterLists, int spawnMonsterAmount, Transform parent,
         System.Action monsterDead)
     {
         int spawnedCount = 0;
