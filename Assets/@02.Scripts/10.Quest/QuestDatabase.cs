@@ -96,7 +96,7 @@ public class QuestDatabase : MonoBehaviour
         {
             List<string> values = CSVParser(line);
 
-            if (values.Count < 7)
+            if (values.Count < 8)
             {
                 Debug.LogWarning($"CSV 라인 형식이 올바르지 않음 {line}");
                 return null;
@@ -107,10 +107,11 @@ public class QuestDatabase : MonoBehaviour
                 Id = values[0],
                 Title = values[1],
                 RequestInformation = values[2],
-                Objective = values[3],
-                TargetAmount = int.Parse(values[4]),
-                RewardSoul = int.Parse(values[5]),
-                Description = values[6],
+                Goal = values[3],
+                Objective = values[4],
+                TargetAmount = int.Parse(values[5]),
+                RewardSoul = int.Parse(values[6]),
+                Description = values[7],
                 CurrentAmount = 0,
                 isCompleted = false
             };
