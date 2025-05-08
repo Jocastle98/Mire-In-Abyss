@@ -8,9 +8,9 @@ using Cysharp.Threading.Tasks;
 using TMPro;
 using QuestEnums;
 
-public class QuestBoardPanel : BaseUIPanel
+public class PlayerQuestBoardPanel : MonoBehaviour
 {
-    [Header("퀘스트 목록")] 
+    [Header("퀘스트 목록")]
     [SerializeField] private Transform mContent;            //퀘스트 목록이 표시될 parent Transform
     [SerializeField] private QuestCardView mQuestViewPrefab;   //퀘스트 항목 UI 프리팹
 
@@ -18,12 +18,12 @@ public class QuestBoardPanel : BaseUIPanel
     [SerializeField] private TMP_Text mQuestTitleText;
     [SerializeField] private TMP_Text mQuestDescriptionText;
     [SerializeField] private TMP_Text mQuestRewardText;
-    [SerializeField] private GameObject mAcceptButton;
-    [SerializeField] private GameObject mGetRewardButton;
+    [SerializeField] private TMP_Text mQuestProgressText;
 
     private Dictionary<string, QuestCardView> mQuestViews = new();    // id, questView
     private string mNowDetailQuestId;
-    
+    private bool mIsInit = false;
+
     void OnEnable()
     {
         if (mQuestViewPrefab == null || mContent == null)
@@ -32,26 +32,40 @@ public class QuestBoardPanel : BaseUIPanel
             return;
         }
 
-        //TODO: 저장된 퀘스트 목록 가져오기
-        var questList = QuestOfferService.Instance.GetQuestList();
-
-        //생성된 퀘스트를 담을 퀘스트 블록 생성
-        foreach (var questId in questList)
+        if (!mIsInit)
         {
-            CreateQuestView(GameDB.Instance.QuestDatabase.GetQuestById(questId));
+            initQuestList();
         }
-        showDetail(questList[0]);
+        else
+        {
+            if (mQuestViews.Count > 0)
+            {
+                showDetail(mQuestViews.Keys.First());
+            }
+        }
     }
 
-    void OnDisable()
+    private void initQuestList()
     {
         mQuestViews.Clear();
         mNowDetailQuestId = null;
         mQuestTitleText.text = "";
         mQuestDescriptionText.text = "";
         mQuestRewardText.text = "";
-        mAcceptButton.SetActive(false);
-        mGetRewardButton.SetActive(false);
+        mQuestProgressText.text = "";
+
+        var questList = PlayerHub.Instance.QuestLog.GetQuestList();
+
+        //퀘스트를 담을 퀘스트 블록 생성
+        foreach (var questId in questList)
+        {
+            CreateQuestView(GameDB.Instance.QuestDatabase.GetQuestById(questId));
+        }
+        if (questList.Count > 0)
+        {
+            showDetail(questList[0]);
+        }
+        mIsInit = true;
     }
 
     private void Start()
@@ -87,25 +101,6 @@ public class QuestBoardPanel : BaseUIPanel
         mQuestTitleText.text = quest.Title;
         mQuestDescriptionText.text = quest.RequestInformation;
         mQuestRewardText.text = $"영혼석 {quest.RewardSoul}개";
-        refreshDetailButtons();
-    }
-
-    void refreshDetailButtons()
-    {
-        mAcceptButton.SetActive(QuestOfferService.Instance.GetQuestState(mNowDetailQuestId) == QuestState.Inactive);
-        mGetRewardButton.SetActive(QuestOfferService.Instance.GetQuestState(mNowDetailQuestId) == QuestState.Completed);
-    }
-
-    public void OnAcceptQuest()
-    {
-        Quest quest = GameDB.Instance.QuestDatabase.GetQuestById(mNowDetailQuestId);
-        PlayerHub.Instance.QuestLog.Accept(mNowDetailQuestId);
-        refreshDetailButtons();
-    }
-
-    public void OnGetReward()
-    {
-        PlayerHub.Instance.QuestLog.Reward(mNowDetailQuestId);
-        refreshDetailButtons();
+        mQuestProgressText.text = $"진행도: {quest.CurrentAmount} / {quest.TargetAmount}";
     }
 }
