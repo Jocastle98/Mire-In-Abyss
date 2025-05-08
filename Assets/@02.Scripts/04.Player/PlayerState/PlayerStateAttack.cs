@@ -8,21 +8,21 @@ using UnityEngine.Rendering;
 public class PlayerStateAttack : IPlayerState
 {
     private PlayerController mPlayerController;
-    private int upperBodyLayer;
+    private int mUpperBodyLayer;
     private Vector3 mAttackDirection;
     private int mMaxCombo = 3;
     private int mCurrentCombo = 0;
     public bool HasReceivedNextAttackInput;
     public bool bIsComboActive;
     
-    private float mComboInputWindow = 2.0f;
+    private float mComboInputWindow = 1.0f;
     private float mComboInputTimer;
     
     public void OnEnter(PlayerController playerController)
     {
         mPlayerController = playerController;
-        upperBodyLayer = mPlayerController.PlayerAnimator.GetLayerIndex("UpperBody Layer");
-        mPlayerController.PlayerAnimator.SetLayerWeight(upperBodyLayer, 1.0f);
+        mUpperBodyLayer = mPlayerController.PlayerAnimator.GetLayerIndex("UpperBody Layer");
+        mPlayerController.PlayerAnimator.SetLayerWeight(mUpperBodyLayer, 1.0f);
         mPlayerController.PlayerAnimator.SetTrigger("Attack");
         
         mAttackDirection = mPlayerController.GetCameraForwardDirection(true);
@@ -87,7 +87,7 @@ public class PlayerStateAttack : IPlayerState
     public void OnExit()
     {
         AttackCount = 0;
-        mPlayerController.PlayerAnimator.SetLayerWeight(upperBodyLayer, 0.0f);
+        mPlayerController.PlayerAnimator.SetLayerWeight(mUpperBodyLayer, 0.0f);
         mPlayerController = null;
     }
 

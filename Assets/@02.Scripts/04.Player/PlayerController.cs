@@ -701,12 +701,12 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
 
     private IEnumerator RollCoroutine(Vector3 targetDirection)
     {
-        float rollEndOffset = 0.2f;
-        float firstDelay = 0.2f;
+        float startupTime = 0.0f;
+        float recoveryTime = 0.0f;
         
         mPlayerStateRoll.bIsRoll = true;
 
-        yield return new WaitForSeconds(firstDelay); // 선딜(현재 애니메이션에 맞춤)
+        yield return new WaitForSeconds(startupTime); // 선딜(현재 애니메이션 선딜 없음)
         RollFunction(true);
      
         StartCoroutine(RollingCoroutine(targetDirection));
@@ -719,8 +719,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         var rollAnimationInfo = PlayerAnimator.GetCurrentAnimatorStateInfo(mobilityLayer);
         if (rollAnimationInfo.IsName("Roll"))
         {
-            float rollAnimationLength = rollAnimationInfo.length;
-            float rollEndTime = Mathf.Max(0.0f, rollAnimationLength - rollEndOffset - firstDelay - mRollFunctionDuration);
+            float rollEndTime = Mathf.Max(0.0f, rollAnimationInfo.length - startupTime - recoveryTime - mRollFunctionDuration);
             yield return new WaitForSeconds(rollEndTime);
             
             mPlayerStateRoll.bIsRoll = false;
@@ -1234,6 +1233,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
                 // todo: 적에게 상태이상 기절 부여
                 EnemyBTController enemy = enemyTransform.GetComponent<EnemyBTController>();
                 enemy.SetHit((int)(mPlayerStats.GetAttackDamage() * mParryDamageMultiplier));
+                
             }
 
             // 잠시 무적효과
@@ -1371,32 +1371,51 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
 
     #region 1번 스킬
 
-    public void Skill_1()
+    private Coroutine mSkill1Coroutine;
+    public void Start_Skill_1()
     {
-        SetCombatState(true);
-        
-        Invoke("Skill_1_Fire", 0.2f); // 애니메이션 선딜
+        mSkill1Coroutine = StartCoroutine(Skill_1());
     }
 
-    private void Skill_1_Fire()
+    public void Stop_Skill_1()
     {
-        GameObject projectilePrefab = Resources.Load<GameObject>("Player/Effects/Skill_1_Projectile");
-        if (projectilePrefab == null)
+        if (mSkill1Coroutine != null)
         {
-            return;
+            StopCoroutine(mSkill1Coroutine);
+            mSkill1Coroutine = null;
+        }
+    }
+
+    private IEnumerator Skill_1()
+    {
+        float attackSpeed = PlayerAnimator.GetFloat("AttackSpeed");
+        float invAttackSpeed = 1.0f / attackSpeed;
+        float startupTime = 0.15f * invAttackSpeed;
+        float recoveryTime = 1.0f * invAttackSpeed;
+        
+        yield return new WaitForSeconds(startupTime); // 애니메이션 선딜
+        
+        GameObject skill_1_Effect_Prefab = Resources.Load<GameObject>("Player/Effects/Skill_1_Projectile");
+        if (skill_1_Effect_Prefab == null)
+        {
+            yield break;
         }
         Vector3 firePosition = transform.position + transform.forward * 2.0f + Vector3.up;
         Vector3 direction = GetActionDirection(false, false);
         
-        GameObject projectileObject = GameObject.Instantiate(projectilePrefab,
+        GameObject skill_1_Effect_Object = GameObject.Instantiate(skill_1_Effect_Prefab,
                                                              firePosition,
                                                              Quaternion.LookRotation(direction));
         
         // 검기 스크립트에 방향 및 속도 설정
-        Skill_1 skill_1 = projectileObject.GetComponent<Skill_1>();
+        Skill_1 skill_1 = skill_1_Effect_Object.GetComponent<Skill_1>();
         skill_1.Init((int)mPlayerStats.GetAttackDamage(), mSkill_1_DamageMultiplier, mSkill_1_Distance, direction);
 
+        yield return new WaitForSeconds(recoveryTime);
+        
         mbInDirection = true;
+        
+        SetCombatState(true);
         mSkill_1_TimeoutDelta = mSkill_1_Timeout;
     }
 
@@ -1404,15 +1423,30 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
 
     #region 2번 스킬
 
-    public void Skill_2()
+    private Coroutine mSkill2CCoroutine;
+    public void Start_Skill_2()
     {
-        SetCombatState(true);
-        
-        Invoke("Skill_2_Fire", 0.5f);
+        mSkill2CCoroutine = StartCoroutine(Skill_2());
     }
 
-    private void Skill_2_Fire()
+    public void Stop_Skill_2()
     {
+        if (mSkill2CCoroutine != null)
+        {
+            StopCoroutine(mSkill2CCoroutine);
+            mSkill2CCoroutine = null;
+        }
+    }
+    
+    private IEnumerator Skill_2()
+    {
+        float attackSpeed = PlayerAnimator.GetFloat("AttackSpeed");
+        float invAttackSpeed = 1.0f / attackSpeed;
+        float startupTime = 0.2f * invAttackSpeed;
+        float recoveryTime = 1.0f * invAttackSpeed;
+        
+        yield return new WaitForSeconds(startupTime); // 애니메이션 선딜
+        
         // 주변 적에게 데미지 주는 로직
         Collider[] hitColliders = Physics.OverlapSphere(transform.position, mSkill_2_Radius);
         foreach (var hitCollider in hitColliders)
@@ -1428,6 +1462,18 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             }
         }
         
+        GameObject skill_2_Effect_Prefab = Resources.Load<GameObject>("Player/Effects/Skill_2_Effect");
+        if (skill_2_Effect_Prefab == null)
+        {
+            yield break;
+        }
+        
+        GameObject skill_2_Effect_Object = GameObject.Instantiate(skill_2_Effect_Prefab, transform.position, Quaternion.identity);
+        
+        yield return new WaitForSeconds(recoveryTime);
+        Destroy(skill_2_Effect_Object);
+        
+        SetCombatState(true);
         mSkill_2_TimeoutDelta = mSkill_2_Timeout;
     }
 
@@ -1441,7 +1487,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
 
     public void Start_Skill_3()
     {
-        StartCoroutine(Skill_3());
+        mSkill3Coroutine = StartCoroutine(Skill_3());
     }
 
     public void Stop_Skill_3()
@@ -1462,17 +1508,21 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     private IEnumerator Skill_3()
     {
         mbIsLandSucess = false;
+        PlayerAnimator.SetTrigger("Skill");
+        PlayerAnimator.SetInteger("Skill_Index", 3);
 
         if (bIsGrounded)
         {
             mbIsLandSucess = true;
+            yield return new WaitForSeconds(0.3f);
         }
         else
         {
             mFallToGroundCoroutine = StartCoroutine(Skill_3_Stance());
             yield return mFallToGroundCoroutine;
         }
-            
+
+        yield return null;
 
         if (mbIsLandSucess)
         {
@@ -1510,10 +1560,12 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     
     private IEnumerator Skill_3_Fire()
     {
-        PlayerAnimator.SetTrigger("Skill");
-        PlayerAnimator.SetInteger("Skill_Index", 3);
+        float attackSpeed = PlayerAnimator.GetFloat("AttackSpeed");
+        float invAttackSpeed = 1.0f / attackSpeed;
+        float startupTime = 0.0f * invAttackSpeed;
+        float recoveryTime = 0.5f * invAttackSpeed;
         
-        yield return new WaitForSeconds(0.3f); // 애니메이션 선딜
+        yield return new WaitForSeconds(startupTime); // 애니메이션 선딜
         
         GameObject skill_3_Effect_Prefab = Resources.Load<GameObject>("Player/Effects/Skill_3_Effect");
         if (skill_3_Effect_Prefab == null)
@@ -1537,9 +1589,10 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             }
         }
         
-        yield return new WaitForSeconds(0.8f);
+        yield return new WaitForSeconds(recoveryTime);
         Destroy(skill_3_Effect_Object);
         
+        SetCombatState(true);
         mSkill_3_TimeoutDelta = mSkill_3_Timeout;
     }
     
@@ -1752,10 +1805,15 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
 
     private IEnumerator FireProjectileCoroutine(Vector3 targetPoint)
     {
+        float attackSpeed = PlayerAnimator.GetFloat("AttackSpeed");
+        float invAttackSpeed = 1.0f / attackSpeed;
+        float startupTime = 0.3f * invAttackSpeed;
+        float recoveryTime = 0.0f * invAttackSpeed;
+        
         PlayerAnimator.SetTrigger("Skill");
         PlayerAnimator.SetInteger("Skill_Index", 4);
         
-        yield return new WaitForSeconds(0.8f); // 애니메이션 선딜
+        yield return new WaitForSeconds(startupTime); // 애니메이션 선딜
         
         GameObject projectilePrefab = Resources.Load<GameObject>("Player/Effects/Skill_4_Projectile");
         if (projectilePrefab == null)
@@ -1769,6 +1827,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         Skill_4 skill_4 = projectileObject.GetComponent<Skill_4>();
         skill_4.Init((int)mPlayerStats.GetAttackDamage(), mSkill_4_DamageMultiplier, mSkill_4_Radius, targetPoint);
         
+        yield return new WaitForSeconds(recoveryTime);
         StartCoroutine(Skill_4_Camera(false));
     }
 

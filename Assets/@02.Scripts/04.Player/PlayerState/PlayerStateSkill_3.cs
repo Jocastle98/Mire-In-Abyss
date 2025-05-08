@@ -6,12 +6,14 @@ using UnityEngine;
 public class PlayerStateSkill_3 : IPlayerState
 {
     private PlayerController mPlayerController;
+    private int mSkillLayer;
     private Vector3 mSkillDirection;
     
     public void OnEnter(PlayerController playerController)
     {
         mPlayerController = playerController;
-        mPlayerController.PlayerAnimator.SetLayerWeight(2, 1.0f);
+        mSkillLayer = mPlayerController.PlayerAnimator.GetLayerIndex("Skill Layer");
+        mPlayerController.PlayerAnimator.SetLayerWeight(mSkillLayer, 1.0f);
         
         mSkillDirection = mPlayerController.GetCameraForwardDirection(true);
         mPlayerController.transform.rotation = Quaternion.LookRotation(mSkillDirection);
@@ -26,7 +28,7 @@ public class PlayerStateSkill_3 : IPlayerState
     public void OnExit()
     {
         mPlayerController.Stop_Skill_3();
-        mPlayerController.PlayerAnimator.SetLayerWeight(2, 0.0f);
+        mPlayerController.PlayerAnimator.SetLayerWeight(mSkillLayer, 0.0f);
         mPlayerController.PlayerAnimator.SetInteger("Skill_Index", 0);
         mPlayerController = null;
     }
