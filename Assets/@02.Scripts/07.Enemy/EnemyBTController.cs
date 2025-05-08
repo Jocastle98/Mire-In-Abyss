@@ -394,7 +394,10 @@ public class EnemyBTController : MonoBehaviour
         mAnim.SetBool("Patrol", false);
         mAnim.SetBool("Trace", false);
         mAnim.SetBool("Idle", false);
-        mAnim.SetBool("FlyTrace", false);
+        if (mAttackBehaviorAsset is DragonAttackBehavior)
+        {
+            mAnim.SetBool("FlyTrace", false);
+        }
     }
 
 
