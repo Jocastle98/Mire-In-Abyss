@@ -1468,6 +1468,7 @@ GameObject:
   - component: {fileID: 4959012575149737574}
   - component: {fileID: 4749783104172799161}
   - component: {fileID: 3600470690653789154}
+  - component: {fileID: -8871883396230777469}
   m_Layer: 8
   m_Name: Player
   m_TagString: Player
@@ -1664,6 +1665,24 @@ MonoBehaviour:
   mRightHandTransform: {fileID: 1561646755167969338}
   mLeftHandTransform: {fileID: 5870613848163703736}
   mVerticalVelocity: 0
+--- !u!114 &-8871883396230777469
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3017948563938787297}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6a87d6193805f7f408f2ee17ab8fcdd7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mLevelTable: []
+  mMaxLevel: 30
+  mApplyBonusOnLevelUp: 1
+  mCurrentExp: 0
+  mExpMultiplier: 1
+  mPlayerStats: {fileID: 4749783104172799161}
 --- !u!1 &3080968844867647087
 GameObject:
   m_ObjectHideFlags: 0

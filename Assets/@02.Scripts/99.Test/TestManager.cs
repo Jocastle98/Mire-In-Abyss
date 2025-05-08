@@ -5,10 +5,6 @@ public class TestManager : MonoBehaviour
 {
     bool mCursorShown;
 
-    void Start()
-    {
-        SpriteCache.Instance.PreloadAsync().Forget();
-    }
 
     private void LateUpdate()
     {

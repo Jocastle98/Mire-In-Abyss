@@ -12,8 +12,9 @@ public class PlayerHub : Singleton<PlayerHub>
     public BuffController BuffController { get; private set; }
     public QuestLog QuestLog { get; private set; }
 
-    void Awake()
+    protected override void Awake()
     {
+        base.Awake();
         Inventory = GetComponent<Inventory>();
         BuffController = GetComponent<BuffController>();
         QuestLog = GetComponent<QuestLog>();

@@ -39,6 +39,27 @@ namespace ItemEnums
     
 }
 
+namespace EnemyEnums
+{
+    public enum EnemyType
+    {
+        Common,
+        Elite,
+        Boss
+    }
+}
+
+namespace QuestEnums
+{
+    public enum QuestState
+    {
+        Inactive,   // 퀘스트 미수락
+        Active,     // 퀘스트 진행중
+        Completed,  // 퀘스트 조건 완료
+        Rewarded     // 퀘스트 보상 수령
+    }
+}
+
 namespace UIEnums
 {
     public enum SpriteType
@@ -55,7 +76,9 @@ namespace UIPanelEnums
     {
         SoulStoneShop,
         QuestBoard,
-        EnterPortal
+        EnterPortal,
+        Setting,
+        Codex,
     }
 }
 
@@ -68,12 +91,6 @@ namespace UIHUDEnums
         Boss,
         Shop,
         Portal,
-    }
-
-    public enum QuestState
-    {
-        Active,
-        Completed
     }
 
     public enum ProgressBarImageType
