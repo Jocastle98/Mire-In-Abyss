@@ -53,6 +53,7 @@ public class EnemyBTController : MonoBehaviour
 
     [Header("경험치 설정")] 
     [SerializeField] private EnemyType mEnemyType = EnemyType.Common;
+    public EnemyType EnemyType => mEnemyType;
     [SerializeField] private EnemyExpRewardController mExpRewardController;
     
     private NavMeshAgent mAgent;
