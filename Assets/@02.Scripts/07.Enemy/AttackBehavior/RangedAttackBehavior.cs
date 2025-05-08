@@ -43,44 +43,6 @@ public class RangedAttackBehavior : ScriptableObject, IAttackBehavior
         mbReady = true;
     }
 
-    public void FireProjectileFrom(Transform self)
-    {
-        var controller = self.GetComponent<EnemyBTController>();
-        var target = controller?.Target;
-        var fp = controller?.FirePoint;
-        if (fp == null || target == null) return;
-
-        var dir = target.position - fp.position;
-        dir.y = 0;
-        if (dir.sqrMagnitude < 0.01f) dir = self.forward;
-        dir.Normalize();
-
-        if (UseRaycastTracer)
-        {
-            if (Physics.Raycast(fp.position, dir, out var hit, Range, HitLayer))
-            {
-                if (hit.collider.TryGetComponent<EnemyBTController>(out var e))
-                {
-                    e.SetHit(Damage);
-                }
-                SpawnTracer(fp.position, hit.point);
-            }
-            else
-            {
-                SpawnTracer(fp.position, fp.position + dir * Range);
-            }
-        }
-        else
-        {
-            var proj = Instantiate(ProjectilePrefab, fp.position, Quaternion.LookRotation(dir));
-            if (proj.TryGetComponent<ProjectileSkeleton>(out var ps))
-            {
-                ps.Initialize(dir, ProjectileSpeed, HitLayer, Damage);
-            }
-        }
-    }
-    
-    
     public void FireLastPosition(Transform self, Vector3 targetPosition)
     {
         var fp = self.GetComponent<EnemyBTController>().FirePoint;
@@ -90,35 +52,11 @@ public class RangedAttackBehavior : ScriptableObject, IAttackBehavior
         dir.y = 0;
         if (dir.sqrMagnitude < 0.01f) dir = self.forward;
         dir.Normalize();
-
-        if (UseRaycastTracer)
-        {
-            if (Physics.Raycast(fp.position, dir, out var hit, Range, HitLayer))
-            {
-                if (hit.collider.TryGetComponent<EnemyBTController>(out var e))
-                    e.SetHit(Damage);
-                SpawnTracer(fp.position, hit.point);
-            }
-            else
-            {
-                SpawnTracer(fp.position, fp.position + dir * Range);
-            }
-        }
-        else
-        {
-            var proj = Instantiate(ProjectilePrefab, fp.position, Quaternion.LookRotation(dir));
-            if (proj.TryGetComponent<ProjectileSkeleton>(out var ps))
-                ps.Initialize(dir, ProjectileSpeed, HitLayer, Damage);
-        }
+        
+        var proj = Instantiate(ProjectilePrefab, fp.position, Quaternion.LookRotation(dir));
+        if (proj.TryGetComponent<Projectile>(out var ps))
+            ps.Initialize(dir, ProjectileSpeed, HitLayer, Damage);
+        
     }
 
-    private void SpawnTracer(Vector3 from, Vector3 to)
-    {
-        var go = new GameObject("Tracer");
-        var lr = go.AddComponent<LineRenderer>();
-        lr.positionCount = 2;
-        lr.SetPositions(new[] { from, to });
-        lr.startWidth = lr.endWidth = 0.05f;
-        Destroy(go, 0.1f);
-    }
 }

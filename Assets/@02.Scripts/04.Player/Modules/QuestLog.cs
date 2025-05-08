@@ -9,10 +9,10 @@ public sealed class QuestLog : MonoBehaviour
 {
     public class QuestProgress { public int cur, target;}
 
-    readonly Dictionary<int, QuestProgress> mActiveQuests = new();
-    public IReadOnlyDictionary<int, QuestProgress> ActiveQuests => mActiveQuests;
-    readonly Dictionary<int, QuestProgress> mCompletedQuests = new();
-    public IReadOnlyDictionary<int, QuestProgress> CompletedQuests => mCompletedQuests;
+    readonly Dictionary<string, QuestProgress> mActiveQuests = new();
+    public IReadOnlyDictionary<string, QuestProgress> ActiveQuests => mActiveQuests;
+    readonly Dictionary<string, QuestProgress> mCompletedQuests = new();
+    public IReadOnlyDictionary<string, QuestProgress> CompletedQuests => mCompletedQuests;
 
     public readonly Subject<QuestAccepted> Accepted = new();
     public readonly Subject<QuestUpdated> Progress = new();
@@ -22,7 +22,7 @@ public sealed class QuestLog : MonoBehaviour
 
     /// <param name="id">"Quest ID"</param>
     /// <param name="target">"Quest 목표치"</param>
-    public void Accept(int id, int target)
+    public void Accept(string id, int target)
     {
         if (mActiveQuests.ContainsKey(id)) 
         {
@@ -34,7 +34,7 @@ public sealed class QuestLog : MonoBehaviour
         Accepted.OnNext(new QuestAccepted(id, 0, target));
     }
 
-    public void AddProgress(int id, int addedAmt = 1)
+    public void AddProgress(string id, int addedAmt = 1)
     {
         if (!mActiveQuests.TryGetValue(id, out var q))
         {
@@ -52,7 +52,7 @@ public sealed class QuestLog : MonoBehaviour
         }
     }
 
-    public bool Reward(int id)
+    public bool Reward(string id)
     {
         if (!mCompletedQuests.TryGetValue(id, out var q))
         {

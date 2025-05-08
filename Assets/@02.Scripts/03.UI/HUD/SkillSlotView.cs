@@ -34,7 +34,7 @@ public sealed class SkillSlotView : MonoBehaviour
         }
         if (mSkillImage.sprite == null)
         {
-            mSkillImage.sprite = SpriteCache.Instance.GetSprite(SpriteType.Skill, id);
+            mSkillImage.sprite = GameDB.Instance.SpriteCache.GetSprite(SpriteType.Skill, id);
         }
     }
 
