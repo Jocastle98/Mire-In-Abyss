@@ -4,8 +4,6 @@
 [RequireComponent(typeof(Collider))]
 public class Projectile : MonoBehaviour
 {
-    [SerializeField] private float mSpeed = 15f;
-
     private Rigidbody mRb;
     private Collider mCol;
     private LayerMask mHitLayer;
