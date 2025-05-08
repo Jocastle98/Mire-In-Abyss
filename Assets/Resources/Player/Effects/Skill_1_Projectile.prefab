@@ -5069,10 +5069,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ccb169098402da2418b8702baef90ebc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mSkill_1_Damage: 50
-  mEnemyLayerMask:
-    serializedVersion: 2
-    m_Bits: 512
 --- !u!1 &8326875285562556626
 GameObject:
   m_ObjectHideFlags: 0
