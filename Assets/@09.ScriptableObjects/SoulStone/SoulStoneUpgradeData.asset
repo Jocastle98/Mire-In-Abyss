@@ -110,7 +110,7 @@ MonoBehaviour:
     - 0.1
     - 0.15
     - 0.2
-    - 0.3
+    - 0.25
     ValueType: percent
   - UpgradeId: levelUp
     Title: "\uB808\uBCA8\uC5C5"

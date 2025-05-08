@@ -24,6 +24,9 @@ public class CollectableItem : MonoBehaviour
     private void CollectItem(GameObject player)
     {
         PlayerHub.Instance.Inventory.AddItem(mItemID, 1);
+        
+        mItemDatabase = FindObjectOfType<ItemDatabase>(); //임시 코드
+        
         Item item = mItemDatabase.GetItemByID(mItemID);
 
         string message = $"{item.ItemName} : {item.Description}";
