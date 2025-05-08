@@ -15,16 +15,17 @@ public abstract class BaseUIPanel : MonoBehaviour
     public CanvasGroup CG;
     protected virtual void Awake() => CG = GetComponent<CanvasGroup>();
 
-    public virtual async UniTask Show()
+    public virtual async UniTask Show(Action onComplete = null)
     {
         gameObject.SetActive(true);
         CG.alpha = 0;
         await CG.DOFade(1, .2f).ToUniTask();
     }
-    public virtual async UniTask Hide()
+    public virtual async UniTask Hide(Action onComplete = null)
     {
         await CG.DOFade(0, .15f).ToUniTask();
         mDisposables.Dispose();
         gameObject.SetActive(false);
+        onComplete?.Invoke();
     }
 }

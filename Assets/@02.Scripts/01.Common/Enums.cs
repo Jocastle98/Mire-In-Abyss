@@ -79,6 +79,7 @@ namespace UIPanelEnums
         EnterPortal,
         Setting,
         Codex,
+        EscGroup,
     }
 }
 

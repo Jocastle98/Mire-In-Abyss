@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
-using Events.Common;
+using Events.Data;
 using R3;
 using UIEnums;
 using Unity.VisualScripting;
