@@ -3913,7 +3913,7 @@ MonoBehaviour:
   mBuffDuration: 10
   mBuffIsDebuff: 1
   mToastMessage: "\uC5C5\uC801: \uC2EC\uC5F0\uC758 \uC9C0\uBC30\uC790 \uB2EC\uC131!"
-  mItemID: 0
+  mItemID: 1
   mItemCount: 1
   mEnemyHp: 100
   mEnemyMaxHp: 100
