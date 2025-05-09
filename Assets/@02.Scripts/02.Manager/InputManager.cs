@@ -11,7 +11,7 @@ public class InputManager
     public bool JumpInput => mJumpBuffer.ConsumeInputBuffer();
     public bool RollInput => mRollBuffer.ConsumeInputBuffer();
     public bool AttackInput => mAttackBuffer.ConsumeInputBuffer();
-    public bool IsAttacking => mAttackBuffer.bIsHolding;
+    public bool IsAttacking => mAttackAction.IsPressed(); // 버퍼 효과 안 받음
     public bool DefendInput => mDefendBuffer.ConsumeInputBuffer();  // 단발성
     public bool IsDefending => mDefendBuffer.bIsHolding;             // 지속 입력
     public bool ParryInput => mParryBuffer.ConsumeInputBuffer();

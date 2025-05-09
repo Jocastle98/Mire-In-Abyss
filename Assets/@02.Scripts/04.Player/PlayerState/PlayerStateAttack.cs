@@ -47,7 +47,7 @@ public class PlayerStateAttack : IPlayerState
         }
         
         if ((GameManager.Instance.Input.AttackInput || GameManager.Instance.Input.IsAttacking) 
-            && bIsComboActive && !HasReceivedNextAttackInput)
+             && bIsComboActive && !HasReceivedNextAttackInput)
         {
             AttackCount++;
             mPlayerController.PlayerAnimator.SetTrigger("Attack");
@@ -91,11 +91,6 @@ public class PlayerStateAttack : IPlayerState
         mPlayerController = null;
     }
 
-    private void ChangeState()
-    {
-        
-    }
-
     private int AttackCount
     {
         get => mCurrentCombo;
@@ -116,28 +111,13 @@ public class PlayerStateAttack : IPlayerState
         switch (AttackCount)
         {
             case 0:
-                GameObject slashEffect_0 = Resources.Load<GameObject>("Player/Effects/Slash_Effect");
-                if (slashEffect_0 != null)
-                {
-                    Vector3 firePosition = mPlayerController.transform.position + mPlayerController.transform.forward + Vector3.up;
-                    slashEffectObject = GameObject.Instantiate(slashEffect_0, firePosition, Quaternion.identity);
-                }
+                slashEffectObject = mPlayerController.SlashEffect(SlashEffectType.RightToLeft);
                 break;
             case 1:
-                GameObject slashEffect_1 = Resources.Load<GameObject>("Player/Effects/Slash_Effect");
-                if (slashEffect_1 != null)
-                {
-                    Vector3 firePosition = mPlayerController.transform.position + mPlayerController.transform.forward + Vector3.up;
-                    slashEffectObject = GameObject.Instantiate(slashEffect_1, firePosition, Quaternion.Euler(180.0f, - 90.0f, 0.0f));
-                }
+                slashEffectObject = mPlayerController.SlashEffect(SlashEffectType.LeftToRight);
                 break;
             case 2:
-                GameObject slashEffect_2 = Resources.Load<GameObject>("Player/Effects/Slash_Effect");
-                if (slashEffect_2 != null)
-                {
-                    Vector3 firePosition = mPlayerController.transform.position + mPlayerController.transform.forward + Vector3.up;
-                    slashEffectObject = GameObject.Instantiate(slashEffect_2, firePosition, Quaternion.identity);
-                }
+                slashEffectObject = mPlayerController.SlashEffect(SlashEffectType.RightToLeft);
                 break;
         }
 

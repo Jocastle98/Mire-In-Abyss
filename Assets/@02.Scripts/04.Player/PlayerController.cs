@@ -892,6 +892,9 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
                 distanceCovered += moveAmount;
                 yield return null;
             }
+
+            GameObject slashEffectObject = SlashEffect(SlashEffectType.LeftToRight);
+            Destroy(slashEffectObject, 0.2f);
         }
     }
 
@@ -907,7 +910,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             mCharacterController.excludeLayers = LayerMask.GetMask("Nothing");
         }
     }
-
+    
     #endregion
     
     #region 공격 관련 기능
@@ -1032,8 +1035,12 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         mWeaponController.AttackStart();
         mPlayerStateAttack.HasReceivedNextAttackInput = false;
         mPlayerStateAttack.bIsComboActive = true;
-        GameObject slashEffectObject = mPlayerStateAttack.AttackEffect();
-        Destroy(slashEffectObject, 0.2f);
+
+        if (CurrentPlayerState == PlayerState.Attack)
+        {
+            GameObject slashEffectObject = mPlayerStateAttack.AttackEffect();
+            Destroy(slashEffectObject, 0.2f);
+        }
     }
 
     // 공격 애니메이션 중 공격 행동 종료 시점에 호출되는 메서드
@@ -1412,6 +1419,8 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         float recoveryTime = 1.0f * invAttackSpeed;
         
         yield return new WaitForSeconds(startupTime); // 애니메이션 선딜
+
+        SlashEffect(SlashEffectType.LeftToRight);
         
         GameObject skill_1_Effect_Prefab = Resources.Load<GameObject>("Player/Effects/Skill_1_Projectile");
         if (skill_1_Effect_Prefab == null)
@@ -1832,6 +1841,8 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         PlayerAnimator.SetInteger("Skill_Index", 4);
         
         yield return new WaitForSeconds(startupTime); // 애니메이션 선딜
+
+        SlashEffect(SlashEffectType.TopToBottom);
         
         GameObject projectilePrefab = Resources.Load<GameObject>("Player/Effects/Skill_4_Projectile");
         if (projectilePrefab == null)
@@ -1882,6 +1893,39 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         {
             AudioSource.PlayClipAtPoint(landingAudioClip, transform.position /*, 볼륨 */);
         }
+    }
+
+    #endregion
+
+    #region 이펙트 관련 기능
+
+    public GameObject SlashEffect(SlashEffectType type)
+    {
+        GameObject slashEffectObject = null;
+        
+        GameObject slashEffect = Resources.Load<GameObject>("Player/Effects/Slash_Effect");
+        if (slashEffect != null)
+        {
+            Vector3 firePosition = transform.position + transform.forward + Vector3.up;
+            Quaternion rotation = Quaternion.Euler(0.0f, 0.0f, 0.0f);
+            
+            switch (type)
+            {
+                case SlashEffectType.RightToLeft:
+                    rotation = transform.rotation;
+                    break;
+                case SlashEffectType.LeftToRight:
+                    rotation = transform.rotation * Quaternion.Euler(0.0f, 0.0f, 180.0f);
+                    break;
+                case SlashEffectType.TopToBottom:
+                    rotation = transform.rotation * Quaternion.Euler(0.0f, 0.0f, 90.0f);
+                    break;
+            }
+            
+            slashEffectObject = GameObject.Instantiate(slashEffect, firePosition, rotation);
+        }
+        
+        return slashEffectObject;
     }
 
     #endregion
