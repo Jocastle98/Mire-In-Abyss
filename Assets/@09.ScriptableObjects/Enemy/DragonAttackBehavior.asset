@@ -24,7 +24,7 @@ MonoBehaviour:
   FireballCooldown: 5
   BreathRange: 10
   BreathProjectorPrefab: {fileID: 3286200521227265529, guid: c377597f34a4fbc4f9767c81bb90a4e3, type: 3}
-  BreathVFXPrefab: {fileID: 2931361623723078552, guid: c8fb260bcf620584aa8c4d3ad65052a9, type: 3}
+  BreathVFXPrefab: {fileID: 389821699222927281, guid: 0526e58e6d0cd04439c721718fe15e69, type: 3}
   BreathHitLayer:
     serializedVersion: 2
     m_Bits: 256

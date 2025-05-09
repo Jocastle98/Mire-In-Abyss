@@ -709,7 +709,8 @@ public class EnemyBTController : MonoBehaviour
 
         if (mAttackBehaviorAsset is DragonAttackBehavior dragon)
         {
-            if (dragon.BreathVFXPrefab != null) Instantiate(dragon.BreathVFXPrefab, transform.position, Quaternion.identity);
+            if (dragon.BreathVFXPrefab != null) 
+                Instantiate(dragon.BreathVFXPrefab, mFirePoint.position, mFirePoint.rotation);
             Collider[] hits = Physics.OverlapSphere(transform.position, dragon.BreathRange, dragon.BreathHitLayer);
             float dotValue = Mathf.Cos(Mathf.Deg2Rad * (dragon.BreathAngle * 0.5f));
             foreach (var col in hits)
