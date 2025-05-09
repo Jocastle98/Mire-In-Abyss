@@ -268,11 +268,11 @@ public class EnemyBTController : MonoBehaviour
                 new BTCondition(() => !mbIsAttacking && mTarget != null && dragon.CanFireball(transform, mTarget)),
                 new BTAction(() =>
                 {
+                    FaceTarget();
                     mbIsAttacking = true;
                     ClearAllBools();
                     if (mAgent != null && mAgent.enabled && mAgent.isOnNavMesh)
                         mAgent.isStopped = true;
-                    FaceTarget();
                     mAttackBehavior.Attack(transform, mTarget);
                 })
             );
@@ -281,11 +281,11 @@ public class EnemyBTController : MonoBehaviour
                 new BTCondition(() => !mbIsAttacking && mTarget != null && dragon.CanBreath(transform, mTarget)),
                 new BTAction(() =>
                 {
+                    FaceTarget();
                     mbIsAttacking = true;
                     ClearAllBools();
                     if (mAgent != null && mAgent.enabled && mAgent.isOnNavMesh)
                         mAgent.isStopped = true;
-                    FaceTarget();
                     mAttackBehavior.Attack(transform, mTarget);
                 })
             );
@@ -294,11 +294,11 @@ public class EnemyBTController : MonoBehaviour
                 new BTCondition(() => !mbIsAttacking && mTarget != null && dragon.CanTail(transform, mTarget)),
                 new BTAction(() =>
                 {
+                    FaceTarget();
                     mbIsAttacking = true;
                     ClearAllBools();
                     if (mAgent != null && mAgent.enabled && mAgent.isOnNavMesh)
                         mAgent.isStopped = true;
-                    FaceTarget();
                     mAttackBehavior.Attack(transform, mTarget);
                 })
             );
@@ -732,7 +732,8 @@ public class EnemyBTController : MonoBehaviour
         }
     }
     #endregion
-
+    
+    #region 골렘 공격
     private IEnumerator ScaleUpProjector()
     {
         if (!(mAttackBehaviorAsset is GolemAttackBehavior golem)) yield break;
@@ -749,10 +750,8 @@ public class EnemyBTController : MonoBehaviour
         }
         currentProjector.orthographicSize = range;
         onComplete?.Invoke();
-        Destroy(currentProjector.gameObject, 0.5f);
+        Destroy(currentProjector.gameObject);
     }
-
-    #region 골렘 공격
     public void OnImpactIndicator()
     {
         if (ImpactProjectorPrefab == null || !(mAttackBehaviorAsset is GolemAttackBehavior) || mTarget == null) return;
@@ -765,11 +764,26 @@ public class EnemyBTController : MonoBehaviour
 
     public void OnImpactLand()
     {
-        var golem = mAttackBehaviorAsset as GolemAttackBehavior;
-        var hits = Physics.OverlapSphere(transform.position, golem.ImpactRange, ImpactHitLayer);
-        foreach (var col in hits)
-            if (col.CompareTag("Player"))
-                col.GetComponent<PlayerController>().SetHit(golem.ImpactDamage, transform, 1);
+        if (mAttackBehaviorAsset is GolemAttackBehavior golem
+            && golem.mImpactVFXPrefab != null
+            && currentProjector != null)
+        {
+            var spawnPos = transform.position;
+            var vfx = Instantiate(golem.mImpactVFXPrefab, spawnPos, golem.mImpactVFXPrefab.transform.rotation);
+            Destroy(vfx, golem.mImpactVFXDuration);
+        }
+
+        if (mAttackBehaviorAsset is GolemAttackBehavior g)
+        {
+            Vector3 center = currentProjector != null ? currentProjector.transform.position: transform.position;
+            Collider[] hits = Physics.OverlapSphere(center, g.ImpactRange, ImpactHitLayer);
+            foreach (var col in hits)
+            {
+                if (!col.CompareTag("Player")) continue;
+                col.GetComponent<PlayerController>()
+                    .SetHit(g.ImpactDamage, transform, 2);
+            }
+        }    
     }
 
     public void OnSwingAttack()

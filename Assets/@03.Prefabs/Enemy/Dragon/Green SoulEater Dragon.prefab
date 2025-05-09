@@ -971,6 +971,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 6893685648307319322}
+  - {fileID: 7519986716846549896}
   m_Father: {fileID: 1944464047234422733}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &3781917859923023226
@@ -1132,6 +1133,7 @@ MonoBehaviour:
   mPatrolRadius: 5
   mAttackBehaviorAsset: {fileID: 11400000, guid: 7a0e4d87a1dfa674fae9b413f0c38b1a, type: 2}
   mFirePoint: {fileID: 6893685648307319322}
+  mBreathPoint: {fileID: 7519986716846549896}
   ImpactProjectorPrefab: {fileID: 0}
   ImpactHitLayer:
     serializedVersion: 2
@@ -1143,6 +1145,7 @@ MonoBehaviour:
   airDuration: 10
   mEnemyType: 2
   mExpRewardController: {fileID: 168077520893859685}
+  stunDuration: 2
 --- !u!95 &6038634554808625915
 Animator:
   serializedVersion: 5
@@ -1965,6 +1968,37 @@ Transform:
   - {fileID: 5915873705130420535}
   m_Father: {fileID: 8601039896354952826}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &7291675947114681181
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7519986716846549896}
+  m_Layer: 9
+  m_Name: BreathPoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7519986716846549896
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7291675947114681181}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0.55676395, y: 0.41265047, z: -0.5237423, w: -0.49540645}
+  m_LocalPosition: {x: -61.4, y: 142, z: -20}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 6794301148608861086}
+  m_LocalEulerAnglesHint: {x: -6.858, y: 272.278, z: 99.776}
 --- !u!1 &7545820968540204122
 GameObject:
   m_ObjectHideFlags: 0

@@ -18,3 +18,5 @@ MonoBehaviour:
   mImpactDamage: 35
   mImpactChargeTime: 1.5
   mImpactCooldown: 10
+  mImpactVFXPrefab: {fileID: 1312756255662086, guid: 078f5bbd7caf6ff47aad8b50cdf3ef8d, type: 3}
+  mImpactVFXDuration: 2

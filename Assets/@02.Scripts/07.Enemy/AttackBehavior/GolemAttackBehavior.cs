@@ -13,7 +13,11 @@ public class GolemAttackBehavior : ScriptableObject, IAttackBehavior
     [SerializeField] private int   mImpactDamage     = 35;
     [SerializeField] private float mImpactChargeTime = 1.5f;
     [SerializeField] private float mImpactCooldown   = 10f;
-
+    
+    [Header("임팩트 VFX")]
+    public GameObject mImpactVFXPrefab;
+    public float mImpactVFXDuration = 2f;
+    
     private float mLastImpactTime = -Mathf.Infinity;
 
     public float SwingRange       => mSwingRange;
