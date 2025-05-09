@@ -381,6 +381,7 @@ public class DungeonCells
 
     public void SetCorridorCollider(Vector2Int fromCoord, Vector2Int toCoord,bool extraForCorner)
     {
+        mCurrentTilePrefab.layer = 3;
         BoxCollider boxCol = mCurrentTilePrefab.gameObject.AddComponent<BoxCollider>();
         boxCol.center += new Vector3(0.5f, -0.5f, 0.5f);
 

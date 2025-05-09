@@ -57,25 +57,25 @@ public class DungeonController : BattleArea
 
     //최대 방 크기, 최소 방 크기, 방 개수, 보물상자, 함정
     public void DungeonInit(int cellSize, int minDungeonSize, int divideLineWidth, int minRoomCount, int levelDesign,
-        int eventRoomChance, SODungeonList dungeonListSo,GameObject player)
+        int eventRoomChance, SODungeonList dungeonListSo, GameObject player)
     {
         mCellSize = cellSize;
         mMinDungeonSize = minDungeonSize;
         mDivideLineWidth = divideLineWidth;
         mEventRoomChance = eventRoomChance;
         mPlayer = player;
-        
+
         mTileFolder = new GameObject("TileFolder");
         mStanderFolder = new GameObject("StanderFolder");
         mDungeonFolder = new GameObject("DungeonFolder");
         mTileFolder.transform.parent = gameObject.transform;
         mStanderFolder.transform.parent = gameObject.transform;
         mDungeonFolder.transform.parent = gameObject.transform;
-        
+
         mCreateSize = mMinDungeonSize * (minRoomCount / 3 + 1);
         mMinRoomCount = Mathf.Max(2,
             Random.Range(minRoomCount - (int)(levelDesign * .1f), minRoomCount + (int)(levelDesign * .1f))) - 1;
-        
+
         int whileCount = 0;
         while (mLeafRooms.Count <= mMinRoomCount)
         {
@@ -84,7 +84,7 @@ public class DungeonController : BattleArea
             ClearObjs(mDungeonFolder);
             mLeafRooms.Clear();
             mDungeonCells = null;
-            
+
             whileCount++;
             if (10 < whileCount)
             {
@@ -93,14 +93,14 @@ public class DungeonController : BattleArea
             }
 
             mDungeonCells = new DungeonCells[mCreateSize, mCreateSize];
-            
+
             for (int i = 0; i < mCreateSize; i++)
             {
                 for (int j = 0; j < mCreateSize; j++)
                 {
                     mDungeonCells[i, j] = new DungeonCells();
                     mDungeonCells[i, j].SetDungeonCells(new Vector2Int(i, j),
-                        mCellSize,mTileFolder,mStanderFolder, mDungeonFolder, dungeonListSo);
+                        mCellSize, mTileFolder, mStanderFolder, mDungeonFolder, dungeonListSo);
                 }
             }
 
@@ -110,12 +110,21 @@ public class DungeonController : BattleArea
 
         for (int i = 0; i < mLeafRooms.Count; i++)
         {
-            SetRoom(mLeafRooms[i],i);
+            SetRoom(mLeafRooms[i], i);
         }
 
         FindClosestRoom(mLeafRooms[0]);
-        
+
+        // NavMeshSurface 생성 및 설정
         mNavMeshSurface = gameObject.AddComponent<NavMeshSurface>();
+
+        // Collect Objects 방식을 Children으로 설정하면 하위 오브젝트만 수집
+        mNavMeshSurface.collectObjects = CollectObjects.All;
+
+        // Ground 레이어만 포함되도록 LayerMask 설정
+        mNavMeshSurface.layerMask = LayerMask.GetMask("Ground");
+
+        // NavMesh 빌드
         mNavMeshSurface.BuildNavMesh();
     }
 

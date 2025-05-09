@@ -189,32 +189,6 @@ public class FieldController : BattleArea
         mMonsterSpawner.transform.position = mPlayer.transform.position + Vector3.up * 2f;
         mSpawnController.SpawnObjWithSoGroupList(monsterLists, spawnCount, mFieldMonsterFolder.transform,
             MonsterDeadCounting);
-
-        #region 비행유닛?
-
-        // //가까운 스폰장소를 찾음
-        // GameObject spawner = FindClosestSpawnController();
-        // if (spawner != null)
-        // {
-        //     SpawnController spawnController = spawner.GetComponent<SpawnController>();
-        //     spawnController.SpawnObjWithSOGruopList(monsterLists,spawnCount, mFieldMonsterFolder.transform);
-        // }
-        // else //없으면 플레이어 주위로 비행 몬스터 소환
-        // {
-        //     Vector3 randomPointOnCircle = Random.insideUnitSphere;
-        //     randomPointOnCircle.Normalize(); // 방향만 남김 (길이 1)
-        //     randomPointOnCircle *= Random.Range(5, 10); // 원하는 반지름으로 스케일 조정
-        //
-        //     GameObject monster = Instantiate(commonRanger[Random.Range(0, commonRanger.Count)],
-        //         mPlayer.transform.position + randomPointOnCircle,
-        //         Quaternion.identity);
-        //     monster.transform.SetParent(mFieldMonsterFolder.transform);
-        // }
-        //
-        // mMonsterCurrentField++;
-
-        #endregion
-
     }
 
     bool SpawnCoolDownUpdate()

@@ -48,7 +48,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5462368760646756697}
   - component: {fileID: 5986019657606163636}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: WayCollider
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -101,7 +101,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8218513499465432186}
   - component: {fileID: 4985688463401913105}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: brick wall (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -300,7 +300,7 @@ Transform:
   m_GameObject: {fileID: 1169715459972020762}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 8.54, y: 0.5, z: 5.46}
+  m_LocalPosition: {x: 8.54, y: 1.53, z: 5.46}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -345,7 +345,7 @@ Transform:
   m_GameObject: {fileID: 1622624497834401325}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 5.37, y: 0.5, z: 5.48}
+  m_LocalPosition: {x: 5.37, y: 1.53, z: 5.48}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -509,7 +509,7 @@ Transform:
   m_GameObject: {fileID: 1748567690379395379}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 2.37, y: 0.5, z: 5.44}
+  m_LocalPosition: {x: 2.37, y: 1.53, z: 5.44}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -784,7 +784,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6628638321493644333}
   - component: {fileID: 7883800543280948668}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: brick wall
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -921,7 +921,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5344656936474248855}
   - component: {fileID: 5471138518544389979}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: brick wall (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1290,7 +1290,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5325564676513761941}
   - component: {fileID: 8622113908588956263}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: brick wall (3)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1375,7 +1375,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5970812609537994757}
   - component: {fileID: 6093710179346625014}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: brick wall
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1444,7 +1444,7 @@ Transform:
   m_GameObject: {fileID: 4208440694923855624}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 5.32, y: 0.5, z: 2.16}
+  m_LocalPosition: {x: 5.32, y: 1.53, z: 2.16}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1473,7 +1473,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2322862960704805947}
   - component: {fileID: 6190366107572113590}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: brick wall (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1561,7 +1561,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5877825851019593152}
   - component: {fileID: 129992893345709887}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: brick wall (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1958,7 +1958,7 @@ Transform:
   m_GameObject: {fileID: 5151160919252014504}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 5.26, y: 0.5, z: 8.63}
+  m_LocalPosition: {x: 5.26, y: 1.53, z: 8.63}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2219,7 +2219,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5031135439110496905}
   - component: {fileID: 5502888605552444030}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: brick wall
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2486,7 +2486,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6866166550556573513}
   - component: {fileID: 7596603759632378413}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: brick wall (3)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2539,7 +2539,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2588057412251179967}
   - component: {fileID: -4980591910336886398}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: MonsterRoom_004
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2594,7 +2594,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2638358773261720512}
   - component: {fileID: 106413522453323992}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: brick wall (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2731,7 +2731,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3963561413224426324}
   - component: {fileID: 8458614873852503009}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: brick wall (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2784,7 +2784,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8884246714517739062}
   - component: {fileID: 256710122624380398}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: brick wall
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3002,7 +3002,7 @@ GameObject:
   m_Component:
   - component: {fileID: 789259774049269043}
   - component: {fileID: 5594848222356354944}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: WayCollider (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3055,7 +3055,7 @@ GameObject:
   m_Component:
   - component: {fileID: 676465270207422381}
   - component: {fileID: 3816691373762515451}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: brick wall (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3157,7 +3157,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6848133892603401192}
   - component: {fileID: 2732214260173519281}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: brick wall (3)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3210,7 +3210,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6747540175360059578}
   - component: {fileID: 6810721132159614606}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: brick wall (3)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3263,7 +3263,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6321697601425488540}
   - component: {fileID: 3069624641958966211}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: brick wall (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4117,6 +4117,10 @@ PrefabInstance:
     - target: {fileID: 9059174854790265793, guid: 78d48e2a4cf87b34ba6c5927c8331bd2, type: 3}
       propertyPath: m_Name
       value: Plane
+      objectReference: {fileID: 0}
+    - target: {fileID: 9059174854790265793, guid: 78d48e2a4cf87b34ba6c5927c8331bd2, type: 3}
+      propertyPath: m_Layer
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 9059174854790265793, guid: 78d48e2a4cf87b34ba6c5927c8331bd2, type: 3}
       propertyPath: m_IsActive
