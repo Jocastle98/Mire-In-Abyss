@@ -7,6 +7,7 @@ using UIPanelEnums;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.Serialization;
+using R3;
 
 public class UIManager : Singleton<UIManager>
 {

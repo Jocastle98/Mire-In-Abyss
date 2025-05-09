@@ -11,8 +11,8 @@ public sealed class MainMenuPresenter : MonoBehaviour
 
     void Start()
     {
-        //TODO: SceneLoader 추가 후 버튼 기능 연결
-        //mBtnPlay    .onClick.AddListener(() => SceneLoader.LoadSceneAsync("Town"));
+        //Temp
+        mBtnPlay    .onClick.AddListener(() => SceneLoader.LoadAsync(Constants.TownScene).Forget());
         mBtnCodex   .onClick.AddListener(() => UIManager.Instance.Push(UIPanelType.Codex).Forget());
         mBtnSettings.onClick.AddListener(() => UIManager.Instance.Push(UIPanelType.Setting).Forget());
         //mBtnCredit  .onClick.AddListener(() => UIManager.Instance.Push(UIPanelType.Credit).Forget());

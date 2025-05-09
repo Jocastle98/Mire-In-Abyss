@@ -6,7 +6,19 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/@01.Scenes/Jihoon_FieldTest.unity
-    guid: 6908a39d23217bf499c0953260b56c48
+    path: Assets/@01.Scenes/Boot.unity
+    guid: 53d45dd7c287e5744b0aefb0e05f86b9
+  - enabled: 1
+    path: Assets/@01.Scenes/Systems.unity
+    guid: bf86feaa046c1c94fac98da519a1ac84
+  - enabled: 1
+    path: Assets/@01.Scenes/MainMenu.unity
+    guid: 00e1373f8b9efbe429daf8157040e703
+  - enabled: 1
+    path: Assets/@01.Scenes/LoadingOverlay.unity
+    guid: 6761f6627e1298a47bdfa379ad5c3e14
+  - enabled: 1
+    path: Assets/@01.Scenes/Jihoon_Town.unity
+    guid: ef8c98bb28a5d04478b548f51ea7164e
   m_configObjects:
     com.unity.addressableassets: {fileID: 11400000, guid: d0038d3451832a640be5e5f290947e8f, type: 2}

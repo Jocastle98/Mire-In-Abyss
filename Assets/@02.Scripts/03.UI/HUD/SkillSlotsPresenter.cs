@@ -24,10 +24,7 @@ public sealed class SkillSlotsPresenter : HudPresenterBase
 
     private void OnPreloaded(Preloaded e)
     {
-        if (e.IsPreloaded)
-        {
-            setSkillSlots();
-        }
+        setSkillSlots();
     }
 
     private void subscribeEvents()
