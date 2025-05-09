@@ -31,6 +31,7 @@ public class EnemyBTController : MonoBehaviour
 
     [Header("원거리 발사 위치 (원거리 스켈레톤, 드래곤)")]
     [SerializeField] private Transform mFirePoint;
+    [SerializeField] private Transform mBreathPoint;
     public Transform FirePoint => mFirePoint;
     
     [Header("임팩트 설정 (골렘)")]
@@ -69,6 +70,7 @@ public class EnemyBTController : MonoBehaviour
     private Projector currentProjector;
     private bool mExpGiven = false;
     private ItemDropper itemDropper;
+    private GameObject mBreathVFXInstance;
 
     
     void Awake()
@@ -622,6 +624,11 @@ public class EnemyBTController : MonoBehaviour
     {
         mbIsAttacking = false;
         ClearAllBools();
+        if (mBreathVFXInstance != null)
+        {
+            Destroy(mBreathVFXInstance);
+            mBreathVFXInstance = null;
+        }   
         if (mAgent != null && mAgent.enabled && mAgent.isOnNavMesh)
         {
             if (DetectPlayer())
@@ -707,19 +714,21 @@ public class EnemyBTController : MonoBehaviour
         if (currentProjector) Destroy(currentProjector.gameObject);
         currentProjector = null;
 
-        if (mAttackBehaviorAsset is DragonAttackBehavior dragon)
+        if (mAttackBehaviorAsset is DragonAttackBehavior dragon && dragon.BreathVFXPrefab != null)
         {
-            if (dragon.BreathVFXPrefab != null) 
-                Instantiate(dragon.BreathVFXPrefab, mFirePoint.position, mFirePoint.rotation);
-            Collider[] hits = Physics.OverlapSphere(transform.position, dragon.BreathRange, dragon.BreathHitLayer);
-            float dotValue = Mathf.Cos(Mathf.Deg2Rad * (dragon.BreathAngle * 0.5f));
-            foreach (var col in hits)
-            {
-                if (!col.CompareTag("Player")) continue;
-                Vector3 direction = (col.transform.position - transform.position).normalized;
-                if (Vector3.Dot(direction, transform.forward) > dotValue)
-                    col.GetComponent<PlayerController>().SetHit(dragon.BreathDamage, transform, 2);
-            }
+            // 1) FirePoint 위치·회전으로 VFX 생성
+            mBreathVFXInstance = Instantiate(
+                dragon.BreathVFXPrefab,
+                mBreathPoint.position,
+                mBreathPoint.rotation
+            );
+
+            // 2) Projectile 연속딜 모드 초기화
+            if (mBreathVFXInstance.TryGetComponent<Projectile>(out var proj))
+                proj.InitializeBreath(
+                    dragon.BreathHitLayer,
+                    dragon.BreathDamage
+                );
         }
     }
     #endregion
