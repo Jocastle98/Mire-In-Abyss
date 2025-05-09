@@ -1032,6 +1032,8 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         mWeaponController.AttackStart();
         mPlayerStateAttack.HasReceivedNextAttackInput = false;
         mPlayerStateAttack.bIsComboActive = true;
+        GameObject slashEffectObject = mPlayerStateAttack.AttackEffect();
+        Destroy(slashEffectObject, 0.2f);
     }
 
     // 공격 애니메이션 중 공격 행동 종료 시점에 호출되는 메서드

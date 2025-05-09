@@ -15,7 +15,7 @@ public class PlayerStateAttack : IPlayerState
     public bool HasReceivedNextAttackInput;
     public bool bIsComboActive;
     
-    private float mComboInputWindow = 1.0f;
+    private float mComboInputWindow = 2.0f;
     private float mComboInputTimer;
     
     public void OnEnter(PlayerController playerController)
@@ -58,7 +58,7 @@ public class PlayerStateAttack : IPlayerState
         mPlayerController.Attack();
 
         // 콤보가 끝날 때 HasReceivedNextAttackInput을 false로 설정
-        if (AttackCount > mMaxCombo)
+        if (AttackCount >= mMaxCombo)
         {
             HasReceivedNextAttackInput = false;
             bIsComboActive = false;
@@ -91,6 +91,11 @@ public class PlayerStateAttack : IPlayerState
         mPlayerController = null;
     }
 
+    private void ChangeState()
+    {
+        
+    }
+
     private int AttackCount
     {
         get => mCurrentCombo;
@@ -102,6 +107,41 @@ public class PlayerStateAttack : IPlayerState
                 mPlayerController.PlayerAnimator.SetInteger("Attack_Count", value);
             }
         }
+    }
+
+    public GameObject AttackEffect()
+    {
+        GameObject slashEffectObject = null;
+        
+        switch (AttackCount)
+        {
+            case 0:
+                GameObject slashEffect_0 = Resources.Load<GameObject>("Player/Effects/Slash_Effect");
+                if (slashEffect_0 != null)
+                {
+                    Vector3 firePosition = mPlayerController.transform.position + mPlayerController.transform.forward + Vector3.up;
+                    slashEffectObject = GameObject.Instantiate(slashEffect_0, firePosition, Quaternion.identity);
+                }
+                break;
+            case 1:
+                GameObject slashEffect_1 = Resources.Load<GameObject>("Player/Effects/Slash_Effect");
+                if (slashEffect_1 != null)
+                {
+                    Vector3 firePosition = mPlayerController.transform.position + mPlayerController.transform.forward + Vector3.up;
+                    slashEffectObject = GameObject.Instantiate(slashEffect_1, firePosition, Quaternion.Euler(180.0f, - 90.0f, 0.0f));
+                }
+                break;
+            case 2:
+                GameObject slashEffect_2 = Resources.Load<GameObject>("Player/Effects/Slash_Effect");
+                if (slashEffect_2 != null)
+                {
+                    Vector3 firePosition = mPlayerController.transform.position + mPlayerController.transform.forward + Vector3.up;
+                    slashEffectObject = GameObject.Instantiate(slashEffect_2, firePosition, Quaternion.identity);
+                }
+                break;
+        }
+
+        return slashEffectObject;
     }
 
     // todo: 콤보별 공격력 배율(무기 공격력 기준) // 임시 기능(사용할지 말지)
