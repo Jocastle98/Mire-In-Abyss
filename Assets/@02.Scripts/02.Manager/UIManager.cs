@@ -1,16 +1,33 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
+using Events.UI;
+using UIPanelEnums;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.Serialization;
 
-public class UIManager : MonoBehaviour
+public class UIManager : Singleton<UIManager>
 {
     readonly Stack<BaseUIPanel> mStack = new();
     [SerializeField] Canvas mPanelCanvas;
-    [SerializeField] BaseUIPanel mPausePrefab;
+    [SerializeField] BaseUIPanel mSettingPrefab;
+    [SerializeField] BaseUIPanel mCodexPrefab;
+    [SerializeField] BaseUIPanel mQuestBoardPrefab;
+    [SerializeField] BaseUIPanel mEscGroupPrefab;
 
-    public async UniTask Push(BaseUIPanel prefab)
+    private Dictionary<UIPanelType, BaseUIPanel> mPanels = new();
+    protected override void Awake()
+    {
+        base.Awake();
+        mPanels.Add(UIPanelType.Setting, mSettingPrefab);
+        mPanels.Add(UIPanelType.Codex, mCodexPrefab);
+        mPanels.Add(UIPanelType.QuestBoard, mQuestBoardPrefab);
+        mPanels.Add(UIPanelType.EscGroup, mEscGroupPrefab);
+    }
+
+    public async UniTask Push(BaseUIPanel prefab, Action onComplete = null)
     {
         if (mStack.TryPeek(out var top))
         {
@@ -19,8 +36,17 @@ public class UIManager : MonoBehaviour
 
         var inst = Instantiate(prefab, mPanelCanvas.transform);
         mStack.Push(inst);
-        await inst.Show();
+        await inst.Show(onComplete);
     }
+
+    public async UniTask Push(UIPanelType type, Action onComplete = null)
+    {
+        if (mPanels.TryGetValue(type, out var prefab))
+        {
+            await Push(prefab, onComplete);
+        }
+    }
+
     public async UniTask Pop()
     {
         if (mStack.Count == 0)
@@ -30,15 +56,20 @@ public class UIManager : MonoBehaviour
         var top = mStack.Pop();
         await top.Hide();
         Destroy(top.gameObject);
+        
         if (mStack.TryPeek(out var next))
         {
             next.CG.interactable = true;
+        }
+        else if (mStack.Count == 0)
+        {
+            R3EventBus.Instance.Publish(new LastUIPopup());
         }
     }
     void Update()
     {
         //Temp
-        if (Input.GetKeyDown(KeyCode.Escape))
+        if (Input.GetKeyDown(KeyCode.F1))
         {
             newMethod();
         }
@@ -48,11 +79,15 @@ public class UIManager : MonoBehaviour
     {
         if (mStack.Count == 0)
         {
-            Push(mPausePrefab).Forget();
+            Push(UIPanelType.EscGroup).Forget();
         }
         else
         {
             Pop().Forget();
         }
+    }
+
+    protected override void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
     }
 }

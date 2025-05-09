@@ -53,6 +53,7 @@ public class EnemyBTController : MonoBehaviour
 
     [Header("경험치 설정")] 
     [SerializeField] private EnemyType mEnemyType = EnemyType.Common;
+    public EnemyType EnemyType => mEnemyType;
     [SerializeField] private EnemyExpRewardController mExpRewardController;
     
     [Header("기절 설정")]
@@ -67,6 +68,7 @@ public class EnemyBTController : MonoBehaviour
     private bool mHasTriggeredDead;
     private Projector currentProjector;
     private bool mExpGiven = false;
+    private ItemDropper itemDropper;
 
     
     void Awake()
@@ -76,6 +78,7 @@ public class EnemyBTController : MonoBehaviour
         mAttackBehavior = mAttackBehaviorAsset as IAttackBehavior;
         mRenderers = GetComponentsInChildren<Renderer>();
         mExpRewardController = GetComponent<EnemyExpRewardController>();
+        itemDropper = GetComponent<ItemDropper>();
     }
 
     void Start()
@@ -548,6 +551,7 @@ public class EnemyBTController : MonoBehaviour
 
     public void OnDeadAnimationExit()
     {
+        itemDropper.DropItemOnDeadth();
         GiveExpReward();
         StartCoroutine(Dissolve());
     }

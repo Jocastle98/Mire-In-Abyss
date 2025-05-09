@@ -12,8 +12,9 @@ public class PlayerHub : Singleton<PlayerHub>
     public BuffController BuffController { get; private set; }
     public QuestLog QuestLog { get; private set; }
 
-    void Awake()
+    protected override void Awake()
     {
+        base.Awake();
         Inventory = GetComponent<Inventory>();
         BuffController = GetComponent<BuffController>();
         QuestLog = GetComponent<QuestLog>();
@@ -21,6 +22,7 @@ public class PlayerHub : Singleton<PlayerHub>
 
     void Start()
     {
+        //TODO: 퀘스트 로드
         Inventory.Init(0, 0);
         SubscribeEvents();
     }
@@ -41,8 +43,8 @@ public class PlayerHub : Singleton<PlayerHub>
         BuffController.Ended.Subscribe(e => R3EventBus.Instance.Publish(new BuffEnded(e.ID))).AddTo(this);
 
         // QuestLog
-        QuestLog.Accepted.Subscribe(e => R3EventBus.Instance.Publish(new QuestAccepted(e.ID, e.Cur, e.Target))).AddTo(this);
-        QuestLog.Progress.Subscribe(e => R3EventBus.Instance.Publish(new QuestUpdated(e.ID, e.Cur, e.Target))).AddTo(this);
+        QuestLog.Accepted.Subscribe(e => R3EventBus.Instance.Publish(new QuestAccepted(e.ID))).AddTo(this);
+        QuestLog.Progress.Subscribe(e => R3EventBus.Instance.Publish(new QuestUpdated(e.ID, e.CurrentAmount))).AddTo(this);
         QuestLog.Completed.Subscribe(e => R3EventBus.Instance.Publish(new QuestCompleted(e.ID))).AddTo(this);
         QuestLog.Rewarded.Subscribe(e => R3EventBus.Instance.Publish(new QuestRewarded(e.ID))).AddTo(this);
     }

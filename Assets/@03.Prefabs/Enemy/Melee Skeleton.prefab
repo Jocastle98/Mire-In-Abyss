@@ -698,6 +698,7 @@ GameObject:
   - component: {fileID: 22493401646877056}
   - component: {fileID: 8125056749957959188}
   - component: {fileID: 1746888895154962212}
+  - component: {fileID: 3797839114899127273}
   m_Layer: 9
   m_Name: Melee Skeleton
   m_TagString: Untagged
@@ -840,6 +841,41 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mExpRewards: []
+--- !u!114 &3797839114899127273
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2304139275706850596}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7b378118add77dc47bb2fabd7adec133, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemDropChance: 0.5
+  commonEnemyDropRates: []
+  eliteEnemyDropRates: []
+  bossEnemyDropRates: []
+  commonItems:
+  - itemPrefab: {fileID: 7976553848433656226, guid: 2a357fbe012c2c74199d53f95e270d36, type: 3}
+  - itemPrefab: {fileID: 4589246766517950410, guid: 1a34c25d0fad0924aaf3cd5b2f832400, type: 3}
+  - itemPrefab: {fileID: 8480188046009260091, guid: 6a3a6b6856e8e654594a39188e1b5584, type: 3}
+  - itemPrefab: {fileID: 8493394798413732935, guid: beae8a9ce5d5d48478cf0fd010ced339, type: 3}
+  - itemPrefab: {fileID: 1309926817723562742, guid: 138436a8322219c408ab697eaadc4114, type: 3}
+  specialItems:
+  - itemPrefab: {fileID: 922036481110598199, guid: 3a029dd852d62f24d8885ec12c655f39, type: 3}
+  - itemPrefab: {fileID: 518130293983372338, guid: 1bcc1e70430c054409aacbea52de7bc9, type: 3}
+  - itemPrefab: {fileID: 36793908403597010, guid: f07114fed71a9d340b87b27f0b84ef36, type: 3}
+  - itemPrefab: {fileID: 2462319302502677356, guid: e1553f1d1f9c14f4f96ab491f092bc1c, type: 3}
+  - itemPrefab: {fileID: 739638939701958509, guid: a030ebce79f6d5b489a45bcf644371e2, type: 3}
+  epicItems:
+  - itemPrefab: {fileID: 1889015723844522165, guid: a6bd177f6d5c4864c99831a3bb37fbf6, type: 3}
+  - itemPrefab: {fileID: 5463470357542820314, guid: b35b02b6139837c4ea206bd23b20c514, type: 3}
+  - itemPrefab: {fileID: 824455999840619301, guid: 7a96c16f468b7ef4f9a563bc1b2429b7, type: 3}
+  - itemPrefab: {fileID: 8451544530208281256, guid: ad40d133f7336e0489b51d2a88344cd0, type: 3}
+  - itemPrefab: {fileID: 4829352644234409064, guid: 66f639e64b8f5834c80f924e2a9a1a72, type: 3}
+  itemDatabase: {fileID: 0}
 --- !u!1 &2398931372347650365
 GameObject:
   m_ObjectHideFlags: 0

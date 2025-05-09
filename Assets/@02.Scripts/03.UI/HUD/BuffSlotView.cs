@@ -30,7 +30,7 @@ public sealed class BuffSlotView : MonoBehaviour
     public void Bind(BuffAdded buffInfo)
     {
         mID = buffInfo.ID;
-        mBuffImage.sprite = SpriteCache.Instance.GetSprite(SpriteType.Buff, buffInfo.ID);
+        mBuffImage.sprite = GameDB.Instance.SpriteCache.GetSprite(SpriteType.Buff, buffInfo.ID);
         mBuffImageBG.color = buffInfo.IsDebuff ? mDebuffColor : mBuffColor;
         mBuffDurationTime = buffInfo.Duration;
         mBuffTimer = 0;

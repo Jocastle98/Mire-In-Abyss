@@ -4,7 +4,7 @@ using Events.Combat;
 using Events.HUD;
 using Events.Player;
 using Events.Player.Modules;
-using UIHUDEnums;
+using QuestEnums;
 using UnityEngine;
 using UnityEngine.Serialization;
 
@@ -25,7 +25,7 @@ public class HUDTest : MonoBehaviour
     [SerializeField] private string mQuestDesc;
 
     [Header("QuestUpdate")]
-    [SerializeField] private int mUpdatedQuestID;
+    [SerializeField] private string mUpdatedQuestID;
     [SerializeField] private QuestState mUpdatedQuestState;
 
     [Header("Currency")]
@@ -167,7 +167,7 @@ public class HUDTest : MonoBehaviour
     public void OnAddQuest()
     {
         mLastQuestID++;
-        PlayerHub.Instance.QuestLog.Accept(mLastQuestID, 1);
+        PlayerHub.Instance.QuestLog.Accept(mLastQuestID.ToString());
     }
 
     public void OnQuestUpdated()

@@ -1,24 +1,28 @@
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
+using Events.Data;
 using R3;
 using UIEnums;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.SceneManagement;
 
-public sealed class SpriteCache : Singleton<SpriteCache>
+public sealed class SpriteCache
 {
-    private UniTask mPreloadTask;
     private bool mbIsPreloaded = false;
     private readonly Dictionary<int, Sprite> mItemSpritesMap  = new();
     private readonly Dictionary<int, Sprite> mSkillSpritesMap = new();
     private readonly Dictionary<int, Sprite> mBuffSpritesMap  = new();
+    //private readonly Dictionary<int, Sprite> mAchievementSpritesMap = new();
 
 
     public Sprite GetSprite(SpriteType type, int id)
     {
-        var dict = GetDict(type);
+        checkPreloaded();
+
+        var dict = getDict(type);
         if (dict.TryGetValue(id, out var sp)) 
         {
             return sp;
@@ -28,43 +32,46 @@ public sealed class SpriteCache : Singleton<SpriteCache>
         return null;
     }
 
-    //TODO: 로딩창과 연계
-    /* ---------- PRELOAD ---------- */
-    public UniTask PreloadAsync()
+    public Dictionary<int, Sprite> GetDict(SpriteType type)
     {
-        if (mbIsPreloaded)
-        {
-            return UniTask.CompletedTask;
-        }
-
-        if (mPreloadTask.Status == UniTaskStatus.Pending)
-        {
-            return mPreloadTask;
-        }
-
-        mPreloadTask = actuallyPreloadAsync();       // 모든 Addressables label 로드
-        mbIsPreloaded = true;    
-        return mPreloadTask;
+        checkPreloaded();
+        
+        return getDict(type);
     }
 
-    private async UniTask actuallyPreloadAsync()
+    //TODO: 로딩창과 연계
+    /* ---------- PRELOAD ---------- */
+
+    public async UniTask PreloadSprites()
     {
         var tasks = new UniTask[]
         {
             LoadLabelAsync(mItemSpritesMap,  "Item_Icons"),
             LoadLabelAsync(mSkillSpritesMap, "Skill_Icons"),
-            LoadLabelAsync(mBuffSpritesMap,  "Buff_Icons")
+            LoadLabelAsync(mBuffSpritesMap,  "Buff_Icons"),
+            //LoadLabelAsync(mAchievementSpritesMap, "Achievement_Icons")
         };
         await UniTask.WhenAll(tasks);
+
+        mbIsPreloaded = true;
+    }
+
+    private void checkPreloaded()
+    {
+        if (!mbIsPreloaded)
+        {
+            Debug.LogWarning("SpriteCache: GetSprite called before preload finished");
+        }
     }
 
     /* ---------- HELPERS ---------- */
-    Dictionary<int, Sprite> GetDict(SpriteType t) =>
+    private Dictionary<int, Sprite> getDict(SpriteType t) =>
         t switch
         {
             SpriteType.Item  => mItemSpritesMap,
             SpriteType.Skill => mSkillSpritesMap,
             SpriteType.Buff  => mBuffSpritesMap,
+            //SpriteType.Achievement => mAchievementSpritesMap,
             _ => null
         };
 
@@ -84,8 +91,7 @@ public sealed class SpriteCache : Singleton<SpriteCache>
         foreach (var sp in mItemSpritesMap.Values)  Addressables.Release(sp);
         foreach (var sp in mSkillSpritesMap.Values) Addressables.Release(sp);
         foreach (var sp in mBuffSpritesMap.Values)  Addressables.Release(sp);
+        //foreach (var sp in mAchievementSpritesMap.Values) Addressables.Release(sp);
         mItemSpritesMap.Clear(); mSkillSpritesMap.Clear(); mBuffSpritesMap.Clear();
     }
-
-    protected override void OnSceneLoaded(Scene scene, LoadSceneMode mode) { }
 }
