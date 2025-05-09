@@ -5,7 +5,7 @@ using Cinemachine;
 using PlayerEnums;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.Serialization;
+using Random = UnityEngine.Random;
 
 [RequireComponent(typeof(Animator))]
 [RequireComponent(typeof(PlayerInput))]
@@ -122,8 +122,12 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     [SerializeField] private Transform mRightHandTransform;
     [SerializeField] private Transform mLeftHandTransform;
     
+    [Space(10)]
+    [Header("Player AudioClips")]
+    public AudioClip[] footstepAudioClips;
+    public AudioClip landingAudioClip;
+    
     // Player Internal Calculation Stat
-    [SerializeField]
     private float mVerticalVelocity;
     private float mRotationVelocity;
     private float mTerminalVelocity = 53.0f;
@@ -1142,6 +1146,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             mParryCoroutine = null;
         }
         
+        mbIsParryActive = false;
         mbIsDamageReduced = false;
         ParryCooldownTime();
     }
@@ -1852,6 +1857,31 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     
     #endregion
     
+    #endregion
+
+    #region 발소리 관련 기능
+
+    // 발소리, 나중에 사운드매니저로 관리해야 함
+    private void OnFootstepSound(AnimationEvent animationEvent)
+    {
+        if (animationEvent.animatorClipInfo.weight > 0.5f)
+        {
+            if (footstepAudioClips.Length > 0)
+            {
+                var index = Random.Range(0, footstepAudioClips.Length);
+                AudioSource.PlayClipAtPoint(footstepAudioClips[index], transform.position /*, 볼륨 */);
+            }
+        }
+    }
+
+    private void OnLandSound(AnimationEvent animationEvent)
+    {
+        if (animationEvent.animatorClipInfo.weight > 0.5f)
+        {
+            AudioSource.PlayClipAtPoint(landingAudioClip, transform.position /*, 볼륨 */);
+        }
+    }
+
     #endregion
     
     #region 디버깅 관련
