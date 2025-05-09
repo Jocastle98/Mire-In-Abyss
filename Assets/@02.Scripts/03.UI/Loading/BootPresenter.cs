@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
-public sealed class LoadingPresenter : MonoBehaviour
+public sealed class BootPresenter : MonoBehaviour
 {
     [SerializeField] ProgressBarUI mPregressBar;
     [SerializeField] TMP_Text mPercentTxt;
