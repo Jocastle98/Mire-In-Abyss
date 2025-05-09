@@ -36,7 +36,12 @@ namespace PlayerEnums
 
 namespace ItemEnums
 {
-    
+    public enum ItemTier
+    {
+        Common,
+        Special,
+        Epic
+    }
 }
 
 namespace EnemyEnums

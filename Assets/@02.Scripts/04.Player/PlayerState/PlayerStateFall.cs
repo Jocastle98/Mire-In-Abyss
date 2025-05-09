@@ -33,7 +33,7 @@ public class PlayerStateFall : IPlayerState
                 mPlayerController.SetPlayerState(PlayerState.Skill_1);
                 return;
             }
-            else if (GameManager.Instance.Input.Skill_2Input)
+            else if (GameManager.Instance.Input.Skill_2Input && mPlayerController.Skill_2_TimeoutDelta < 0.0f)
             {
                 mPlayerController.SetPlayerState(PlayerState.Skill_2);
                 return;
