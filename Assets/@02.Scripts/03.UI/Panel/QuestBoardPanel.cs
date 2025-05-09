@@ -33,8 +33,7 @@ public class QuestBoardPanel : BaseUIPanel
         }
 
         //TODO: 저장된 퀘스트 목록 가져오기
-        //임시로 퀘스트 목록 생성
-        var questList = QuestOfferService.Instance.GenerateQuestList();
+        var questList = QuestOfferService.Instance.GetQuestList();
 
         //생성된 퀘스트를 담을 퀘스트 블록 생성
         foreach (var questId in questList)
@@ -100,13 +99,13 @@ public class QuestBoardPanel : BaseUIPanel
     public void OnAcceptQuest()
     {
         Quest quest = GameDB.Instance.QuestDatabase.GetQuestById(mNowDetailQuestId);
-        R3EventBus.Instance.Publish(new QuestAccepted(mNowDetailQuestId, 0, quest.TargetAmount));
+        PlayerHub.Instance.QuestLog.Accept(mNowDetailQuestId);
         refreshDetailButtons();
     }
 
     public void OnGetReward()
     {
-        R3EventBus.Instance.Publish(new QuestRewarded(mNowDetailQuestId));
+        PlayerHub.Instance.QuestLog.Reward(mNowDetailQuestId);
         refreshDetailButtons();
     }
 }

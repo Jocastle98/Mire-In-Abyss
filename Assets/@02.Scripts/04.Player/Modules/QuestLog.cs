@@ -7,12 +7,10 @@ using UnityEngine;
 
 public sealed class QuestLog : MonoBehaviour
 {
-    public class QuestProgress { public int cur, target;}
-
-    readonly Dictionary<string, QuestProgress> mActiveQuests = new();
-    public IReadOnlyDictionary<string, QuestProgress> ActiveQuests => mActiveQuests;
-    readonly Dictionary<string, QuestProgress> mCompletedQuests = new();
-    public IReadOnlyDictionary<string, QuestProgress> CompletedQuests => mCompletedQuests;
+    readonly Dictionary<string, Quest> mActiveQuests = new();
+    public IReadOnlyDictionary<string, Quest> ActiveQuests => mActiveQuests;
+    readonly Dictionary<string, Quest> mCompletedQuests = new();
+    public IReadOnlyDictionary<string, Quest> CompletedQuests => mCompletedQuests;
 
     public readonly Subject<QuestAccepted> Accepted = new();
     public readonly Subject<QuestUpdated> Progress = new();
@@ -20,9 +18,38 @@ public sealed class QuestLog : MonoBehaviour
     public readonly Subject<QuestRewarded> Rewarded = new();
 
 
-    /// <param name="id">"Quest ID"</param>
-    /// <param name="target">"Quest 목표치"</param>
-    public void Accept(string id, int target)
+    public Quest GetQuest(string id)
+    {
+        if (mActiveQuests.TryGetValue(id, out var q))
+        {
+            return q;
+        }
+        else if (mCompletedQuests.TryGetValue(id, out q))
+        {
+            return q;
+        }
+        else
+        {
+            Debug.LogError($"Quest {id} not found");
+            return null;
+        }
+    }
+
+    public List<string> GetQuestList()
+    {
+        List<string> questList = new();
+        foreach (var quest in mActiveQuests)
+        {
+            questList.Add(quest.Key);
+        }
+        foreach (var quest in mCompletedQuests)
+        {
+            questList.Add(quest.Key);
+        }
+        return questList;
+    }
+
+    public void Accept(string id)
     {
         if (mActiveQuests.ContainsKey(id)) 
         {
@@ -30,8 +57,8 @@ public sealed class QuestLog : MonoBehaviour
             return;
         }
 
-        mActiveQuests[id] = new() { cur = 0, target = target };
-        Accepted.OnNext(new QuestAccepted(id, 0, target));
+        mActiveQuests.Add(id, GameDB.Instance.QuestDatabase.GetQuestById(id));
+        Accepted.OnNext(new QuestAccepted(id));
     }
 
     public void AddProgress(string id, int addedAmt = 1)
@@ -42,12 +69,13 @@ public sealed class QuestLog : MonoBehaviour
             return;
         }
 
-        q.cur = Mathf.Min(q.cur + addedAmt, q.target);
-        Progress.OnNext(new QuestUpdated(id, q.cur, q.target));
-        if (q.cur == q.target)
+        q.CurrentAmount = Mathf.Min(q.CurrentAmount + addedAmt, q.TargetAmount);
+        Progress.OnNext(new QuestUpdated(id, q.CurrentAmount));
+        if (q.CurrentAmount == q.TargetAmount)
         {
+            q.isCompleted = true;
+            mCompletedQuests.Add(id, q);
             mActiveQuests.Remove(id);
-            mCompletedQuests[id] = q;
             Completed.OnNext(new QuestCompleted(id));
         }
     }

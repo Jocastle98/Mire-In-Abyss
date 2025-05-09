@@ -3,7 +3,7 @@ using UIHUDEnums;
 using UnityEngine;
 
 
-namespace Events.Common
+namespace Events.Data
 {
     public readonly struct Preloaded
     {
@@ -161,16 +161,13 @@ namespace Events.Player.Modules
     public readonly struct QuestAccepted
     {
         public readonly string ID;
-        public readonly int Cur;
-        public readonly int Target;
-        public QuestAccepted(string id, int cur, int target) => (ID, Cur, Target) = (id, cur, target);
+        public QuestAccepted(string id) => ID = id;
     }
     public readonly struct QuestUpdated
     {
         public readonly string ID;
-        public readonly int Cur;
-        public readonly int Target;
-        public QuestUpdated(string id, int cur, int target) => (ID, Cur, Target) = (id, cur, target);
+        public readonly int CurrentAmount;
+        public QuestUpdated(string id, int cur) => (ID, CurrentAmount) = (id, cur);
     }
     public readonly struct QuestCompleted
     {
@@ -262,4 +259,9 @@ namespace Events.HUD
         public readonly T Entity;
         public EntityDestroyed(int id, T e) => (ID, Entity) = (id, e);
     }
+}
+
+namespace Events.UI
+{
+    public readonly struct LastUIPopup { }
 }

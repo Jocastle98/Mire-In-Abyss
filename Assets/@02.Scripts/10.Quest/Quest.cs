@@ -12,6 +12,7 @@ public class Quest
     public string Id;                   //퀘스트 고유 식별자 Q001~Q015
     public string Title;                //퀘스트 제목
     public string RequestInformation;   //퀘스트 요청 정보 (~해주세요)
+    public string Goal;                 //퀘스트 목표 설명 (~명 처치하세요)
     public string Objective;            //퀘스트 목표 유형 (처치, 수집 등)
     public int TargetAmount;            //퀘스트 목표 달성에 필요한 수량 
     public int RewardSoul;              //퀘스트 완료시 영혼석 보상 개수
