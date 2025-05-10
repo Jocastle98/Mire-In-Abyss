@@ -1,4 +1,5 @@
 using Cinemachine;
+using Events.UI;
 using UnityEngine;
 
 [RequireComponent(typeof(Camera))]
