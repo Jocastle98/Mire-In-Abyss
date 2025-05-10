@@ -14,13 +14,26 @@ public sealed class EscSystemPresenter : MonoBehaviour
         {
             mBtnSettings.onClick.AddListener(()=> UIManager.Instance.Push(UIPanelType.Setting).Forget());
             // mBtnTown.onClick.AddListener(()=> SceneLoader.LoadAsync("TownScene"));
-            // mBtnMain.onClick.AddListener(()=> SceneLoader.LoadAsync("MainMenu"));
-            mBtnQuit.onClick.AddListener(()=> Application.Quit());
+            mBtnMain.onClick.AddListener(()=> 
+            {
+                UIManager.Instance.Pop().Forget();
+                SceneLoader.LoadAsync(Constants.MainMenuScene).Forget();
+            });
+            mBtnQuit.onClick.AddListener(QuitGame);
 
             //Abyss에 있는 경우에만 활성화
             // mBtnTown.interactable = GameState.Instance.IsInAbyss;
 
             mbIsInit = true;
         }
+    }
+
+    void QuitGame()
+    {
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+#else
+        Application.Quit();
+#endif
     }
 }
