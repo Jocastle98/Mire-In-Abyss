@@ -514,6 +514,12 @@ public class EnemyBTController : MonoBehaviour
     {
         itemDropper.DropItemOnDeadth();
         GiveExpReward();
+        GameObject player = GameObject.FindGameObjectWithTag("Player");
+        if (player != null)
+        {
+            PlayerController playerController = player.GetComponent<PlayerController>();
+            playerController.OnEnemyKilled();
+        }
         StartCoroutine(Dissolve());
     }
 
