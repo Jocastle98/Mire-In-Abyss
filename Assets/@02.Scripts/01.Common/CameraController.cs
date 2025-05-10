@@ -1,6 +1,9 @@
+using System;
 using Cinemachine;
 using Events.UI;
 using UnityEngine;
+using R3;
+using Events.Player;
 
 [RequireComponent(typeof(Camera))]
 [RequireComponent(typeof(CinemachineBrain))]
@@ -21,7 +24,7 @@ public class CameraController : MonoBehaviour
     // cinemachine
     private float mCinemachineTargetYaw;
     private float mCinemachineTargetPitch;
-    private bool mbIsGround;
+    private bool mbPlayerIsOnGround;
 
     private void Awake()
     {
@@ -29,16 +32,23 @@ public class CameraController : MonoBehaviour
         mCinemachineTargetYaw = mCinemachineCameraTarget.transform.rotation.eulerAngles.y;
     }
 
+    private void Start()
+    {
+        eventsubscribe();
+    }
+
+    void eventsubscribe()
+    {
+        R3EventBus.Instance.Receive<PlayerGrounded>()
+            .Subscribe(e => mbPlayerIsOnGround = e.IsGrounded)
+            .AddTo(this);
+    }
+
     private void LateUpdate()
     {
         CameraRotation();
     }
-
-    public void SendPlayerGrounded(bool isGround)
-    {
-        mbIsGround = isGround;
-    }
-
+    
     private void CameraRotation()
     {
         if (GameManager.Instance.Input.LookInput.sqrMagnitude >= mThreshold)
@@ -48,7 +58,7 @@ public class CameraController : MonoBehaviour
         }
 
         mCinemachineTargetYaw = ClampAngle(mCinemachineTargetYaw, float.MinValue, float.MaxValue);
-        if (mbIsGround)
+        if (mbPlayerIsOnGround)
         {
             mCinemachineTargetPitch = ClampAngle(mCinemachineTargetPitch, mGroundedBottomClamp, mGroundedTopClamp);
         }
@@ -66,5 +76,11 @@ public class CameraController : MonoBehaviour
         if (localFloatAngle < -360f) localFloatAngle += 360f;
         if (localFloatAngle > 360f) localFloatAngle -= 360f;
         return Mathf.Clamp(localFloatAngle, localFloatMin, localFloatMax);
+    }
+
+    [Obsolete("이 함수는 곧 R3EventBus의 이벤트 처리로 대체할 예정입니다.")]
+    public void SendPlayerGrounded(bool isGround)
+    {
+        mbPlayerIsOnGround = isGround;
     }
 }

@@ -65,6 +65,16 @@ namespace QuestEnums
     }
 }
 
+namespace SceneEnums
+{
+    public enum GameplayMode
+    {
+        MainMenu,
+        Town,
+        Abyss,
+    }
+}
+
 namespace UIEnums
 {
     public enum SpriteType

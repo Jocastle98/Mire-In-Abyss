@@ -15,6 +15,9 @@ EditorBuildSettings:
     path: Assets/@01.Scenes/MainMenu.unity
     guid: 00e1373f8b9efbe429daf8157040e703
   - enabled: 1
+    path: Assets/@01.Scenes/GameplayShared.unity
+    guid: ba798c10aa0a7f84d9b7a958668c0709
+  - enabled: 1
     path: Assets/@01.Scenes/LoadingOverlay.unity
     guid: 6761f6627e1298a47bdfa379ad5c3e14
   - enabled: 1

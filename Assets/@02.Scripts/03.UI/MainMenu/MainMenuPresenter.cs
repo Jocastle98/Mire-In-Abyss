@@ -12,7 +12,7 @@ public sealed class MainMenuPresenter : MonoBehaviour
     void Start()
     {
         //Temp
-        mBtnPlay    .onClick.AddListener(() => SceneLoader.LoadAsync(Constants.TownScene).Forget());
+        mBtnPlay    .onClick.AddListener(() => SceneLoader.LoadSceneAsync(Constants.TownScene).Forget());
         mBtnCodex   .onClick.AddListener(() => UIManager.Instance.Push(UIPanelType.Codex).Forget());
         mBtnSettings.onClick.AddListener(() => UIManager.Instance.Push(UIPanelType.Setting).Forget());
         //mBtnCredit  .onClick.AddListener(() => UIManager.Instance.Push(UIPanelType.Credit).Forget());
