@@ -3,6 +3,7 @@ using Unity.VisualScripting;
 using EnemyEnums;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.Serialization;
 
 [RequireComponent(typeof(NavMeshAgent))]
 public class EnemyBTController : MonoBehaviour
@@ -57,9 +58,17 @@ public class EnemyBTController : MonoBehaviour
     public EnemyType EnemyType => mEnemyType;
     [SerializeField] private EnemyExpRewardController mExpRewardController;
     
-    [Header("기절 설정")]
-    [SerializeField] private float stunDuration = 2f;
+    [Header("몬스터 Hit 상태 설정")]
+    [SerializeField] private float mStunDuration = 2f;
+    [SerializeField] private float mAttackDebuffDuration = 10f;
+    [SerializeField] private int mAttackDebuffAmount = 5;
+    [SerializeField] private float mFireDotDuration = 3f;
+    [SerializeField] private int mFireDotDamagePerSecond = 3;
+    [SerializeField] private float mIceDebuffDuration = 8f;
+    [SerializeField] private float mIceAnimSpeed = 0.2f;
+    private bool mbAttackDebuffed = false;
     private bool mbIsStunned = false;
+    private float mOriginalAnimSpeed;
     
     private NavMeshAgent mAgent;
     private Animator mAnim;
@@ -487,56 +496,112 @@ public class EnemyBTController : MonoBehaviour
 
     public void SetHit(int damage, int hitType)
     {
-        if (mbIsDead)
-            return;
+        if (mbIsDead) return;
 
-        // hitType == 0: 기절 처리
-        if (hitType == 0)
+        switch (hitType)
         {
-            StartCoroutine(StunRoutine());
-            return;
+            case 0: //스턴
+                ApplyDamage(damage);
+                StartCoroutine(StunRoutine());
+                break;
+            case 1: // 공격력 감소
+                ApplyDamage(damage);
+                StartCoroutine(AttackDebuffRoutine());
+                break;
+            case 2: // 화염 도트뎀(해당 코루틴에 데미지 포함)
+                StartCoroutine(FireDotRoutine());
+                break;
+            case 3: // 얼음 속도감소 
+                ApplyDamage(damage);
+                StartCoroutine(IceDebuffRoutine());
+                break;
+            default:
+                ApplyDamage(damage);
+                break;
         }
-
-        // hitType == 1: 기존 데미지 처리
+    }
+    private void ApplyDamage(int damage)
+    {
         int effective = Mathf.Max(0, damage - mDefense);
         mCurrentHealth -= effective;
         Debug.Log($"받은 대미지:{damage} 방어력:{mDefense} 최종:{effective} 남은체력:{mCurrentHealth}");
-
-        if (mCurrentHealth <= 0)
-            mbIsDead = true;
-        else
-            mbIsHit = true;
+        if (mCurrentHealth <= 0) mbIsDead = true;
+        else mbIsHit = true;
     }
-    // 스턴 코루틴
+
+    // 스턴 
     private IEnumerator StunRoutine()
     {
         mbIsStunned = true;
 
-        // 움직임 멈추기
         if (mAgent != null && mAgent.enabled && mAgent.isOnNavMesh)
             mAgent.isStopped = true;
 
-        // 현재 재생 중인 애니메이터 상태 기록
         var info = mAnim.GetCurrentAnimatorStateInfo(0);
         int stateHash = info.fullPathHash;
 
-        // 애니메이터 일시정지
         mAnim.speed = 0f;
-
-        yield return new WaitForSeconds(stunDuration);
-
-        // 애니메이터 재생 속도 복구
-        mAnim.speed = 1f;
-
-        // 같은 상태(Idle, Trace, Attack 등) 애니메이션을 처음부터 다시 실행
+        yield return new WaitForSeconds(mStunDuration);
+        mAnim.speed = mOriginalAnimSpeed;
         mAnim.Play(stateHash, 0, 0f);
 
-        // 움직임 복구
         if (mAgent != null && mAgent.enabled && mAgent.isOnNavMesh)
             mAgent.isStopped = false;
 
         mbIsStunned = false;
     }
+    // 공격력 감소 
+    private IEnumerator AttackDebuffRoutine()
+    {
+        if (mbAttackDebuffed) yield break;
+        mbAttackDebuffed = true;
+
+        // 원래 스탯 저장
+        int origMeleeDamage = 0, origRangedDamage = 0;
+        if (mAttackBehaviorAsset is MeleeAttackBehavior melee) 
+        {
+            origMeleeDamage = melee.Damage;
+            melee.Damage = Mathf.Max(0, melee.Damage - mAttackDebuffAmount);
+        }
+        else if (mAttackBehaviorAsset is RangedAttackBehavior ranged)
+        {
+            origRangedDamage = ranged.Damage;
+            ranged.Damage = Mathf.Max(0, ranged.Damage - mAttackDebuffAmount);
+        }
+        // (다른 Behaviors도 필요하면 같은 방식으로 처리)
+
+        yield return new WaitForSeconds(mAttackDebuffDuration);
+
+        // 스탯 복구
+        if (mAttackBehaviorAsset is MeleeAttackBehavior melee2) 
+            melee2.Damage = origMeleeDamage;
+        else if (mAttackBehaviorAsset is RangedAttackBehavior ranged2)
+            ranged2.Damage = origRangedDamage;
+
+        mbAttackDebuffed = false;
+    }
+
+    // 화염 도트 데미지 1초마다 fireDuration까지 데미지
+    private IEnumerator FireDotRoutine()
+    {
+        float elapsed = 0f;
+        while (elapsed < mFireDotDuration)
+        {
+            ApplyDamage(mFireDotDamagePerSecond);
+            elapsed += 1f;
+            yield return new WaitForSeconds(1f);
+        }
+    }
+
+    // 얼음디버프 속도 감소 
+    private IEnumerator IceDebuffRoutine()
+    {
+        mOriginalAnimSpeed = mAnim.speed;
+        mAnim.speed = mIceAnimSpeed;
+        yield return new WaitForSeconds(mIceDebuffDuration);
+        mAnim.speed = mOriginalAnimSpeed;
+    }
+
     public void OnHitAnimationExit()
     {
         mbIsHit = false;
@@ -551,12 +616,7 @@ public class EnemyBTController : MonoBehaviour
         }
     }
 
-    public void OnDeadAnimationExit()
-    {
-        itemDropper.DropItemOnDeadth();
-        GiveExpReward();
-        StartCoroutine(Dissolve());
-    }
+    #region Hit시 머터리얼 변화
 
     private IEnumerator HitColorChange()
     {
@@ -595,6 +655,19 @@ public class EnemyBTController : MonoBehaviour
         }
     }
 
+    #endregion
+
+    #region Dead시 상태
+
+    public void OnDeadAnimationExit()
+    {
+        itemDropper.DropItemOnDeadth();
+        GiveExpReward();
+        StartCoroutine(Dissolve());
+    }
+
+    
+
     public void GiveExpReward()
     {
         if (mExpGiven || mExpRewardController == null) return;
@@ -617,6 +690,9 @@ public class EnemyBTController : MonoBehaviour
         return null;
     }
 
+
+    #endregion
+    
     #endregion
 
     #region Attack 이벤트
