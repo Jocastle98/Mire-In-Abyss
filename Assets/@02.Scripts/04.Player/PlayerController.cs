@@ -1233,7 +1233,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
                 EnemyBTController enemy = enemyTransform.GetComponent<EnemyBTController>();
                 if (enemy != null)
                 {
-                    enemy.SetHit((int)(mPlayerStats.GetAttackDamage() * mParryDamageMultiplier));
+                    enemy.SetHit((int)(mPlayerStats.GetAttackDamage() * mParryDamageMultiplier),0);
                     // todo: 적에게 상태이상 기절 부여
                 }
                 else
@@ -1468,7 +1468,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
                 if (enemy != null)
                 {
                     // 상태이상(이속감소? 공격력 감소?) 부여
-                    enemy.SetHit((int)(mPlayerStats.GetAttackDamage() * mSkill_2_DamageMultiplier));
+                    enemy.SetHit((int)(mPlayerStats.GetAttackDamage() * mSkill_2_DamageMultiplier),1);
                 }
             }
         }
