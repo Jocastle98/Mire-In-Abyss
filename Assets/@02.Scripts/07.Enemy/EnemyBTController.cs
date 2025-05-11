@@ -552,34 +552,67 @@ public class EnemyBTController : MonoBehaviour
     }
     // 공격력 감소 
     private IEnumerator AttackDebuffRoutine()
+{
+    if (mbAttackDebuffed) yield break;
+    mbAttackDebuffed = true;
+
+    // 원래 데미지 저장용 변수
+    int origMeleeDamage = 0, origRangedDamage = 0;
+    int origSwingDamage = 0, origImpactDamage = 0;
+    int origTailDamage = 0, origFireballDamage = 0, origBreathDamage = 0;
+
+    // Melee / Ranged
+    if (mAttackBehaviorAsset is MeleeAttackBehavior melee)
     {
-        if (mbAttackDebuffed) yield break;
-        mbAttackDebuffed = true;
-
-        // 원래 스탯 저장
-        int origMeleeDamage = 0, origRangedDamage = 0;
-        if (mAttackBehaviorAsset is MeleeAttackBehavior melee) 
-        {
-            origMeleeDamage = melee.Damage;
-            melee.Damage = Mathf.Max(0, melee.Damage - mAttackDebuffAmount);
-        }
-        else if (mAttackBehaviorAsset is RangedAttackBehavior ranged)
-        {
-            origRangedDamage = ranged.Damage;
-            ranged.Damage = Mathf.Max(0, ranged.Damage - mAttackDebuffAmount);
-        }
-        // (다른 Behaviors도 필요하면 같은 방식으로 처리)
-
-        yield return new WaitForSeconds(mAttackDebuffDuration);
-
-        // 스탯 복구
-        if (mAttackBehaviorAsset is MeleeAttackBehavior melee2) 
-            melee2.Damage = origMeleeDamage;
-        else if (mAttackBehaviorAsset is RangedAttackBehavior ranged2)
-            ranged2.Damage = origRangedDamage;
-
-        mbAttackDebuffed = false;
+        origMeleeDamage = melee.Damage;
+        melee.Damage = Mathf.Max(0, melee.Damage - mAttackDebuffAmount);
     }
+    else if (mAttackBehaviorAsset is RangedAttackBehavior ranged)
+    {
+        origRangedDamage = ranged.Damage;
+        ranged.Damage = Mathf.Max(0, ranged.Damage - mAttackDebuffAmount);
+    }
+    // Golem: Swing & Impact
+    else if (mAttackBehaviorAsset is GolemAttackBehavior golem)
+    {
+        origSwingDamage  = golem.SwingDamage;
+        origImpactDamage = golem.ImpactDamage;
+        golem.SwingDamage  = Mathf.Max(0, golem.SwingDamage  - mAttackDebuffAmount);
+        golem.ImpactDamage = Mathf.Max(0, golem.ImpactDamage - mAttackDebuffAmount);
+    }
+    // Dragon: Tail, Fireball, Breath
+    else if (mAttackBehaviorAsset is DragonAttackBehavior dragon)
+    {
+        origTailDamage     = dragon.TailDamage;
+        origFireballDamage = dragon.FireballDamage;
+        origBreathDamage   = dragon.BreathDamage;
+        dragon.TailDamage     = Mathf.Max(0, dragon.TailDamage     - mAttackDebuffAmount);
+        dragon.FireballDamage = Mathf.Max(0, dragon.FireballDamage - mAttackDebuffAmount);
+        dragon.BreathDamage   = Mathf.Max(0, dragon.BreathDamage   - mAttackDebuffAmount);
+    }
+
+    // 디버프 지속 시간 대기
+    yield return new WaitForSeconds(mAttackDebuffDuration);
+
+    // 데미지 원복
+    if (mAttackBehaviorAsset is MeleeAttackBehavior melee2)
+        melee2.Damage = origMeleeDamage;
+    else if (mAttackBehaviorAsset is RangedAttackBehavior ranged2)
+        ranged2.Damage = origRangedDamage;
+    else if (mAttackBehaviorAsset is GolemAttackBehavior golem2)
+    {
+        golem2.SwingDamage  = origSwingDamage;
+        golem2.ImpactDamage = origImpactDamage;
+    }
+    else if (mAttackBehaviorAsset is DragonAttackBehavior dragon2)
+    {
+        dragon2.TailDamage     = origTailDamage;
+        dragon2.FireballDamage = origFireballDamage;
+        dragon2.BreathDamage   = origBreathDamage;
+    }
+
+    mbAttackDebuffed = false;
+}
 
     // 화염 도트 데미지 1초마다 fireDuration까지 데미지
     private IEnumerator FireDotRoutine()
