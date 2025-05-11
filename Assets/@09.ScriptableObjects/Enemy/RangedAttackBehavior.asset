@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: RangedAttackBehavior
   m_EditorClassIdentifier: 
   Range: 10
-  ProjectilePrefab: {fileID: 4865309214770636011, guid: 5ef8112459c5b9c448083f706c9ea5cb, type: 3}
+  ProjectilePrefab: {fileID: 1168065043843762, guid: f4a0c6c8630fe7a4e8e84aa033234ed3, type: 3}
   HitLayer:
     serializedVersion: 2
     m_Bits: 256
