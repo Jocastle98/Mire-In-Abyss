@@ -38,6 +38,7 @@ public class EnemyBTController : MonoBehaviour
     [Header("임팩트 설정 (골렘)")]
     [SerializeField] private GameObject ImpactProjectorPrefab;
     [SerializeField] private LayerMask ImpactHitLayer;
+    private bool mImpactHandled = false;
 
     [Header("렌더러 설정")]  
     [SerializeField] private Renderer[] mRenderers;
@@ -66,6 +67,7 @@ public class EnemyBTController : MonoBehaviour
     [SerializeField] private int mFireDotDamagePerSecond = 3;
     [SerializeField] private float mIceDebuffDuration = 8f;
     [SerializeField] private float mIceAnimSpeed = 0.2f;
+    private float mOriginalAgentSpeed;
     private bool mbAttackDebuffed = false;
     private bool mbIsStunned = false;
     private float mOriginalAnimSpeed;
@@ -84,6 +86,8 @@ public class EnemyBTController : MonoBehaviour
     
     void Awake()
     {
+        if (mAttackBehaviorAsset != null)
+            mAttackBehaviorAsset = Instantiate(mAttackBehaviorAsset);
         mAgent = GetComponent<NavMeshAgent>();
         mAnim = GetComponent<Animator>();
         mAttackBehavior = mAttackBehaviorAsset as IAttackBehavior;
@@ -533,21 +537,16 @@ public class EnemyBTController : MonoBehaviour
     private IEnumerator StunRoutine()
     {
         mbIsStunned = true;
+        mOriginalAnimSpeed = mAnim.speed;
+        mAnim.speed = 0f;
 
         if (mAgent != null && mAgent.enabled && mAgent.isOnNavMesh)
             mAgent.isStopped = true;
-
-        var info = mAnim.GetCurrentAnimatorStateInfo(0);
-        int stateHash = info.fullPathHash;
-
-        mAnim.speed = 0f;
         yield return new WaitForSeconds(mStunDuration);
-        mAnim.speed = mOriginalAnimSpeed;
-        mAnim.Play(stateHash, 0, 0f);
 
+        mAnim.speed = mOriginalAnimSpeed;
         if (mAgent != null && mAgent.enabled && mAgent.isOnNavMesh)
             mAgent.isStopped = false;
-
         mbIsStunned = false;
     }
     // 공격력 감소 
@@ -556,12 +555,10 @@ public class EnemyBTController : MonoBehaviour
     if (mbAttackDebuffed) yield break;
     mbAttackDebuffed = true;
 
-    // 원래 데미지 저장용 변수
     int origMeleeDamage = 0, origRangedDamage = 0;
     int origSwingDamage = 0, origImpactDamage = 0;
     int origTailDamage = 0, origFireballDamage = 0, origBreathDamage = 0;
 
-    // Melee / Ranged
     if (mAttackBehaviorAsset is MeleeAttackBehavior melee)
     {
         origMeleeDamage = melee.Damage;
@@ -572,7 +569,6 @@ public class EnemyBTController : MonoBehaviour
         origRangedDamage = ranged.Damage;
         ranged.Damage = Mathf.Max(0, ranged.Damage - mAttackDebuffAmount);
     }
-    // Golem: Swing & Impact
     else if (mAttackBehaviorAsset is GolemAttackBehavior golem)
     {
         origSwingDamage  = golem.SwingDamage;
@@ -580,7 +576,6 @@ public class EnemyBTController : MonoBehaviour
         golem.SwingDamage  = Mathf.Max(0, golem.SwingDamage  - mAttackDebuffAmount);
         golem.ImpactDamage = Mathf.Max(0, golem.ImpactDamage - mAttackDebuffAmount);
     }
-    // Dragon: Tail, Fireball, Breath
     else if (mAttackBehaviorAsset is DragonAttackBehavior dragon)
     {
         origTailDamage     = dragon.TailDamage;
@@ -591,10 +586,9 @@ public class EnemyBTController : MonoBehaviour
         dragon.BreathDamage   = Mathf.Max(0, dragon.BreathDamage   - mAttackDebuffAmount);
     }
 
-    // 디버프 지속 시간 대기
     yield return new WaitForSeconds(mAttackDebuffDuration);
 
-    // 데미지 원복
+    // 데미지 복구
     if (mAttackBehaviorAsset is MeleeAttackBehavior melee2)
         melee2.Damage = origMeleeDamage;
     else if (mAttackBehaviorAsset is RangedAttackBehavior ranged2)
@@ -629,10 +623,15 @@ public class EnemyBTController : MonoBehaviour
     // 얼음디버프 속도 감소 
     private IEnumerator IceDebuffRoutine()
     {
-        mOriginalAnimSpeed = mAnim.speed;
-        mAnim.speed = mIceAnimSpeed;
+        mOriginalAnimSpeed  = mAnim.speed;
+        mOriginalAgentSpeed = mAgent.speed;
+
+        mAnim.speed  = mIceAnimSpeed;
+        mAgent.speed = mOriginalAgentSpeed * mIceAnimSpeed;
         yield return new WaitForSeconds(mIceDebuffDuration);
-        mAnim.speed = mOriginalAnimSpeed;
+
+        mAnim.speed  = mOriginalAnimSpeed;
+        mAgent.speed = mOriginalAgentSpeed;
     }
 
     public void OnHitAnimationExit()
@@ -863,6 +862,8 @@ public class EnemyBTController : MonoBehaviour
     }
     public void OnImpactIndicator()
     {
+        mImpactHandled = false;
+        
         if (ImpactProjectorPrefab == null || !(mAttackBehaviorAsset is GolemAttackBehavior) || mTarget == null) return;
         var go = Instantiate(ImpactProjectorPrefab);
         currentProjector = go.GetComponent<Projector>();
@@ -873,6 +874,8 @@ public class EnemyBTController : MonoBehaviour
 
     public void OnImpactLand()
     {
+        if (mImpactHandled) return;
+        mImpactHandled = true;
         if (mAttackBehaviorAsset is GolemAttackBehavior golem
             && golem.mImpactVFXPrefab != null
             && currentProjector != null)
