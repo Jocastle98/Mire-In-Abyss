@@ -82,6 +82,7 @@ public class EnemyBTController : MonoBehaviour
     private bool mExpGiven = false;
     private ItemDropper itemDropper;
     private GameObject mBreathVFXInstance;
+    private bool mbIgnoreHits = false;
 
     
     void Awake()
@@ -500,7 +501,7 @@ public class EnemyBTController : MonoBehaviour
 
     public void SetHit(int damage, int hitType)
     {
-        if (mbIsDead) return;
+        if (mbIsDead || mbIgnoreHits) return;
 
         switch (hitType)
         {
@@ -784,6 +785,7 @@ public class EnemyBTController : MonoBehaviour
     #region 드래곤 공격
     public void OnBreathIndicator()
     {
+        mbIgnoreHits = true;
         if (!(mAttackBehaviorAsset is DragonAttackBehavior dragon)) return;
         if (dragon.BreathProjectorPrefab == null) return;
 
@@ -819,6 +821,7 @@ public class EnemyBTController : MonoBehaviour
     }
     public void OnBreathLand()
     {
+        mbIgnoreHits = false;
         if (currentProjector) Destroy(currentProjector.gameObject);
         currentProjector = null;
 
@@ -863,7 +866,7 @@ public class EnemyBTController : MonoBehaviour
     public void OnImpactIndicator()
     {
         mImpactHandled = false;
-        
+        mbIgnoreHits = true;
         if (ImpactProjectorPrefab == null || !(mAttackBehaviorAsset is GolemAttackBehavior) || mTarget == null) return;
         var go = Instantiate(ImpactProjectorPrefab);
         currentProjector = go.GetComponent<Projector>();
@@ -876,6 +879,7 @@ public class EnemyBTController : MonoBehaviour
     {
         if (mImpactHandled) return;
         mImpactHandled = true;
+        mbIgnoreHits = false;
         if (mAttackBehaviorAsset is GolemAttackBehavior golem
             && golem.mImpactVFXPrefab != null
             && currentProjector != null)
