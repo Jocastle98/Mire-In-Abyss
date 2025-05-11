@@ -31,11 +31,10 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     public float JumpTimeoutDelta => mJumpTimeoutDelta;
     [SerializeField] private float mFallTimeout = 0.15f;
     [SerializeField] private float mFallTimeoutDelta;
-    public float FallTimeoutDelta => mFallTimeoutDelta;
     
     [Space(10)]
     [Header("Player Roll Stat")]
-    [SerializeField] private float mRollDistance = 8.0f;
+    [SerializeField] private float mRollDistance = 10.0f;
     [SerializeField] private float mRollFunctionDuration = 0.3f;
     [SerializeField] private float mRollTimeout = 3.0f;
     [SerializeField] private float mRollTimeoutDelta;
@@ -44,7 +43,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     
     [Space(10)]
     [Header("Player Dash Stat")]
-    [SerializeField] private float mDashDistance = 10.0f;
+    [SerializeField] private float mDashDistance = 15.0f;
     [SerializeField] private float mDashFunctionDuration = 0.3f;
     [SerializeField] private float mDashTimeout = 5.0f;
     [SerializeField] private float mDashTimeoutDelta;
@@ -57,20 +56,29 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
 
     [Space(10)] 
     [Header("Player Parry Stat")]
-    [SerializeField] private float mParryTimeout = 10.0f;
+    [SerializeField] private float mParryDamageMultiplier = 3.0f;
+    [SerializeField] private float mParryFunctionDuration = 0.2f;
+    [SerializeField] private float mParrySuccessFunctionDuration = 0.5f;
+    [SerializeField] private float mParryTimeout = 6.0f;
     [SerializeField] private float mParryTimeoutDelta;
     public float ParryTimeoutDelta => mParryTimeoutDelta;
+    private bool mbIsParrySucessful = false;
     
     [Space(10)] 
     [Header("Player Skill_1 Stat")]
     [SerializeField] private float mSkill_1_DamageMultiplier = 1.5f;
     [SerializeField] private float mSkill_1_Distance = 20.0f;
-    [SerializeField] private float mSkill_1_Timeout = 10.0f;
+    [SerializeField] private float mSkill_1_Timeout = 8.0f;
     [SerializeField] private float mSkill_1_TimeoutDelta;
     public float Skill_1_TimeoutDelta => mSkill_1_TimeoutDelta;
     
     [Space(10)] 
     [Header("Player Skill_2 Stat")]
+    [SerializeField] private float mSkill_2_DamageMultiplier = 0.5f;
+    [SerializeField] private float mSkill_2_Radius = 10.0f;
+    [SerializeField] private float mSkill_2_Timeout = 10.0f;
+    [SerializeField] private float mSkill_2_TimeoutDelta;
+    public float Skill_2_TimeoutDelta => mSkill_2_TimeoutDelta;
     
     [Space(10)] 
     [Header("Player Skill_3 Stat")]
@@ -84,7 +92,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     [Header("Player Skill_4 Stat")]
     [SerializeField] private float mSkill_4_DamageMultiplier = 2.5f;
     [SerializeField] private float mSkill_4_Radius = 5.0f;
-    [SerializeField] private float mSkill_4_Timeout = 30.0f;
+    [SerializeField] private float mSkill_4_Timeout = 25.0f;
     [SerializeField] private float mSkill_4_TimeoutDelta;
     public float Skill_4_TimeoutDelta => mSkill_4_TimeoutDelta;
     
@@ -121,6 +129,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     private float mTerminalVelocity = 53.0f;
     private float mTargetRotation;
     private float mAnimationBlend;
+    private bool mbIsDamageReduced;
     
     // Componenet
     public Animator PlayerAnimator { get; private set; }
@@ -261,6 +270,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         mRollTimeoutDelta = 0.0f;
         mDashTimeoutDelta = 0.0f;
         mSkill_1_TimeoutDelta = 0.0f;
+        mSkill_2_TimeoutDelta = 0.0f;
         mSkill_3_TimeoutDelta = 0.0f;
         mSkill_4_TimeoutDelta = 0.0f;
     }
@@ -329,7 +339,8 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
                 {
                     Fall();
                 }
-                else if (CurrentPlayerState == PlayerState.Dash || CurrentPlayerState == PlayerState.Skill_1 ||
+                else if (CurrentPlayerState == PlayerState.Dash || 
+                         CurrentPlayerState == PlayerState.Skill_1 || CurrentPlayerState == PlayerState.Skill_2 ||
                          CurrentPlayerState == PlayerState.Skill_3 || CurrentPlayerState == PlayerState.Skill_4)
                 {
                     mVerticalVelocity = 0.0f;
@@ -373,6 +384,12 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         if (mSkill_1_TimeoutDelta >= 0.0f)
         {
             mSkill_1_TimeoutDelta -= Time.deltaTime;
+        }
+        
+        // Skill_2 관련 Timeout
+        if (mSkill_2_TimeoutDelta >= 0.0f)
+        {
+            mSkill_2_TimeoutDelta -= Time.deltaTime;
         }
         
         // Skill_3 관련 Timeout
@@ -663,7 +680,6 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
 
     #region 구르기 관련 기능
     
-    // todo: 현재 재사용대기시간 적용 -> 스테미너 소모 형식으로 바꿀지 고민 중 / 재사용대기시간을 적용 한다면 돌진기와 공통기능 통합 가능
     public void StartRoll(Vector3 targetDirection)
     {
         if (mRollCoroutine == null || !mPlayerStateRoll.bIsRoll)
@@ -679,17 +695,18 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             StopCoroutine(mRollCoroutine);
             mRollCoroutine = null;
         }
+        
+        mRollTimeoutDelta = mRollTimeout;
     }
 
     private IEnumerator RollCoroutine(Vector3 targetDirection)
     {
-        float rollEndOffset = 0.2f;
-        float firstDelay = 0.2f;
+        float startupTime = 0.0f;
+        float recoveryTime = 0.0f;
         
-        mRollTimeoutDelta = mRollTimeout;
         mPlayerStateRoll.bIsRoll = true;
 
-        yield return new WaitForSeconds(firstDelay); // 선딜(현재 애니메이션에 맞춤)
+        yield return new WaitForSeconds(startupTime); // 선딜(현재 애니메이션 선딜 없음)
         RollFunction(true);
      
         StartCoroutine(RollingCoroutine(targetDirection));
@@ -702,8 +719,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         var rollAnimationInfo = PlayerAnimator.GetCurrentAnimatorStateInfo(mobilityLayer);
         if (rollAnimationInfo.IsName("Roll"))
         {
-            float rollAnimationLength = rollAnimationInfo.length;
-            float rollEndTime = Mathf.Max(0.0f, rollAnimationLength - rollEndOffset - firstDelay - mRollFunctionDuration);
+            float rollEndTime = Mathf.Max(0.0f, rollAnimationInfo.length - startupTime - recoveryTime - mRollFunctionDuration);
             yield return new WaitForSeconds(rollEndTime);
             
             mPlayerStateRoll.bIsRoll = false;
@@ -753,12 +769,22 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         }
     }
 
-    // 무적?
+    // 무적
     private void RollFunction(bool isRollFunction)
     {
         if (isRollFunction)
         {
-            
+            // 무적 시작
+            mbIsDamageReduced = true;
+            OverrideDamageReduction = 1.0f;
+            Debug.Log("무적 시작");
+        }
+        else
+        {
+            // 무적 끝
+            mbIsDamageReduced = false;
+            OverrideDamageReduction = 0.0f;
+            Debug.Log("무적 끝");
         }
     }
     
@@ -776,7 +802,6 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         if (mDashCoroutine == null || !mPlayerStateDash.bIsDashing)
         {
             mDashCoroutine = StartCoroutine(DashCoroutine(cameraCenterDirection));
-            SetCombatState(true);
         }
     }
 
@@ -787,6 +812,8 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             StopCoroutine(mDashCoroutine);
             mDashCoroutine = null;
         }
+        
+        mDashTimeoutDelta = mDashTimeout;
     }
     
     private IEnumerator DashCoroutine(Vector3 cameraCenterDirection)
@@ -794,7 +821,6 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         float dashEndOffset = 0.5f;
         float firstDelay = 0.0f;
         
-        mDashTimeoutDelta = mDashTimeout;
         mPlayerStateDash.bIsDashing = true;
         
         // 애니메이션 선딜
@@ -865,7 +891,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         }
     }
 
-    // 충돌 무시 및 피해감소? 무적?
+    // 적 레이어와 충돌 무시
     private void DashFunction(bool isDashFunction)
     {
         if (isDashFunction)
@@ -1060,7 +1086,6 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         }
         else
         {
-            // 피해감소 or 방어력 증가 기능 메서드
             Defending(true);
             
             // 이동 방어시 하반신(Base Layer) 애니메이션
@@ -1079,26 +1104,51 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     {
         if (isDefending)
         {
-            // todo: 임시[테스트용]
-            mPlayerStats.EnableDefenceBuff(0.9f);
+            //피해감소
+            mbIsDamageReduced = true;
+            OverrideDamageReduction = 0.9f;
             mPlayerStats.OnGuardSuccess();
         }
         else
         {
-            mPlayerStats.EnableDefenceBuff(0.0f);
+            mbIsDamageReduced = false;
+            OverrideDamageReduction = 0.0f;
+            //피해감소 끝
         }
     }
 
     #endregion
 
     #region 패리 관련 기능
+            
+    private Coroutine mParryCoroutine;
+    private Coroutine mParrySuccessInvincibleCoroutine;
+    private bool mbIsParryActive = false;
+    private bool mbIsParrySuccess = false;
 
+    public void StartParry()
+    {
+        if (mParryCoroutine == null)
+        {
+            mParryCoroutine = StartCoroutine(ParryCoroutine());
+        }
+    }
+
+    public void StopParry()
+    {
+        if (mParryCoroutine != null)
+        {
+            StopCoroutine(mParryCoroutine);
+            mParryCoroutine = null;
+        }
+        
+        mbIsDamageReduced = false;
+        ParryCooldownTime();
+    }
+    
     public void Parry()
     {
         SetCombatState(true);
-
-        // 패리 성공 시 행동 메서드
-        ParrySuccess();
         
         PlayerAnimator.SetBool("Idle", false);
         PlayerAnimator.SetBool("Move", false);
@@ -1114,13 +1164,44 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             BattleMove();
             PlayerAnimator.SetBool("Move", true);
         }
-
-        mParryTimeoutDelta = mParryTimeout;
     }
 
-    private void ParrySuccess()
+    private IEnumerator ParryCoroutine()
     {
+        mbIsParryActive = true;
+        mbIsParrySuccess = false;
         
+        yield return new WaitForSeconds(mParryFunctionDuration);
+        
+        mbIsParryActive = false;
+    }
+
+    private IEnumerator ParrySuccessInvincibleCoroutine()
+    {
+        // 무적 시작
+        mbIsDamageReduced = true;
+        OverrideDamageReduction = 1.0f;
+        mbIsParrySuccess = true;
+        
+        yield return new WaitForSeconds(mParrySuccessFunctionDuration);
+        
+        //무적 끝
+        mbIsDamageReduced = false;
+        OverrideDamageReduction = 0.0f;
+    }
+
+    private void ParryCooldownTime()
+    {
+        if (mbIsParrySuccess)
+        {
+            // 패리 성공 시 재사용대기시간 초기화
+            mParryTimeoutDelta = 0.0f;
+        }
+        else
+        {
+            // 패리 실패 시 재사용대기시간 적용
+            mParryTimeoutDelta = mParryTimeout;
+        }
     }
     
     #endregion
@@ -1140,9 +1221,44 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         {
             return; // 사망 상태에서는 더 이상 피해를 받지 않음
         }
+
+        // 패리 성공 시
+        if (mbIsParryActive)
+        {
+            mbIsParryActive = false;
+
+            // 적에게 패리 데미지 적용
+            if (enemyTransform != null)
+            {
+                EnemyBTController enemy = enemyTransform.GetComponent<EnemyBTController>();
+                if (enemy != null)
+                {
+                    enemy.SetHit((int)(mPlayerStats.GetAttackDamage() * mParryDamageMultiplier));
+                    // todo: 적에게 상태이상 기절 부여
+                }
+                else
+                {
+                    // 공격 오브젝트가 발사체라면
+                    Projectile enemyProjectile = enemyTransform.GetComponent<Projectile>();
+                    if (enemyProjectile != null)
+                    {
+                        
+                    }
+                }
+            }
+
+            // 잠시 무적효과
+            if (mParrySuccessInvincibleCoroutine != null)
+            {
+                StopCoroutine(mParrySuccessInvincibleCoroutine);
+            }
+            mParrySuccessInvincibleCoroutine = StartCoroutine(ParrySuccessInvincibleCoroutine());
+            
+            return;
+        }
         
         //PlayerState의 TakeDamage 메서드 사용
-        mPlayerStats.TakeDamage(enemyAttackPower);
+        mPlayerStats.TakeDamage(enemyAttackPower, OverrideDamageReduction);
         
         // 체력 UI 업데이트
         // GameManager.Instance.SetHP((float)mPlayerStats.GetCurrentHP() / mPlayerStats.GetMaxHP());
@@ -1155,6 +1271,9 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         {
             SetCombatState(true);
             
+            int upperBodyLayer = PlayerAnimator.GetLayerIndex("UpperBody Layer");
+            PlayerAnimator.SetLayerWeight(upperBodyLayer, 1.0f);
+            
             if (CurrentPlayerState == PlayerState.Defend)
             {
                 PlayerAnimator.SetTrigger("DefendHit");
@@ -1162,9 +1281,6 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             // 공격 관련 동작들이 끊기지 않도록
             else if(CurrentPlayerState == PlayerState.Idle || CurrentPlayerState == PlayerState.Move)
             {
-                int upperBodyLayer = PlayerAnimator.GetLayerIndex("UpperBody Layer");
-                PlayerAnimator.SetLayerWeight(upperBodyLayer, 1.0f);
-               
                 PlayerAnimator.SetFloat("HitPower", hitPower);
                 PlayerAnimator.SetTrigger("Hit");
                 
@@ -1181,7 +1297,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         }
     }
 
-    // 플레이어의 상태이상 효과
+    // 플레이어의 상태이상 효과를 부여하는 메서드
     public void SetStatusEffect(StatusEffect statusEffectType, float duration)
     {
         switch (statusEffectType)
@@ -1233,6 +1349,23 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         onEnd?.Invoke();
     }
 
+    private float mOverrideDamageReduction = 0.0f;
+    private float OverrideDamageReduction
+    {
+        get
+        {
+            if (mbIsDamageReduced)
+            {
+                return mOverrideDamageReduction;
+            }
+            else
+            {
+                return 0.0f;
+            }
+        } 
+        set { mOverrideDamageReduction = value; }
+    }
+
     public void OnEnemyKilled()
     {
         mPlayerStats.OnEnemyKilled();
@@ -1249,32 +1382,51 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
 
     #region 1번 스킬
 
-    public void Skill_1()
+    private Coroutine mSkill1Coroutine;
+    public void Start_Skill_1()
     {
-        SetCombatState(true);
-        
-        Invoke("Skill_1_Fire", 0.2f); // 애니메이션 선딜
+        mSkill1Coroutine = StartCoroutine(Skill_1());
     }
 
-    private void Skill_1_Fire()
+    public void Stop_Skill_1()
     {
-        GameObject projectilePrefab = Resources.Load<GameObject>("Player/Effects/SlashProjectileEffect");
-        if (projectilePrefab == null)
+        if (mSkill1Coroutine != null)
         {
-            return;
+            StopCoroutine(mSkill1Coroutine);
+            mSkill1Coroutine = null;
+        }
+    }
+
+    private IEnumerator Skill_1()
+    {
+        float attackSpeed = PlayerAnimator.GetFloat("AttackSpeed");
+        float invAttackSpeed = 1.0f / attackSpeed;
+        float startupTime = 0.15f * invAttackSpeed;
+        float recoveryTime = 1.0f * invAttackSpeed;
+        
+        yield return new WaitForSeconds(startupTime); // 애니메이션 선딜
+        
+        GameObject skill_1_Effect_Prefab = Resources.Load<GameObject>("Player/Effects/Skill_1_Projectile");
+        if (skill_1_Effect_Prefab == null)
+        {
+            yield break;
         }
         Vector3 firePosition = transform.position + transform.forward * 2.0f + Vector3.up;
         Vector3 direction = GetActionDirection(false, false);
         
-        GameObject projectileObject = GameObject.Instantiate(projectilePrefab,
+        GameObject skill_1_Effect_Object = GameObject.Instantiate(skill_1_Effect_Prefab,
                                                              firePosition,
                                                              Quaternion.LookRotation(direction));
         
         // 검기 스크립트에 방향 및 속도 설정
-        Skill_1 skill_1 = projectileObject.GetComponent<Skill_1>();
+        Skill_1 skill_1 = skill_1_Effect_Object.GetComponent<Skill_1>();
         skill_1.Init((int)mPlayerStats.GetAttackDamage(), mSkill_1_DamageMultiplier, mSkill_1_Distance, direction);
 
+        yield return new WaitForSeconds(recoveryTime);
+        
         mbInDirection = true;
+        
+        SetCombatState(true);
         mSkill_1_TimeoutDelta = mSkill_1_Timeout;
     }
 
@@ -1282,51 +1434,157 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
 
     #region 2번 스킬
 
-    public void Skill_2()
+    private Coroutine mSkill2CCoroutine;
+    public void Start_Skill_2()
     {
+        mSkill2CCoroutine = StartCoroutine(Skill_2());
+    }
+
+    public void Stop_Skill_2()
+    {
+        if (mSkill2CCoroutine != null)
+        {
+            StopCoroutine(mSkill2CCoroutine);
+            mSkill2CCoroutine = null;
+        }
+    }
+    
+    private IEnumerator Skill_2()
+    {
+        float attackSpeed = PlayerAnimator.GetFloat("AttackSpeed");
+        float invAttackSpeed = 1.0f / attackSpeed;
+        float startupTime = 0.2f * invAttackSpeed;
+        float recoveryTime = 1.0f * invAttackSpeed;
         
+        yield return new WaitForSeconds(startupTime); // 애니메이션 선딜
+        
+        // 주변 적에게 데미지 주는 로직
+        Collider[] hitColliders = Physics.OverlapSphere(transform.position, mSkill_2_Radius);
+        foreach (var hitCollider in hitColliders)
+        {
+            if (hitCollider.transform.gameObject.layer == LayerMask.NameToLayer("Enemy"))
+            {
+                EnemyBTController enemy = hitCollider.GetComponent<EnemyBTController>();
+                if (enemy != null)
+                {
+                    // 상태이상(이속감소? 공격력 감소?) 부여
+                    enemy.SetHit((int)(mPlayerStats.GetAttackDamage() * mSkill_2_DamageMultiplier));
+                }
+            }
+        }
+        
+        GameObject skill_2_Effect_Prefab = Resources.Load<GameObject>("Player/Effects/Skill_2_Effect");
+        if (skill_2_Effect_Prefab == null)
+        {
+            yield break;
+        }
+        
+        GameObject skill_2_Effect_Object = GameObject.Instantiate(skill_2_Effect_Prefab, transform.position, Quaternion.identity);
+        
+        yield return new WaitForSeconds(recoveryTime);
+        Destroy(skill_2_Effect_Object);
+        
+        SetCombatState(true);
+        mSkill_2_TimeoutDelta = mSkill_2_Timeout;
     }
 
     #endregion
 
     #region 3번 스킬
 
-    public void Skill_3()
-    {
-        SetCombatState(true);
+    private Coroutine mFallToGroundCoroutine;
+    private Coroutine mSkill3Coroutine;
+    private bool mbIsLandSucess = false;
 
-        Invoke("Skill_3_Fire", 0.5f);
+    public void Start_Skill_3()
+    {
+        mSkill3Coroutine = StartCoroutine(Skill_3());
     }
 
-    private Coroutine fallCoroutine;
-    private void Skill_3_Fire()
+    public void Stop_Skill_3()
     {
-        if (!bIsGrounded)
+        if (mFallToGroundCoroutine != null)
         {
-            if (fallCoroutine != null)
-            {
-                StopCoroutine(fallCoroutine);
-            }
-            
-            RaycastHit hit;
-            if (Physics.Raycast(transform.position, Vector3.down, out hit, 100f, LayerMask.GetMask("Ground")))
-            {
-                fallCoroutine = StartCoroutine(FallToGround(hit.point));
-            }
-            else
-            {
-                // 레이 실패 시 그냥 낙하
-                SetPlayerState(PlayerState.Fall);
-            }
+            StopCoroutine(mFallToGroundCoroutine);
+            mFallToGroundCoroutine = null;
+        }
+
+        if (mSkill3Coroutine != null)
+        {
+            StopCoroutine(mSkill3Coroutine);
+            mSkill3Coroutine = null;
+        }
+    }
+    
+    private IEnumerator Skill_3()
+    {
+        mbIsLandSucess = false;
+        PlayerAnimator.SetTrigger("Skill");
+        PlayerAnimator.SetInteger("Skill_Index", 3);
+
+        if (bIsGrounded)
+        {
+            mbIsLandSucess = true;
+            yield return new WaitForSeconds(0.3f);
         }
         else
         {
-            if (fallCoroutine != null)
-            {
-                StopCoroutine(fallCoroutine);
-                fallCoroutine = null;
-            }
+            mFallToGroundCoroutine = StartCoroutine(Skill_3_Stance());
+            yield return mFallToGroundCoroutine;
         }
+
+        yield return null;
+
+        if (mbIsLandSucess)
+        {
+            mSkill3Coroutine = StartCoroutine(Skill_3_Fire());
+            yield return mSkill3Coroutine;
+        }
+    }
+
+    private IEnumerator Skill_3_Stance()
+    {
+        if (Physics.Raycast(transform.position + Vector3.up * 2.0f, Vector3.down, out RaycastHit hit, 100f, mGroundLayers))
+        {
+            mbIsLandSucess = true;
+            
+            float duration = 0.3f; // 떨어지는 시간
+            float timer = 0.0f;
+            Vector3 startPosition = transform.position;
+
+            while (timer < duration)
+            {
+                transform.position = Vector3.Lerp(startPosition, hit.point, timer / duration);
+                timer += Time.deltaTime;
+                yield return null;
+            }
+
+            transform.position = hit.point;
+        }
+        else
+        {
+            // 레이 실패 시 그냥 낙하
+            mbIsLandSucess = false;
+            SetPlayerState(PlayerState.Fall);
+        }
+    }
+    
+    private IEnumerator Skill_3_Fire()
+    {
+        float attackSpeed = PlayerAnimator.GetFloat("AttackSpeed");
+        float invAttackSpeed = 1.0f / attackSpeed;
+        float startupTime = 0.0f * invAttackSpeed;
+        float recoveryTime = 0.5f * invAttackSpeed;
+        
+        yield return new WaitForSeconds(startupTime); // 애니메이션 선딜
+        
+        GameObject skill_3_Effect_Prefab = Resources.Load<GameObject>("Player/Effects/Skill_3_Effect");
+        if (skill_3_Effect_Prefab == null)
+        {
+            yield break;
+        }
+        
+        GameObject skill_3_Effect_Object = GameObject.Instantiate(skill_3_Effect_Prefab, transform.position, Quaternion.identity);
         
         // 주변 적에게 데미지 주는 로직
         Collider[] hitColliders = Physics.OverlapSphere(transform.position, mSkill_3_Radius);
@@ -1334,8 +1592,6 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         {
             if (hitCollider.transform.gameObject.layer == LayerMask.NameToLayer("Enemy"))
             {
-                //TODO: enemy범위 공격 로직
-                // 데미지 처리
                 EnemyBTController enemy = hitCollider.GetComponent<EnemyBTController>();
                 if (enemy != null)
                 {
@@ -1344,25 +1600,11 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             }
         }
         
-        mSkill_3_TimeoutDelta = mSkill_3_Timeout;
-    }
-    
-    private IEnumerator FallToGround(Vector3 groundPosition)
-    {
-        float duration = 0.3f; // 떨어지는 시간
-        float timer = 0.0f;
-        Vector3 startPosition = transform.position;
-
-        while (timer < duration)
-        {
-            transform.position = Vector3.Lerp(startPosition, groundPosition, timer / duration);
-            timer += Time.deltaTime;
-            yield return null;
-        }
-
-        transform.position = groundPosition;
+        yield return new WaitForSeconds(recoveryTime);
+        Destroy(skill_3_Effect_Object);
         
-        fallCoroutine = null;
+        SetCombatState(true);
+        mSkill_3_TimeoutDelta = mSkill_3_Timeout;
     }
     
     #endregion
@@ -1574,10 +1816,15 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
 
     private IEnumerator FireProjectileCoroutine(Vector3 targetPoint)
     {
+        float attackSpeed = PlayerAnimator.GetFloat("AttackSpeed");
+        float invAttackSpeed = 1.0f / attackSpeed;
+        float startupTime = 0.3f * invAttackSpeed;
+        float recoveryTime = 0.0f * invAttackSpeed;
+        
         PlayerAnimator.SetTrigger("Skill");
         PlayerAnimator.SetInteger("Skill_Index", 4);
         
-        yield return new WaitForSeconds(0.8f); // 애니메이션 선딜
+        yield return new WaitForSeconds(startupTime); // 애니메이션 선딜
         
         GameObject projectilePrefab = Resources.Load<GameObject>("Player/Effects/Skill_4_Projectile");
         if (projectilePrefab == null)
@@ -1586,11 +1833,12 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         }
         Vector3 firePosition = targetPoint + Vector3.up * 10.0f;
         
-        GameObject projectileObject = GameObject.Instantiate(projectilePrefab, firePosition, Quaternion.identity);
+        GameObject projectileObject = GameObject.Instantiate(projectilePrefab, firePosition, Quaternion.LookRotation(- mMainCamera.transform.right));
         
         Skill_4 skill_4 = projectileObject.GetComponent<Skill_4>();
         skill_4.Init((int)mPlayerStats.GetAttackDamage(), mSkill_4_DamageMultiplier, mSkill_4_Radius, targetPoint);
         
+        yield return new WaitForSeconds(recoveryTime);
         StartCoroutine(Skill_4_Camera(false));
     }
 

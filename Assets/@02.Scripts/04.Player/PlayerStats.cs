@@ -216,7 +216,7 @@ public class PlayerStats : MonoBehaviour
     /// 플레이어가 데미지를 받을 때 호출
     /// </summary>
     /// <param name="damage">받는 데미지 양</param>
-    public void TakeDamage(float damage)
+    public void TakeDamage(float damage, float overrideReduction = 0.0f)
     {
         if (mbDefenceBuff)
         {
@@ -225,12 +225,20 @@ public class PlayerStats : MonoBehaviour
         }
 
         float finalDamage = damage;
-        if (mDefence > 0)
+        if (mDefence > 0.0f)
         {
             finalDamage = Mathf.Max(damage - mDefence, 1);
         }
 
-        finalDamage *= (1f - mDamageReduction);
+        // [방어, 구르기, 패링 성공]으로 발생하는 피해 감소 상태 적용 시 스탯 상의 피해 감소와 별개로 적용
+        if (overrideReduction > 0.0f)
+        {
+            finalDamage *= (1.0f - overrideReduction);
+        }
+        else
+        {
+            finalDamage *= (1.0f - mDamageReduction);
+        }
 
         if (mbHasLastStand && !mbLastStandActive && mCurrentHP - finalDamage <= mMaxHP * 0.3f)
         {

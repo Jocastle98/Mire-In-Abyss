@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 
 [RequireComponent(typeof(QuestDatabase))]
-public class GameDB : Singleton<GameDB>
+public class GameDB : Singleton<GameDB>, IInitializable
 {
     public QuestDatabase QuestDatabase { get; private set; }
     public SpriteCache SpriteCache { get; private set; }
@@ -16,16 +16,17 @@ public class GameDB : Singleton<GameDB>
         SpriteCache = new SpriteCache();
     }
 
-    async void Start()
+
+
+    public async UniTask InitializeAsync()
     {
-        await SpriteCache.PreloadSprites();
-        R3EventBus.Instance.Publish(new Preloaded(true));
+        var tasks = new UniTask[]
+        {
+            //TODO: 모든 DB들 초기화 추가
+            SpriteCache.InitializeAsync()
+        };
+        await UniTask.WhenAll(tasks);
     }
 
-
-
-
-    protected override void OnSceneLoaded(Scene scene, LoadSceneMode mode)
-    {
-    }
+    protected override void OnSceneLoaded(Scene scene, LoadSceneMode mode) { }
 }
