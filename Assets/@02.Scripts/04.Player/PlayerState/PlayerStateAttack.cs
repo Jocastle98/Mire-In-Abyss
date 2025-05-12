@@ -15,7 +15,7 @@ public class PlayerStateAttack : IPlayerState
     public bool HasReceivedNextAttackInput;
     public bool bIsComboActive;
     
-    private float mComboInputWindow = 1.0f;
+    private float mComboInputWindow = 2.0f;
     private float mComboInputTimer;
     
     public void OnEnter(PlayerController playerController)
@@ -47,7 +47,7 @@ public class PlayerStateAttack : IPlayerState
         }
         
         if ((GameManager.Instance.Input.AttackInput || GameManager.Instance.Input.IsAttacking) 
-            && bIsComboActive && !HasReceivedNextAttackInput)
+             && bIsComboActive && !HasReceivedNextAttackInput)
         {
             AttackCount++;
             mPlayerController.PlayerAnimator.SetTrigger("Attack");
@@ -58,7 +58,7 @@ public class PlayerStateAttack : IPlayerState
         mPlayerController.Attack();
 
         // 콤보가 끝날 때 HasReceivedNextAttackInput을 false로 설정
-        if (AttackCount > mMaxCombo)
+        if (AttackCount >= mMaxCombo)
         {
             HasReceivedNextAttackInput = false;
             bIsComboActive = false;
@@ -102,6 +102,26 @@ public class PlayerStateAttack : IPlayerState
                 mPlayerController.PlayerAnimator.SetInteger("Attack_Count", value);
             }
         }
+    }
+
+    public GameObject AttackEffect()
+    {
+        GameObject slashEffectObject = null;
+        
+        switch (AttackCount)
+        {
+            case 0:
+                slashEffectObject = mPlayerController.SlashEffect(SlashEffectType.RightToLeft);
+                break;
+            case 1:
+                slashEffectObject = mPlayerController.SlashEffect(SlashEffectType.LeftToRight);
+                break;
+            case 2:
+                slashEffectObject = mPlayerController.SlashEffect(SlashEffectType.RightToLeft);
+                break;
+        }
+
+        return slashEffectObject;
     }
 
     // todo: 콤보별 공격력 배율(무기 공격력 기준) // 임시 기능(사용할지 말지)

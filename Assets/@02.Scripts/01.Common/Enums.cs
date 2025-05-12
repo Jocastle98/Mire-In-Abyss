@@ -43,6 +43,13 @@ namespace PlayerEnums
         Poison,
         Bleed
     }
+
+    public enum SlashEffectType
+    {
+        RightToLeft,
+        LeftToRight,
+        TopToBottom,
+    }
 }
 
 namespace ItemEnums
