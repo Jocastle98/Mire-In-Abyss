@@ -17,7 +17,7 @@ public sealed class EscSystemPresenter : MonoBehaviour
             mBtnMain.onClick.AddListener(()=> 
             {
                 UIManager.Instance.Pop().Forget();
-                SceneLoader.LoadAsync(Constants.MainMenuScene).Forget();
+                SceneLoader.LoadSceneAsync(Constants.MainMenuScene).Forget();
             });
             mBtnQuit.onClick.AddListener(QuitGame);
 

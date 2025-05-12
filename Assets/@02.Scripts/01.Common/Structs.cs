@@ -1,4 +1,5 @@
 using System;
+using SceneEnums;
 using UIHUDEnums;
 using UnityEngine;
 
@@ -7,6 +8,15 @@ namespace Events.Data
 {
     public readonly struct Preloaded
     {
+    }
+}
+
+namespace Events.Gameplay
+{
+    public readonly struct GameplaySceneChanged
+    {
+        public readonly GameScene NewScene;
+        public GameplaySceneChanged(GameScene newScene) => NewScene = newScene;
     }
 }
 
@@ -34,6 +44,12 @@ namespace AchievementStructs
 
 namespace Events.Player
 {
+    public readonly struct PlayerGrounded
+    {
+        public readonly bool IsGrounded;
+        public PlayerGrounded(bool isGrounded) => IsGrounded = isGrounded;
+    }
+
     public readonly struct PlayerHpChanged
     {
         public readonly int Current;
@@ -261,8 +277,7 @@ namespace Events.HUD
 
 namespace Events.UI
 {
-    public readonly struct EnterInGameScene
-    {
-    }
-    public readonly struct LastUIPopup { }
+    public readonly struct EnterInGameScene { }
+    public readonly struct EnterAbyssScene { }
+    public readonly struct EnterTownScene { }
 }

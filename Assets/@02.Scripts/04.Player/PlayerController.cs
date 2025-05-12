@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Cinemachine;
+using Events.Player;
 using PlayerEnums;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -134,7 +135,6 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     // Componenet
     public Animator PlayerAnimator { get; private set; }
     private CharacterController mCharacterController;
-    private PlayerInput mPlayerInput;
     private GameObject mMainCamera;
     private WeaponController mWeaponController;
     
@@ -164,7 +164,6 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     {
         PlayerAnimator = GetComponent<Animator>();
         mCharacterController = GetComponent<CharacterController>();
-        mPlayerInput = GetComponent<PlayerInput>();
         if (Camera.main != null)
         {
             mMainCamera = Camera.main.gameObject;
@@ -202,9 +201,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     {
         StateInit();
         TimeoutInit();
-        
-        GameManager.Instance.Input.Init(mPlayerInput);
-        
+
         // 공격 속도 설정
         PlayerAnimator.SetFloat("AttackSpeed", mAttackSpeedMultiplier);
         
@@ -297,11 +294,14 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     private void GroundedCheck()
     {
         Vector3 spherePosition = new Vector3(transform.position.x, transform.position.y - mGroundedOffset, transform.position.z);
-        bIsGrounded = Physics.CheckSphere(spherePosition, mGroundedRadius, mGroundLayers, QueryTriggerInteraction.Ignore);
+        bool isGrounded = Physics.CheckSphere(spherePosition, mGroundedRadius, mGroundLayers, QueryTriggerInteraction.Ignore);
 
-        PlayerAnimator.SetBool("IsGrounded", bIsGrounded);
-
-        mMainCamera.GetComponent<CameraController>().SendPlayerGrounded(bIsGrounded);
+        if (bIsGrounded != isGrounded)
+        {
+            bIsGrounded = isGrounded;
+            PlayerAnimator.SetBool("IsGrounded", bIsGrounded);
+            R3EventBus.Instance.Publish(new PlayerGrounded(bIsGrounded));
+        }
     }
    
     public void SetNearestInteractable(InteractableObject obj)
