@@ -5,21 +5,21 @@ using UnityEngine;
 public class GolemAttackBehavior : ScriptableObject, IAttackBehavior
 {
     [Header("스윙 공격")]
-    [SerializeField] private float mSwingRange = 3f;
-    [SerializeField] private int   mSwingDamage = 20;
+    public float SwingRange = 3f;
+    public int  SwingDamage = 20;
 
     [Header("임팩트 공격")]
-    [SerializeField] private float mImpactRange      = 6f;
-    [SerializeField] private int   mImpactDamage     = 35;
+    public float ImpactRange  = 6f;
+    public int ImpactDamage = 35;
     [SerializeField] private float mImpactChargeTime = 1.5f;
     [SerializeField] private float mImpactCooldown   = 10f;
-
+    
+    [Header("임팩트 VFX")]
+    public GameObject mImpactVFXPrefab;
+    public float mImpactVFXDuration = 2f;
+    
     private float mLastImpactTime = -Mathf.Infinity;
 
-    public float SwingRange       => mSwingRange;
-    public int   SwingDamage      => mSwingDamage;
-    public float ImpactRange      => mImpactRange;
-    public int   ImpactDamage     => mImpactDamage;
     public float ImpactChargeTime => mImpactChargeTime;
     public float ImpactCooldown   => mImpactCooldown;
 
@@ -33,7 +33,7 @@ public class GolemAttackBehavior : ScriptableObject, IAttackBehavior
     {
         if (target == null) return false;
         float dist = Vector3.Distance(self.position, target.position);
-        return dist <= mSwingRange || dist <= mImpactRange;
+        return dist <= SwingRange || dist <= ImpactRange;
     }
 
     public bool CanImpact(Transform self, Transform target)
@@ -43,7 +43,7 @@ public class GolemAttackBehavior : ScriptableObject, IAttackBehavior
         float nextImpactTime = mLastImpactTime + mImpactCooldown;
         float remaining = nextImpactTime - Time.time;
         
-        bool can = Time.time >= nextImpactTime && dist <= mImpactRange;
+        bool can = Time.time >= nextImpactTime && dist <= ImpactRange;
         return can;
     }
 
@@ -51,7 +51,7 @@ public class GolemAttackBehavior : ScriptableObject, IAttackBehavior
     {
         if (target == null) return false;
         float dist = Vector3.Distance(self.position, target.position);
-        return dist <= mSwingRange;
+        return dist <= SwingRange;
     }
 
     public void Attack(Transform self, Transform target)
