@@ -48,14 +48,6 @@ public class Projectile : MonoBehaviour
         mLastDamageTime   = Time.time;
     }
 
-    private void FixedUpdate()
-    {
-        if (!mIsBreath && mRb.velocity.sqrMagnitude > 0.1f)
-        {
-            var rot = Quaternion.LookRotation(mRb.velocity);
-            transform.rotation = rot * Quaternion.Euler(90f, 0f, 0f);
-        }
-    }
     private void OnTriggerEnter(Collider other)
     {
         if (mIsBreath) return;

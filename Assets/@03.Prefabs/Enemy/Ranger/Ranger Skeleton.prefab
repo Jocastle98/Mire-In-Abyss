@@ -2297,7 +2297,7 @@ Animator:
   m_Controller: {fileID: 9100000, guid: 6f6f2907b8d296f4f8f1fa625020d431, type: 2}
   m_CullingMode: 1
   m_UpdateMode: 0
-  m_ApplyRootMotion: 0
+  m_ApplyRootMotion: 1
   m_LinearVelocityBlending: 0
   m_StabilizeFeet: 0
   m_WarningMessage: 
@@ -2327,6 +2327,7 @@ MonoBehaviour:
   mPatrolRadius: 5
   mAttackBehaviorAsset: {fileID: 11400000, guid: d4421d88b302c33418aaa05ef814bf6a, type: 2}
   mFirePoint: {fileID: 5811797329913469919}
+  mBreathPoint: {fileID: 0}
   ImpactProjectorPrefab: {fileID: 0}
   ImpactHitLayer:
     serializedVersion: 2
@@ -2342,6 +2343,13 @@ MonoBehaviour:
   airDuration: 10
   mEnemyType: 0
   mExpRewardController: {fileID: 5738935410241395221}
+  mStunDuration: 2
+  mAttackDebuffDuration: 10
+  mAttackDebuffAmount: 5
+  mFireDotDuration: 3
+  mFireDotDamagePerSecond: 3
+  mIceDebuffDuration: 8
+  mIceAnimSpeed: 0.2
 --- !u!195 &4720923295094366070
 NavMeshAgent:
   m_ObjectHideFlags: 0

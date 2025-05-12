@@ -3,6 +3,10 @@ using UnityEngine.InputSystem;
 
 public class InputManager
 {
+    // UI
+    public bool EscInput => mEscInputAction.WasPressedThisFrame();
+
+    // Gameplay
     public bool CursorToggleInput => mCursorToggleBuffer.ConsumeInputBuffer();
     public Vector2 LookInput { get; private set; }
     public Vector2 MoveInput { get; private set; }
@@ -21,7 +25,7 @@ public class InputManager
     public bool Skill_3Input => mSkill_3Buffer.ConsumeInputBuffer();
     public bool Skill_4Input => mSkill_4Buffer.ConsumeInputBuffer();
     public bool InteractionInput => mInteractionBuffer.ConsumeInputBuffer();
-    
+
     private InputBuffer mCursorToggleBuffer = new InputBuffer();
     private InputBuffer mSprintBuffer = new InputBuffer();
     private InputBuffer mJumpBuffer = new InputBuffer();
@@ -35,6 +39,8 @@ public class InputManager
     private InputBuffer mSkill_3Buffer = new InputBuffer();
     private InputBuffer mSkill_4Buffer = new InputBuffer();
     private InputBuffer mInteractionBuffer = new InputBuffer();
+
+    private InputAction mEscInputAction;
 
     private InputAction mCursorToggleAction;
     private InputAction mLookAction;
@@ -51,13 +57,17 @@ public class InputManager
     private InputAction mSkill_3Action;
     private InputAction mSkill_4Action;
     private InputAction mInteractionAction;
-    
+
     private PlayerInput mPlayerInput;
-    
+
     public void Init(PlayerInput playerInput)
     {
         mPlayerInput = playerInput;
 
+        // UI
+        mEscInputAction = playerInput.actions["Esc"];
+
+        // Gameplay
         mCursorToggleAction = playerInput.actions["CursorToggleAction"];
         mLookAction = playerInput.actions["Look"];
         mMoveAction = playerInput.actions["Move"];
@@ -81,7 +91,7 @@ public class InputManager
         {
             return;
         }
-        
+
         SetInputBuffer(mCursorToggleAction, mCursorToggleBuffer);
         LookInput = mLookAction.ReadValue<Vector2>();
         MoveInput = mMoveAction.ReadValue<Vector2>();
@@ -91,7 +101,7 @@ public class InputManager
             mSprintToggled = !mSprintToggled;
         }
         mSprintBuffer.SetHold(mSprintToggled);
-        
+
         SetInputBuffer(mJumpAction, mJumpBuffer);
         SetInputBuffer(mRollAction, mRollBuffer);
         SetInputBuffer(mAttackAction, mAttackBuffer);
