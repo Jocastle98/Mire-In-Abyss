@@ -2497,6 +2497,7 @@ MonoBehaviour:
   mQuestRewardText: {fileID: 4620830071323102169}
   mAcceptButton: {fileID: 8224463281395953774}
   mGetRewardButton: {fileID: 1409635678962383478}
+  mBackButton: {fileID: 3450681168829757092}
 --- !u!1001 &7064812480728005469
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2594,6 +2595,17 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 3cd83f721d1916245ae64e7c8b4dd148, type: 3}
+--- !u!114 &3450681168829757092 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5613747624545078777, guid: 3cd83f721d1916245ae64e7c8b4dd148, type: 3}
+  m_PrefabInstance: {fileID: 7064812480728005469}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 479c223e91d4be1439bf91bbdffebc5a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!224 &8084068830735754240 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 1313679176049762141, guid: 3cd83f721d1916245ae64e7c8b4dd148, type: 3}
