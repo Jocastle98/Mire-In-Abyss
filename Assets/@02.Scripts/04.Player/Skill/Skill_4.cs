@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -8,14 +9,27 @@ public class Skill_4 : MonoBehaviour
     private float mDamageMultiplier;
     private float mRadius;
     private Vector3 mTargetPoint;
-    private float mSpeed = 20.0f;
     private bool mbHasArrived = false;
+    private float mSpeed = 20.0f;
+    private float mDuration = 1.0f;
+    private float mTimer = 0.0f;
 
     private void FixedUpdate()
     {
         if (!mbHasArrived)
         {
+            mTimer = 0.0f;
+            
             FallToTarget();
+        }
+        else
+        {
+            mTimer += Time.deltaTime;
+
+            if (mTimer >= mDuration)
+            {
+                GameManager.Instance.Resource.Destroy(gameObject);
+            }
         }
     }
     
@@ -25,6 +39,7 @@ public class Skill_4 : MonoBehaviour
         mDamageMultiplier = damageMultiplier;
         mRadius = radius;
         mTargetPoint = targetPoint;
+        mbHasArrived = false;
     }
 
     private void FallToTarget()
@@ -61,9 +76,5 @@ public class Skill_4 : MonoBehaviour
                 // Todo: 흡혈효과 처리 추가해야함
             }
         }
-
-        // 이펙트 추가
-        
-        Destroy(gameObject, 1.0f);
     }
 }
