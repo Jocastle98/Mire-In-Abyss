@@ -1,36 +1,35 @@
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.SceneManagement; 
+using UnityEngine.SceneManagement;
 using AudioEnums;
 
 public class AudioManager : Singleton<AudioManager>
 {
-    [Header("Sources")]
+    [Header("오디오 소스")]
     [SerializeField] private AudioSource mBgmSource;
     [SerializeField] private AudioSource mSfxSource;
     [SerializeField] private AudioSource mUiSource;
 
-    [Header("Clips")]
-    [SerializeField] private AudioClip[] mBgmClips;  
-    [SerializeField] private AudioClip[] mSfxClips; 
-    [SerializeField] private AudioClip[] mUiClips;   
+    [Header("오디오 클립")]
+    [SerializeField] private AudioClip[] mBgmClips;
+    [SerializeField] private AudioClip[] mSfxClips;
+    [SerializeField] private AudioClip[] mUiClips;
 
     private void Start()
     {
         AudioListener.volume = PlayerPrefs.GetFloat(Constants.MasterVolumeKey, 1f);
+        if (mBgmSource != null) mBgmSource.volume = PlayerPrefs.GetFloat(Constants.BGMVolumeKey, 1f);
+        if (mSfxSource != null) mSfxSource.volume = PlayerPrefs.GetFloat(Constants.SFXVolumeKey, 1f);
+        if (mUiSource  != null) mUiSource .volume = PlayerPrefs.GetFloat(Constants.UIVolumeKey, 1f);
 
-        if (mBgmSource != null)
-            mBgmSource.volume = PlayerPrefs.GetFloat(Constants.BGMVolumeKey, 1f);
-
-        if (mSfxSource != null)
-            mSfxSource.volume = PlayerPrefs.GetFloat(Constants.SFXVolumeKey, 1f);
-
-        if (mUiSource != null)
-            mUiSource.volume = PlayerPrefs.GetFloat(Constants.UIVolumeKey, 1f);
+        AudioListener.pause = PlayerPrefs.GetInt(Constants.MasterMuteKey, 0) == 1;
+        if (mBgmSource != null) mBgmSource.mute = PlayerPrefs.GetInt(Constants.BgmMuteKey, 0) == 1;
+        if (mSfxSource != null) mSfxSource.mute = PlayerPrefs.GetInt(Constants.SeMuteKey,  0) == 1;
+        if (mUiSource  != null) mUiSource .mute = PlayerPrefs.GetInt(Constants.UiMuteKey,  0) == 1;
     }
 
     /// <summary>
-    /// Setting Panel에서 네 개 슬라이더를 바인딩
+    /// SoundPresenter에서 슬라이더 할당 
     /// </summary>
     public void InitSliders(
         Slider masterSlider,
@@ -88,15 +87,41 @@ public class AudioManager : Singleton<AudioManager>
         PlayerPrefs.Save();
     }
 
+    public void SetMasterMute(bool isMuted)
+    {
+        AudioListener.pause = isMuted;
+        PlayerPrefs.SetInt(Constants.MasterMuteKey, isMuted ? 1 : 0);
+        PlayerPrefs.Save();
+    }
+
+    public void SetBgmMute(bool isMuted)
+    {
+        mBgmSource.mute = isMuted;
+        PlayerPrefs.SetInt(Constants.BgmMuteKey, isMuted ? 1 : 0);
+        PlayerPrefs.Save();
+    }
+
+    public void SetSeMute(bool isMuted)
+    {
+        mSfxSource.mute = isMuted;
+        PlayerPrefs.SetInt(Constants.SeMuteKey, isMuted ? 1 : 0);
+        PlayerPrefs.Save();
+    }
+
+    public void SetUiMute(bool isMuted)
+    {
+        mUiSource.mute = isMuted;
+        PlayerPrefs.SetInt(Constants.UiMuteKey, isMuted ? 1 : 0);
+        PlayerPrefs.Save();
+    }
+
     public void PlayBgm(EBgmType type)
     {
         int idx = (int)type;
         if (mBgmClips == null || idx < 0 || idx >= mBgmClips.Length)
             return;
-
-        AudioClip clip = mBgmClips[idx];
+        var clip = mBgmClips[idx];
         if (clip == null) return;
-
         mBgmSource.clip = clip;
         mBgmSource.loop = true;
         mBgmSource.Play();
@@ -111,29 +136,20 @@ public class AudioManager : Singleton<AudioManager>
     public void PlaySfx(ESfxType type)
     {
         int idx = (int)type;
-        if (mSfxClips == null || idx < 0 || idx >= mSfxClips.Length)
-            return;
-
-        AudioClip clip = mSfxClips[idx];
+        if (mSfxClips == null || idx < 0 || idx >= mSfxClips.Length) return;
+        var clip = mSfxClips[idx];
         if (clip == null) return;
-
         mSfxSource.PlayOneShot(clip);
     }
 
     public void PlayUi(EUiType type)
     {
         int idx = (int)type;
-        if (mUiClips == null || idx < 0 || idx >= mUiClips.Length)
-            return;
-
-        AudioClip clip = mUiClips[idx];
+        if (mUiClips == null || idx < 0 || idx >= mUiClips.Length) return;
+        var clip = mUiClips[idx];
         if (clip == null) return;
-
         mUiSource.PlayOneShot(clip);
     }
 
-    protected override void OnSceneLoaded(Scene scene, LoadSceneMode mode)
-    {
-        
-    }
+    protected override void OnSceneLoaded(Scene scene, LoadSceneMode mode) { }
 }

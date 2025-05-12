@@ -46,7 +46,6 @@ public class Projectile : MonoBehaviour
         if (mIsBreath) 
             return;
 
-        // 1) 플레이어 레이어가 아니면 그냥 파괴
         int otherLayer = other.gameObject.layer;
         int playerLayer = LayerMask.NameToLayer("Player");
         if (otherLayer != playerLayer)
@@ -55,7 +54,6 @@ public class Projectile : MonoBehaviour
             return;
         }
 
-        // 2) 플레이어면 데미지 입히고 파괴
         if (other.TryGetComponent<PlayerController>(out var player))
         {
             player.SetHit(mDamage, transform, 1);
