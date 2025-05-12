@@ -1,8 +1,10 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using BattleAreaEnums;
 using Unity.AI.Navigation;
+using Random = UnityEngine.Random;
 
 public class DungeonController : Abyss
 {
@@ -21,16 +23,22 @@ public class DungeonController : Abyss
     private int mMinRoomCount;
     private int mDivideLineWidth;
     private int mEventRoomChance;
+    private int mLevelDesign;
     private GameObject mPlayer;
     
-    private SODungeonList dungeonListSo;
+    private SODungeonList mDungeonListSo;
     
     private GameObject mTileFolder;
     private GameObject mStanderFolder;
     private GameObject mDungeonFolder;
     
     private NavMeshSurface mNavMeshSurface;
-    
+
+    private void Start()
+    {
+        DungeonInit();
+    }
+
     public override void BattleAreaClear()
     {
         ClearField();
@@ -40,7 +48,7 @@ public class DungeonController : Abyss
     
     public override void SetPortal()
     {
-        portal = AbyssManager.portal;
+        portal = AbyssManager.Instance.portal;
         AbyssMoveController moveCon = portal.GetComponent<AbyssMoveController>();
         moveCon.battleAreaMoveDelegate = BattleAreaClear;
         DeActivatePortal();
@@ -56,14 +64,20 @@ public class DungeonController : Abyss
     }
 
     //최대 방 크기, 최소 방 크기, 방 개수, 보물상자, 함정
-    public void DungeonInit(int cellSize, int minDungeonSize, int divideLineWidth, int minRoomCount, int levelDesign,
-        int eventRoomChance, SODungeonList dungeonListSo, GameObject player)
+    public void DungeonInit()
     {
-        mCellSize = cellSize;
-        mMinDungeonSize = minDungeonSize;
-        mDivideLineWidth = divideLineWidth;
-        mEventRoomChance = eventRoomChance;
-        mPlayer = player;
+        //클리어 델리게이트 부착
+        OnClearBattleArea -= AbyssManager.Instance.BattleAreaClear;
+        OnClearBattleArea += AbyssManager.Instance.BattleAreaClear;
+        
+        mCellSize = AbyssManager.Instance.cellSize;
+        mMinDungeonSize = AbyssManager.Instance.minDungeonRoomSize;
+        mDivideLineWidth = AbyssManager.Instance.divideLineWidth;
+        mMinRoomCount = AbyssManager.Instance.minRoomCount;
+        mLevelDesign = AbyssManager.Instance.levelDesign;
+        mEventRoomChance = AbyssManager.Instance.eventRoomChance;
+        mDungeonListSo = AbyssManager.Instance.dungeonListSO;
+        mPlayer = AbyssManager.Instance.player;
 
         mTileFolder = new GameObject("TileFolder");
         mStanderFolder = new GameObject("StanderFolder");
@@ -72,9 +86,15 @@ public class DungeonController : Abyss
         mStanderFolder.transform.parent = gameObject.transform;
         mDungeonFolder.transform.parent = gameObject.transform;
 
-        mCreateSize = mMinDungeonSize * (minRoomCount / 3 + 1);
+        DungeonCreat();
+    }
+
+    void DungeonCreat()
+    {
+
+        mCreateSize = mMinDungeonSize * (mMinRoomCount / 3 + 1);
         mMinRoomCount = Mathf.Max(2,
-            Random.Range(minRoomCount - (int)(levelDesign * .1f), minRoomCount + (int)(levelDesign * .1f))) - 1;
+            Random.Range(mMinRoomCount - (int)(mLevelDesign * .1f), mMinRoomCount + (int)(mLevelDesign * .1f))) - 1;
 
         int whileCount = 0;
         while (mLeafRooms.Count <= mMinRoomCount)
@@ -89,7 +109,7 @@ public class DungeonController : Abyss
             if (10 < whileCount)
             {
                 mCreateRoomChance += 10;
-                mCreateSize += minDungeonSize;
+                mCreateSize += mMinDungeonSize;
             }
 
             mDungeonCells = new DungeonCells[mCreateSize, mCreateSize];
@@ -100,7 +120,7 @@ public class DungeonController : Abyss
                 {
                     mDungeonCells[i, j] = new DungeonCells();
                     mDungeonCells[i, j].SetDungeonCells(new Vector2Int(i, j),
-                        mCellSize, mTileFolder, mStanderFolder, mDungeonFolder, dungeonListSo);
+                        mCellSize, mTileFolder, mStanderFolder, mDungeonFolder, mDungeonListSo);
                 }
             }
 

@@ -68,7 +68,7 @@ public class FieldController : Abyss
 
     public override void SetPortal()
     {
-        portal = AbyssManager.portal;
+        portal = AbyssManager.Instance.portal;
         DeActivatePortal();
         AbyssMoveController moveCon = portal.GetComponent<AbyssMoveController>();
         moveCon.battleAreaMoveDelegate = BattleAreaClear;
@@ -83,11 +83,11 @@ public class FieldController : Abyss
     /// <param name="levelDesign"></param>
     public void FieldInit()
     {
-        mPlayer = AbyssManager.player;
-        mLevelDesign = AbyssManager.levelDesign;
-        mFieldData = AbyssManager.battleFields[Random.Range(0, AbyssManager.battleFields.Count)];
-        OnClearBattleArea -= AbyssManager.BattleAreaClear;
-        OnClearBattleArea += AbyssManager.BattleAreaClear;
+        mPlayer = AbyssManager.Instance.player;
+        mLevelDesign = AbyssManager.Instance.levelDesign;
+        mFieldData = AbyssManager.Instance.battleFields[Random.Range(0, AbyssManager.Instance.battleFields.Count)];
+        OnClearBattleArea -= AbyssManager.Instance.BattleAreaClear;
+        OnClearBattleArea += AbyssManager.Instance.BattleAreaClear;
         
         mMonsterMaxFieldCount += Mathf.FloorToInt(mLevelDesign * .1f);
         mFieldMonsterFolder = new GameObject("FieldMonsterFolder");
