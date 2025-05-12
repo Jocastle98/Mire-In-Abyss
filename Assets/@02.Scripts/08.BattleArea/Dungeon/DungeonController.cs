@@ -4,7 +4,7 @@ using UnityEngine;
 using BattleAreaEnums;
 using Unity.AI.Navigation;
 
-public class DungeonController : BattleArea
+public class DungeonController : Abyss
 {
     //BSP
     private int mCellSize;
@@ -38,10 +38,10 @@ public class DungeonController : BattleArea
         Destroy(gameObject);
     }
     
-    public override void SetPortal(GameObject portal)
+    public override void SetPortal()
     {
-        this.portal = portal;
-        BattleAreaMoveController moveCon = portal.GetComponent<BattleAreaMoveController>();
+        portal = AbyssManager.portal;
+        AbyssMoveController moveCon = portal.GetComponent<AbyssMoveController>();
         moveCon.battleAreaMoveDelegate = BattleAreaClear;
         DeActivatePortal();
     }

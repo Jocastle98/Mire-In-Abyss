@@ -8,7 +8,7 @@ using UnityEngine.AI;
 using UnityEngine.Serialization;
 using Random = UnityEngine.Random;
 
-public class FieldController : BattleArea
+public class FieldController : Abyss
 {
     private FieldDataSO mFieldData;
     //스폰 주기
@@ -40,6 +40,11 @@ public class FieldController : BattleArea
     private GameObject mFieldMonsterFolder;
     private GameObject mRandomTreasureFolder;
 
+    private void Start()
+    {
+        FieldInit();
+    }
+
     private void FixedUpdate()
     {
         mCurrentTime += Time.fixedDeltaTime;
@@ -61,11 +66,11 @@ public class FieldController : BattleArea
         Destroy(gameObject);
     }
 
-    public override void SetPortal(GameObject portal)
+    public override void SetPortal()
     {
-        this.portal = portal;
+        portal = AbyssManager.portal;
         DeActivatePortal();
-        BattleAreaMoveController moveCon = portal.GetComponent<BattleAreaMoveController>();
+        AbyssMoveController moveCon = portal.GetComponent<AbyssMoveController>();
         moveCon.battleAreaMoveDelegate = BattleAreaClear;
     }
 
@@ -76,12 +81,15 @@ public class FieldController : BattleArea
     /// </summary>
     /// <param name="player"></param>
     /// <param name="levelDesign"></param>
-    public void FieldInit(GameObject player, int levelDesign,FieldDataSO fieldData)
+    public void FieldInit()
     {
-        mPlayer = player;
-        mLevelDesign = levelDesign;
-        mFieldData = fieldData;
-        mMonsterMaxFieldCount += Mathf.FloorToInt(levelDesign * .1f);
+        mPlayer = AbyssManager.player;
+        mLevelDesign = AbyssManager.levelDesign;
+        mFieldData = AbyssManager.battleFields[Random.Range(0, AbyssManager.battleFields.Count)];
+        OnClearBattleArea -= AbyssManager.BattleAreaClear;
+        OnClearBattleArea += AbyssManager.BattleAreaClear;
+        
+        mMonsterMaxFieldCount += Mathf.FloorToInt(mLevelDesign * .1f);
         mFieldMonsterFolder = new GameObject("FieldMonsterFolder");
         mRandomTreasureFolder = new GameObject("RandomTreasureFolder");
 
@@ -277,10 +285,10 @@ public class FieldController : BattleArea
     {
         mBoss = mFieldData.bossMonsters.monsters[Random.Range(0, mFieldData.bossMonsters.monsters.Count)];
         SpawnController spawnController = mBossSpawner.GetComponent<SpawnController>();
-        spawnController.SpawnObj(mBoss, mFieldMonsterFolder.transform,SetPortal);
+        spawnController.SpawnObj(mBoss, mFieldMonsterFolder.transform,SetPortalAtBoss);
     }
 
-    void SetPortal()
+    void SetPortalAtBoss()
     {
         Debug.Log("Boss is Dead!");
         ActivatePortal(portal,mBossSpawner);

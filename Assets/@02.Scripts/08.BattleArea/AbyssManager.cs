@@ -3,24 +3,25 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.Serialization;
 using Random = UnityEngine.Random;
+using Cysharp.Threading.Tasks;
+
 
 /// <summary>
 /// 필드와 던전을 관리하고 생성하는 매니저
 /// </summary>
-public class BattleAreaManager : MonoBehaviour
+public class AbyssManager : Singleton<AbyssManager>
 {
 
     [Header("매니저")] 
-    [SerializeField]private int mLevelDesign = 1;
-    [SerializeField]private int mBattleAreaClearLimit = 5;
-    [SerializeField]private int mBattleAreaClearCount = 0;
-    [Range(0, 1)] [SerializeField] private int mFieldFirst = 0;
-    private GameObject mPortal;
+    public static int levelDesign = 1;
+    private static int battleAreaClearLimit = 5;
+    private static int battleAreaClearCount = 0;
+    public static GameObject portal;
     
-    [SerializeField]private GameObject mPlayer;
-    [SerializeField]private GameObject mCurrentArea;
+    public static GameObject player;
 
     [Space(10)] [Header("던전")]
     [SerializeField]private int mCellSize = 3;
@@ -33,14 +34,10 @@ public class BattleAreaManager : MonoBehaviour
     
     [Space(10)] [Header("드래그 할당")] 
     [Header("포탈")] [SerializeField]private GameObject mPortalPrefab;
-    [Header("필드")] [SerializeField]private List<FieldDataSO> mBattleFields;
-    [Header("던전")] [SerializeField]private SODungeonList mDungeonListSO;
-
-    private void Start()
-    {
-        BattleAreaManagerInit(mPlayer, 1, 5);
-    }
-
+    
+    [Header("필드")] public static List<FieldDataSO> battleFields;
+    [Header("던전")] public static SODungeonList dungeonListSO;
+    
     /// <summary>
     /// 매니저 초기화 및 필드,던전을 생성하는 함수
     /// </summary>
@@ -49,10 +46,11 @@ public class BattleAreaManager : MonoBehaviour
     /// <param name="battleAreaClearLimit"></param>
     public void BattleAreaManagerInit(GameObject player, int levelDesign, int battleAreaClearLimit)
     {
-        mPlayer = player;
-        mLevelDesign = levelDesign;
-        mBattleAreaClearLimit = battleAreaClearLimit;
-        mPortal = Instantiate(mPortalPrefab);
+        AbyssManager.player = player;
+        AbyssManager.levelDesign = levelDesign;
+        AbyssManager.battleAreaClearLimit = battleAreaClearLimit;
+        
+        portal = Instantiate(mPortalPrefab);
 
         BattleAreaCreate();
         Debug.Log("Init succeed!");
@@ -61,36 +59,26 @@ public class BattleAreaManager : MonoBehaviour
     /// <summary>
     /// 필드 혹은 던전을 생성하는 함수
     /// </summary>
-    private void BattleAreaCreate()
+    private static async void BattleAreaCreate()
     {
-        Debug.Log("Creating...");
-        if (mBattleAreaClearCount % 2 == mFieldFirst)
+        if (battleAreaClearCount % 2 == battleAreaClearLimit % 2 - 1)
         {
-            Debug.Log("...Field");
-            //생성 및 초기화
-            FieldDataSO fieldData = mBattleFields[Random.Range(0, mBattleFields.Count)];
-            mCurrentArea = Instantiate(fieldData.battleFields);
-            FieldController fc = mCurrentArea.GetComponent<FieldController>();
-            fc.SetPortal(mPortal);
-            fc.FieldInit(mPlayer, mLevelDesign, fieldData);
-            
-            //클리어 델리게이트 부착
-            fc.OnClearBattleArea -= BattleAreaClear;
-            fc.OnClearBattleArea += BattleAreaClear;
+            SceneLoader.LoadAsync(Constants.AbyssFieldScene).Forget();
         }
         else
         {
-            Debug.Log("...Dungeon");
             //생성 및 초기화
             GameObject dungeon = new GameObject("Dungeon");
             DungeonController dCon = dungeon.AddComponent<DungeonController>();
-            dCon.SetPortal(mPortal);
+            dCon.SetPortal(portal);
             dCon.DungeonInit(mCellSize, mMinDungeonRoomSize, mDivideLineWidth, mMinRoomCount, mLevelDesign,
-                     mEventRoomChance, mDungeonListSO, mPlayer);
+                     mEventRoomChance, dungeonListSO, mPlayer);
             
             //클리어 델리게이트 부착
             dCon.OnClearBattleArea -= BattleAreaClear;
             dCon.OnClearBattleArea += BattleAreaClear;
+            
+            SceneLoader.LoadAsync(Constants.AbyssDungeonScene).Forget();
         }
 
         Debug.Log("Create succeed!");
@@ -99,13 +87,13 @@ public class BattleAreaManager : MonoBehaviour
     /// <summary>
     /// 필드 혹은 던전 클래스에서 클리어함수가 실행된 후 호출될 함수
     /// </summary>
-    private void BattleAreaClear()
+    public static void BattleAreaClear()
     {
-        mLevelDesign++;
-        mBattleAreaClearCount++;
-        Debug.Log("Clear succeed! : " + mBattleAreaClearCount);
+        levelDesign++;
+        battleAreaClearCount++;
+        Debug.Log("Clear succeed! : " + battleAreaClearCount);
 
-        if (mBattleAreaClearCount >= mBattleAreaClearLimit)
+        if (battleAreaClearCount >= battleAreaClearLimit)
         {
             LetsGoHome();
         }
@@ -119,10 +107,14 @@ public class BattleAreaManager : MonoBehaviour
     /// <summary>
     /// 집으로가는 함수
     /// </summary>
-    private void LetsGoHome()
+    private static void LetsGoHome()
     {
         //마을 씬로드
         Debug.Log("LetsGoHome");
+    }
+
+    protected override void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
     }
 }
  

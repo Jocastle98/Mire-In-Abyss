@@ -4,9 +4,9 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Rendering.PostProcessing;
 
-public abstract class BattleArea : MonoBehaviour
+public abstract class Abyss : MonoBehaviour
 {
-    public abstract void SetPortal(GameObject portal);
+    public abstract void SetPortal();
     public abstract void BattleAreaClear();
 
     public delegate void ClearDelegate();

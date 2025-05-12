@@ -135,6 +135,7 @@ GameObject:
   - component: {fileID: 618509338}
   - component: {fileID: 618509337}
   - component: {fileID: 618509340}
+  - component: {fileID: 618509341}
   m_Layer: 0
   m_Name: Managers
   m_TagString: Untagged
@@ -210,6 +211,33 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2301458724112f647b49fd4f34a6d421, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &618509341
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 618509335}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9fb84ff51887fb84596bc95a369479ed, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mLevelDesign: 1
+  mBattleAreaClearLimit: 5
+  mBattleAreaClearCount: 0
+  mFieldFirst: 0
+  mPlayer: {fileID: 0}
+  mCurrentArea: {fileID: 0}
+  mCellSize: 1
+  mMinDungeonRoomSize: 15
+  mEventRoomChance: 12
+  mDivideLineWidth: 2
+  mMinRoomCount: 6
+  mPortalPrefab: {fileID: 731653145237511377, guid: 2d0c8e17c7dedb64e95f33449af90af8, type: 3}
+  mBattleFields:
+  - {fileID: 11400000, guid: 8bad1ddf270ec754292ce2aceb5dc52f, type: 2}
+  mDungeonListSO: {fileID: 11400000, guid: c8aad2f24d6770c47afffb5587dc849f, type: 2}
 --- !u!1001 &1048028298
 PrefabInstance:
   m_ObjectHideFlags: 0
