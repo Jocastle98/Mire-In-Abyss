@@ -9,6 +9,7 @@ using UnityEngine.SceneManagement;
 using UnityEngine.Serialization;
 using R3;
 using GameEnums;
+using PlayerEnums;
 
 public class UIManager : Singleton<UIManager>
 {
@@ -18,6 +19,8 @@ public class UIManager : Singleton<UIManager>
     [SerializeField] BaseUIPanel mCodexPrefab;
     [SerializeField] BaseUIPanel mQuestBoardPrefab;
     [SerializeField] BaseUIPanel mEscGroupPrefab;
+    [SerializeField] BaseUIPanel mSoulStoneShopPanelPrefab;
+    [SerializeField] BaseUIPanel mPortalPanelPrefab;
 
     private Dictionary<UIPanelType, BaseUIPanel> mPanels = new();
     protected override void Awake()
@@ -27,8 +30,9 @@ public class UIManager : Singleton<UIManager>
         mPanels.Add(UIPanelType.Codex, mCodexPrefab);
         mPanels.Add(UIPanelType.QuestBoard, mQuestBoardPrefab);
         mPanels.Add(UIPanelType.EscGroup, mEscGroupPrefab);
+        mPanels.Add(UIPanelType.SoulStoneShop, mSoulStoneShopPanelPrefab);
+        mPanels.Add(UIPanelType.EnterPortal, mPortalPanelPrefab);
     }
-
     public async UniTask Push(BaseUIPanel prefab, Action onComplete = null)
     {
         if (mStack.TryPeek(out var top))
@@ -54,6 +58,48 @@ public class UIManager : Singleton<UIManager>
             await Push(prefab, onComplete);
         }
     }
+    #region playercontroller도 전달해야할때 ex 퀘스트, 영혼석 상점, 포탈 패널 취소시 player setstate idle로 변경
+
+    // PlayerController를 전달하는 Push 메서드 추가
+    public async UniTask Push(BaseUIPanel prefab, PlayerController player, Action onComplete = null, Action onClose = null)
+    {
+        if (mStack.TryPeek(out var top))
+        {
+            top.CG.interactable = false;
+        }
+
+        var inst = Instantiate(prefab, mPanelCanvas.transform);
+        
+        // PlayerController 설정
+        if (player != null)
+        {
+            inst.SetPlayer(player);
+            inst.SetOnCloseCallback(onClose);
+        }
+        
+        mStack.Push(inst);
+
+        if (mStack.Count == 1)
+        {
+            GameManager.Instance.SetGameState(GameState.UI);
+        }
+
+        await inst.Show(onComplete);
+    }
+
+    // PlayerController를 전달하는 UIPanelType 기반 Push 메서드 추가
+    public async UniTask Push(UIPanelType type, PlayerController player, Action onComplete = null)
+    {
+        if (mPanels.TryGetValue(type, out var prefab))
+        {
+            await Push(prefab, player, onComplete, () =>
+            {
+                player.SetPlayerState(PlayerState.Idle);
+            });
+        }
+    }
+
+    #endregion
 
     public async UniTask Pop()
     {

@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -13,6 +14,7 @@ public class BackButton : MonoBehaviour, IPointerEnterHandler,
     [SerializeField] Image mOutlineImage;
 
     private Tween mFadeTween;
+    private Action mOnAfterClose;
     public void OnPointerEnter(PointerEventData eventData)
     {
         playFadeTween(1f);
@@ -41,6 +43,12 @@ public class BackButton : MonoBehaviour, IPointerEnterHandler,
     void OnClick()
     {
         UIManager.Instance.Pop().Forget();
+        mOnAfterClose?.Invoke();
+    }
+
+    public void SetAfterCloseAction(Action onClose)
+    {
+        mOnAfterClose = onClose;
     }
 
     void OnDestroy()

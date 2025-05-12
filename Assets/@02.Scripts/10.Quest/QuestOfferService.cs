@@ -106,6 +106,10 @@ public class QuestOfferService: Singleton<QuestOfferService>
 
     public List<string> GetQuestList()
     {
+        if (mGeneratedQuestStates == null)
+        {
+            GenerateQuestList();
+        }
         return mGeneratedQuestStates.Keys.ToList();
     }
 

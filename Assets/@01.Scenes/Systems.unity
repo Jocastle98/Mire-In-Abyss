@@ -215,6 +215,7 @@ GameObject:
   - component: {fileID: 618509337}
   - component: {fileID: 618509341}
   - component: {fileID: 618509342}
+  - component: {fileID: 618509343}
   m_Layer: 0
   m_Name: Managers
   m_TagString: Untagged
@@ -266,6 +267,8 @@ MonoBehaviour:
   mCodexPrefab: {fileID: 1087006600799090707, guid: a905aedf37f44374d874f45e92fb8baa, type: 3}
   mQuestBoardPrefab: {fileID: 2358408809830075226, guid: 4f4c914ca50b8424cb99bfb471646e5a, type: 3}
   mEscGroupPrefab: {fileID: 1275060947987298349, guid: 477d8dbc582d5694b952f58160eea7f8, type: 3}
+  mSoulStoneShopPanelPrefab: {fileID: 6519008536383111261, guid: 6a961b3db45c0914c8150f9ccbd30a50, type: 3}
+  mPortalPanelPrefab: {fileID: -8464723387062600712, guid: 7dbacaa03137f1a42971bd2f69cb590a, type: 3}
 --- !u!114 &618509339
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -322,6 +325,24 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerInput: {fileID: 618509341}
+--- !u!114 &618509343
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 618509335}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 03bfca07167451749bc3dbde2ce2e277, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mCommonQuestCount: 3
+  mEpicQuestCount: 1
+  mCommonQuestMinID: 1
+  mCommonQuestMaxID: 10
+  mEpicQuestMinID: 11
+  mEpicQuestMaxID: 15
 --- !u!1001 &1048028298
 PrefabInstance:
   m_ObjectHideFlags: 0
