@@ -141,6 +141,14 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     private GameObject mMainCamera;
     private WeaponController mWeaponController;
     
+    // Effect
+    private GameObject mSlash_Effect_Prefab;
+    private GameObject mSkill_1_Effect_Prefab;
+    private GameObject mSkill_2_Effect_Prefab;
+    private GameObject mSkill_3_Effect_Prefab;
+    private GameObject mSkill_4_RangeIndicator_Prefab;
+    private GameObject mSkill_4_Effect_Prefab;
+    
     // State
     private PlayerStateIdle mPlayerStateIdle;
     private PlayerStateMove mPlayerStateMove;
@@ -274,7 +282,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         mSkill_3_TimeoutDelta = 0.0f;
         mSkill_4_TimeoutDelta = 0.0f;
     }
-
+    
     /// <summary>
     /// 플레이어 캐릭터 상태전환 메서드
     /// </summary>
@@ -1037,8 +1045,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
 
         if (CurrentPlayerState == PlayerState.Attack)
         {
-            GameObject slashEffectObject = mPlayerStateAttack.AttackEffect();
-            Destroy(slashEffectObject, 0.2f);
+            mPlayerStateAttack.AttackEffect();
         }
     }
 
@@ -1439,20 +1446,20 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
 
         SlashEffect(SlashEffectType.LeftToRight);
         
-        GameObject skill_1_Effect_Prefab = Resources.Load<GameObject>("Player/Effects/Skill_1_Projectile");
+        var skill_1_Effect_Prefab = GameManager.Instance.Resource.Instantiate("Skill_1_Projectile");
         if (skill_1_Effect_Prefab == null)
         {
             yield break;
         }
+        
         Vector3 firePosition = transform.position + transform.forward * 2.0f + Vector3.up;
         Vector3 direction = GetActionDirection(false, false);
         
-        GameObject skill_1_Effect_Object = GameObject.Instantiate(skill_1_Effect_Prefab,
-                                                             firePosition,
-                                                             Quaternion.LookRotation(direction));
+        skill_1_Effect_Prefab.transform.position = firePosition;
+        skill_1_Effect_Prefab.transform.rotation = Quaternion.LookRotation(direction);
         
         // 검기 스크립트에 방향 및 속도 설정
-        Skill_1 skill_1 = skill_1_Effect_Object.GetComponent<Skill_1>();
+        Skill_1 skill_1 = skill_1_Effect_Prefab.GetComponent<Skill_1>();
         skill_1.Init((int)mPlayerStats.GetAttackDamage(), mSkill_1_DamageMultiplier, mSkill_1_Distance, direction);
 
         yield return new WaitForSeconds(recoveryTime);
@@ -1460,6 +1467,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         mbInDirection = true;
         
         SetCombatState(true);
+        
         // 스킬 쿨타임 초기화 확인
         if (!CheckSkillReset())
         {
@@ -1469,7 +1477,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         else
         {
             // 초기화 성공 - 쿨타임 즉시 완료
-            mSkill_1_TimeoutDelta = 0f;
+            mSkill_1_TimeoutDelta = 0.0f;
             Debug.Log("스킬 1 쿨타임 초기화!");
         }
     }
@@ -1517,18 +1525,19 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             }
         }
         
-        GameObject skill_2_Effect_Prefab = Resources.Load<GameObject>("Player/Effects/Skill_2_Effect");
+        GameObject skill_2_Effect_Prefab = GameManager.Instance.Resource.Instantiate("Skill_2_Effect");
         if (skill_2_Effect_Prefab == null)
         {
             yield break;
         }
-        
-        GameObject skill_2_Effect_Object = GameObject.Instantiate(skill_2_Effect_Prefab, transform.position, Quaternion.identity);
+        skill_2_Effect_Prefab.transform.position = transform.position;
+        skill_2_Effect_Prefab.transform.rotation = Quaternion.identity;
         
         yield return new WaitForSeconds(recoveryTime);
-        Destroy(skill_2_Effect_Object);
+        GameManager.Instance.Resource.Destroy(skill_2_Effect_Prefab);
         
         SetCombatState(true);
+        
         // 스킬 쿨타임 초기화 확인
         if (!CheckSkillReset())
         {
@@ -1538,7 +1547,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         else
         {
             // 초기화 성공 - 쿨타임 즉시 완료
-            mSkill_2_TimeoutDelta = 0f;
+            mSkill_2_TimeoutDelta = 0.0f;
             Debug.Log("스킬 2 쿨타임 초기화!");
         }
     }
@@ -1633,13 +1642,13 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         
         yield return new WaitForSeconds(startupTime); // 애니메이션 선딜
         
-        GameObject skill_3_Effect_Prefab = Resources.Load<GameObject>("Player/Effects/Skill_3_Effect");
+        GameObject skill_3_Effect_Prefab = GameManager.Instance.Resource.Instantiate("Skill_3_Effect");
         if (skill_3_Effect_Prefab == null)
         {
             yield break;
         }
-        
-        GameObject skill_3_Effect_Object = GameObject.Instantiate(skill_3_Effect_Prefab, transform.position, Quaternion.identity);
+        skill_3_Effect_Prefab.transform.position = transform.position;
+        skill_3_Effect_Prefab.transform.rotation = Quaternion.identity;
         
         // 주변 적에게 데미지 주는 로직
         Collider[] hitColliders = Physics.OverlapSphere(transform.position, mSkill_3_Radius);
@@ -1656,7 +1665,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         }
         
         yield return new WaitForSeconds(recoveryTime);
-        Destroy(skill_3_Effect_Object);
+        GameManager.Instance.Resource.Destroy(skill_3_Effect_Prefab);
         
         SetCombatState(true);
         
@@ -1782,7 +1791,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             float duration = 0.5f;
             float targetDistance = 20.0f;
             
-            while (timeElapsed < 1.0f)
+            while (timeElapsed < duration)
             {
                 threePersonFollow.CameraDistance = Mathf.Lerp(originCameraDistance, targetDistance, timeElapsed / duration);
                 timeElapsed += Time.deltaTime;
@@ -1805,7 +1814,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             float duration = 0.5f;
             float startDistance = threePersonFollow.CameraDistance;
             
-            while (timeElapsed < 1.0f)
+            while (timeElapsed < duration)
             {
                 threePersonFollow.CameraDistance = Mathf.Lerp(startDistance, originCameraDistance, timeElapsed / duration);
                 timeElapsed += Time.deltaTime;
@@ -1819,8 +1828,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     
     private IEnumerator Skill_4_AimAndFire()
     {
-        GameObject rangeIndicatorObject = Resources.Load<GameObject>("Player/Effects/Skill_4_RangeIndicator");
-        GameObject rangeIndicator = GameObject.Instantiate(rangeIndicatorObject);
+        GameObject rangeIndicatorObject = GameManager.Instance.Resource.Instantiate("Skill_4_RangeIndicator");
 
         float timer = 5.0f;
         bool isAttackCompleted = false;
@@ -1834,7 +1842,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             RaycastHit hit;
             if (Physics.Raycast(ray, out hit, 100.0f, mGroundLayers))
             {
-                rangeIndicator.transform.position = hit.point;
+                rangeIndicatorObject.transform.position = hit.point;
                 finalTargetPoint = hit.point;
             }
 
@@ -1864,10 +1872,10 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         if (!isAttackCompleted)
         {
             FireProjectile(finalTargetPoint);
+            yield return null;
         }
         
-        Destroy(rangeIndicator);
-        rangeIndicator = null;
+        GameManager.Instance.Resource.Destroy(rangeIndicatorObject);
         
         SetCombatState(true);
     }
@@ -1886,7 +1894,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         float attackSpeed = PlayerAnimator.GetFloat("AttackSpeed");
         float invAttackSpeed = 1.0f / attackSpeed;
         float startupTime = 0.3f * invAttackSpeed;
-        float recoveryTime = 0.0f * invAttackSpeed;
+        float recoveryTime = 0.1f * invAttackSpeed;
         
         PlayerAnimator.SetTrigger("Skill");
         PlayerAnimator.SetInteger("Skill_Index", 4);
@@ -1894,17 +1902,20 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         yield return new WaitForSeconds(startupTime); // 애니메이션 선딜
 
         SlashEffect(SlashEffectType.TopToBottom);
-        
-        GameObject projectilePrefab = Resources.Load<GameObject>("Player/Effects/Skill_4_Projectile");
+
+        GameObject projectilePrefab = GameManager.Instance.Resource.Instantiate("Skill_4_Projectile");
         if (projectilePrefab == null)
         {
             yield break;
         }
+        
         Vector3 firePosition = targetPoint + Vector3.up * 10.0f;
+        Quaternion rotation = Quaternion.LookRotation(- mMainCamera.transform.right);
         
-        GameObject projectileObject = GameObject.Instantiate(projectilePrefab, firePosition, Quaternion.LookRotation(- mMainCamera.transform.right));
+        projectilePrefab.transform.position = firePosition;
+        projectilePrefab.transform.rotation = rotation;
         
-        Skill_4 skill_4 = projectileObject.GetComponent<Skill_4>();
+        Skill_4 skill_4 = projectilePrefab.GetComponent<Skill_4>();
         skill_4.Init((int)mPlayerStats.GetAttackDamage(), mSkill_4_DamageMultiplier, mSkill_4_Radius, targetPoint);
         
         yield return new WaitForSeconds(recoveryTime);
@@ -1921,7 +1932,9 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             mSkill_4_TimeoutDelta = 0f;
             Debug.Log("스킬 4 쿨타임 초기화!");
         }
-        StartCoroutine(Skill_4_Camera(false));
+        
+        yield return StartCoroutine(Skill_4_Camera(false));
+        yield return null;
     }
 
     private void CancelSkill()
@@ -1929,6 +1942,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         StartCoroutine(Skill_4_Camera(false));
 
         mbInDirection = true;
+        
         SetPlayerState(PlayerState.Fall);
     }
     
@@ -1942,8 +1956,10 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     private void OnFootstepSound(AnimationEvent animationEvent)
     {
         var mobilityLayer = PlayerAnimator.GetLayerIndex("Mobility Layer");
+        var skillLayer = PlayerAnimator.GetLayerIndex("Skill Layer");
         
-        if (animationEvent.animatorClipInfo.weight > 0.5f && PlayerAnimator.GetLayerWeight(mobilityLayer) < 1.0f)
+        if (animationEvent.animatorClipInfo.weight > 0.5f && 
+            (PlayerAnimator.GetLayerWeight(mobilityLayer) < 1.0f && PlayerAnimator.GetLayerWeight(skillLayer) < 1.0f))
         {
             if (footstepAudioClips.Length > 0)
             {
@@ -1965,11 +1981,12 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
 
     #region 이펙트 관련 기능
 
+    private Coroutine mSlashCoroutine = null;
     public GameObject SlashEffect(SlashEffectType type)
     {
-        GameObject slashEffectObject = null;
+        var slashEffect = GameManager.Instance.Resource.Instantiate("Slash_Effect");
+        GameObject slashEffectObject = slashEffect.gameObject;
         
-        GameObject slashEffect = Resources.Load<GameObject>("Player/Effects/Slash_Effect");
         if (slashEffect != null)
         {
             Vector3 firePosition = transform.position + transform.forward + Vector3.up;
@@ -1988,12 +2005,26 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
                     break;
             }
             
-            slashEffectObject = GameObject.Instantiate(slashEffect, firePosition, rotation);
+            slashEffectObject.transform.position = firePosition;
+            slashEffectObject.transform.rotation = rotation;
+            
+            mSlashCoroutine = StartCoroutine(DisableEffectAfterDelay(slashEffectObject, 0.2f));
         }
         
         return slashEffectObject;
     }
 
+    private IEnumerator DisableEffectAfterDelay(GameObject obj, float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        GameManager.Instance.Resource.Destroy(obj); // 풀링 객체면 풀로, 아니면 파괴
+    }
+
+    public void StopSlashCoroutine()
+    {
+        StopCoroutine(mSlashCoroutine);
+    }
+    
     #endregion
     
     #region 디버깅 관련
