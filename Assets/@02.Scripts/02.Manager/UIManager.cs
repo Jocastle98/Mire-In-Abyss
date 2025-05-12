@@ -140,13 +140,28 @@ public class UIManager : Singleton<UIManager>
 
     private void ProcessEscInput()
     {
-        if (GameManager.Instance.Input.EscInput)
+        if(GameManager.Instance.Input.EscInput)
         {
-            Pop().Forget();
+            if(GameManager.Instance.CurrentGameState == GameState.UI)
+            {
+                Pop().Forget();
+            }
+            else if(GameManager.Instance.CurrentGameState == GameState.Gameplay)
+            {
+                Push(UIPanelType.EscGroup).Forget();
+            }
         }
-        else if(GameManager.Instance.Input.CursorToggleInput)
+        else if(GameManager.Instance.Input.TabInput)
         {
-            Push(UIPanelType.EscGroup).Forget();
+            //TODO: EscGroup패널을 Inventory 탭으로 시작하게 호출
+            if(GameManager.Instance.CurrentGameState == GameState.UI)
+            {
+                Pop().Forget();
+            }
+            else if(GameManager.Instance.CurrentGameState == GameState.Gameplay)
+            {
+                Push(UIPanelType.EscGroup).Forget();
+            }
         }
     }
 

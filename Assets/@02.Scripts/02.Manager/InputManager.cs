@@ -4,11 +4,11 @@ using UnityEngine.InputSystem;
 
 public class InputManager
 {
-    // UI
-    public bool EscInput => mEscInputAction.WasPressedThisFrame();
+    // UI & Gameplay
+    public bool EscInput => mEscUIInputAction.WasPressedThisFrame() || mEscGamePlayInputAction.WasPressedThisFrame();
+    public bool TabInput => mTabUIInputAction.WasPressedThisFrame() || mTabGamePlayInputAction.WasPressedThisFrame();
 
     // Gameplay
-    public bool CursorToggleInput => mCursorToggleBuffer.ConsumeInputBuffer();
     public Vector2 LookInput { get; private set; }
     public Vector2 MoveInput { get; private set; }
     public bool SprintInput => mSprintBuffer.bIsHolding;
@@ -27,7 +27,6 @@ public class InputManager
     public bool Skill_4Input => mSkill_4Buffer.ConsumeInputBuffer();
     public bool InteractionInput => mInteractionBuffer.ConsumeInputBuffer();
 
-    private InputBuffer mCursorToggleBuffer = new InputBuffer();
     private InputBuffer mSprintBuffer = new InputBuffer();
     private InputBuffer mJumpBuffer = new InputBuffer();
     private InputBuffer mRollBuffer = new InputBuffer();
@@ -41,9 +40,11 @@ public class InputManager
     private InputBuffer mSkill_4Buffer = new InputBuffer();
     private InputBuffer mInteractionBuffer = new InputBuffer();
 
-    private InputAction mEscInputAction;
+    private InputAction mEscUIInputAction;
+    private InputAction mEscGamePlayInputAction;
+    private InputAction mTabUIInputAction;
+    private InputAction mTabGamePlayInputAction;
 
-    private InputAction mCursorToggleAction;
     private InputAction mLookAction;
     private InputAction mMoveAction;
     private InputAction mSprintAction;
@@ -65,11 +66,13 @@ public class InputManager
     {
         mPlayerInput = playerInput;
 
-        // UI
-        mEscInputAction = playerInput.actions["Esc"];
+        // UI & Gameplay
+        mEscUIInputAction = playerInput.actions["EscUI"];
+        mEscGamePlayInputAction = playerInput.actions["EscGamePlay"];
+        mTabUIInputAction = playerInput.actions["ItemTabUI"];
+        mTabGamePlayInputAction = playerInput.actions["ItemTabGamePlay"];
 
         // Gameplay
-        mCursorToggleAction = playerInput.actions["CursorToggleAction"];
         mLookAction = playerInput.actions["Look"];
         mMoveAction = playerInput.actions["Move"];
         mSprintAction = playerInput.actions["Sprint"];
@@ -93,7 +96,6 @@ public class InputManager
             return;
         }
 
-        SetInputBuffer(mCursorToggleAction, mCursorToggleBuffer);
         LookInput = mLookAction.ReadValue<Vector2>();
         MoveInput = mMoveAction.ReadValue<Vector2>();
 

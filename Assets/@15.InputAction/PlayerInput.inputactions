@@ -6,9 +6,18 @@
             "id": "cf8a3d0c-67f3-4f39-b77c-fba4700f2d43",
             "actions": [
                 {
-                    "name": "CursorToggleAction",
+                    "name": "EscGamePlay",
                     "type": "Button",
                     "id": "c6d0950d-b15c-4f62-8426-cd07129e0d21",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "ItemTabGamePlay",
+                    "type": "Button",
+                    "id": "d36d032f-d707-4761-8df8-22b08fb2e6d0",
                     "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
@@ -479,7 +488,18 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "CursorToggleAction",
+                    "action": "EscGamePlay",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "11dd0d14-2977-4391-896b-75d25bf981b0",
+                    "path": "<Keyboard>/tab",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "ItemTabGamePlay",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -591,9 +611,18 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "Esc",
+                    "name": "EscUI",
                     "type": "Button",
                     "id": "449e24bc-68a8-4c10-88f6-8bf2f153b857",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "ItemTabUI",
+                    "type": "Button",
+                    "id": "c1805ca2-cbb0-48fa-be91-9349db6c207e",
                     "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
@@ -1026,7 +1055,18 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "Esc",
+                    "action": "EscUI",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "2f6d9e9f-0f35-479d-839f-dd708b551857",
+                    "path": "<Keyboard>/tab",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "ItemTabUI",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

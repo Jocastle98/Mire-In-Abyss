@@ -127,6 +127,7 @@ namespace UIPanelEnums
         Setting,
         Codex,
         EscGroup,
+        EscGroup_Item, // 하드코딩, Item탭으로 시작하는 EscGroup 패널
     }
 }
 
