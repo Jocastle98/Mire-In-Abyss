@@ -7,15 +7,16 @@ using UnityEngine;
 public sealed class MiniQuestBoxPresenter : HudPresenterBase
 {
 
-    [Header("Set in Inspector")] [SerializeField]
+    [Header("Set in Inspector")]
+    [SerializeField]
     RectTransform mContentRoot;
 
     [SerializeField] MiniQuestCardView mCardPrefab;
 
     private ObjectPool<MiniQuestCardView> mCardPool = null;
     private Dictionary<string, MiniQuestCardView> mVisibleCards = new();
-    private List<string> mPendingActive    = new();
-    private List<string> mPendingComplete  = new();
+    private List<string> mPendingActive = new();
+    private List<string> mPendingComplete = new();
     private int mMaxCardNumber;
 
     void Awake()
@@ -29,12 +30,17 @@ public sealed class MiniQuestBoxPresenter : HudPresenterBase
     public override void Initialize()
     {
         subscribeEvents();
+        var quests = PlayerHub.Instance.QuestLog.GetQuestList();
+        foreach (var quest in quests)
+        {
+            onQuestAccepted(quest);
+        }
     }
 
     private void subscribeEvents()
     {
         R3EventBus.Instance.Receive<QuestAccepted>()
-            .Subscribe(e => onQuestAccepted(e))
+            .Subscribe(e => onQuestAccepted(e.ID))
             .AddTo(mCD);
 
         R3EventBus.Instance.Receive<QuestUpdated>()
@@ -44,18 +50,18 @@ public sealed class MiniQuestBoxPresenter : HudPresenterBase
         R3EventBus.Instance.Receive<QuestCompleted>()
             .Subscribe(e => onQuestComplete(e.ID))
             .AddTo(mCD);
-        
+
         R3EventBus.Instance.Receive<QuestRewarded>()
             .Subscribe(e => onQuestRemove(e.ID))
             .AddTo(mCD);
     }
 
-    private void onQuestAccepted(QuestAccepted e)
+    private void onQuestAccepted(string id)
     {
         // Quest Add 1. 빈자리 있는 경우
         if (mVisibleCards.Count < mMaxCardNumber)
         {
-            spawnCard(e.ID);
+            spawnCard(id);
             return;
         }
 
@@ -64,12 +70,12 @@ public sealed class MiniQuestBoxPresenter : HudPresenterBase
         if (firstCompleted != null)
         {
             moveVisibleCardToCompleted(firstCompleted);
-            spawnCard(e.ID);
+            spawnCard(id);
             return;
         }
 
         // 3. 빈 자리 없는 경우 Pending 리스트에 추가
-        addPending(e.ID);
+        addPending(id);
     }
 
     private void onQuestUpdated(QuestUpdated e)
@@ -86,7 +92,7 @@ public sealed class MiniQuestBoxPresenter : HudPresenterBase
         {
             card.QuestCompleted();
             card.transform.SetAsLastSibling();
-            if(mVisibleCards.Count == mMaxCardNumber && mPendingActive.Count > 0)
+            if (mVisibleCards.Count == mMaxCardNumber && mPendingActive.Count > 0)
             {
                 moveVisibleCardToCompleted(card);
                 fillVacancyFromPending();
@@ -118,7 +124,7 @@ public sealed class MiniQuestBoxPresenter : HudPresenterBase
         var card = mCardPool.Rent();
         Quest quest = PlayerHub.Instance.QuestLog.GetQuest(id);
         card.Bind(id, quest.CurrentAmount, quest.TargetAmount);
-        if(quest.CurrentAmount >= quest.TargetAmount)
+        if (quest.CurrentAmount >= quest.TargetAmount)
         {
             card.transform.SetAsLastSibling();
         }
@@ -134,7 +140,7 @@ public sealed class MiniQuestBoxPresenter : HudPresenterBase
     {
         foreach (var kv in mVisibleCards)
         {
-            if (kv.Value.IsCompleted) 
+            if (kv.Value.IsCompleted)
             {
                 return kv.Value;
             }
@@ -166,19 +172,19 @@ public sealed class MiniQuestBoxPresenter : HudPresenterBase
     {
         while (mVisibleCards.Count < mMaxCardNumber)
         {
-            if (mPendingActive.Count > 0)  
+            if (mPendingActive.Count > 0)
             {
                 string id = mPendingActive.Last();
                 mPendingActive.RemoveAt(mPendingActive.Count - 1);
                 spawnCard(id);
             }
-            else if (mPendingComplete.Count > 0) 
+            else if (mPendingComplete.Count > 0)
             {
                 string id = mPendingComplete.Last();
                 mPendingComplete.RemoveAt(mPendingComplete.Count - 1);
                 spawnCard(id);
             }
-            else 
+            else
             {
                 break;
             }
