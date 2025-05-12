@@ -18,7 +18,7 @@ public class GameManager : Singleton<GameManager>
     public GameState CurrentGameState => mStateRP.Value;
     private GameState mPreviousGameState;
     public ReadOnlyReactiveProperty<GameState> ObserveState => mStateRP;
-    private readonly ReactiveProperty<GameState> mStateRP = new(GameState.MainMenu);
+    private readonly ReactiveProperty<GameState> mStateRP = new(GameState.Gameplay);
 
     private bool mIsPause = false;
 
@@ -26,6 +26,7 @@ public class GameManager : Singleton<GameManager>
     protected override void Awake()
     {
         base.Awake();
+        mPlayerInput = GetComponent<PlayerInput>();
         Input.Init(mPlayerInput);
         mStateRP.Subscribe(onStateChanged);
     }

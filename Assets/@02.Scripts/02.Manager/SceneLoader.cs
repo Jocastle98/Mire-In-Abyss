@@ -8,6 +8,11 @@ public static class SceneLoader
     public static Scene CurrentGameplayScene { get; internal set; }
     public static GameScene CurrentSceneType { get; internal set; }
 
+    public static void Init()
+    {
+        CurrentSceneType = getGameplayScene(CurrentGameplayScene.name);
+    }
+
     // MainMenu, Town, Abyss(Field, Dungeon) 이동 시에만 사용
     public static async UniTask LoadSceneAsync(string targetSceneName)
     {
@@ -24,7 +29,7 @@ public static class SceneLoader
         }
 
         /* 2) 씬 변경에 따른 GameplayShared 씬 처리 및 이벤트 발행 */
-        await ChangeSceneAsync(getGameplayMode(targetSceneName));
+        await ChangeSceneAsync(getGameplayScene(targetSceneName));
 
         /* 3) 새 Gameplay 씬 Additive */
         await SceneManager.LoadSceneAsync(targetSceneName, LoadSceneMode.Additive).ToUniTask();
@@ -68,7 +73,7 @@ public static class SceneLoader
         R3EventBus.Instance.Publish(new GameplaySceneChanged(newSceneType));
     }
 
-    private static GameScene getGameplayMode(string sceneName)
+    private static GameScene getGameplayScene(string sceneName)
     {
         GameScene ret = sceneName switch
         {

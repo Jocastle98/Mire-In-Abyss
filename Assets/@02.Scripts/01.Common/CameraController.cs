@@ -58,10 +58,10 @@ public class CameraController : MonoBehaviour
     
     private void CameraRotation()
     {
-        if (!mbAcceptInput) 
-        {
-            return;
-        }
+        // if (!mbAcceptInput) 
+        // {
+        //     return;
+        // }
         
         if (GameManager.Instance.Input.LookInput.sqrMagnitude >= mThreshold)
         {
