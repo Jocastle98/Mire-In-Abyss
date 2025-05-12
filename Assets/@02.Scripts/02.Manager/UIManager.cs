@@ -41,7 +41,7 @@ public class UIManager : Singleton<UIManager>
 
         if (mStack.Count == 1)
         {
-            GameManager.Instance.Set(GameState.UI);
+            GameManager.Instance.SetGameState(GameState.UI);
         }
 
         await inst.Show(onComplete);
@@ -64,34 +64,30 @@ public class UIManager : Singleton<UIManager>
         var top = mStack.Pop();
         await top.Hide();
         Destroy(top.gameObject);
-        
+
         if (mStack.TryPeek(out var next))
         {
             next.CG.interactable = true;
         }
-        else if (mStack.Count == 0)
+        else if (mStack.Count == 0 && GameManager.Instance.CurrentGameState == GameState.UI)
         {
-            GameManager.Instance.Set(GameState.Gameplay);
+            GameManager.Instance.ChangePreviousGameState();
         }
     }
     void Update()
     {
-        //Temp
-        if (Input.GetKeyDown(KeyCode.F1))
-        {
-            newMethod();
-        }
+        ProcessEscInput();
     }
 
-    private void newMethod()
+    private void ProcessEscInput()
     {
-        if (mStack.Count == 0)
-        {
-            Push(UIPanelType.EscGroup).Forget();
-        }
-        else
+        if (GameManager.Instance.Input.EscInput)
         {
             Pop().Forget();
+        }
+        else if(GameManager.Instance.Input.CursorToggleInput)
+        {
+            Push(UIPanelType.EscGroup).Forget();
         }
     }
 

@@ -6,7 +6,7 @@ using UnityEngine.SceneManagement;
 public static class SceneLoader
 {
     public static Scene CurrentGameplayScene { get; internal set; }
-    public static GameplayMode CurrentGameplayMode { get; internal set; }
+    public static GameScene CurrentSceneType { get; internal set; }
 
     // MainMenu, Town, Abyss(Field, Dungeon) 이동 시에만 사용
     public static async UniTask LoadSceneAsync(string targetSceneName)
@@ -23,8 +23,8 @@ public static class SceneLoader
             await SceneManager.UnloadSceneAsync(CurrentGameplayScene).ToUniTask();
         }
 
-        /* 2) 게임모드 변경에 따른 처리 */
-        await ChangeGameplayModeAsync(getGameplayMode(targetSceneName));
+        /* 2) 씬 변경에 따른 GameplayShared 씬 처리 및 이벤트 발행 */
+        await ChangeSceneAsync(getGameplayMode(targetSceneName));
 
         /* 3) 새 Gameplay 씬 Additive */
         await SceneManager.LoadSceneAsync(targetSceneName, LoadSceneMode.Additive).ToUniTask();
@@ -39,22 +39,22 @@ public static class SceneLoader
         }
     }
 
-    private static async UniTask ChangeGameplayModeAsync(GameplayMode newMode)
+    private static async UniTask ChangeSceneAsync(GameScene newSceneType)
     { 
-        if(CurrentGameplayMode == newMode)
+        if(CurrentSceneType == newSceneType)
         {
             return;
         }
 
         // GameplayShared 씬 로드 (메인메뉴 -> 타운)
-        if(CurrentGameplayMode == GameplayMode.MainMenu && newMode == GameplayMode.Town)
+        if(CurrentSceneType == GameScene.MainMenu && newSceneType == GameScene.Town)
         {
             await SceneManager.LoadSceneAsync(Constants.GameplaySharedScene,
                                                      LoadSceneMode.Additive).ToUniTask();
         }
         
         // GameplayShared 씬 언로드 (타운 or Abyss -> 메인메뉴)
-        else if(newMode == GameplayMode.MainMenu)
+        else if(newSceneType == GameScene.MainMenu)
         {
             Scene sharedScene = SceneManager.GetSceneByName(Constants.GameplaySharedScene);
             if(sharedScene.IsValid() && sharedScene.isLoaded)
@@ -64,17 +64,17 @@ public static class SceneLoader
         }
 
         // 게임모드 변경 이벤트 발행
-        CurrentGameplayMode = newMode;
-        R3EventBus.Instance.Publish(new GameplayModeChanged(newMode));
+        CurrentSceneType = newSceneType;
+        R3EventBus.Instance.Publish(new GameplaySceneChanged(newSceneType));
     }
 
-    private static GameplayMode getGameplayMode(string sceneName)
+    private static GameScene getGameplayMode(string sceneName)
     {
-        GameplayMode ret = sceneName switch
+        GameScene ret = sceneName switch
         {
-            Constants.TownScene => GameplayMode.Town,
-            Constants.MainMenuScene => GameplayMode.MainMenu,
-            _ => GameplayMode.Abyss,
+            Constants.TownScene => GameScene.Town,
+            Constants.MainMenuScene => GameScene.MainMenu,
+            _ => GameScene.Abyss,
         };
         return ret;
     }

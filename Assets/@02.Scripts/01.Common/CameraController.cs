@@ -4,6 +4,7 @@ using Events.UI;
 using UnityEngine;
 using R3;
 using Events.Player;
+using GameEnums;
 
 [RequireComponent(typeof(Camera))]
 [RequireComponent(typeof(CinemachineBrain))]
@@ -16,6 +17,8 @@ public class CameraController : MonoBehaviour
     [SerializeField] private float mThreshold = 0.01f;
     [SerializeField] private float mGroundedTopClamp = 70.0f;
     [SerializeField] private float mGroundedBottomClamp = -30.0f;
+
+    private bool mbAcceptInput = false;
 
     // 공중 시야 제한 완화(90로도 하면 공격감지 콜라이더에 문제 생김)
     private float mAirTopClamp = 89f;
@@ -39,6 +42,10 @@ public class CameraController : MonoBehaviour
 
     void eventsubscribe()
     {
+        GameManager.Instance.ObserveState
+        .Subscribe(s => mbAcceptInput = (s == GameState.Gameplay))
+        .AddTo(this);
+
         R3EventBus.Instance.Receive<PlayerGrounded>()
             .Subscribe(e => mbPlayerIsOnGround = e.IsGrounded)
             .AddTo(this);
@@ -51,6 +58,11 @@ public class CameraController : MonoBehaviour
     
     private void CameraRotation()
     {
+        if (!mbAcceptInput) 
+        {
+            return;
+        }
+        
         if (GameManager.Instance.Input.LookInput.sqrMagnitude >= mThreshold)
         {
             mCinemachineTargetYaw += GameManager.Instance.Input.LookInput.x * mRotationSensitivity;

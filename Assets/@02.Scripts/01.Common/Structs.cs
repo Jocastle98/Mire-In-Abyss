@@ -13,10 +13,10 @@ namespace Events.Data
 
 namespace Events.Gameplay
 {
-    public readonly struct GameplayModeChanged
+    public readonly struct GameplaySceneChanged
     {
-        public readonly GameplayMode NewMode;
-        public GameplayModeChanged(GameplayMode newMode) => NewMode = newMode;
+        public readonly GameScene NewScene;
+        public GameplaySceneChanged(GameScene newScene) => NewScene = newScene;
     }
 }
 

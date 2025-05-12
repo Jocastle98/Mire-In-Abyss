@@ -1,6 +1,8 @@
 using Cysharp.Threading.Tasks;
+using Events.Gameplay;
 using GameEnums;
 using R3;
+using SceneEnums;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
@@ -13,9 +15,10 @@ public class GameManager : Singleton<GameManager>
     public InputManager Input { get { return Instance.mInput; } }
     private InputManager mInput = new InputManager();
 
-    public GameState CurrentGameState { get; private set; }
+    public GameState CurrentGameState => mStateRP.Value;
+    private GameState mPreviousGameState;
     public ReadOnlyReactiveProperty<GameState> ObserveState => mStateRP;
-    private readonly ReactiveProperty<GameState> mStateRP = new(GameState.Gameplay);
+    private readonly ReactiveProperty<GameState> mStateRP = new(GameState.MainMenu);
 
     private bool mIsPause = false;
 
@@ -24,11 +27,18 @@ public class GameManager : Singleton<GameManager>
     {
         base.Awake();
         Input.Init(mPlayerInput);
-        CurrentGameState = mStateRP.Value;
-        mStateRP.Subscribe(OnStateChanged);
-        // Temp
-        Cursor.visible = false;
-        Cursor.lockState = CursorLockMode.Locked;
+        mStateRP.Subscribe(onStateChanged);
+    }
+    
+    private void Start()
+    {
+        subscribeEvents();
+    }
+
+    private void subscribeEvents()
+    {
+        R3EventBus.Instance.Receive<GameplaySceneChanged>()
+            .Subscribe(e => updateGameStateForScene(e));
     }
 
     private void Update()
@@ -36,21 +46,27 @@ public class GameManager : Singleton<GameManager>
         mInput.OnInputUpdate();
     }
 
-    public void Set(GameState next)
+    public void SetGameState(GameState next)
     {
         if (CurrentGameState != next) 
         {
+            mPreviousGameState = CurrentGameState;
             mStateRP.Value = next; 
         }
     }
 
+    public void ChangePreviousGameState()
+    {
+        SetGameState(mPreviousGameState);
+    }
+
     public async UniTask PauseForSeconds(float sec)
     {
-        Set(GameState.GameplayPause);
+        SetGameState(GameState.GameplayPause);
         Time.timeScale = 0;
         await UniTask.Delay(System.TimeSpan.FromSeconds(sec));
         Time.timeScale = 1;
-        Set(GameState.Gameplay);
+        SetGameState(GameState.Gameplay);
     }
 
     public void SetPause(bool isPaused)
@@ -59,24 +75,56 @@ public class GameManager : Singleton<GameManager>
         {
             mIsPause = true;
             // TODO: 일시정지
-            Debug.Log("일시정지");
         }
         else
         {
             mIsPause = false;
             // TODO: 일시정지 해제
-            Debug.Log("일시정지 해제");
         }
     }
-    /* 예: 한 곳에서 부수효과 관리 */
-    void OnStateChanged(GameState s)
+
+    private void updateGameStateForScene(GameplaySceneChanged e)
     {
-        CurrentGameState = s;
+        GameState next;
+        if(e.NewScene == GameScene.MainMenu)
+        {
+            next = GameState.MainMenu;
+        }
+        else // if(e.NewMode == GameScene.Town && e.NewMode == GameScene.Abyss)
+        {
+            next = GameState.Gameplay;
+        }
+
+        if(CurrentGameState != next)
+        {
+            SetGameState(next);
+        }
+    }
+
+    private void setMouseCursor(bool isVisible)
+    {
+        Cursor.visible = isVisible;
+        Cursor.lockState = isVisible ? CursorLockMode.None : CursorLockMode.Locked;
+    }
+    /* 예: 한 곳에서 부수효과 관리 */
+    void onStateChanged(GameState s)
+    {
         switch (s)
         {
-            case GameState.UI:   SetPause(true);             break;
-            case GameState.Gameplay:    SetPause(false);     break;
-            case GameState.GameplayPause: SetPause(true);    break;
+            case GameState.MainMenu:
+                SetPause(false);
+                setMouseCursor(true);
+                break;
+            case GameState.UI:   
+                SetPause(true);
+                setMouseCursor(true);
+                break;
+            case GameState.Gameplay:   
+                SetPause(false);
+                setMouseCursor(false);
+                break;
+            case GameState.GameplayPause: 
+                SetPause(true);    break;
         }
     }
     

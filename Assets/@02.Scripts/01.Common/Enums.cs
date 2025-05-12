@@ -2,7 +2,8 @@ namespace GameEnums
 {
     public enum GameState
     {
-        Gameplay,
+        MainMenu,
+        Gameplay,   // 플레이어 조작 중
         UI,         // Pause
         GameplayPause,       
     }
@@ -77,7 +78,7 @@ namespace QuestEnums
 
 namespace SceneEnums
 {
-    public enum GameplayMode
+    public enum GameScene
     {
         MainMenu,
         Town,

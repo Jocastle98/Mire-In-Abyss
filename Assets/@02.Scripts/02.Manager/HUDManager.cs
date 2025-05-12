@@ -14,23 +14,23 @@ public sealed class HUDManager : MonoBehaviour
 
     void Awake()
     {
-        R3EventBus.Instance.Receive<GameplayModeChanged>()
+        R3EventBus.Instance.Receive<GameplaySceneChanged>()
             .Subscribe(OnModeChanged)
             .AddTo(mCd);
     }
 
     void OnDisable() => mCd.Dispose();
 
-    void OnModeChanged(GameplayModeChanged e)
+    void OnModeChanged(GameplaySceneChanged e)
     {
-        if (e.NewMode == GameplayMode.Town)
+        if (e.NewScene == GameScene.Town)
         {
             foreach (var hud in mTownDisableHuds)
             {
                 hud.gameObject.SetActive(false);
             }
         }
-        else if(e.NewMode == GameplayMode.Abyss)
+        else if(e.NewScene == GameScene.Abyss)
         {
             foreach (var hud in mTownDisableHuds)
             {
