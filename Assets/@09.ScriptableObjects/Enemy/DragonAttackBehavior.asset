@@ -15,18 +15,19 @@ MonoBehaviour:
   TailRange: 5
   TailDamage: 10
   FireballRange: 8
-  FireBallPrefab: {fileID: 2669515435981036941, guid: 6b953dc147bf97546896075ac48e0243, type: 3}
+  FireBallPrefab: {fileID: 1347034509603832, guid: 4b4d196fd22a09a4099e7e34a26d78fb, type: 3}
   HitLayer:
     serializedVersion: 2
     m_Bits: 256
   FireballDamage: 20
-  Cooldown: 5
   FireballSpeed: 20
+  FireballCooldown: 5
   BreathRange: 10
   BreathProjectorPrefab: {fileID: 3286200521227265529, guid: c377597f34a4fbc4f9767c81bb90a4e3, type: 3}
-  BreathVFXPrefab: {fileID: 2931361623723078552, guid: c8fb260bcf620584aa8c4d3ad65052a9, type: 3}
+  BreathVFXPrefab: {fileID: 4495172529726081446, guid: 4882bbb9355e9454298bbccd33dc86f9, type: 3}
   BreathHitLayer:
     serializedVersion: 2
     m_Bits: 256
+  BreathAngle: 45
   BreathDamage: 30
   BreathCooldown: 15
