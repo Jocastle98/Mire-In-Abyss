@@ -28,6 +28,6 @@ public class PortalPanelController : BaseUIPanel
 
     private void LoadTargetScene()
     {
-        SceneLoader.LoadSceneAsync(Constants.AbyssScene);
+        AbyssManager.Instance.BattleAreaManagerInit(mPlayer.gameObject,1,2);
     }
 }
