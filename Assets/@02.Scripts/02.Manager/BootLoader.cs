@@ -5,6 +5,7 @@ using UnityEngine.SceneManagement;
 using R3;
 
 using Events.Data;
+using GameEnums;
 
 public sealed class BootLoader : MonoBehaviour
 {
@@ -39,6 +40,8 @@ public sealed class BootLoader : MonoBehaviour
 
         SceneManager.SetActiveScene(menuScene);
         SceneLoader.CurrentGameplayScene = menuScene;
+        SceneLoader.Init();
+        GameManager.Instance.SetGameState(GameState.MainMenu);
 
         /* D) Boot 씬 언로드 */
         Scene bootScene = gameObject.scene;

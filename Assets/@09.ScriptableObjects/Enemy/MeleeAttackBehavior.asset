@@ -12,6 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7a786c41f56544cba8d37621b009a4ac, type: 3}
   m_Name: MeleeAttackBehavior
   m_EditorClassIdentifier: 
-  range: 2
-  delay: 0.4
-  damage: 10
+  Range: 2
+  Damage: 10

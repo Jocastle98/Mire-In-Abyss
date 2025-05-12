@@ -3,6 +3,7 @@ using Unity.VisualScripting;
 using EnemyEnums;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.Serialization;
 
 [RequireComponent(typeof(NavMeshAgent))]
 public class EnemyBTController : MonoBehaviour
@@ -31,11 +32,13 @@ public class EnemyBTController : MonoBehaviour
 
     [Header("원거리 발사 위치 (원거리 스켈레톤, 드래곤)")]
     [SerializeField] private Transform mFirePoint;
+    [SerializeField] private Transform mBreathPoint;
     public Transform FirePoint => mFirePoint;
     
     [Header("임팩트 설정 (골렘)")]
     [SerializeField] private GameObject ImpactProjectorPrefab;
     [SerializeField] private LayerMask ImpactHitLayer;
+    private bool mImpactHandled = false;
 
     [Header("렌더러 설정")]  
     [SerializeField] private Renderer[] mRenderers;
@@ -56,6 +59,19 @@ public class EnemyBTController : MonoBehaviour
     public EnemyType EnemyType => mEnemyType;
     [SerializeField] private EnemyExpRewardController mExpRewardController;
     
+    [Header("몬스터 Hit 상태 설정")]
+    [SerializeField] private float mStunDuration = 2f;
+    [SerializeField] private float mAttackDebuffDuration = 10f;
+    [SerializeField] private int mAttackDebuffAmount = 5;
+    [SerializeField] private float mFireDotDuration = 3f;
+    [SerializeField] private int mFireDotDamagePerSecond = 3;
+    [SerializeField] private float mIceDebuffDuration = 8f;
+    [SerializeField] private float mIceAnimSpeed = 0.2f;
+    private float mOriginalAgentSpeed;
+    private bool mbAttackDebuffed = false;
+    private bool mbIsStunned = false;
+    private float mOriginalAnimSpeed;
+    
     private NavMeshAgent mAgent;
     private Animator mAnim;
     private BTNode mRoot;
@@ -65,10 +81,14 @@ public class EnemyBTController : MonoBehaviour
     private Projector currentProjector;
     private bool mExpGiven = false;
     private ItemDropper itemDropper;
+    private GameObject mBreathVFXInstance;
+    private bool mbIgnoreHits = false;
 
     
     void Awake()
     {
+        if (mAttackBehaviorAsset != null)
+            mAttackBehaviorAsset = Instantiate(mAttackBehaviorAsset);
         mAgent = GetComponent<NavMeshAgent>();
         mAnim = GetComponent<Animator>();
         mAttackBehavior = mAttackBehaviorAsset as IAttackBehavior;
@@ -262,11 +282,11 @@ public class EnemyBTController : MonoBehaviour
                 new BTCondition(() => !mbIsAttacking && mTarget != null && dragon.CanFireball(transform, mTarget)),
                 new BTAction(() =>
                 {
+                    FaceTarget();
                     mbIsAttacking = true;
                     ClearAllBools();
                     if (mAgent != null && mAgent.enabled && mAgent.isOnNavMesh)
                         mAgent.isStopped = true;
-                    FaceTarget();
                     mAttackBehavior.Attack(transform, mTarget);
                 })
             );
@@ -275,11 +295,11 @@ public class EnemyBTController : MonoBehaviour
                 new BTCondition(() => !mbIsAttacking && mTarget != null && dragon.CanBreath(transform, mTarget)),
                 new BTAction(() =>
                 {
+                    FaceTarget();
                     mbIsAttacking = true;
                     ClearAllBools();
                     if (mAgent != null && mAgent.enabled && mAgent.isOnNavMesh)
                         mAgent.isStopped = true;
-                    FaceTarget();
                     mAttackBehavior.Attack(transform, mTarget);
                 })
             );
@@ -288,11 +308,11 @@ public class EnemyBTController : MonoBehaviour
                 new BTCondition(() => !mbIsAttacking && mTarget != null && dragon.CanTail(transform, mTarget)),
                 new BTAction(() =>
                 {
+                    FaceTarget();
                     mbIsAttacking = true;
                     ClearAllBools();
                     if (mAgent != null && mAgent.enabled && mAgent.isOnNavMesh)
                         mAgent.isStopped = true;
-                    FaceTarget();
                     mAttackBehavior.Attack(transform, mTarget);
                 })
             );
@@ -377,9 +397,7 @@ public class EnemyBTController : MonoBehaviour
 
     void Update()
     {
-        if (mIsFlying)
-            return;
-        if (mHasTriggeredDead)   
+        if (mIsFlying || mHasTriggeredDead || mbIsStunned)
             return;
         mRoot.Tick();
     }
@@ -480,20 +498,141 @@ public class EnemyBTController : MonoBehaviour
     #endregion
 
     #region Hit & Death 처리
-    public void SetHit(int damage)
+
+    public void SetHit(int damage, int hitType)
     {
-        if (mbIsDead) return;
+        if (mbIsDead || mbIgnoreHits) return;
+
+        switch (hitType)
+        {
+            case 0: //스턴
+                ApplyDamage(damage);
+                StartCoroutine(StunRoutine());
+                break;
+            case 1: // 공격력 감소
+                ApplyDamage(damage);
+                StartCoroutine(AttackDebuffRoutine());
+                break;
+            case 2: // 화염 도트뎀(해당 코루틴에 데미지 포함)
+                StartCoroutine(FireDotRoutine());
+                break;
+            case 3: // 얼음 속도감소 
+                ApplyDamage(damage);
+                StartCoroutine(IceDebuffRoutine());
+                break;
+            default:
+                ApplyDamage(damage);
+                break;
+        }
+    }
+    private void ApplyDamage(int damage)
+    {
         int effective = Mathf.Max(0, damage - mDefense);
         mCurrentHealth -= effective;
         Debug.Log($"받은 대미지:{damage} 방어력:{mDefense} 최종:{effective} 남은체력:{mCurrentHealth}");
-        if (mCurrentHealth <= 0)
+        if (mCurrentHealth <= 0) mbIsDead = true;
+        else mbIsHit = true;
+    }
+
+    // 스턴 
+    private IEnumerator StunRoutine()
+    {
+        mbIsStunned = true;
+        mOriginalAnimSpeed = mAnim.speed;
+        mAnim.speed = 0f;
+
+        if (mAgent != null && mAgent.enabled && mAgent.isOnNavMesh)
+            mAgent.isStopped = true;
+        yield return new WaitForSeconds(mStunDuration);
+
+        mAnim.speed = mOriginalAnimSpeed;
+        if (mAgent != null && mAgent.enabled && mAgent.isOnNavMesh)
+            mAgent.isStopped = false;
+        mbIsStunned = false;
+    }
+    // 공격력 감소 
+    private IEnumerator AttackDebuffRoutine()
+{
+    if (mbAttackDebuffed) yield break;
+    mbAttackDebuffed = true;
+
+    int origMeleeDamage = 0, origRangedDamage = 0;
+    int origSwingDamage = 0, origImpactDamage = 0;
+    int origTailDamage = 0, origFireballDamage = 0, origBreathDamage = 0;
+
+    if (mAttackBehaviorAsset is MeleeAttackBehavior melee)
+    {
+        origMeleeDamage = melee.Damage;
+        melee.Damage = Mathf.Max(0, melee.Damage - mAttackDebuffAmount);
+    }
+    else if (mAttackBehaviorAsset is RangedAttackBehavior ranged)
+    {
+        origRangedDamage = ranged.Damage;
+        ranged.Damage = Mathf.Max(0, ranged.Damage - mAttackDebuffAmount);
+    }
+    else if (mAttackBehaviorAsset is GolemAttackBehavior golem)
+    {
+        origSwingDamage  = golem.SwingDamage;
+        origImpactDamage = golem.ImpactDamage;
+        golem.SwingDamage  = Mathf.Max(0, golem.SwingDamage  - mAttackDebuffAmount);
+        golem.ImpactDamage = Mathf.Max(0, golem.ImpactDamage - mAttackDebuffAmount);
+    }
+    else if (mAttackBehaviorAsset is DragonAttackBehavior dragon)
+    {
+        origTailDamage     = dragon.TailDamage;
+        origFireballDamage = dragon.FireballDamage;
+        origBreathDamage   = dragon.BreathDamage;
+        dragon.TailDamage     = Mathf.Max(0, dragon.TailDamage     - mAttackDebuffAmount);
+        dragon.FireballDamage = Mathf.Max(0, dragon.FireballDamage - mAttackDebuffAmount);
+        dragon.BreathDamage   = Mathf.Max(0, dragon.BreathDamage   - mAttackDebuffAmount);
+    }
+
+    yield return new WaitForSeconds(mAttackDebuffDuration);
+
+    // 데미지 복구
+    if (mAttackBehaviorAsset is MeleeAttackBehavior melee2)
+        melee2.Damage = origMeleeDamage;
+    else if (mAttackBehaviorAsset is RangedAttackBehavior ranged2)
+        ranged2.Damage = origRangedDamage;
+    else if (mAttackBehaviorAsset is GolemAttackBehavior golem2)
+    {
+        golem2.SwingDamage  = origSwingDamage;
+        golem2.ImpactDamage = origImpactDamage;
+    }
+    else if (mAttackBehaviorAsset is DragonAttackBehavior dragon2)
+    {
+        dragon2.TailDamage     = origTailDamage;
+        dragon2.FireballDamage = origFireballDamage;
+        dragon2.BreathDamage   = origBreathDamage;
+    }
+
+    mbAttackDebuffed = false;
+}
+
+    // 화염 도트 데미지 1초마다 fireDuration까지 데미지
+    private IEnumerator FireDotRoutine()
+    {
+        float elapsed = 0f;
+        while (elapsed < mFireDotDuration)
         {
-            mbIsDead = true;
+            ApplyDamage(mFireDotDamagePerSecond);
+            elapsed += 1f;
+            yield return new WaitForSeconds(1f);
         }
-        else
-        {
-            mbIsHit = true;
-        }
+    }
+
+    // 얼음디버프 속도 감소 
+    private IEnumerator IceDebuffRoutine()
+    {
+        mOriginalAnimSpeed  = mAnim.speed;
+        mOriginalAgentSpeed = mAgent.speed;
+
+        mAnim.speed  = mIceAnimSpeed;
+        mAgent.speed = mOriginalAgentSpeed * mIceAnimSpeed;
+        yield return new WaitForSeconds(mIceDebuffDuration);
+
+        mAnim.speed  = mOriginalAnimSpeed;
+        mAgent.speed = mOriginalAgentSpeed;
     }
 
     public void OnHitAnimationExit()
@@ -510,12 +649,8 @@ public class EnemyBTController : MonoBehaviour
         }
     }
 
-    public void OnDeadAnimationExit()
-    {
-        itemDropper.DropItemOnDeadth();
-        GiveExpReward();
-        StartCoroutine(Dissolve());
-    }
+    #region Hit시 머터리얼 변화
+    
 
     private IEnumerator HitColorChange()
     {
@@ -554,6 +689,25 @@ public class EnemyBTController : MonoBehaviour
         }
     }
 
+    #endregion
+
+    #region Dead시 상태
+
+    public void OnDeadAnimationExit()
+    {
+        itemDropper.DropItemOnDeadth();
+        GiveExpReward();
+        GameObject player = GameObject.FindGameObjectWithTag("Player");
+        if (player != null)
+        {
+            PlayerController playerController = player.GetComponent<PlayerController>();
+            playerController.OnEnemyKilled();
+        }
+        StartCoroutine(Dissolve());
+    }
+
+    
+
     public void GiveExpReward()
     {
         if (mExpGiven || mExpRewardController == null) return;
@@ -576,6 +730,9 @@ public class EnemyBTController : MonoBehaviour
         return null;
     }
 
+
+    #endregion
+    
     #endregion
 
     #region Attack 이벤트
@@ -583,6 +740,11 @@ public class EnemyBTController : MonoBehaviour
     {
         mbIsAttacking = false;
         ClearAllBools();
+        if (mBreathVFXInstance != null)
+        {
+            Destroy(mBreathVFXInstance);
+            mBreathVFXInstance = null;
+        }   
         if (mAgent != null && mAgent.enabled && mAgent.isOnNavMesh)
         {
             if (DetectPlayer())
@@ -630,6 +792,7 @@ public class EnemyBTController : MonoBehaviour
     #region 드래곤 공격
     public void OnBreathIndicator()
     {
+        mbIgnoreHits = true;
         if (!(mAttackBehaviorAsset is DragonAttackBehavior dragon)) return;
         if (dragon.BreathProjectorPrefab == null) return;
 
@@ -665,25 +828,30 @@ public class EnemyBTController : MonoBehaviour
     }
     public void OnBreathLand()
     {
+        mbIgnoreHits = false;
         if (currentProjector) Destroy(currentProjector.gameObject);
         currentProjector = null;
 
-        if (mAttackBehaviorAsset is DragonAttackBehavior dragon)
+        if (mAttackBehaviorAsset is DragonAttackBehavior dragon && dragon.BreathVFXPrefab != null)
         {
-            if (dragon.BreathVFXPrefab != null) Instantiate(dragon.BreathVFXPrefab, transform.position, Quaternion.identity);
-            Collider[] hits = Physics.OverlapSphere(transform.position, dragon.BreathRange, dragon.BreathHitLayer);
-            float dotValue = Mathf.Cos(Mathf.Deg2Rad * (dragon.BreathAngle * 0.5f));
-            foreach (var col in hits)
-            {
-                if (!col.CompareTag("Player")) continue;
-                Vector3 direction = (col.transform.position - transform.position).normalized;
-                if (Vector3.Dot(direction, transform.forward) > dotValue)
-                    col.GetComponent<PlayerController>().SetHit(dragon.BreathDamage, transform, 2);
-            }
+            // 1) FirePoint 위치·회전으로 VFX 생성
+            mBreathVFXInstance = Instantiate(
+                dragon.BreathVFXPrefab,
+                mBreathPoint.position,
+                mBreathPoint.rotation
+            );
+
+            // 2) Projectile 연속딜 모드 초기화
+            if (mBreathVFXInstance.TryGetComponent<Projectile>(out var proj))
+                proj.InitializeBreath(
+                    dragon.BreathHitLayer,
+                    dragon.BreathDamage
+                );
         }
     }
     #endregion
-
+    
+    #region 골렘 공격
     private IEnumerator ScaleUpProjector()
     {
         if (!(mAttackBehaviorAsset is GolemAttackBehavior golem)) yield break;
@@ -700,12 +868,12 @@ public class EnemyBTController : MonoBehaviour
         }
         currentProjector.orthographicSize = range;
         onComplete?.Invoke();
-        Destroy(currentProjector.gameObject, 0.5f);
+        Destroy(currentProjector.gameObject);
     }
-
-    #region 골렘 공격
     public void OnImpactIndicator()
     {
+        mImpactHandled = false;
+        mbIgnoreHits = true;
         if (ImpactProjectorPrefab == null || !(mAttackBehaviorAsset is GolemAttackBehavior) || mTarget == null) return;
         var go = Instantiate(ImpactProjectorPrefab);
         currentProjector = go.GetComponent<Projector>();
@@ -716,11 +884,29 @@ public class EnemyBTController : MonoBehaviour
 
     public void OnImpactLand()
     {
-        var golem = mAttackBehaviorAsset as GolemAttackBehavior;
-        var hits = Physics.OverlapSphere(transform.position, golem.ImpactRange, ImpactHitLayer);
-        foreach (var col in hits)
-            if (col.CompareTag("Player"))
-                col.GetComponent<PlayerController>().SetHit(golem.ImpactDamage, transform, 1);
+        if (mImpactHandled) return;
+        mImpactHandled = true;
+        mbIgnoreHits = false;
+        if (mAttackBehaviorAsset is GolemAttackBehavior golem
+            && golem.mImpactVFXPrefab != null
+            && currentProjector != null)
+        {
+            var spawnPos = transform.position;
+            var vfx = Instantiate(golem.mImpactVFXPrefab, spawnPos, golem.mImpactVFXPrefab.transform.rotation);
+            Destroy(vfx, golem.mImpactVFXDuration);
+        }
+
+        if (mAttackBehaviorAsset is GolemAttackBehavior g)
+        {
+            Vector3 center = currentProjector != null ? currentProjector.transform.position: transform.position;
+            Collider[] hits = Physics.OverlapSphere(center, g.ImpactRange, ImpactHitLayer);
+            foreach (var col in hits)
+            {
+                if (!col.CompareTag("Player")) continue;
+                col.GetComponent<PlayerController>()
+                    .SetHit(g.ImpactDamage, transform, 2);
+            }
+        }    
     }
 
     public void OnSwingAttack()
