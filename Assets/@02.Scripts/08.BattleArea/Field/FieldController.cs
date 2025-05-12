@@ -20,6 +20,7 @@ public class FieldController : Abyss
     //스폰 구역
     private GameObject mPlayer;
     private GameObject mBoss;
+    private GameObject mField;
     private GameObject mPlayerSpawner;
     private GameObject mBossSpawner;
     private GameObject mMonsterSpawner;
@@ -63,12 +64,12 @@ public class FieldController : Abyss
     {
         ClearField();
         OnClearBattleArea.Invoke();
-        Destroy(gameObject);
+        Destroy(mField);
     }
 
     public override void SetPortal()
     {
-        portal = AbyssManager.Instance.portal;
+        portal = Instantiate(AbyssManager.Instance.portalPrefab);
         DeActivatePortal();
         AbyssMoveController moveCon = portal.GetComponent<AbyssMoveController>();
         moveCon.battleAreaMoveDelegate = BattleAreaClear;
@@ -85,20 +86,22 @@ public class FieldController : Abyss
     {
         mPlayer = AbyssManager.Instance.player;
         mLevelDesign = AbyssManager.Instance.levelDesign;
-        mFieldData = AbyssManager.Instance.battleFields[Random.Range(0, AbyssManager.Instance.battleFields.Count)];
         OnClearBattleArea -= AbyssManager.Instance.BattleAreaClear;
         OnClearBattleArea += AbyssManager.Instance.BattleAreaClear;
+        mFieldData = AbyssManager.Instance.abyssFields[Random.Range(0, AbyssManager.Instance.abyssFields.Count)];
         
         mMonsterMaxFieldCount += Mathf.FloorToInt(mLevelDesign * .1f);
+        mField = Instantiate(mFieldData.battleFields);
         mFieldMonsterFolder = new GameObject("FieldMonsterFolder");
         mRandomTreasureFolder = new GameObject("RandomTreasureFolder");
 
         GetNavGrounds();
-        mPlayerSpawner = FindChildrenWithName(mFieldData.playerSpawnZoneName, gameObject);
-        mBossSpawner = FindChildrenWithName(mFieldData.bossSpawnZoneName, gameObject);
+        mPlayerSpawner = FindChildrenWithName(mFieldData.playerSpawnZoneName, mField);
+        mBossSpawner = FindChildrenWithName(mFieldData.bossSpawnZoneName, mField);
         mMonsterSpawner = GetMonsterSpawnZone();
         mSpawnController = mMonsterSpawner.GetComponent<SpawnController>();
 
+        SetPortal();
         SpawnTreasure();
         PlayerSpawn();
 
@@ -137,7 +140,7 @@ public class FieldController : Abyss
     /// </summary>
     void GetNavGrounds()
     {
-        GameObject environment = FindChildrenWithName(mFieldData.environmentName, gameObject);
+        GameObject environment = FindChildrenWithName(mFieldData.environmentName, mField);
         GameObject navGround = FindChildrenWithName(mFieldData.navGroundsName, environment);
 
 

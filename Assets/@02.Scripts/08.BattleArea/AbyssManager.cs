@@ -5,6 +5,7 @@ using Cysharp.Threading.Tasks;
 using Events.Gameplay;
 using SceneEnums;
 using UnityEngine.SceneManagement;
+using UnityEngine.Serialization;
 
 
 /// <summary>
@@ -15,9 +16,8 @@ public class AbyssManager : Singleton<AbyssManager>
 
     [Header("매니저")] 
     public int levelDesign = 1;
-    private int battleAreaClearLimit = 5;
-    private int battleAreaClearCount = 0;
-    public GameObject portal;
+    public int abyssClearLimit = 3;
+    private int abyssClearCount = 0;
     
     public GameObject player;
 
@@ -33,7 +33,7 @@ public class AbyssManager : Singleton<AbyssManager>
     [Space(10)] [Header("드래그 할당")] 
     [Header("포탈")] [SerializeField]public GameObject portalPrefab;
     
-    [Header("필드")] public List<FieldDataSO> battleFields;
+    [Header("필드")] public List<FieldDataSO> abyssFields;
     [Header("던전")] public SODungeonList dungeonListSO;
     
     /// <summary>
@@ -46,9 +46,7 @@ public class AbyssManager : Singleton<AbyssManager>
     {
         Instance.player = player;
         Instance.levelDesign = levelDesign;
-        Instance.battleAreaClearLimit = battleAreaClearLimit;
-        
-        portal = Instantiate(portalPrefab);
+        Instance.abyssClearLimit = battleAreaClearLimit;
 
         BattleAreaCreate();
         Debug.Log("Init succeed!");
@@ -59,7 +57,8 @@ public class AbyssManager : Singleton<AbyssManager>
     /// </summary>
     private static void BattleAreaCreate()
     {
-        if (Instance.battleAreaClearCount % 2 == Instance.battleAreaClearLimit % 2 - 1)
+        if (Instance.abyssClearCount == Instance.abyssClearLimit - 1 ||
+            Instance.abyssClearCount % 2 == 0)
         {
             SceneLoader.LoadSceneAsync(Constants.AbyssFieldScene).Forget();
         }
@@ -77,10 +76,10 @@ public class AbyssManager : Singleton<AbyssManager>
     public void BattleAreaClear()
     {
         levelDesign++;
-        battleAreaClearCount++;
-        Debug.Log("Clear succeed! : " + battleAreaClearCount);
+        abyssClearCount++;
+        Debug.Log("Clear succeed! : " + abyssClearCount);
 
-        if (battleAreaClearCount >= battleAreaClearLimit)
+        if (abyssClearCount >= abyssClearLimit)
         {
             LetsGoHome();
         }
@@ -98,6 +97,7 @@ public class AbyssManager : Singleton<AbyssManager>
     {
         //마을 씬로드
         Debug.Log("LetsGoHome");
+        SceneLoader.LoadSceneAsync(Constants.TownScene).Forget();
     }
 
     protected override void OnSceneLoaded(Scene scene, LoadSceneMode mode)

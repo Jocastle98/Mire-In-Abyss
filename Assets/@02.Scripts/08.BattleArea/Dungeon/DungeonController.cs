@@ -48,7 +48,7 @@ public class DungeonController : Abyss
     
     public override void SetPortal()
     {
-        portal = AbyssManager.Instance.portal;
+        portal = Instantiate(AbyssManager.Instance.portalPrefab);
         AbyssMoveController moveCon = portal.GetComponent<AbyssMoveController>();
         moveCon.battleAreaMoveDelegate = BattleAreaClear;
         DeActivatePortal();
@@ -86,6 +86,7 @@ public class DungeonController : Abyss
         mStanderFolder.transform.parent = gameObject.transform;
         mDungeonFolder.transform.parent = gameObject.transform;
 
+        SetPortal();
         DungeonCreat();
     }
 

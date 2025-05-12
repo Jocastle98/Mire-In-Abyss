@@ -157,6 +157,7 @@ public class DungeonCells
     void SetRoom(DungeonCells[,] cells, DungeonNode node, SODungeon soDungeon)
     {
         SetRoomPrefabs(cells, node, soDungeon);
+        if (mCurrentDungeonPrefab == null) return;
         roomCon = cells[dungeonNode.x, dungeonNode.y].mCurrentDungeonPrefab.GetComponent<DungeonRoomController>();
         Vector3 roomCenter = (new Vector3(dungeonNode.x, 0, dungeonNode.y) +
                               (new Vector3(currentSODungeon.width, 0, currentSODungeon.height) * 0.5f)) * cellSize;
@@ -165,11 +166,6 @@ public class DungeonCells
 
     void SetRoomPrefabs(DungeonCells[,] cells, DungeonNode node, SODungeon soDungeon)
     {
-
-        //노드의 크기에 던전크기가 들어가는지 확인
-        if (node.width < soDungeon.width || node.height < soDungeon.height &&
-            node.width < soDungeon.height || node.height < soDungeon.width) return;
-
         //오일러 방향 재구성
         int randEuler = 90 * Random.Range(0, 2) * 2;
         int dungeonEuler = (node.width < soDungeon.width) ? randEuler : randEuler + 90;
