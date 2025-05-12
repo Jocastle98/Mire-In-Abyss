@@ -22,6 +22,7 @@ public class Skill_1 : MonoBehaviour
         mDamageMultiplier = damageMultiplier;
         mDistance = distance;
         mDirection = direction;
+        mDistanceTraveled = 0.0f;
     }
 
     private void MoveEffect()
@@ -33,7 +34,7 @@ public class Skill_1 : MonoBehaviour
 
         if (mDistanceTraveled >= mDistance)
         {
-            Destroy(gameObject);
+            GameManager.Instance.Resource.Destroy(gameObject);
         }
     }
 

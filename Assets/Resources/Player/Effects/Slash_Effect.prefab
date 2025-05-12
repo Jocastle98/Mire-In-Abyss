@@ -9812,6 +9812,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1955876010561979242}
+  - component: {fileID: -4061197213386030094}
   m_Layer: 0
   m_Name: Slash_Effect
   m_TagString: Untagged
@@ -9835,6 +9836,19 @@ Transform:
   - {fileID: 6905708350599873451}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 90}
+--- !u!114 &-4061197213386030094
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3236027463150290622}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7b74e07d6aa606f4d8e20e90e86bf38c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  IsUsing: 0
 --- !u!1 &3680842225045253617
 GameObject:
   m_ObjectHideFlags: 0
