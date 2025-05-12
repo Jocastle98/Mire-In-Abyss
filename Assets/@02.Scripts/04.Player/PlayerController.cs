@@ -1120,7 +1120,6 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             //피해감소
             mbIsDamageReduced = true;
             OverrideDamageReduction = 0.9f;
-            mPlayerStats.OnGuardSuccess();
         }
         else
         {
@@ -1269,6 +1268,11 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             mParrySuccessInvincibleCoroutine = StartCoroutine(ParrySuccessInvincibleCoroutine());
             
             return;
+        }
+
+        if (CurrentPlayerState == PlayerState.Defend && GameManager.Instance.Input.IsDefending)
+        {
+            mPlayerStats.OnGuardSuccess();
         }
         
         //PlayerState의 TakeDamage 메서드 사용
@@ -1443,7 +1447,18 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         mbInDirection = true;
         
         SetCombatState(true);
-        mSkill_1_TimeoutDelta = mSkill_1_Timeout;
+        // 스킬 쿨타임 초기화 확인
+        if (!CheckSkillReset())
+        {
+            // 초기화 실패 - 일반적인 쿨타임 적용
+            mSkill_1_TimeoutDelta = mSkill_1_Timeout;
+        }
+        else
+        {
+            // 초기화 성공 - 쿨타임 즉시 완료
+            mSkill_1_TimeoutDelta = 0f;
+            Debug.Log("스킬 1 쿨타임 초기화!");
+        }
     }
 
     #endregion
@@ -1501,7 +1516,18 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         Destroy(skill_2_Effect_Object);
         
         SetCombatState(true);
-        mSkill_2_TimeoutDelta = mSkill_2_Timeout;
+        // 스킬 쿨타임 초기화 확인
+        if (!CheckSkillReset())
+        {
+            // 초기화 실패 - 일반적인 쿨타임 적용
+            mSkill_2_TimeoutDelta = mSkill_2_Timeout;
+        }
+        else
+        {
+            // 초기화 성공 - 쿨타임 즉시 완료
+            mSkill_2_TimeoutDelta = 0f;
+            Debug.Log("스킬 2 쿨타임 초기화!");
+        }
     }
 
     #endregion
@@ -1620,7 +1646,19 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         Destroy(skill_3_Effect_Object);
         
         SetCombatState(true);
-        mSkill_3_TimeoutDelta = mSkill_3_Timeout;
+        
+        // 스킬 쿨타임 초기화 확인
+        if (!CheckSkillReset())
+        {
+            // 초기화 실패 - 일반적인 쿨타임 적용
+            mSkill_3_TimeoutDelta = mSkill_3_Timeout;
+        }
+        else
+        {
+            // 초기화 성공 - 쿨타임 즉시 완료
+            mSkill_3_TimeoutDelta = 0f;
+            Debug.Log("스킬 3 쿨타임 초기화!");
+        }    
     }
     
     #endregion
@@ -1857,6 +1895,19 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         skill_4.Init((int)mPlayerStats.GetAttackDamage(), mSkill_4_DamageMultiplier, mSkill_4_Radius, targetPoint);
         
         yield return new WaitForSeconds(recoveryTime);
+        
+        // 스킬 쿨타임 초기화 확인
+        if (!CheckSkillReset())
+        {
+            // 초기화 실패 - 일반적인 쿨타임 적용
+            mSkill_4_TimeoutDelta = mSkill_4_Timeout;
+        }
+        else
+        {
+            // 초기화 성공 - 쿨타임 즉시 완료
+            mSkill_4_TimeoutDelta = 0f;
+            Debug.Log("스킬 4 쿨타임 초기화!");
+        }
         StartCoroutine(Skill_4_Camera(false));
     }
 

@@ -7,8 +7,6 @@ namespace Events.Data
 {
     public readonly struct Preloaded
     {
-        public readonly bool IsPreloaded;
-        public Preloaded(bool isPreloaded) => IsPreloaded = isPreloaded;
     }
 }
 
@@ -263,5 +261,8 @@ namespace Events.HUD
 
 namespace Events.UI
 {
+    public readonly struct EnterInGameScene
+    {
+    }
     public readonly struct LastUIPopup { }
 }
