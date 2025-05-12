@@ -2,6 +2,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// ResourceManager를 통해 사용되는 풀링 매니저
+/// 직접적으로 사용할 필요는 없고 ResourceManager에 의해 자동으로 풀링 관리됨
+/// 풀링으로 관리하고자 하는 게임 오브젝트에 Poolable 스크립트를 붙여주면 됨
+/// </summary>
 public class PoolManager
 {
     #region Pool
@@ -69,6 +74,7 @@ public class PoolManager
             // DontDestroyOnLoad 해제용도 -> 안하면 DontDestroyOnLoad로 생성됨
             /*if (parent == null)
             {
+                                             // 현재 씬의 트랜스폼을 부모관계로 설정해줘야 함
                 poolable.transform.SetParent(GameManager.Scene.CurrentScene.transform);
             }*/
             
