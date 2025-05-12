@@ -136,3 +136,14 @@ namespace BattleAreaEnums
         Boss,
     }
 }
+
+#region 사운드 
+
+namespace AudioEnums
+{
+    public enum EBgmType { Intro = 0, Town = 1, Battle = 2, Dungeon = 3 }
+    public enum ESfxType   { Arrow = 0, Death = 1 }
+    public enum EUiType    { Open = 0, Close = 1, Click = 2  }
+}
+
+#endregion
