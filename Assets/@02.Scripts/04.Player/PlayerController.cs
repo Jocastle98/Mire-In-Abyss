@@ -62,7 +62,6 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     [SerializeField] private float mParryTimeout = 6.0f;
     [SerializeField] private float mParryTimeoutDelta;
     public float ParryTimeoutDelta => mParryTimeoutDelta;
-    private bool mbIsParrySucessful = false;
     
     [Space(10)] 
     [Header("Player Skill_1 Stat")]
@@ -97,25 +96,18 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     public float Skill_4_TimeoutDelta => mSkill_4_TimeoutDelta;
     
     [Space(10)]
-    [Header("Player Grouned Check")]
+    [Header("Player Surroundings Check")]
     [SerializeField] private LayerMask mGroundLayers;
     [SerializeField] private float mGroundedOffset = -0.15f;
     [SerializeField] private float mGroundedRadius = 0.3f;
     public bool bIsGrounded { get; private set; }
+    public InteractableObject NearestInteractableObject { get; private set; }
 
     [Space(10)]
     [Header("Player Combat Check")]
     [SerializeField] private float mInCombatTimeout = 10.0f;
     [SerializeField] private float mInCombatTimeoutDelta;
     [SerializeField] private bool mbInCombat = false;
-    
-    [Space(10)]
-    [Header("Player Interactables Check")]
-    [SerializeField] private LayerMask mInteractableLayers;
-    [SerializeField] private float mInteractableRadius = 3.0f;
-    [SerializeField] private Collider[] mDetectedInteractables = new Collider[5];
-    [SerializeField] private List<Collider> mActiveInteractables = new List<Collider>();
-    public InteractableObject NearestInteractableObject { get; private set; }
     
     [Space(10)]
     [Header("Player Attach Point")]
@@ -1082,6 +1074,54 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             
     #endregion
     
+    #region 일반 공격 이펙트 관련 기능
+
+        private Coroutine mSlashCoroutine = null;
+        public GameObject SlashEffect(SlashEffectType type)
+        {
+            var slashEffect = GameManager.Instance.Resource.Instantiate("Slash_Effect");
+            GameObject slashEffectObject = slashEffect.gameObject;
+            
+            if (slashEffect != null)
+            {
+                Vector3 firePosition = transform.position + transform.forward + Vector3.up;
+                Quaternion rotation = Quaternion.Euler(0.0f, 0.0f, 0.0f);
+                
+                switch (type)
+                {
+                    case SlashEffectType.RightToLeft:
+                        rotation = transform.rotation;
+                        break;
+                    case SlashEffectType.LeftToRight:
+                        rotation = transform.rotation * Quaternion.Euler(0.0f, 0.0f, 180.0f);
+                        break;
+                    case SlashEffectType.TopToBottom:
+                        rotation = transform.rotation * Quaternion.Euler(0.0f, 0.0f, 90.0f);
+                        break;
+                }
+                
+                slashEffectObject.transform.position = firePosition;
+                slashEffectObject.transform.rotation = rotation;
+                
+                mSlashCoroutine = StartCoroutine(DisableEffectAfterDelay(slashEffectObject, 0.2f));
+            }
+            
+            return slashEffectObject;
+        }
+
+        private IEnumerator DisableEffectAfterDelay(GameObject obj, float delay)
+        {
+            yield return new WaitForSeconds(delay);
+            GameManager.Instance.Resource.Destroy(obj); // 풀링 객체면 풀로, 아니면 파괴
+        }
+
+        public void StopSlashCoroutine()
+        {
+            StopCoroutine(mSlashCoroutine);
+        }
+    
+    #endregion
+    
     #endregion
 
     #region 방어 관련 기능
@@ -1950,7 +1990,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     
     #endregion
 
-    #region 발소리 관련 기능
+    #region 사운드 관련 기능
 
     // 발소리, 나중에 사운드매니저로 관리해야 함
     private void OnFootstepSound(AnimationEvent animationEvent)
@@ -1977,54 +2017,6 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         }
     }
 
-    #endregion
-
-    #region 이펙트 관련 기능
-
-    private Coroutine mSlashCoroutine = null;
-    public GameObject SlashEffect(SlashEffectType type)
-    {
-        var slashEffect = GameManager.Instance.Resource.Instantiate("Slash_Effect");
-        GameObject slashEffectObject = slashEffect.gameObject;
-        
-        if (slashEffect != null)
-        {
-            Vector3 firePosition = transform.position + transform.forward + Vector3.up;
-            Quaternion rotation = Quaternion.Euler(0.0f, 0.0f, 0.0f);
-            
-            switch (type)
-            {
-                case SlashEffectType.RightToLeft:
-                    rotation = transform.rotation;
-                    break;
-                case SlashEffectType.LeftToRight:
-                    rotation = transform.rotation * Quaternion.Euler(0.0f, 0.0f, 180.0f);
-                    break;
-                case SlashEffectType.TopToBottom:
-                    rotation = transform.rotation * Quaternion.Euler(0.0f, 0.0f, 90.0f);
-                    break;
-            }
-            
-            slashEffectObject.transform.position = firePosition;
-            slashEffectObject.transform.rotation = rotation;
-            
-            mSlashCoroutine = StartCoroutine(DisableEffectAfterDelay(slashEffectObject, 0.2f));
-        }
-        
-        return slashEffectObject;
-    }
-
-    private IEnumerator DisableEffectAfterDelay(GameObject obj, float delay)
-    {
-        yield return new WaitForSeconds(delay);
-        GameManager.Instance.Resource.Destroy(obj); // 풀링 객체면 풀로, 아니면 파괴
-    }
-
-    public void StopSlashCoroutine()
-    {
-        StopCoroutine(mSlashCoroutine);
-    }
-    
     #endregion
     
     #region 디버깅 관련
