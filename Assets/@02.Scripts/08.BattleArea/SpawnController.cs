@@ -6,19 +6,18 @@ using BattleAreaEnums;
 
 public class SpawnController : MonoBehaviour
 {
-    public float radius;
+    public float radius = 10;
 
     public void SpawnObj(GameObject obj, Transform parent, System.Action monsterDead)
     {
         for (int i = 0; i < 10; i++)
         {
-            Vector3 randomPointOnCircle = Random.insideUnitSphere;
-            randomPointOnCircle.Normalize(); // 방향만 남김 (길이 1)
-            randomPointOnCircle.y = 0;
-            randomPointOnCircle *= Random.Range(5, radius); // 원하는 반지름으로 스케일 조정
+            Vector2 circle = Random.insideUnitCircle.normalized * Random.Range(0, radius);
+            Vector3 randomPointOnCircle = new Vector3(circle.x, 0f, circle.y);
 
             RaycastHit hit;
-            if (Physics.Raycast(transform.position + randomPointOnCircle, Vector3.down, out hit))
+            if (Physics.Raycast(transform.position + randomPointOnCircle, Vector3.down,
+                    out hit,100f, LayerMask.GetMask("Ground")))
             {
                 GameObject spawnObj = Instantiate(obj, hit.point, Quaternion.identity);
                 spawnObj.transform.parent = parent;
@@ -35,7 +34,7 @@ public class SpawnController : MonoBehaviour
         Debug.Log(" Spawn Failed.. / Monster name : " + obj.name);
     }
 
-    public void SpawnObjWithSOGruopList(SOSpawnTypeList monsterLists, int spawnMonsterAmount, Transform parent,
+    public void SpawnObjWithSoGroupList(SOSpawnTypeList monsterLists, int spawnMonsterAmount, Transform parent,
         System.Action monsterDead)
     {
         int spawnedCount = 0;

@@ -17,6 +17,9 @@ MonoBehaviour:
   shopRoom: {fileID: 11400000, guid: 99975246ad8830242ad76642e8c04917, type: 2}
   monsterDungeonList:
   - {fileID: 11400000, guid: 33587b8b351322b40bbdd6eeae82fef2, type: 2}
+  - {fileID: 11400000, guid: 2a066f41c33d49343a9de83e9debddbe, type: 2}
+  - {fileID: 11400000, guid: 2482bc6047c32d143b5173979805cd19, type: 2}
+  - {fileID: 11400000, guid: 9434ba4bc6988f048a21d587b5c0adc4, type: 2}
   eventDungeonList:
   - {fileID: 11400000, guid: 3f81b2b5c631bed4681fcb5206a8add1, type: 2}
   bossDungeonList:

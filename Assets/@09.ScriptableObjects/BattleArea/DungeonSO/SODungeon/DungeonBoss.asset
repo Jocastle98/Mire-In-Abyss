@@ -13,9 +13,8 @@ MonoBehaviour:
   m_Name: DungeonBoss
   m_EditorClassIdentifier: 
   name: 
-  width: 7
-  height: 7
-  dungeonScale: {x: 1, y: 1, z: 1}
+  width: 15
+  height: 15
   entranceYPos: 
   dungeonPrefab: {fileID: 6721582049527035228, guid: d10025e78c7db2a47b84750ed0871e03, type: 3}
   prefabType: 1
