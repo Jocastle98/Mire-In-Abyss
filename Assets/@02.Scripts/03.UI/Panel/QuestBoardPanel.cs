@@ -5,6 +5,7 @@ using System.Linq;
 using Events.Player.Modules;
 using R3;
 using Cysharp.Threading.Tasks;
+using PlayerEnums;
 using TMPro;
 using QuestEnums;
 
@@ -20,9 +21,24 @@ public class QuestBoardPanel : BaseUIPanel
     [SerializeField] private TMP_Text mQuestRewardText;
     [SerializeField] private GameObject mAcceptButton;
     [SerializeField] private GameObject mGetRewardButton;
+    [SerializeField] BackButton mBackButton;
 
     private Dictionary<string, QuestCardView> mQuestViews = new();    // id, questView
     private string mNowDetailQuestId;
+    
+
+    protected override void Awake()
+    {
+        base.Awake();
+
+        if (mBackButton != null)
+        {
+            mBackButton.SetAfterCloseAction(() =>
+            {
+                mPlayer?.SetPlayerState(PlayerState.Idle);
+            });
+        }
+    }
     
     void OnEnable()
     {

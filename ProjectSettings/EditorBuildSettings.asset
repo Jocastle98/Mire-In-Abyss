@@ -23,6 +23,9 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/@01.Scenes/Jihoon_Town.unity
     guid: ef8c98bb28a5d04478b548f51ea7164e
+  - enabled: 1
+    path: Assets/@01.Scenes/Town_YoonGun.unity
+    guid: 61b48dd0b9e72564ca7ee4b2aa3e7e35
   m_configObjects:
     com.unity.addressableassets: {fileID: 11400000, guid: d0038d3451832a640be5e5f290947e8f, type: 2}
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 2ccea834226f0b740bbed6d0f32a38df, type: 3}

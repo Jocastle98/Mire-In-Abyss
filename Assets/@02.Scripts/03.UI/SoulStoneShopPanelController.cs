@@ -6,7 +6,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class SoulStoneShopPanelController : PopupPanelController
+public class SoulStoneShopPanelController : BaseUIPanel
 {
     [System.Serializable]
     public class UpgradeButton
@@ -30,6 +30,7 @@ public class SoulStoneShopPanelController : PopupPanelController
     [SerializeField] private TextMeshProUGUI mSoulStoneCountText;   //현재 보유 영혼석
     [SerializeField] private TextMeshProUGUI mCostText;             //강화 비용
     [SerializeField] private Button mUpgradeApplyButton;            //강화 적용 버튼
+    [SerializeField] BackButton mBackButton;
 
     [Header("참조")] 
     [SerializeField] private PlayerStats mPlayerStats;
@@ -39,6 +40,19 @@ public class SoulStoneShopPanelController : PopupPanelController
 
     private const string UPGRADE_LEVEL_SAVE_KEY = "SoulStoneUpgradeLevels";
 
+    protected override void Awake()
+    {
+        base.Awake();
+
+        if (mBackButton != null)
+        {
+            mBackButton.SetAfterCloseAction(() =>
+            {
+                mPlayer?.SetPlayerState(PlayerState.Idle);
+            });
+        }
+    }
+    
     private void OnEnable()
     {
         mSoulStones = PlayerHub.Instance.Inventory.Soul;
@@ -248,14 +262,6 @@ public class SoulStoneShopPanelController : PopupPanelController
                 Debug.LogWarning($"알수없는 업그레이드 ID : {mSelectedUpgrade.UpgradeId}");
                 break;
         }
-    }
-
-    public void OnClickCloseButton()
-    {
-        Hide(() =>
-        {
-            mPlayer.SetPlayerState(PlayerState.Idle);
-        });
     }
 
     #region 디버깅 관련
