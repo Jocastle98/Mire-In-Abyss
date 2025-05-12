@@ -6,6 +6,7 @@ public class Projectile : MonoBehaviour
 {
     [SerializeField] private float mSpeed = 15f;
 
+    public Transform ShooterTransform { get; private set; }
     private Rigidbody mRb;
     private Collider mCol;
     private LayerMask mHitLayer;
@@ -24,8 +25,9 @@ public class Projectile : MonoBehaviour
     /// <summary>
     /// RangedAttackBehavior에서 호출하세요.
     /// </summary>
-    public void Initialize(Vector3 direction, float speed, LayerMask hitLayer, int damage)
+    public void Initialize(Vector3 direction, float speed, LayerMask hitLayer, int damage, Transform shooter = null)
     {
+        ShooterTransform = shooter;
         mRb.velocity = direction.normalized * speed;
         mHitLayer = hitLayer;
         mDamage = damage;

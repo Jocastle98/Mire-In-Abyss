@@ -1255,7 +1255,21 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
                     Projectile enemyProjectile = enemyTransform.GetComponent<Projectile>();
                     if (enemyProjectile != null)
                     {
-                        
+                        // 화살 프리팹 인스턴스 생성 (반사용)
+                        GameObject reflectedObject = Instantiate(enemyProjectile.gameObject, transform.position + Vector3.up * 1.2f, Quaternion.identity);
+                       
+                        Projectile reflectedProjectile = reflectedObject.GetComponent<Projectile>();
+                        if (reflectedProjectile != null)
+                        {
+                            // 방향: 적 방향으로
+                            Vector3 reflectDir = (reflectedProjectile.ShooterTransform.transform.position - transform.position).normalized;
+
+                            // 반사 레이어: 적만 맞도록 설정
+                            LayerMask enemyLayer = LayerMask.GetMask("Enemy"); // 적 레이어 이름에 따라 수정
+
+                            // 반사 화살 발사
+                            reflectedProjectile.Initialize(transform.forward, 20f, enemyLayer, (int)(mPlayerStats.GetAttackDamage() * mParryDamageMultiplier));
+                        }
                     }
                 }
             }
@@ -1388,16 +1402,16 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     {
         mPlayerStats.OnEnemyKilled();
     }
+    
+    #endregion
+
+    #region 스킬 관련 기능
 
     public bool CheckSkillReset()
     {
         return mPlayerStats.OnSkillUse();
     }
-
-    #endregion
-
-    #region 스킬 관련 기능
-
+    
     #region 1번 스킬
 
     private Coroutine mSkill1Coroutine;
