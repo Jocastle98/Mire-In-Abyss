@@ -133,14 +133,6 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     private GameObject mMainCamera;
     private WeaponController mWeaponController;
     
-    // Effect
-    private GameObject mSlash_Effect_Prefab;
-    private GameObject mSkill_1_Effect_Prefab;
-    private GameObject mSkill_2_Effect_Prefab;
-    private GameObject mSkill_3_Effect_Prefab;
-    private GameObject mSkill_4_RangeIndicator_Prefab;
-    private GameObject mSkill_4_Effect_Prefab;
-    
     // State
     private PlayerStateIdle mPlayerStateIdle;
     private PlayerStateMove mPlayerStateMove;
