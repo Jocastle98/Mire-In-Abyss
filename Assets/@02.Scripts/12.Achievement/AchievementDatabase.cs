@@ -9,7 +9,7 @@ using UnityEngine;
 public class AchievementDatabase : MonoBehaviour
 {
     public TextAsset achievementCsvFile;
-    private string mAchievementCsvFilePath = "Achievements/achievement_list";
+    private string mAchievementCsvFilePath = "Achievement/achievement_list";
 
     private Dictionary<string, Achievement> mAchievementDatabase = new Dictionary<string, Achievement>();   //전체 업적 데이터
     private Dictionary<string, Achievement> mUnlockAchievements = new Dictionary<string, Achievement>();    //해금된 업적
@@ -34,6 +34,7 @@ public class AchievementDatabase : MonoBehaviour
         }
 
         LoadUnlockedAchievements();
+
     }
 
     private void Start()
@@ -77,8 +78,6 @@ public class AchievementDatabase : MonoBehaviour
                 mAchievementDatabase[achievement.Id] = achievement;
             }
         }
-
-        Debug.Log($"{mAchievementDatabase.Count} 업적 로드 완료");
     }
 
     private Achievement ParseAchievementFromCSV(string line)

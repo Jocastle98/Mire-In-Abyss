@@ -16,6 +16,8 @@ public static class SceneLoader
     // MainMenu, Town, Abyss(Field, Dungeon) 이동 시에만 사용
     public static async UniTask LoadSceneAsync(string targetSceneName)
     {
+        UIManager.Instance.PopAll();
+        
         /* 0) 로딩 오버레이 Additive */
         var overlayOp = SceneManager.LoadSceneAsync(Constants.LoadingOverlayScene,
                                                     LoadSceneMode.Additive);

@@ -8,5 +8,5 @@ public class TestPortal : MonoBehaviour, IMapTrackable
 
     public Transform MapAnchor => mMapAnchor;
 
-    public MiniMapIconType Icon => MiniMapIconType.Portal;
+    public MiniMapIconType IconType => MiniMapIconType.Portal;
 }
