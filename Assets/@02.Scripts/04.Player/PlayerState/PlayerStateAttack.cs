@@ -44,6 +44,7 @@ public class PlayerStateAttack : IPlayerState
         if (bIsComboActive && mComboInputTimer > mComboInputWindow)
         {
             bIsComboActive = false;
+            mPlayerController.StopSlashCoroutine();
         }
         
         if ((GameManager.Instance.Input.AttackInput || GameManager.Instance.Input.IsAttacking) 
