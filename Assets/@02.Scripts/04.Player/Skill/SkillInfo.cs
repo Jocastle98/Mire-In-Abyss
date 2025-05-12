@@ -1,15 +1,16 @@
+using PlayerEnums;
 using UnityEngine;
 
 public class SkillInfo
 {
     public int ID;
-    public KeyCode KeyCode;
+    public string KeyString;
     public float CooldownTime;
 
-    public SkillInfo(int id, KeyCode keyCode, float cooldownTime)
+    public SkillInfo(int id, string keyString, float cooldownTime)
     {
         ID = id;
-        KeyCode = keyCode;
+        KeyString = keyString;
         CooldownTime = cooldownTime;
     }
 

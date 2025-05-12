@@ -210,6 +210,29 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         
         // 무기 할당
         SetPlayerWeapon(mRightHandTransform, "Longsword", mLeftHandTransform, "Shield");
+
+        //TODO: 스킬 데이터 관리 기능 추가 시 삭제
+        initPlayerHubSkillData();
+    }
+
+    /// <summary>
+    /// 스킬 데이터 PlayerHub에 전달 메서드(임시)
+    /// </summary>
+    private void initPlayerHubSkillData()
+    {
+        Dictionary<SkillType, SkillInfo> skillInfos = new();
+        skillInfos.Add(SkillType.DefaultAttack, new SkillInfo(0, GameManager.Instance.Input.GetSkillKey(SkillType.DefaultAttack), 0f));
+        skillInfos.Add(SkillType.Parry, new SkillInfo(1, GameManager.Instance.Input.GetSkillKey(SkillType.Parry), mParryTimeout));
+        skillInfos.Add(SkillType.Defend, new SkillInfo(2, GameManager.Instance.Input.GetSkillKey(SkillType.Defend), 0f));
+        skillInfos.Add(SkillType.Sprint, new SkillInfo(3, GameManager.Instance.Input.GetSkillKey(SkillType.Sprint), 0f));
+        skillInfos.Add(SkillType.Roll, new SkillInfo(4, GameManager.Instance.Input.GetSkillKey(SkillType.Roll), mRollTimeout));
+        skillInfos.Add(SkillType.Dash, new SkillInfo(5, GameManager.Instance.Input.GetSkillKey(SkillType.Dash), mDashTimeout));
+        skillInfos.Add(SkillType.Skill1, new SkillInfo(6, GameManager.Instance.Input.GetSkillKey(SkillType.Skill1), mSkill_1_Timeout));
+        skillInfos.Add(SkillType.Skill2, new SkillInfo(7, GameManager.Instance.Input.GetSkillKey(SkillType.Skill2), mSkill_2_Timeout));
+        skillInfos.Add(SkillType.Skill3, new SkillInfo(8, GameManager.Instance.Input.GetSkillKey(SkillType.Skill3), mSkill_3_Timeout));
+        skillInfos.Add(SkillType.Skill4, new SkillInfo(9, GameManager.Instance.Input.GetSkillKey(SkillType.Skill4), mSkill_4_Timeout));
+
+        PlayerHub.Instance.Skills.SetSkills(skillInfos);
     }
 
     private void StateInit()

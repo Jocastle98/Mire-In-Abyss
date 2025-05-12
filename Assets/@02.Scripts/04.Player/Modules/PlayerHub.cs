@@ -8,13 +8,13 @@ using UnityEngine.SceneManagement;
 [RequireComponent(typeof(Inventory))]
 [RequireComponent(typeof(BuffController))]
 [RequireComponent(typeof(QuestLog))]
-[RequireComponent(typeof(SkillDataController))]
+[RequireComponent(typeof(SkillController))]
 public class PlayerHub : Singleton<PlayerHub>
 {
     public Inventory Inventory { get; private set; }
     public BuffController BuffController { get; private set; }
     public QuestLog QuestLog { get; private set; }
-    public SkillDataController Skills { get; private set; }
+    public SkillController Skills { get; private set; }
 
     protected override void Awake()
     {
@@ -22,11 +22,10 @@ public class PlayerHub : Singleton<PlayerHub>
         Inventory = GetComponent<Inventory>();
         BuffController = GetComponent<BuffController>();
         QuestLog = GetComponent<QuestLog>();
-        Skills = GetComponent<SkillDataController>();
+        Skills = GetComponent<SkillController>();
 
         Inventory.Init(0, 0);
         SubscribeEvents();
-        R3EventBus.Instance.Publish(new PlayerHubLoaded());
     }
 
     private void SubscribeEvents()
@@ -52,7 +51,7 @@ public class PlayerHub : Singleton<PlayerHub>
 
         // Skills
         Skills.SkillUsed.Subscribe(e => R3EventBus.Instance.Publish(new SkillUsed(e.ID))).AddTo(this);
-        Skills.SkillUpdated.Subscribe(e => R3EventBus.Instance.Publish(new SkillUpdated(e.ID, e.CooldownTime, e.KeyCode))).AddTo(this);
+        Skills.SkillUpdated.Subscribe(e => R3EventBus.Instance.Publish(new SkillUpdated(e.ID, e.CooldownTime, e.KeyString))).AddTo(this);
     }
 
     protected override void OnSceneLoaded(Scene scene, LoadSceneMode mode)

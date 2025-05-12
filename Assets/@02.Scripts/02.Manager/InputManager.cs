@@ -1,3 +1,4 @@
+using PlayerEnums;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -115,6 +116,26 @@ public class InputManager
         SetInputBuffer(mSkill_3Action, mSkill_3Buffer);
         SetInputBuffer(mSkill_4Action, mSkill_4Buffer);
         SetInputBuffer(mInteractionAction, mInteractionBuffer);
+    }
+
+    public string GetSkillKey(SkillType skillType)
+    {
+        InputAction inputAction = skillType switch
+        {
+            SkillType.DefaultAttack => mAttackAction,
+            SkillType.Parry => mParryAction,
+            SkillType.Defend => mDefendAction,
+            SkillType.Sprint => mSprintAction,
+            SkillType.Roll => mRollAction,
+            SkillType.Dash => mDashAction,
+            SkillType.Skill1 => mSkill_1Action,
+            SkillType.Skill2 => mSkill_2Action,
+            SkillType.Skill3 => mSkill_3Action,
+            SkillType.Skill4 => mSkill_4Action,
+            _ => throw new System.NotImplementedException(),
+        };
+
+        return inputAction.GetBindingDisplayString();
     }
 
     private void SetInputBuffer(InputAction inputAction, InputBuffer inputBuffer)

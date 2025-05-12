@@ -38,12 +38,12 @@ public sealed class SkillSlotsPresenter : HudPresenterBase
             {
                 if (mSlots.TryGetValue(e.ID, out var slot))
                 {
-                    slot.Bind(e.CooldownTime, e.KeyCode, e.ID);
+                    slot.Bind(e.CooldownTime, e.KeyString, e.ID);
                 }
             })
             .AddTo(mCD);
 
-        R3EventBus.Instance.Receive<PlayerHubLoaded>()
+        R3EventBus.Instance.Receive<SkillInfoLoaded>()
             .Subscribe(e =>
             {
                 setSkillSlots();
@@ -59,7 +59,7 @@ public sealed class SkillSlotsPresenter : HudPresenterBase
         // 기본 스킬 정보 등록
         for (int i = 0; i < mDefaultSkillSlots.Count; i++)
         {
-            mDefaultSkillSlots[i].Bind(skillInfos[i].CooldownTime, skillInfos[i].KeyCode, skillInfos[i].ID);
+            mDefaultSkillSlots[i].Bind(skillInfos[i].CooldownTime, skillInfos[i].KeyString, skillInfos[i].ID);
             mSlots[skillInfos[i].ID] = mDefaultSkillSlots[i];
         }
 
@@ -67,7 +67,7 @@ public sealed class SkillSlotsPresenter : HudPresenterBase
         for (int i = mDefaultSkillSlots.Count; i < skillInfos.Count; i++)
         {
             var slot = Instantiate(mSlotPrefab, mSkillSlotRoot);
-            slot.Bind(skillInfos[i].CooldownTime, skillInfos[i].KeyCode, skillInfos[i].ID);
+            slot.Bind(skillInfos[i].CooldownTime, skillInfos[i].KeyString, skillInfos[i].ID);
             mSlots[skillInfos[i].ID] = slot;
         }
 

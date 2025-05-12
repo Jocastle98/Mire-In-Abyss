@@ -7,7 +7,7 @@ using UnityEngine;
 namespace Events.Data
 {
     public readonly struct Preloaded { }
-    public readonly struct PlayerHubLoaded { }
+    public readonly struct SkillInfoLoaded { }
 }
 
 namespace Events.Gameplay
@@ -81,9 +81,9 @@ namespace Events.Player
     {
         public readonly int ID;
         public readonly float CooldownTime;
-        public readonly KeyCode KeyCode;
-        public SkillUpdated(int id, float cooldownTime, KeyCode keyCode)
-            => (ID, CooldownTime, KeyCode) = (id, cooldownTime, keyCode);
+        public readonly string KeyString;
+        public SkillUpdated(int id, float cooldownTime, string keyString)
+            => (ID, CooldownTime, KeyString) = (id, cooldownTime, keyString);
     }
 }
 

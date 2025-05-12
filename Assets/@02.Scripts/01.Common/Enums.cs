@@ -53,7 +53,16 @@ namespace PlayerEnums
 
     public enum SkillType
     {
-        
+        DefaultAttack,
+        Parry,
+        Defend,
+        Sprint,
+        Roll,
+        Dash,
+        Skill1,
+        Skill2,
+        Skill3,
+        Skill4,
     }
 }
 
