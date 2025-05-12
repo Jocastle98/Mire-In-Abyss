@@ -9,7 +9,7 @@ public class AbyssManagerSceneTest : MonoBehaviour
         if (other.name.Contains("Player", System.StringComparison.OrdinalIgnoreCase))
         {
             
-            AbyssManager.Instance.BattleAreaManagerInit(other.gameObject,1,2);
+            AbyssManager.Instance.BattleAreaManagerInit(other.gameObject,1,3);
         }
     }
 }

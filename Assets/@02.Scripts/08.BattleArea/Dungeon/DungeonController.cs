@@ -4,7 +4,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using BattleAreaEnums;
 using Unity.AI.Navigation;
+using UnityEngine.AI;
 using Random = UnityEngine.Random;
+
 
 public class DungeonController : Abyss
 {
@@ -138,6 +140,7 @@ public class DungeonController : Abyss
 
         // NavMeshSurface 생성 및 설정
         mNavMeshSurface = gameObject.AddComponent<NavMeshSurface>();
+        mNavMeshSurface.useGeometry = NavMeshCollectGeometry.PhysicsColliders;
 
         // Collect Objects 방식을 Children으로 설정하면 하위 오브젝트만 수집
         mNavMeshSurface.collectObjects = CollectObjects.All;
