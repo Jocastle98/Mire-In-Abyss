@@ -69,8 +69,9 @@ public class UIManager : Singleton<UIManager>
         {
             next.CG.interactable = true;
         }
-        else if (mStack.Count == 0 && GameManager.Instance.CurrentGameState == GameState.UI)
+        else if (mStack.Count == 0)
         {
+            // 팝 했을 때 스택이 비어있으면 이전 게임 상태로 돌아감
             GameManager.Instance.ChangePreviousGameState();
         }
     }

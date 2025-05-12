@@ -43,6 +43,11 @@ namespace PlayerEnums
         Poison,
         Bleed
     }
+
+    public enum SkillType
+    {
+        
+    }
 }
 
 namespace ItemEnums

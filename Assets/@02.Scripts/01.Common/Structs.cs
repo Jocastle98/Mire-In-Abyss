@@ -6,9 +6,8 @@ using UnityEngine;
 
 namespace Events.Data
 {
-    public readonly struct Preloaded
-    {
-    }
+    public readonly struct Preloaded { }
+    public readonly struct PlayerHubLoaded { }
 }
 
 namespace Events.Gameplay
@@ -70,16 +69,6 @@ namespace Events.Player
     {
         public readonly int Level;
         public PlayerLevelChanged(int level) => Level = level;
-    }
-
-    //TODO: 담당자의 스킬 Info로 대체
-    public readonly struct TempSkillInfo
-    {
-        public readonly int ID;
-        public readonly KeyCode KeyCode;
-        public readonly float CooldownTime;
-        public TempSkillInfo(int id, KeyCode keyCode, float cooldownTime)
-            => (ID, KeyCode, CooldownTime) = (id, keyCode, cooldownTime);
     }
 
     public readonly struct SkillUsed
