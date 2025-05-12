@@ -1,14 +1,18 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 
+[RequireComponent(typeof(PlayerInput))]
 public class GameManager : Singleton<GameManager>
 {
-    private InputManager minput = new InputManager();
-    public InputManager Input { get { return Instance.minput; } }
+    [SerializeField] PlayerInput mPlayerInput;
+    private InputManager mInput = new InputManager();
+    public InputManager Input { get { return Instance.mInput; } }
 
     protected override void Awake()
     {
         base.Awake();
+        Input.Init(mPlayerInput);
         // Temp
         Cursor.visible = false;
         Cursor.lockState = CursorLockMode.Locked;
@@ -21,7 +25,7 @@ public class GameManager : Singleton<GameManager>
 
     private void Update()
     {
-        minput.OnInputUpdate();
+        mInput.OnInputUpdate();
     }
     
     protected override void OnSceneLoaded(Scene scene, LoadSceneMode mode)

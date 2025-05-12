@@ -1,3 +1,12 @@
+namespace GameEnums
+{
+    public enum GameState
+    {
+        Gameplay,
+        UI,         // Pause
+    }
+}
+
 namespace PlayerEnums
 {
     public enum PlayerState

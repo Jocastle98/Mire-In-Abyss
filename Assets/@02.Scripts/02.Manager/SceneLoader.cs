@@ -23,11 +23,8 @@ public static class SceneLoader
             await SceneManager.UnloadSceneAsync(CurrentGameplayScene).ToUniTask();
         }
 
-        /* 2) GameplayShared 씬 로드 */
-        GameplayMode newMode = getGameplayMode(targetSceneName);
-        await LoadGameplaySharedSceneAsync(newMode);
-        CurrentGameplayMode = newMode;
-        R3EventBus.Instance.Publish(new GameplayModeChanged(newMode));
+        /* 2) 게임모드 변경에 따른 처리 */
+        await ChangeGameplayModeAsync(getGameplayMode(targetSceneName));
 
         /* 3) 새 Gameplay 씬 Additive */
         await SceneManager.LoadSceneAsync(targetSceneName, LoadSceneMode.Additive).ToUniTask();
@@ -42,8 +39,13 @@ public static class SceneLoader
         }
     }
 
-    private static async UniTask LoadGameplaySharedSceneAsync(GameplayMode newMode)
-    {
+    private static async UniTask ChangeGameplayModeAsync(GameplayMode newMode)
+    { 
+        if(CurrentGameplayMode == newMode)
+        {
+            return;
+        }
+
         // GameplayShared 씬 로드 (메인메뉴 -> 타운)
         if(CurrentGameplayMode == GameplayMode.MainMenu && newMode == GameplayMode.Town)
         {
@@ -60,6 +62,10 @@ public static class SceneLoader
                 await SceneManager.UnloadSceneAsync(sharedScene).ToUniTask();
             }
         }
+
+        // 게임모드 변경 이벤트 발행
+        CurrentGameplayMode = newMode;
+        R3EventBus.Instance.Publish(new GameplayModeChanged(newMode));
     }
 
     private static GameplayMode getGameplayMode(string sceneName)
