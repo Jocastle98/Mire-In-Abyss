@@ -44,6 +44,13 @@ namespace PlayerEnums
         Bleed
     }
 
+    public enum SlashEffectType
+    {
+        RightToLeft,
+        LeftToRight,
+        TopToBottom,
+    }
+
     public enum SkillType
     {
         
