@@ -139,6 +139,8 @@ namespace UIHUDEnums
         Boss,
         Shop,
         Portal,
+        QuestBoard,
+        SoulStoneShop, // Upgrade
     }
 
     public enum ProgressBarImageType

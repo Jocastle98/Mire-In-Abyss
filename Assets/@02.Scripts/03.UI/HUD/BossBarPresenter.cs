@@ -24,9 +24,10 @@ public sealed class BossBarPresenter : HudPresenterBase
         mRootGroup.alpha = 0;
         mRootGroup.interactable = false;
         mRootGroup.blocksRaycasts = false;
+        DisableScene = SceneEnums.GameScene.Town;
     }
 
-    void Start()
+    public override void Initialize()
     {
         subscribeEvents();
     }

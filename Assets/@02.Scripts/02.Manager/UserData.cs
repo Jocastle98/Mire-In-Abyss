@@ -9,7 +9,6 @@ using UnityEngine.SceneManagement;
 // 많이 바뀔 예정이니 사용하지 말아주세요.
 public class UserData : Singleton<UserData>, IInitializable
 {
-    public int Gold;
     public int Soul;
     public Dictionary<string, UserAchievementData> AchievementDataMap;
     public Dictionary<string, UserItemData> ItemDataMap;

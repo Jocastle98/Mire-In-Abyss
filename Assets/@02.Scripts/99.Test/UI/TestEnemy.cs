@@ -10,5 +10,5 @@ public class TestEnemy : MonoBehaviour, IMapTrackable, IHpTrackable
     public Transform MapAnchor => mMapAnchor;
     public Transform HpAnchor => mHpAnchor;
 
-    public MiniMapIconType Icon => MiniMapIconType.Enemy;
+    public MiniMapIconType IconType => MiniMapIconType.Enemy;
 }

@@ -14,7 +14,7 @@ public sealed class SkillSlotsPresenter : HudPresenterBase
     private readonly Dictionary<int, SkillSlotView> mSlots = new();
 
 
-    void Awake()
+    public override void Initialize()
     {
         subscribeEvents();
     }

@@ -23,9 +23,10 @@ public sealed class MiniQuestBoxPresenter : HudPresenterBase
         mMaxCardNumber = Mathf.FloorToInt(mContentRoot.GetComponent<RectTransform>().rect.height
                                / mCardPrefab.GetComponent<RectTransform>().rect.height);
         mCardPool = new(mCardPrefab, mContentRoot, mMaxCardNumber);
+        DisableScene = SceneEnums.GameScene.Town;
     }
 
-    void Start()
+    public override void Initialize()
     {
         subscribeEvents();
     }

@@ -14,8 +14,12 @@ public sealed class DifficultyPresenter : HudPresenterBase
     [SerializeField] private Image mDifficultyLevelImage;
     [SerializeField] private ProgressBarUI mLevelProgressBar;
 
+    void Awake()
+    {
+        DisableScene = SceneEnums.GameScene.Town;
+    }
 
-    void Start()
+    public override void Initialize()
     {
         subscribeEvents();
     }
