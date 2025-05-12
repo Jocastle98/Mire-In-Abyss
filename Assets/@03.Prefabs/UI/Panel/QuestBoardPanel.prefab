@@ -2428,7 +2428,7 @@ GameObject:
   - component: {fileID: 1145559461388393006}
   - component: {fileID: 2358408809830075226}
   m_Layer: 5
-  m_Name: QuestBoardPanel_Jihoon
+  m_Name: QuestBoardPanel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

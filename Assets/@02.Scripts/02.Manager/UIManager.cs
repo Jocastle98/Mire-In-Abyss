@@ -75,6 +75,15 @@ public class UIManager : Singleton<UIManager>
             GameManager.Instance.ChangePreviousGameState();
         }
     }
+
+    public async UniTask PopAll()
+    {
+        while (mStack.Count > 0)
+        {
+            await Pop();
+        }
+    }
+    
     void Update()
     {
         ProcessEscInput();
