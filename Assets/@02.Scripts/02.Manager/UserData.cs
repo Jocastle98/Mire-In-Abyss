@@ -12,6 +12,7 @@ public class UserData : Singleton<UserData>, IInitializable
     public int Gold;
     public int Soul;
     public Dictionary<string, UserAchievementData> AchievementDataMap;
+    public Dictionary<string, UserItemData> ItemDataMap;
 
     protected override void OnSceneLoaded(Scene scene, LoadSceneMode mode) { }
 
@@ -37,19 +38,34 @@ public class UserData : Singleton<UserData>, IInitializable
     {
         return new UserAchievementData()
         {
-            id = id,
+            Id = id,
             Progress = 0,
-            isUnlocked = true,
+            IsUnlocked = true,
             ClearDate = DateTime.Now
         };
         // return AchievementDataMap[id];
+    }
+
+    public UserItemData GetItemData(int id)
+    {
+        return new UserItemData()
+        {
+            Id = id,
+            IsUnlocked = true
+        };
     }
 }
 
 public class UserAchievementData
 {
-    public string id;
+    public string Id;
     public float Progress;
-    public bool isUnlocked;
+    public bool IsUnlocked;
     public DateTime ClearDate;
+}
+
+public class UserItemData
+{
+    public int Id;
+    public bool IsUnlocked;
 }

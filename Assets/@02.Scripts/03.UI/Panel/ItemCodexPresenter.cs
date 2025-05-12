@@ -28,7 +28,7 @@ public sealed class ItemCodexPresenter : MonoBehaviour
         foreach (var rec in dict)
         {
             var v = Instantiate(mItemIconPrefab, mContent);
-            if(isUnsealed(rec.Key))
+            if(UserData.Instance.GetItemData(rec.Key).IsUnlocked)
             {
                 v.Bind(rec.Key, rec.Value, showDetail);
             }
@@ -47,18 +47,11 @@ public sealed class ItemCodexPresenter : MonoBehaviour
 
     void showDetail(int id)
     {
-        if (isUnsealed(id))
+        if (UserData.Instance.GetItemData(id).IsUnlocked)
         {
             mLargeIcon.sprite = GameDB.Instance.SpriteCache.GetSprite(SpriteType.Item, id);
             //TODO: 아이템 정보 가져오기
-            //var rec = GameDatabase.Instance.Item.Get(id);
-            // 임시 아이템 정보 생성
-            var rec = new Item
-            {
-                ID = id,
-                ItemName = "아이템 이름",
-                Description = "아이템 설명",
-            };
+            var rec = GameDB.Instance.ItemDatabase.GetItemByID(id);
 
             mNameText.text = rec.ItemName;
             mDescText.text = rec.Description;
@@ -69,12 +62,5 @@ public sealed class ItemCodexPresenter : MonoBehaviour
             mNameText.text = "???";
             mDescText.text = "???";
         }
-    }
-
-    private bool isUnsealed(int id)
-    {
-        //TODO: 아이템 획득 경험 여부 확인
-        // 임시로 짝수만 true 처리
-        return (id & 1) == 0;
     }
 }

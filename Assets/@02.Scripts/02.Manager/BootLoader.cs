@@ -20,7 +20,8 @@ public sealed class BootLoader : MonoBehaviour
         var initTasks = new UniTask[]
         {
             GameDB.Instance.InitializeAsync(),
-            ManagersHub.Instance.InitializeAsync()
+            ManagersHub.Instance.InitializeAsync(),
+            UserData.Instance.InitializeAsync()
         };
         await WaitWithProgress(initTasks);   // Progress 값 0~1
         R3EventBus.Instance.Publish(new Preloaded());
