@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 2659244939736392478}
   - component: {fileID: 5405911734466036859}
   - component: {fileID: 3729128728792724839}
+  - component: {fileID: 4143140729941065858}
   m_Layer: 0
   m_Name: brick wall.001
   m_TagString: Untagged
@@ -84,6 +85,27 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!65 &4143140729941065858
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2194606431005621881}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.021061955, y: 0.0040698624, z: 0.030626213}
+  m_Center: {x: -0.010535053, y: 0.00006673938, z: 0.015313107}
 --- !u!1 &8528044309013666880
 GameObject:
   m_ObjectHideFlags: 0

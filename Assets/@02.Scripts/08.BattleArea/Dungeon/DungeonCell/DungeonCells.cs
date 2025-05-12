@@ -12,6 +12,7 @@ public class DungeonCells
     private int mCellSize;
     private DungeonCellType mCellType;
     private DungeonCellType[] mNeighbourCellType = new DungeonCellType[4];
+    private DungeonRoomType mRoomType;
     
     private GameObject mCurrentDungeonPrefab;
     private GameObject mCurrentTilePrefab;
@@ -22,10 +23,10 @@ public class DungeonCells
 
     private DungeonRoomController roomCon;
 
-    public GameObject portal;
-    public GameObject tileFolder;
-    public GameObject standerFolder;
-    public GameObject dungeonFolder;
+    private GameObject portal;
+    private GameObject tileFolder;
+    private GameObject standerFolder;
+    private GameObject dungeonFolder;
 
     public DungeonNode dungeonNode
     {
@@ -45,6 +46,11 @@ public class DungeonCells
     public DungeonCellType cellType
     {
         get { return mCellType; }
+    }
+
+    public DungeonRoomType roomType
+    {
+        get { return mRoomType; }
     }
 
     public void SetDungeonCells(Vector2Int cellpos, int cellSize,
@@ -72,30 +78,37 @@ public class DungeonCells
 
     public void SetDungeon(DungeonCells[,] cells, DungeonRoomType roomType)
     {
+        mNode.SetCell(this);
+        
         switch (roomType)
         {
             case DungeonRoomType.SafeRoom:
                 currentSODungeon = mDungeonListSO.safeDungeon;
                 SetRoom(cells, mNode, currentSODungeon);
+                mRoomType = DungeonRoomType.SafeRoom;
                 break;
             case DungeonRoomType.MonsterRoom:
                 currentSODungeon =
                     mDungeonListSO.monsterDungeonList[Random.Range(0, mDungeonListSO.monsterDungeonList.Count)];
                 SetRoom(cells, mNode, currentSODungeon);
+                mRoomType = DungeonRoomType.MonsterRoom;
                 break;
             case DungeonRoomType.BossRoom:
                 currentSODungeon =
                     mDungeonListSO.bossDungeonList[Random.Range(0, mDungeonListSO.bossDungeonList.Count)];
                 SetRoom(cells, mNode, currentSODungeon);
+                mRoomType = DungeonRoomType.BossRoom;
                 break;
             case DungeonRoomType.EventRoom:
                 currentSODungeon =
                     mDungeonListSO.eventDungeonList[Random.Range(0, mDungeonListSO.eventDungeonList.Count)];
                 SetRoom(cells, mNode, currentSODungeon);
+                mRoomType = DungeonRoomType.EventRoom;
                 break;
             case DungeonRoomType.ShopRoom:
                 currentSODungeon = mDungeonListSO.shopRoom;
                 SetRoom(cells, mNode, currentSODungeon);
+                mRoomType = DungeonRoomType.ShopRoom;
                 break;
         }
     }
@@ -144,6 +157,7 @@ public class DungeonCells
     void SetRoom(DungeonCells[,] cells, DungeonNode node, SODungeon soDungeon)
     {
         SetRoomPrefabs(cells, node, soDungeon);
+        if (mCurrentDungeonPrefab == null) return;
         roomCon = cells[dungeonNode.x, dungeonNode.y].mCurrentDungeonPrefab.GetComponent<DungeonRoomController>();
         Vector3 roomCenter = (new Vector3(dungeonNode.x, 0, dungeonNode.y) +
                               (new Vector3(currentSODungeon.width, 0, currentSODungeon.height) * 0.5f)) * cellSize;
@@ -152,11 +166,6 @@ public class DungeonCells
 
     void SetRoomPrefabs(DungeonCells[,] cells, DungeonNode node, SODungeon soDungeon)
     {
-
-        //노드의 크기에 던전크기가 들어가는지 확인
-        if (node.width < soDungeon.width || node.height < soDungeon.height &&
-            node.width < soDungeon.height || node.height < soDungeon.width) return;
-
         //오일러 방향 재구성
         int randEuler = 90 * Random.Range(0, 2) * 2;
         int dungeonEuler = (node.width < soDungeon.width) ? randEuler : randEuler + 90;
@@ -198,14 +207,7 @@ public class DungeonCells
 
         mCurrentDungeonPrefab.transform.localScale *= cellSize;
         mCurrentDungeonPrefab.transform.SetParent(dungeonFolder.transform);
-
-        //임시 확인용
-        // Dungeon temptDungeon = mCurrentDungeonPrefab.GetComponent<Dungeon>();
-        // temptDungeon.x = node.x;
-        // temptDungeon.y = node.y;
-        // temptDungeon.w = node.w;
-        // temptDungeon.h = node.h;
-
+        
         //mCells이 3차원이 될 때 높이값으로 쓰이게됨
         //int entranceCount = dungeon.entranceYPos.GetLength(0);
 
@@ -216,9 +218,9 @@ public class DungeonCells
         return rotation switch
         {
             0 => Vector3.zero,
-            90 => new Vector3(0, 0, height),
-            180 => new Vector3(width, 0, height),
-            270 => new Vector3(width, 0, 0),
+            90 => new Vector3(0, 0, width),
+            180 => new Vector3(height, 0, width),
+            270 => new Vector3(height, 0, 0),
             _ => Vector3.zero
         };
     }
@@ -370,6 +372,27 @@ public class DungeonCells
         }
 
         return cells[dirX, dirY];
+    }
+
+    public void SetCorridorCollider(Vector2Int fromCoord, Vector2Int toCoord,bool extraForCorner)
+    {
+        mCurrentTilePrefab.layer = 3;
+        BoxCollider boxCol = mCurrentTilePrefab.gameObject.AddComponent<BoxCollider>();
+        boxCol.center += new Vector3(0.5f, -0.5f, 0.5f);
+
+        Vector2 center = toCoord - fromCoord;
+        if (extraForCorner) center += new Vector2(Mathf.Sign(center.x), Mathf.Sign(center.y));
+
+        if (Mathf.Abs(center.x) < Mathf.Abs(center.y))
+        {
+            boxCol.center += new Vector3(0, 0, center.y * 0.5f);
+            boxCol.size = new Vector3(3, 1, center.y + Mathf.Sign(center.y));
+        }
+        else
+        {
+            boxCol.center += new Vector3(center.x * 0.5f, 0, 0);
+            boxCol.size = new Vector3(center.x + Mathf.Sign(center.x), 1, 3);
+        }
     }
 
     void DestroyStander(int dir)
