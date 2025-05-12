@@ -43,12 +43,24 @@ public class Projectile : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (mIsBreath) return;
+        if (mIsBreath) 
+            return;
 
-        if ((mHitLayer.value & 1 << other.gameObject.layer) == 0) return;
+        // 1) 플레이어 레이어가 아니면 그냥 파괴
+        int otherLayer = other.gameObject.layer;
+        int playerLayer = LayerMask.NameToLayer("Player");
+        if (otherLayer != playerLayer)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
+        // 2) 플레이어면 데미지 입히고 파괴
         if (other.TryGetComponent<PlayerController>(out var player))
+        {
             player.SetHit(mDamage, transform, 1);
-        Destroy(gameObject);
+        }
+        Destroy(gameObject,2f);
     }
 
     private void OnTriggerStay(Collider other)

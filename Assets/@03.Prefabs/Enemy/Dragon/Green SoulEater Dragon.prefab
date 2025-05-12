@@ -1145,7 +1145,13 @@ MonoBehaviour:
   airDuration: 10
   mEnemyType: 2
   mExpRewardController: {fileID: 168077520893859685}
-  stunDuration: 2
+  mStunDuration: 2
+  mAttackDebuffDuration: 10
+  mAttackDebuffAmount: 5
+  mFireDotDuration: 3
+  mFireDotDamagePerSecond: 3
+  mIceDebuffDuration: 8
+  mIceAnimSpeed: 0.2
 --- !u!95 &6038634554808625915
 Animator:
   serializedVersion: 5
@@ -2307,7 +2313,7 @@ Transform:
   m_GameObject: {fileID: 8855097814695911778}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0, y: 0, z: 82}
+  m_LocalPosition: {x: 0, y: -0, z: 75}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
