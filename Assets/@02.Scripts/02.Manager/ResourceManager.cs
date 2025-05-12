@@ -38,9 +38,10 @@ public class ResourceManager
     /// 경로 설정 부분만 수정하면 범용성 있게 만들 수 있음
     /// </summary>
     /// <param name="path"> 게임오브젝트 리소스의 경로 </param>
+    /// <param name="poolSize"> 풀링 관리시 풀 사이즈, 기본값은 5 </param>
     /// <param name="parent"> 부모오브젝트, 기본값은 null </param>
     /// <returns></returns>
-    public GameObject Instantiate(string path, Transform parent = null)
+    public GameObject Instantiate(string path, int poolSize = 5, Transform parent = null)
     {
         // 필요하면 더 범용성있게 수정 가능(현재는 플레이어 이펙트만)
         GameObject original = Load<GameObject>($"Player/Effects/{path}");
@@ -54,7 +55,12 @@ public class ResourceManager
         // 만약에 풀링이 필요한 객체(Poolable 컴포넌트가 있는 객체)라면 풀링 매니저를 통해 객체를 가져옴
         if (original.GetComponent<Poolable>() != null)
         {
-            return GameManager.Instance.Pool.Pop(original, parent).gameObject;
+            if (GameManager.Instance.Pool.GetOriginal(original.name) == null)
+            {
+                GameManager.Instance.Pool.CreatePool(original, poolSize);
+            }
+            
+            return GameManager.Instance.Pool.Pop(original, poolSize, parent).gameObject;
         }
         
         GameObject go = Object.Instantiate(original, parent);
