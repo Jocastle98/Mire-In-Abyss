@@ -1,3 +1,4 @@
+using System;
 using Events.Abyss;
 using Events.Player;
 using R3;
@@ -14,12 +15,51 @@ public sealed class DifficultyPresenter : HudPresenterBase
     [SerializeField] private Image mDifficultyLevelImage;
     [SerializeField] private ProgressBarUI mLevelProgressBar;
 
+    //Temp
+    private int mDifficultyLevel = 1;
+    private float mDifficultyProgress = 0;
+    private DateTime mStartUtc;
 
-    void Start()
+    void Awake()
     {
-        subscribeEvents();
+        DisableScene = SceneEnums.GameScene.Town;
     }
 
+    public override void Initialize()
+    {
+        subscribeEvents();
+        mDifficultyLevelText.text = getTempLevelText(1);
+        mNextDifficultyLevelText.text = getTempLevelText(2);
+        mLevelProgressBar.SetProgress(0);
+        mAbyssElapseText.text = "00:00";
+
+        //Temp
+        mDifficultyLevel = 1;
+        mDifficultyProgress = 0;
+        mStartUtc = DateTime.UtcNow;
+    }
+
+    void Update()
+    {
+        tempDifficultyTestProgress();
+    }
+
+    private void tempDifficultyTestProgress()
+    {
+        mDifficultyProgress += Time.deltaTime * 0.02f;
+        if (mDifficultyProgress >= 1)
+        {
+            mDifficultyProgress = 0;
+            mDifficultyLevel++;
+            R3EventBus.Instance.Publish(new DifficultyChanged(mDifficultyLevel));
+        }
+
+        R3EventBus.Instance.Publish(new DifficultyProgressed(mDifficultyProgress));
+
+        TimeSpan elapsed = DateTime.UtcNow - mStartUtc;
+        R3EventBus.Instance.Publish(new PlayTimeChanged(elapsed));
+    }
+    
     private void subscribeEvents()
     {
         R3EventBus.Instance.Receive<DifficultyChanged>()

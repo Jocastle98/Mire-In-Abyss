@@ -1,3 +1,5 @@
+using Events.Data;
+using Events.Player;
 using Events.Player.Modules;
 using R3;
 using UnityEngine;
@@ -6,11 +8,13 @@ using UnityEngine.SceneManagement;
 [RequireComponent(typeof(Inventory))]
 [RequireComponent(typeof(BuffController))]
 [RequireComponent(typeof(QuestLog))]
+[RequireComponent(typeof(SkillController))]
 public class PlayerHub : Singleton<PlayerHub>
 {
     public Inventory Inventory { get; private set; }
     public BuffController BuffController { get; private set; }
     public QuestLog QuestLog { get; private set; }
+    public SkillController Skills { get; private set; }
 
     protected override void Awake()
     {
@@ -18,11 +22,8 @@ public class PlayerHub : Singleton<PlayerHub>
         Inventory = GetComponent<Inventory>();
         BuffController = GetComponent<BuffController>();
         QuestLog = GetComponent<QuestLog>();
-    }
+        Skills = GetComponent<SkillController>();
 
-    void Start()
-    {
-        //TODO: 퀘스트 로드
         Inventory.Init(0, 0);
         SubscribeEvents();
     }
@@ -47,6 +48,10 @@ public class PlayerHub : Singleton<PlayerHub>
         QuestLog.Progress.Subscribe(e => R3EventBus.Instance.Publish(new QuestUpdated(e.ID, e.CurrentAmount))).AddTo(this);
         QuestLog.Completed.Subscribe(e => R3EventBus.Instance.Publish(new QuestCompleted(e.ID))).AddTo(this);
         QuestLog.Rewarded.Subscribe(e => R3EventBus.Instance.Publish(new QuestRewarded(e.ID))).AddTo(this);
+
+        // Skills
+        Skills.SkillUsed.Subscribe(e => R3EventBus.Instance.Publish(new SkillUsed(e.ID))).AddTo(this);
+        Skills.SkillUpdated.Subscribe(e => R3EventBus.Instance.Publish(new SkillUpdated(e.ID, e.CooldownTime, e.KeyString))).AddTo(this);
     }
 
     protected override void OnSceneLoaded(Scene scene, LoadSceneMode mode)

@@ -18,7 +18,7 @@ public sealed class SkillSlotView : MonoBehaviour
     {
         progressSkillCoolTime();
     }
-    public void Bind(float cooldownTime, KeyCode keyCode, int id)
+    public void Bind(float cooldownTime, string keyString, int id)
     {
         mSkillCooldownTime = cooldownTime;
         mSkillTimer = 0;
@@ -30,7 +30,7 @@ public sealed class SkillSlotView : MonoBehaviour
         }
         if (mSkillKeyText != null)
         {
-            mSkillKeyText.text = keyCode.ToString();
+            mSkillKeyText.text = keyString;
         }
         if (mSkillImage.sprite == null)
         {

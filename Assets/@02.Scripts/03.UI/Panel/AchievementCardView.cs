@@ -14,14 +14,14 @@ public sealed class AchievementCardView : MonoBehaviour
 
 
     /* ────────── Bind API ────────── */
-    public void Bind(in TempAchievementInfo info)
+    public void Bind(in Achievement achievement, in UserAchievementData userAchievementData)
     {
-        if(info.IsClear)
+        if(userAchievementData.IsUnlocked)
         {
-            mIconImage.sprite = GetAchievementIconSprite(info.Id);
-            mTitleText.text = info.Title;
-            mDescText.text  = info.Description;
-            mClearDateText.text = $"Clear\n{info.ClearDate:yyyy-MM-dd}";
+            mIconImage.sprite = GetAchievementIconSprite(achievement.Id);
+            mTitleText.text = achievement.Title;
+            mDescText.text  = achievement.Description;
+            mClearDateText.text = $"Clear\n{userAchievementData.ClearDate:yyyy-MM-dd}";
             mClearOverlay.alpha = 1f;
         }
         else
@@ -32,7 +32,7 @@ public sealed class AchievementCardView : MonoBehaviour
         }
     }
 
-    private Sprite GetAchievementIconSprite(int id)
+    private Sprite GetAchievementIconSprite(string id)
     {
         // DataBase에서 업적 아이콘 Sprite 가져오기
         return null;

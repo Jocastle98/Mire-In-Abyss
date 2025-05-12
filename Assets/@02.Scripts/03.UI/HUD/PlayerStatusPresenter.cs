@@ -7,6 +7,7 @@ using R3;
 using TMPro;
 using UIEnums;
 using UnityEngine;
+using UnityEngine.PlayerLoop;
 using UnityEngine.UI;
 
 public sealed class PlayerStatusPresenter : HudPresenterBase
@@ -28,11 +29,14 @@ public sealed class PlayerStatusPresenter : HudPresenterBase
         mPool = new(mBuffSlotPrefab, mBuffRoot, 8);
     }
 
-    void Start()
+    public override void Initialize()
     {
         subscribeEvents();
+        mLevelText.text = "1";
+        mExpBarUI.SetProgress(0);
+        mHpBarUI.SetProgress(1);
     }
-
+    
     private void subscribeEvents()
     {
         /* ─── HP ─── */

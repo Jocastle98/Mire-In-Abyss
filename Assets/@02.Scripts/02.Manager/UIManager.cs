@@ -115,11 +115,24 @@ public class UIManager : Singleton<UIManager>
         {
             next.CG.interactable = true;
         }
-        else if (mStack.Count == 0 && GameManager.Instance.CurrentGameState == GameState.UI)
+        else if (mStack.Count == 0)
         {
+            // 팝 했을 때 스택이 비어있으면 이전 게임 상태로 돌아감
             GameManager.Instance.ChangePreviousGameState();
         }
     }
+
+    /// <summary>
+    /// 씬 변경 시 모든 패널 제거 할 때만 호출
+    /// </summary>
+    public void PopAll()
+    {
+        while (mStack.Count > 0)
+        {
+            Destroy(mStack.Pop().gameObject);
+        }
+    }
+    
     void Update()
     {
         ProcessEscInput();
@@ -127,13 +140,28 @@ public class UIManager : Singleton<UIManager>
 
     private void ProcessEscInput()
     {
-        if (GameManager.Instance.Input.EscInput)
+        if(GameManager.Instance.Input.EscInput)
         {
-            Pop().Forget();
+            if(GameManager.Instance.CurrentGameState == GameState.UI)
+            {
+                Pop().Forget();
+            }
+            else if(GameManager.Instance.CurrentGameState == GameState.Gameplay)
+            {
+                Push(UIPanelType.EscGroup).Forget();
+            }
         }
-        else if(GameManager.Instance.Input.CursorToggleInput)
+        else if(GameManager.Instance.Input.TabInput)
         {
-            Push(UIPanelType.EscGroup).Forget();
+            //TODO: EscGroup패널을 Inventory 탭으로 시작하게 호출
+            if(GameManager.Instance.CurrentGameState == GameState.UI)
+            {
+                Pop().Forget();
+            }
+            else if(GameManager.Instance.CurrentGameState == GameState.Gameplay)
+            {
+                Push(UIPanelType.EscGroup).Forget();
+            }
         }
     }
 
