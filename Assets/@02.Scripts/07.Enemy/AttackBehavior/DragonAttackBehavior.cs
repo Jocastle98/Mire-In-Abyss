@@ -22,7 +22,6 @@ public class DragonAttackBehavior : ScriptableObject, IAttackBehavior
     private Transform mSelf;
     private Transform mTarget;
     private EnemyBTController mController;
-    private bool mbReady = true;
 
     [Header("브레스 공격")]
     public float BreathRange = 10f;

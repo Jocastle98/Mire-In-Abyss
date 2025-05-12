@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Cinemachine;
+using Events.Player;
 using PlayerEnums;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -134,7 +135,6 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     // Componenet
     public Animator PlayerAnimator { get; private set; }
     private CharacterController mCharacterController;
-    private PlayerInput mPlayerInput;
     private GameObject mMainCamera;
     private WeaponController mWeaponController;
     
@@ -164,7 +164,6 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     {
         PlayerAnimator = GetComponent<Animator>();
         mCharacterController = GetComponent<CharacterController>();
-        mPlayerInput = GetComponent<PlayerInput>();
         if (Camera.main != null)
         {
             mMainCamera = Camera.main.gameObject;
@@ -202,9 +201,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     {
         StateInit();
         TimeoutInit();
-        
-        GameManager.Instance.Input.Init(mPlayerInput);
-        
+
         // 공격 속도 설정
         PlayerAnimator.SetFloat("AttackSpeed", mAttackSpeedMultiplier);
         
@@ -297,11 +294,14 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     private void GroundedCheck()
     {
         Vector3 spherePosition = new Vector3(transform.position.x, transform.position.y - mGroundedOffset, transform.position.z);
-        bIsGrounded = Physics.CheckSphere(spherePosition, mGroundedRadius, mGroundLayers, QueryTriggerInteraction.Ignore);
+        bool isGrounded = Physics.CheckSphere(spherePosition, mGroundedRadius, mGroundLayers, QueryTriggerInteraction.Ignore);
 
-        PlayerAnimator.SetBool("IsGrounded", bIsGrounded);
-
-        mMainCamera.GetComponent<CameraController>().SendPlayerGrounded(bIsGrounded);
+        if (bIsGrounded != isGrounded)
+        {
+            bIsGrounded = isGrounded;
+            PlayerAnimator.SetBool("IsGrounded", bIsGrounded);
+            R3EventBus.Instance.Publish(new PlayerGrounded(bIsGrounded));
+        }
     }
    
     public void SetNearestInteractable(InteractableObject obj)
@@ -1045,7 +1045,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             {
                 //공격력을 PlayerStats에서 가져와 데미지 계산
                 float damage = mPlayerStats.GetAttackDamage();
-                enemyController.SetHit((int)damage);
+                enemyController.SetHit((int)damage,1);
                 //피해적용 후 흡혈효과 처리
                 mPlayerStats.OnDamageDealt(damage);
             }
@@ -1232,7 +1232,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
                 EnemyBTController enemy = enemyTransform.GetComponent<EnemyBTController>();
                 if (enemy != null)
                 {
-                    enemy.SetHit((int)(mPlayerStats.GetAttackDamage() * mParryDamageMultiplier));
+                    enemy.SetHit((int)(mPlayerStats.GetAttackDamage() * mParryDamageMultiplier),0);
                     // todo: 적에게 상태이상 기절 부여
                 }
                 else
@@ -1483,7 +1483,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
                 if (enemy != null)
                 {
                     // 상태이상(이속감소? 공격력 감소?) 부여
-                    enemy.SetHit((int)(mPlayerStats.GetAttackDamage() * mSkill_2_DamageMultiplier));
+                    enemy.SetHit((int)(mPlayerStats.GetAttackDamage() * mSkill_2_DamageMultiplier),1);
                 }
             }
         }
@@ -1621,7 +1621,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
                 EnemyBTController enemy = hitCollider.GetComponent<EnemyBTController>();
                 if (enemy != null)
                 {
-                    enemy.SetHit((int)(mPlayerStats.GetAttackDamage() * mSkill_3_DamageMultiplier));
+                    enemy.SetHit((int)(mPlayerStats.GetAttackDamage() * mSkill_3_DamageMultiplier),1);
                 }
             }
         }

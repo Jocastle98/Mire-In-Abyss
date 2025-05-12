@@ -9,6 +9,7 @@ public static class Constants
     // public const string TownScene = "Town";
     public const string TownScene = "Jihoon_Town"; //임시
     public const string AbyssScene = "Abyss";
+    public const string GameplaySharedScene = "GameplayShared";
 
 
 

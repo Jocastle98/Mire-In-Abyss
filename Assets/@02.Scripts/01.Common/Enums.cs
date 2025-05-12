@@ -1,3 +1,14 @@
+namespace GameEnums
+{
+    public enum GameState
+    {
+        MainMenu,
+        Gameplay,   // 플레이어 조작 중
+        UI,         // Pause
+        GameplayPause,       
+    }
+}
+
 namespace PlayerEnums
 {
     public enum PlayerState
@@ -62,6 +73,16 @@ namespace QuestEnums
         Active,     // 퀘스트 진행중
         Completed,  // 퀘스트 조건 완료
         Rewarded     // 퀘스트 보상 수령
+    }
+}
+
+namespace SceneEnums
+{
+    public enum GameScene
+    {
+        MainMenu,
+        Town,
+        Abyss,
     }
 }
 
