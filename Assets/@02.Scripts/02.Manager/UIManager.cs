@@ -122,11 +122,14 @@ public class UIManager : Singleton<UIManager>
         }
     }
 
-    public async UniTask PopAll()
+    /// <summary>
+    /// 씬 변경 시 모든 패널 제거 할 때만 호출
+    /// </summary>
+    public void PopAll()
     {
         while (mStack.Count > 0)
         {
-            await Pop();
+            Destroy(mStack.Pop().gameObject);
         }
     }
     

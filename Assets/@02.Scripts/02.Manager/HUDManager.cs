@@ -24,14 +24,12 @@ public sealed class HUDManager : MonoBehaviour
     {
         foreach (var hud in mAllHuds)
         {
+            hud.gameObject.SetActive(false);
+            
             if (hud.DisableScene != e.NewScene)
             {
                 hud.gameObject.SetActive(true);
                 hud.Initialize();
-            }
-            else
-            {
-                hud.gameObject.SetActive(false);
             }
         }
     }

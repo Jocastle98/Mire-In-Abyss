@@ -7,7 +7,7 @@ public abstract class HudPresenterBase : MonoBehaviour
 {
     public GameScene DisableScene = GameScene.MainMenu;
     protected readonly CompositeDisposable mCD = new();
-    protected virtual void OnDisable() => mCD.Dispose();
+    protected virtual void OnDisable() => mCD.Clear();
 
     public abstract void Initialize();
 }

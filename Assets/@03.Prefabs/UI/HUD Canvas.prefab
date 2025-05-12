@@ -248,6 +248,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 646749d43275d3742a2d1998c284e40e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  DisableScene: 0
   mToastRoot: {fileID: 249833635207375005}
   mToastPrefab: {fileID: 4072667900234398490, guid: cb4d7847408dce543ac66526236ec734, type: 3}
   mFadeTime: 0.25
@@ -301,6 +302,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 13bdc63e7863cb94b94ff40991b272ce, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  DisableScene: 0
   mGoldText: {fileID: 1410439792189701050}
   mSoulText: {fileID: 803599830270777094}
 --- !u!225 &8041025299563830097
@@ -1027,6 +1029,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 61ffde070e8e60c46a955dd291178ba5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  DisableScene: 0
   mSlotPrefab: {fileID: 2151475761896148693, guid: 8f465aacb1e7fe548a6b5a6fa6893abf, type: 3}
   mMiniItemRoot: {fileID: 8405317414668662356}
 --- !u!1 &1129197910230913593
@@ -1211,13 +1214,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a43f2fd124b9b2546812aa1eb40190bc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mTownDisableHuds:
-  - {fileID: 8933356970523862325}
-  - {fileID: 8570003224490875290}
-  - {fileID: 5409067193531014601}
-  - {fileID: 1438575998249158596}
-  - {fileID: 8030071191712089074}
-  - {fileID: 7271336828075112800}
   mAllHuds: []
 --- !u!1 &1749025955782403914
 GameObject:
@@ -1998,6 +1994,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0bbb7f809ec644c69657de9f3da00236, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  DisableScene: 0
   mContentRoot: {fileID: 4266322725043186343}
   mCardPrefab: {fileID: 3195439108712829589, guid: e70f97c1bccd9534ca971273019656de, type: 3}
 --- !u!225 &2842982017052748637
@@ -2377,6 +2374,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 217ddbca29501884ba9960a380579bb8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  DisableScene: 0
   mHpBarUI: {fileID: 3239532410529465896}
   mHpText: {fileID: 591786070513097064}
   mExpBarUI: {fileID: 2118679925543990350}
@@ -3631,6 +3629,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 70dffe646c684dd5a7f22e8e653515aa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  DisableScene: 0
   mOtherIconLayer: {fileID: 2442939210764762602}
   mPlayerIconLayer: {fileID: 5031882884272554245}
   mMiniMapCam: {fileID: 0}
@@ -4223,6 +4222,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4f0b85b57fe72f7488345c0dcb26cceb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  DisableScene: 0
   mSlotPrefab: {fileID: 7619552406044975281, guid: e4d1ec468334d7c41af7a8f43ae64212, type: 3}
   mSkillSlotRoot: {fileID: 3073430612827884653}
   mDefaultSkillSlots:
@@ -4553,6 +4553,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2acc4649d9ac3d148978acdcae3c9cd6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  DisableScene: 0
   mRootGroup: {fileID: 1950804092299308928}
   mNameText: {fileID: 5426882617227969156}
   mSubNameText: {fileID: 8366627411598511007}
@@ -5161,6 +5162,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2360bd0f4c6343ff8e54f4b234eb358a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  DisableScene: 0
   mDifficultyLevelText: {fileID: 6317344639310041865}
   mNextDifficultyLevelText: {fileID: 5271943625441426322}
   mAbyssElapseText: {fileID: 4153769973521348910}
@@ -5938,12 +5940,12 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2881650128514527051, guid: f884d260bd2837d46851e8a70a43e87f, type: 3}
       propertyPath: m_Type
-      value: 1
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 2881650128514527051, guid: f884d260bd2837d46851e8a70a43e87f, type: 3}
       propertyPath: m_Sprite
       value: 
-      objectReference: {fileID: 21300000, guid: d111337f70aa81748830d65d60f70fad, type: 3}
+      objectReference: {fileID: 21300000, guid: e28588c2e1e6b984b9acb7bc55fbd90f, type: 3}
     - target: {fileID: 2881650128514527051, guid: f884d260bd2837d46851e8a70a43e87f, type: 3}
       propertyPath: m_FillAmount
       value: 1
@@ -6267,7 +6269,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 534169928116471900, guid: f884d260bd2837d46851e8a70a43e87f, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 0
+      value: 800
       objectReference: {fileID: 0}
     - target: {fileID: 534169928116471900, guid: f884d260bd2837d46851e8a70a43e87f, type: 3}
       propertyPath: m_SizeDelta.y
@@ -6287,7 +6289,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2779433974074858296, guid: f884d260bd2837d46851e8a70a43e87f, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 0
+      value: 800
       objectReference: {fileID: 0}
     - target: {fileID: 2779433974074858296, guid: f884d260bd2837d46851e8a70a43e87f, type: 3}
       propertyPath: m_SizeDelta.y

@@ -12,11 +12,16 @@ public sealed class SkillSlotsPresenter : HudPresenterBase
     [SerializeField] RectTransform mSkillSlotRoot;
     [SerializeField] List<SkillSlotView> mDefaultSkillSlots = new();
     private readonly Dictionary<int, SkillSlotView> mSlots = new();
+    private bool mSkillInfoLoaded = false;
 
 
     public override void Initialize()
     {
         subscribeEvents();
+        if (mSkillInfoLoaded)
+        {
+            setSkillSlots();
+        }
     }
 
     private void subscribeEvents()
@@ -46,6 +51,7 @@ public sealed class SkillSlotsPresenter : HudPresenterBase
         R3EventBus.Instance.Receive<SkillInfoLoaded>()
             .Subscribe(e =>
             {
+                mSkillInfoLoaded = true;
                 setSkillSlots();
             })
             .AddTo(mCD);
@@ -76,9 +82,9 @@ public sealed class SkillSlotsPresenter : HudPresenterBase
     protected override void OnDisable()
     {
         base.OnDisable();
-        foreach (var s in mSlots.Values)
+        for (int i = mDefaultSkillSlots.Count; i < mSlots.Count; i++)
         {
-            Destroy(s.gameObject);
+            Destroy(mSlots[i].gameObject);
         }
         mSlots.Clear();
     }
