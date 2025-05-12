@@ -4,6 +4,8 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 
 [RequireComponent(typeof(QuestDatabase))]
+[RequireComponent(typeof(AchievementDatabase))]
+[RequireComponent(typeof(ItemDatabase))]
 public class GameDB : Singleton<GameDB>, IInitializable
 {
     public QuestDatabase QuestDatabase { get; private set; }
