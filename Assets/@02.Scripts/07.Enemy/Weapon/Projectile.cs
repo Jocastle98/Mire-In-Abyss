@@ -38,6 +38,7 @@ public class Projectile : MonoBehaviour
 
         Destroy(gameObject, 5f);
     }
+    
     public void InitializeBreath(LayerMask hitLayer, int damage)
     {
         mRb.velocity      = Vector3.zero;
@@ -61,7 +62,13 @@ public class Projectile : MonoBehaviour
 
         if ((mHitLayer.value & 1 << other.gameObject.layer) == 0) return;
         if (other.TryGetComponent<PlayerController>(out var player))
+        {
             player.SetHit(mDamage, transform, 1);
+        }
+        else if (other.TryGetComponent<EnemyBTController>(out var enemy))
+        {
+            enemy.SetHit(mDamage, -1);
+        }
         Destroy(gameObject);
     }
 

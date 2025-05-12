@@ -1058,7 +1058,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             {
                 //공격력을 PlayerStats에서 가져와 데미지 계산
                 float damage = mPlayerStats.GetAttackDamage();
-                enemyController.SetHit((int)damage,1);
+                enemyController.SetHit((int)damage, -1);
                 //피해적용 후 흡혈효과 처리
                 mPlayerStats.OnDamageDealt(damage);
             }
@@ -1247,7 +1247,6 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
                 if (enemy != null)
                 {
                     enemy.SetHit((int)(mPlayerStats.GetAttackDamage() * mParryDamageMultiplier),0);
-                    // todo: 적에게 상태이상 기절 부여
                 }
                 else
                 {
@@ -1256,19 +1255,20 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
                     if (enemyProjectile != null)
                     {
                         // 화살 프리팹 인스턴스 생성 (반사용)
-                        GameObject reflectedObject = Instantiate(enemyProjectile.gameObject, transform.position + Vector3.up * 1.2f, Quaternion.identity);
+                        GameObject reflectedObject = Instantiate(enemyProjectile.gameObject, transform.position + transform.forward + Vector3.up, Quaternion.identity);
                        
                         Projectile reflectedProjectile = reflectedObject.GetComponent<Projectile>();
                         if (reflectedProjectile != null)
                         {
                             // 방향: 적 방향으로
-                            Vector3 reflectDir = (reflectedProjectile.ShooterTransform.transform.position - transform.position).normalized;
+                            Vector3 reflectDir = (enemyProjectile.ShooterTransform.transform.position - transform.position).normalized;
 
                             // 반사 레이어: 적만 맞도록 설정
                             LayerMask enemyLayer = LayerMask.GetMask("Enemy"); // 적 레이어 이름에 따라 수정
 
                             // 반사 화살 발사
-                            reflectedProjectile.Initialize(transform.forward, 20f, enemyLayer, (int)(mPlayerStats.GetAttackDamage() * mParryDamageMultiplier));
+                            reflectedProjectile.Initialize(transform.forward, 15.0f, enemyLayer, (int)(mPlayerStats.GetAttackDamage() * mParryDamageMultiplier));
+                            reflectedProjectile.transform.rotation = Quaternion.LookRotation(reflectDir);
                         }
                     }
                 }
@@ -1512,7 +1512,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
                 EnemyBTController enemy = hitCollider.GetComponent<EnemyBTController>();
                 if (enemy != null)
                 {
-                    // 상태이상(이속감소? 공격력 감소?) 부여
+                    // 공격력 감소 부여
                     enemy.SetHit((int)(mPlayerStats.GetAttackDamage() * mSkill_2_DamageMultiplier),1);
                 }
             }
