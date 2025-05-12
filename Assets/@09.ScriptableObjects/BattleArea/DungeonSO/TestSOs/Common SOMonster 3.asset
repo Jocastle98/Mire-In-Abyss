@@ -13,4 +13,4 @@ MonoBehaviour:
   m_Name: Common SOMonster 3
   m_EditorClassIdentifier: 
   monsters:
-  - {fileID: 4487653650641632195, guid: 0d51e97a2e41b3b47bb82c0b91c4cbee, type: 3}
+  - {fileID: 6574461105365415849, guid: 3b213124377649f40b42030b3943479d, type: 3}

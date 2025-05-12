@@ -8,7 +8,7 @@ using UnityEngine.AI;
 using UnityEngine.Serialization;
 using Random = UnityEngine.Random;
 
-public class FieldController : BattleArea
+public class FieldController : Abyss
 {
     private FieldDataSO mFieldData;
     //스폰 주기
@@ -20,9 +20,11 @@ public class FieldController : BattleArea
     //스폰 구역
     private GameObject mPlayer;
     private GameObject mBoss;
+    private GameObject mField;
     private GameObject mPlayerSpawner;
     private GameObject mBossSpawner;
     private GameObject mMonsterSpawner;
+    private SpawnController mSpawnController;
     private List<NavMeshModifierVolume> mNavMeshes = new List<NavMeshModifierVolume>();
     //private List<GameObject> mMonsterSections = new List<GameObject>();
 
@@ -31,12 +33,18 @@ public class FieldController : BattleArea
 
     //몬스터 관리
     private int mMonsterCurrentField;
+    private int mMonsterMaxFieldCount = 10;
     private int mMonsterKillCurrentCount;
     private bool IsBossSpawn = false;
 
     //생성된 게임오브젝트들을 하이어라키상 정리용 폴더
     private GameObject mFieldMonsterFolder;
     private GameObject mRandomTreasureFolder;
+
+    private void Start()
+    {
+        FieldInit();
+    }
 
     private void FixedUpdate()
     {
@@ -56,14 +64,14 @@ public class FieldController : BattleArea
     {
         ClearField();
         OnClearBattleArea.Invoke();
-        Destroy(gameObject);
+        Destroy(mField);
     }
 
-    public override void SetPortal(GameObject portal)
+    public override void SetPortal()
     {
-        this.portal = portal;
+        portal = Instantiate(AbyssManager.Instance.portalPrefab);
         DeActivatePortal();
-        BattleAreaMoveController moveCon = portal.GetComponent<BattleAreaMoveController>();
+        AbyssMoveController moveCon = portal.GetComponent<AbyssMoveController>();
         moveCon.battleAreaMoveDelegate = BattleAreaClear;
     }
 
@@ -74,19 +82,26 @@ public class FieldController : BattleArea
     /// </summary>
     /// <param name="player"></param>
     /// <param name="levelDesign"></param>
-    public void FieldInit(GameObject player, int levelDesign,FieldDataSO fieldData)
+    public void FieldInit()
     {
-        mPlayer = player;
-        mLevelDesign = levelDesign;
-        mFieldData = fieldData;
+        mPlayer = AbyssManager.Instance.player;
+        mLevelDesign = AbyssManager.Instance.levelDesign;
+        OnClearBattleArea -= AbyssManager.Instance.BattleAreaClear;
+        OnClearBattleArea += AbyssManager.Instance.BattleAreaClear;
+        mFieldData = AbyssManager.Instance.abyssFields[Random.Range(0, AbyssManager.Instance.abyssFields.Count)];
+        
+        mMonsterMaxFieldCount += Mathf.FloorToInt(mLevelDesign * .1f);
+        mField = Instantiate(mFieldData.battleFields);
         mFieldMonsterFolder = new GameObject("FieldMonsterFolder");
         mRandomTreasureFolder = new GameObject("RandomTreasureFolder");
 
         GetNavGrounds();
-        mPlayerSpawner = FindChildrenWithName(mFieldData.playerSpawnZoneName, gameObject);
-        mBossSpawner = FindChildrenWithName(mFieldData.bossSpawnZoneName, gameObject);
+        mPlayerSpawner = FindChildrenWithName(mFieldData.playerSpawnZoneName, mField);
+        mBossSpawner = FindChildrenWithName(mFieldData.bossSpawnZoneName, mField);
         mMonsterSpawner = GetMonsterSpawnZone();
+        mSpawnController = mMonsterSpawner.GetComponent<SpawnController>();
 
+        SetPortal();
         SpawnTreasure();
         PlayerSpawn();
 
@@ -125,7 +140,7 @@ public class FieldController : BattleArea
     /// </summary>
     void GetNavGrounds()
     {
-        GameObject environment = FindChildrenWithName(mFieldData.environmentName, gameObject);
+        GameObject environment = FindChildrenWithName(mFieldData.environmentName, mField);
         GameObject navGround = FindChildrenWithName(mFieldData.navGroundsName, environment);
 
 
@@ -168,9 +183,13 @@ public class FieldController : BattleArea
         //스폰 수 최신화
         int spawnCount = (int)(mFieldData.spawnAmount +
                                Random.Range(0, mLevelDesign + mFieldData.spawnAmountDifficult * 0.1f));
-
-        if (mFieldData.monsterMaxField <= mMonsterCurrentField) return;
-
+        
+        spawnCount = mMonsterMaxFieldCount < mMonsterCurrentField + spawnCount ?
+            mMonsterMaxFieldCount - mMonsterCurrentField : spawnCount;
+        if (spawnCount == 0) return;
+        
+        mMonsterCurrentField += spawnCount;
+        
         int unique = Mathf.Min(mLevelDesign / mFieldData.uniqueSpawnMaxChance, mFieldData.uniqueSpawnMaxChance);
 
         //일반 , 유니크 확률 소환
@@ -179,35 +198,8 @@ public class FieldController : BattleArea
             : mFieldData.eliteMonsters;
 
         mMonsterSpawner.transform.position = mPlayer.transform.position + Vector3.up * 2f;
-        SpawnController spawnController = mMonsterSpawner.AddComponent<SpawnController>();
-        spawnController.SpawnObjWithSOGruopList(monsterLists, spawnCount, mFieldMonsterFolder.transform,
+        mSpawnController.SpawnObjWithSoGroupList(monsterLists, spawnCount, mFieldMonsterFolder.transform,
             MonsterDeadCounting);
-
-        #region 비행유닛?
-
-        // //가까운 스폰장소를 찾음
-        // GameObject spawner = FindClosestSpawnController();
-        // if (spawner != null)
-        // {
-        //     SpawnController spawnController = spawner.GetComponent<SpawnController>();
-        //     spawnController.SpawnObjWithSOGruopList(monsterLists,spawnCount, mFieldMonsterFolder.transform);
-        // }
-        // else //없으면 플레이어 주위로 비행 몬스터 소환
-        // {
-        //     Vector3 randomPointOnCircle = Random.insideUnitSphere;
-        //     randomPointOnCircle.Normalize(); // 방향만 남김 (길이 1)
-        //     randomPointOnCircle *= Random.Range(5, 10); // 원하는 반지름으로 스케일 조정
-        //
-        //     GameObject monster = Instantiate(commonRanger[Random.Range(0, commonRanger.Count)],
-        //         mPlayer.transform.position + randomPointOnCircle,
-        //         Quaternion.identity);
-        //     monster.transform.SetParent(mFieldMonsterFolder.transform);
-        // }
-        //
-        // mMonsterCurrentField++;
-
-        #endregion
-
     }
 
     bool SpawnCoolDownUpdate()
@@ -296,10 +288,10 @@ public class FieldController : BattleArea
     {
         mBoss = mFieldData.bossMonsters.monsters[Random.Range(0, mFieldData.bossMonsters.monsters.Count)];
         SpawnController spawnController = mBossSpawner.GetComponent<SpawnController>();
-        spawnController.SpawnObj(mBoss, mFieldMonsterFolder.transform,SetPortal);
+        spawnController.SpawnObj(mBoss, mFieldMonsterFolder.transform,SetPortalAtBoss);
     }
 
-    void SetPortal()
+    void SetPortalAtBoss()
     {
         Debug.Log("Boss is Dead!");
         ActivatePortal(portal,mBossSpawner);
@@ -308,6 +300,7 @@ public class FieldController : BattleArea
     void MonsterDeadCounting()
     {
         mMonsterKillCurrentCount++;
+        mMonsterCurrentField--;
         if (mMonsterKillCurrentCount >= mFieldData.monsterKillMaxCount && !IsBossSpawn)
         {
             BossSpawn();

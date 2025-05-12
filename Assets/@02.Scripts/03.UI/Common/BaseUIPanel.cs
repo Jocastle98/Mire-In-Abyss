@@ -13,8 +13,20 @@ public abstract class BaseUIPanel : MonoBehaviour
 {
     protected readonly CompositeDisposable mDisposables = new();
     public CanvasGroup CG;
+    protected PlayerController mPlayer;
+    private Action mOnClosed;
     protected virtual void Awake() => CG = GetComponent<CanvasGroup>();
 
+    public void SetOnCloseCallback(Action callback)
+    {
+        mOnClosed = callback;
+    }
+    
+    public void SetPlayer(PlayerController player)
+    {
+        mPlayer = player;
+    }
+    
     public virtual async UniTask Show(Action onComplete = null)
     {
         gameObject.SetActive(true);
@@ -27,5 +39,6 @@ public abstract class BaseUIPanel : MonoBehaviour
         mDisposables.Dispose();
         gameObject.SetActive(false);
         onComplete?.Invoke();
+        mOnClosed?.Invoke();
     }
 }

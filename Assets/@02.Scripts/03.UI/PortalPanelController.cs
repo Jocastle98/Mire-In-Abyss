@@ -2,30 +2,32 @@ using System.Collections;
 using System.Collections.Generic;
 using PlayerEnums;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
-public class PortalPanelController : PopupPanelController
+public class PortalPanelController : BaseUIPanel
 {
-    [SerializeField] private string targetSceneName = "BattleArea_Hong";
+    [SerializeField] private BackButton mBackButton;
     
-    public void OnClickCloseButton()
+    protected override void Awake()
     {
-        Hide(() =>
+        base.Awake();
+        if (mBackButton != null)
         {
-            mPlayer.SetPlayerState(PlayerState.Idle);
-        });
+            mBackButton.SetAfterCloseAction(() =>
+            {
+                mPlayer?.SetPlayerState(PlayerState.Idle);
+            });
+        }
     }
 
-    public void OnClickMoveButton()
+    public async void OnClickMoveButton()
     {
-        Hide(() =>
-        {
-            LoadTargetScene();
-        });
+        await UIManager.Instance.Pop(); 
+        mPlayer.SetPlayerState(PlayerState.Idle);
+        LoadTargetScene();
     }
 
     private void LoadTargetScene()
     {
-        SceneManager.LoadScene(targetSceneName);
+        AbyssManager.Instance.BattleAreaManagerInit(mPlayer.gameObject,1,2);
     }
 }

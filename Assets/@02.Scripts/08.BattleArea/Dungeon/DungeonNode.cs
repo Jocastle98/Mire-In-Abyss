@@ -14,6 +14,13 @@ public class DungeonNode
     public int width, height;
     public Vector2Int[] entrancePos = new Vector2Int[4]; //SO의 입구를 할당받음
     public List<DungeonNode> connectedRoom = new List<DungeonNode>();
+    
+    private DungeonCells mCell;
+
+    public DungeonCells cell
+    {
+        get{ return mCell; }
+    }
 
     public DungeonNode(int x,int y,int w,int h)
     {
@@ -35,6 +42,11 @@ public class DungeonNode
     public void SetParent(DungeonNode parent)
     {
         this.parent = parent;
+    }
+
+    public void SetCell(DungeonCells cell)
+    {
+        this.mCell = cell;
     }
     
 }
