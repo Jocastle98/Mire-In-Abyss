@@ -8,6 +8,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.Serialization;
 using R3;
+using GameEnums;
 
 public class UIManager : Singleton<UIManager>
 {
@@ -37,6 +38,12 @@ public class UIManager : Singleton<UIManager>
 
         var inst = Instantiate(prefab, mPanelCanvas.transform);
         mStack.Push(inst);
+
+        if (mStack.Count == 1)
+        {
+            GameManager.Instance.Set(GameState.UI);
+        }
+
         await inst.Show(onComplete);
     }
 
@@ -64,7 +71,7 @@ public class UIManager : Singleton<UIManager>
         }
         else if (mStack.Count == 0)
         {
-            R3EventBus.Instance.Publish(new LastUIPopup());
+            GameManager.Instance.Set(GameState.Gameplay);
         }
     }
     void Update()

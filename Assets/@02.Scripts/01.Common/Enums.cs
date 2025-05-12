@@ -4,6 +4,7 @@ namespace GameEnums
     {
         Gameplay,
         UI,         // Pause
+        GameplayPause,       
     }
 }
 

@@ -280,6 +280,4 @@ namespace Events.UI
     public readonly struct EnterInGameScene { }
     public readonly struct EnterAbyssScene { }
     public readonly struct EnterTownScene { }
-
-    public readonly struct LastUIPopup { }
 }
