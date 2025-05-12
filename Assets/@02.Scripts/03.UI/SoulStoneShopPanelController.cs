@@ -244,19 +244,34 @@ public class SoulStoneShopPanelController : BaseUIPanel
                 mPlayerStats.ModifyCritChance(value, valueType);
                 break;
             case "soulStone":
-                //영혼석 획득량 증가
+                if (valueType == "percent")
+                {
+                    mPlayerStats.SetSoulStoneMultiplier(value);
+                }
                 break;
             case "coolDown":
-                //쿨다운 감소 로직
+                if (valueType == "percent")
+                {
+                    mPlayerStats.SetCoolDownReduction(value);
+                }
                 break;
             case "itemDrop":
-                //아이템 드랍률 증가
+                if (valueType == "percent")
+                {
+                    mPlayerStats.SetItemDropRateBonus(value);
+                }
                 break;
             case "level":
-                //경험치 획득량 증가
+                if (valueType == "percent")
+                {
+                    mPlayerStats.SetExpMultiplier(value);
+                }
                 break;
             case "gold":
-                //골드 획득량 증가
+                if (valueType == "percent")
+                {
+                    mPlayerStats.SetGoldMultiplier(value);
+                }
                 break;
             default:
                 Debug.LogWarning($"알수없는 업그레이드 ID : {mSelectedUpgrade.UpgradeId}");

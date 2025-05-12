@@ -53,6 +53,12 @@ public class PlayerStats : MonoBehaviour
     private float mLastStandValue = 0f;
     private bool mbLastStandActive = false;
     private float mLastStandDuration = 0f;
+
+    private float mSoulStoneMultiplier = 1.0f;
+    private float mCoolDownReduction = 0.0f;
+    private float mItemDropRateBonus = 0.0f;
+    private float mExpMultiplier = 1.0f;
+    private float mGoldMultiplier = 1.0f;
     
     //스탯 변경 추적을 위한 리스트
     private List<(float value, string type)> mMaxHPModifiers = new List<(float, string)>();
@@ -708,6 +714,66 @@ public class PlayerStats : MonoBehaviour
         mLastStandValue = 0f;
         mbLastStandActive = false;
     }
+    #endregion
+
+    #region 특수 영혼석 강화
+
+    public void SetSoulStoneMultiplier(float multiplier)
+    {
+        mSoulStoneMultiplier = 1.0f + multiplier;
+    }
+
+    public float GetSoulStoneMultiplier()
+    {
+        return mSoulStoneMultiplier;
+    }
+
+    public void SetCoolDownReduction(float reduction)
+    {
+        mCoolDownReduction = reduction;
+    }
+
+    public float GetCoolDownReduction()
+    {
+        return mCoolDownReduction;
+    }
+
+    public void SetItemDropRateBonus(float bonus)
+    {
+        mItemDropRateBonus = bonus;
+    }
+
+    public float GetItemDropRateBonus()
+    {
+        return mItemDropRateBonus;
+    }
+
+    public void SetExpMultiplier(float multiplier)
+    {
+        mExpMultiplier = 1.0f + multiplier;
+
+        var levelController = GetComponent<PlayerLevelController>();
+        if (levelController != null)
+        {
+            levelController.SetExpMultiplier(mExpMultiplier);
+        }
+    }
+
+    public float GetExpMultiplier()
+    {
+        return mExpMultiplier;
+    }
+
+    public void SetGoldMultiplier(float multiplier)
+    {
+        mGoldMultiplier = 1.0f + multiplier;
+    }
+
+    public float GetGoldMultiplier()
+    {
+        return mGoldMultiplier;
+    }
+    
     #endregion
 
     #region 스탯 가져오기 메서드
