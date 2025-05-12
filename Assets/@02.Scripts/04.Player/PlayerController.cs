@@ -9,7 +9,6 @@ using UnityEngine.InputSystem;
 using Random = UnityEngine.Random;
 
 [RequireComponent(typeof(Animator))]
-[RequireComponent(typeof(PlayerInput))]
 [RequireComponent(typeof(PlayerStats))]
 [RequireComponent(typeof(CharacterController))]
 public class PlayerController : MonoBehaviour, IObserver<GameObject>
@@ -1942,7 +1941,9 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     // 발소리, 나중에 사운드매니저로 관리해야 함
     private void OnFootstepSound(AnimationEvent animationEvent)
     {
-        if (animationEvent.animatorClipInfo.weight > 0.5f)
+        var mobilityLayer = PlayerAnimator.GetLayerIndex("Mobility Layer");
+        
+        if (animationEvent.animatorClipInfo.weight > 0.5f && PlayerAnimator.GetLayerWeight(mobilityLayer) < 1.0f)
         {
             if (footstepAudioClips.Length > 0)
             {
