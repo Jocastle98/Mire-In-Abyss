@@ -650,6 +650,7 @@ public class EnemyBTController : MonoBehaviour
     }
 
     #region Hit시 머터리얼 변화
+    
 
     private IEnumerator HitColorChange()
     {
@@ -696,6 +697,12 @@ public class EnemyBTController : MonoBehaviour
     {
         itemDropper.DropItemOnDeadth();
         GiveExpReward();
+        GameObject player = GameObject.FindGameObjectWithTag("Player");
+        if (player != null)
+        {
+            PlayerController playerController = player.GetComponent<PlayerController>();
+            playerController.OnEnemyKilled();
+        }
         StartCoroutine(Dissolve());
     }
 

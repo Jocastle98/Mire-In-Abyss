@@ -89,7 +89,9 @@ public class ItemSystemTest : MonoBehaviour
                        $"공격력: {playerStats.GetAttackPower():F1}\n" +
                        $"방어력: {playerStats.GetDefence():F1}\n" +
                        $"치명타 확률: {playerStats.GetCritChance() * 100:F1}%\n" +
-                       $"데미지 감소: {playerStats.GetDamageReduction() * 100:F1}%";
+                       $"데미지 감소: {playerStats.GetDamageReduction() * 100:F1}%\n" +
+                       $"흡혈 퍼센트: {playerStats.GetLifeStealPercentage() * 100:F1}%";
+        
 
         statsText.text = stats;
         Debug.Log(stats);

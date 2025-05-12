@@ -106,8 +106,8 @@ public class ItemEffectSystem : MonoBehaviour
                 ApplyStatEffect(item, mPlayerStats.ModifyAttackPower);
                 break;
 
-            case "damageReduction":
-                ApplyStatEffect(item, mPlayerStats.ModifyDamageReduction);
+            case "damageDefence":
+                ApplyStatEffect(item, mPlayerStats.ModifyDefence);
                 break;
 
             case "critChance":
@@ -116,9 +116,13 @@ public class ItemEffectSystem : MonoBehaviour
 
             // Special 등급 아이템 (6-10)
             // 붉은 월계관은 attackPower 효과를 사용하므로 이미 위에서 처리
+            case "attackSpeed":
+                ApplyStatEffect(item, mPlayerStats.ModifyAttackSpeed);
+                break;
 
             case "lifeSteal":
-                mPlayerStats.SetLifeSteal(item.Value);
+                float currentLifeSteal = mPlayerStats.GetLifeStealPercentage();
+                mPlayerStats.SetLifeSteal(currentLifeSteal + item.Value);
                 break;
 
             case "defenceBuff":
@@ -136,7 +140,7 @@ public class ItemEffectSystem : MonoBehaviour
             // Epic 등급 아이템 (11-15)
             case "critBoost":
                 ApplyStatEffect(item, mPlayerStats.ModifyCritChance);
-                mPlayerStats.SetCritDamageMultiplier(2f);
+                mPlayerStats.SetCritDamageMultiplier(3f);
                 break;
 
             case "skillReset":
@@ -146,29 +150,19 @@ public class ItemEffectSystem : MonoBehaviour
             case "aoeDamage":
                 mPlayerStats.EnableAoeDamage(item.Value);
                 break;
+            
+            case "maxHpDefence":
+                ApplyStatEffect(item, mPlayerStats.ModifyMaxHP);
+                ApplyStatEffect(item, mPlayerStats.ModifyDefence);
+                break;
+                
 
             case "lastStand":
                 mPlayerStats.EnableLastStand(item.Value);
                 break;
 
             default:
-                // 복합 효과(쉼표로 구분된 여러 효과) 처리 (현재는 epic 전설의 대지만 사용)
-                if (item.EffectType.Contains(","))
-                {
-                    string[] effects = item.EffectType.Split(',');
-                    for (int i = 0; i < effects.Length; i++)
-                    {
-                        string effect = effects[i].Trim();
-                        if (effect == "maxHP")
-                            ApplyStatEffect(item, mPlayerStats.ModifyMaxHP);
-                        else if (effect == "defence")
-                            ApplyStatEffect(item, mPlayerStats.ModifyDefence);
-                    }
-                }
-                else
-                {
-                    Debug.LogWarning($"알 수 없는 효과 타입: {item.EffectType}, 아이템: {item.ItemName}");
-                }
+                Debug.LogWarning($"알 수 없는 효과 타입: {item.EffectType}, 아이템: {item.ItemName}");
                 break;
         }
     }
@@ -196,8 +190,8 @@ public class ItemEffectSystem : MonoBehaviour
                 RemoveStatEffect(item, mPlayerStats.ModifyAttackPower);
                 break;
 
-            case "damageReduction":
-                RemoveStatEffect(item, mPlayerStats.ModifyDamageReduction);
+            case "damageDefence":
+                RemoveStatEffect(item, mPlayerStats.ModifyDefence);
                 break;
 
             case "critChance":
@@ -207,12 +201,13 @@ public class ItemEffectSystem : MonoBehaviour
             // Special 등급 아이템 (6-10)
             // 붉은 월계관은 위에서 처리
 
+            case "attackSpeed":
+                RemoveStatEffect(item, mPlayerStats.ModifyAttackSpeed);
+                break;
+            
             case "lifeSteal":
-                // 다른 lifeSteal 아이템이 없는 경우에만 제거
-                if (!HasOtherItemsOfType(item.ID, "lifeSteal"))
-                {
-                    mPlayerStats.ResetLifeSteal();
-                }
+                float currentLifeSteal = mPlayerStats.GetLifeStealPercentage();
+                mPlayerStats.SetLifeSteal(Mathf.Max(0, currentLifeSteal - item.Value));
                 break;
 
             case "defenceBuff":
@@ -230,11 +225,7 @@ public class ItemEffectSystem : MonoBehaviour
                 break;
 
             case "revive":
-                // 다른 revive 아이템이 없는 경우에만 제거
-                if (!HasOtherItemsOfType(item.ID, "revive"))
-                {
-                    mPlayerStats.DisableRevive();
-                }
+                mPlayerStats.DecreaseReviveCount();
                 break;
 
             // Epic 등급 아이템 (11-15)
@@ -259,6 +250,10 @@ public class ItemEffectSystem : MonoBehaviour
                     mPlayerStats.DisableAoeDamage();
                 }
                 break;
+            case "maxHpDefence":
+                RemoveStatEffect(item, mPlayerStats.ModifyMaxHP);
+                RemoveStatEffect(item, mPlayerStats.ModifyDefence);
+                break;
 
             case "lastStand":
                 if (!HasOtherItemsOfType(item.ID, "lastStand"))
@@ -267,21 +262,6 @@ public class ItemEffectSystem : MonoBehaviour
                 }
                 break;
 
-            default:
-                // 복합 효과 처리
-                if (item.EffectType.Contains(","))
-                {
-                    string[] effects = item.EffectType.Split(',');
-                    for (int i = 0; i < effects.Length; i++)
-                    {
-                        string effect = effects[i].Trim();
-                        if (effect == "maxHP")
-                            RemoveStatEffect(item, mPlayerStats.ModifyMaxHP);
-                        else if (effect == "defence")
-                            RemoveStatEffect(item, mPlayerStats.ModifyDefence);
-                    }
-                }
-                break;
         }
     }
 
