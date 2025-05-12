@@ -7,7 +7,7 @@ public sealed class ManagersHub : Singleton<ManagersHub>, IInitializable
 {
     GameManager mGameManager;
     UIManager mUIManager;
-
+    
 
     void Start()
     {

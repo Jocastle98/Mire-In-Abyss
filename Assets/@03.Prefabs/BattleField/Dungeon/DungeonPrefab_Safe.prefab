@@ -430,8 +430,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2588057412251179967}
-  - component: {fileID: -5606533070704763175}
   - component: {fileID: -4980591910336886398}
+  - component: {fileID: 8974467631911093402}
   m_Layer: 3
   m_Name: DungeonPrefab_Safe
   m_TagString: Untagged
@@ -455,7 +455,23 @@ Transform:
   - {fileID: 7178395897015187302}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!65 &-5606533070704763175
+--- !u!114 &-4980591910336886398
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6721582049527035228}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f6e088516eee72545b2fb4cee8d05050, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  IsClear: 0
+  spawnTypeList: {fileID: 11400000, guid: a1a724eed2f269c48bb5c6e4254ea82b, type: 2}
+  bossMonsters: {fileID: 0}
+  roomType: 1
+--- !u!65 &8974467631911093402
 BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -474,24 +490,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 200, y: 1, z: 200}
+  m_Size: {x: 7, y: 1, z: 7}
   m_Center: {x: 3.5, y: -0.5, z: 3.5}
---- !u!114 &-4980591910336886398
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6721582049527035228}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f6e088516eee72545b2fb4cee8d05050, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  IsClear: 0
-  spawnTypeList: {fileID: 11400000, guid: a1a724eed2f269c48bb5c6e4254ea82b, type: 2}
-  bossMonsters: {fileID: 0}
-  roomType: 1
 --- !u!1 &7941659863971215110
 GameObject:
   m_ObjectHideFlags: 0
