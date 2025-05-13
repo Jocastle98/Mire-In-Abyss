@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using AudioEnums;
 using Cysharp.Threading.Tasks;
 using PlayerEnums;
 using UIPanelEnums;
@@ -14,7 +15,8 @@ public class PlayerStateInteraction : IPlayerState
     {
         mPlayerController = playerController;
         mPlayerController.PlayerAnimator.SetBool("Interaction", true);
-
+        AudioManager.Instance.PlaySfx(ESfxType.InteractionVoice);
+        
         InteractableObject interactable = mPlayerController.NearestInteractableObject;
         if (interactable != null)
         {
