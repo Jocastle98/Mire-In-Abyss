@@ -97,7 +97,14 @@ public class AbyssManager : Singleton<AbyssManager>
     {
         //마을 씬로드
         Debug.Log("LetsGoHome");
-        SceneLoader.LoadSceneAsync(Constants.TownScene).Forget();
+        SceneLoader.LoadSceneAsync(Constants.TownScene).ContinueWith(() =>
+        {
+            var playerStats = Instance.player.GetComponent<PlayerStats>();
+            if (playerStats != null)
+            {
+                playerStats.ResetStatsExceptSoulStoneUpgrades();
+            }
+        }).Forget();
     }
 
     protected override void OnSceneLoaded(Scene scene, LoadSceneMode mode)

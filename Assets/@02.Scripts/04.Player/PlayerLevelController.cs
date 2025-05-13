@@ -53,6 +53,12 @@ public class PlayerLevelController : MonoBehaviour
         //초기 레벨 및 경험치 정보 UI에 표시
         PublishLevelInfo();
         PublishExpInfo();
+
+        PlayerStats playerStats = GetComponent<PlayerStats>();
+        if (playerStats != null)
+        {
+            playerStats.OnReturnToTown += ResetPlayerLevel;
+        }
     }
 
     /// <summary>
@@ -186,6 +192,12 @@ public class PlayerLevelController : MonoBehaviour
     private void PublishExpInfo()
     {
         R3EventBus.Instance.Publish(new PlayerExpChanged(mCurrentExp, GetRequiredExpForLevel(mCurrentLevel)));
+    }
+
+    private void ResetPlayerLevel()
+    {
+        SetLevelAndExp(1, 0);
+        mPlayerStats.RemoveLevelBonuses();
     }
 
     public void SetLevelAndExp(int level, int exp)
