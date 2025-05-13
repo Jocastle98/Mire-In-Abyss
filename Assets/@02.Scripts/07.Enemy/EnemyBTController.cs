@@ -87,6 +87,8 @@ public class EnemyBTController : MonoBehaviour
     private ItemDropper itemDropper;
     private GameObject mBreathVFXInstance;
     private bool mbIgnoreHits = false;
+    
+    public System.Action monsterDead;
 
     
     void Awake()
@@ -731,6 +733,7 @@ public class EnemyBTController : MonoBehaviour
         }
         PlayerHub.Instance.QuestLog.AddProgress("Q009", 1);
         
+        monsterDead.Invoke();
         StartCoroutine(Dissolve());
     }
 

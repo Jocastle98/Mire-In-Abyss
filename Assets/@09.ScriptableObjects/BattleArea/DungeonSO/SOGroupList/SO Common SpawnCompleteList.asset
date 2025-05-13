@@ -10,22 +10,22 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d23594af7bfad36499d4fdb561e59a06, type: 3}
-  m_Name: SOSpawnCompleteList
+  m_Name: SO Common SpawnCompleteList
   m_EditorClassIdentifier: 
   monsterSpawnTypeList:
   - meleeMonster:
     - {fileID: 11400000, guid: 2c18043a6134d41489472e4a22fc550e, type: 2}
     rangedMonster: []
-    meleeMonsterCount: 03000000
+    meleeMonsterCount: 04000000
     rangedMonsterCount: 
   - meleeMonster:
     - {fileID: 11400000, guid: 2c18043a6134d41489472e4a22fc550e, type: 2}
     rangedMonster:
     - {fileID: 11400000, guid: 5d7bfa40f43571a4b9251b822f7fa34f, type: 2}
-    meleeMonsterCount: 01000000
-    rangedMonsterCount: 01000000
+    meleeMonsterCount: 02000000
+    rangedMonsterCount: 02000000
   - meleeMonster:
     - {fileID: 11400000, guid: 0dd884c9a48a96c43b9fb7be0be723a4, type: 2}
     rangedMonster: []
-    meleeMonsterCount: 01000000
+    meleeMonsterCount: 03000000
     rangedMonsterCount: 
