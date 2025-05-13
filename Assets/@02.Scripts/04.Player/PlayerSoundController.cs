@@ -26,17 +26,18 @@ public class PlayerSoundController : MonoBehaviour
         }
     }
 
-    private void OnJumpSound(AnimationEvent animationEvent)
+    // 구르기나 돌진기도 같이 사용
+    public void OnJumpSound()
     {
         AudioManager.Instance.PlaySfx(ESfxType.JumpVoice);
     }
     
-    private void OnLandSound(AnimationEvent animationEvent)
+    public void OnLandSound()
     {
         AudioManager.Instance.PlaySfx(ESfxType.LandVoice);
         AudioManager.Instance.PlaySfx(ESfxType.LandEffect);
     }
-
+    
     public void OnSwordSwingSound()
     {
         AudioManager.Instance.PlaySfx(ESfxType.AttackVoice);

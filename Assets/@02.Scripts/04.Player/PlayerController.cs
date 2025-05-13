@@ -725,6 +725,9 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         mPlayerStateRoll.bIsRoll = true;
 
         yield return new WaitForSeconds(startupTime); // 선딜(현재 애니메이션 선딜 없음)
+        
+        mPlayerSounds.OnJumpSound();
+        
         RollFunction(true);
      
         StartCoroutine(RollingCoroutine(targetDirection));
@@ -842,6 +845,9 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         
         // 애니메이션 선딜
         yield return new WaitForSeconds(firstDelay);
+        
+        mPlayerSounds.OnJumpSound();
+        
         DashFunction(true);
         
         StartCoroutine(DashingCoroutine(cameraCenterDirection));
@@ -1209,6 +1215,8 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         {
             mParryCoroutine = StartCoroutine(ParryCoroutine());
         }
+        
+        mPlayerSounds.OnSwordSwingSound();
     }
 
     public void StopParry()
@@ -1226,8 +1234,6 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     
     public void Parry()
     {
-        SetCombatState(true);
-        
         PlayerAnimator.SetBool("Idle", false);
         PlayerAnimator.SetBool("Move", false);
 
@@ -1281,6 +1287,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             mParryTimeoutDelta = mParryTimeout;
         }
         
+        SetCombatState(true);
         PlayerHub.Instance.Skills.UseSkill(SkillType.Parry);
     }
     
