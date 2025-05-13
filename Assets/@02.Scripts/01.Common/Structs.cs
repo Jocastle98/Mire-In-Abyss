@@ -51,10 +51,10 @@ namespace Events.Player
 
     public readonly struct PlayerHpChanged
     {
-        public readonly int Current;
-        public readonly int Max;
+        public readonly float Current;
+        public readonly float Max;
 
-        public PlayerHpChanged(int current, int max)
+        public PlayerHpChanged(float current, float max)
             => (Current, Max) = (current, max);
     }
 
