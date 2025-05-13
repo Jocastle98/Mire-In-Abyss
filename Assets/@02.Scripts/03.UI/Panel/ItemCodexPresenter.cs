@@ -9,7 +9,7 @@ using R3;
 using UnityEngine.EventSystems;
 using System.Collections.Generic;
 
-public sealed class ItemCodexPresenter : MonoBehaviour
+public sealed class ItemCodexPresenter : TabPresenterBase
 {
     [SerializeField] RectTransform mContent;
     [SerializeField] ItemIconView mItemIconPrefab;
@@ -17,7 +17,7 @@ public sealed class ItemCodexPresenter : MonoBehaviour
     [SerializeField] TMP_Text mNameText, mDescText;
     [SerializeField] Sprite mSealedSprite;
 
-    void Start()
+    public override void Initialize()
     {
         buildGrid();
     }

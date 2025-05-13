@@ -1,32 +1,30 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public sealed class SoundPresenter : MonoBehaviour
+public sealed class SoundPresenter : TabPresenterBase
 {
     [SerializeField] Toggle mMasterToggle, mBgmToggle, mSeToggle, mUiToggle;
     [SerializeField] Slider mMasterVol, mBgmVol, mSeVol, mUiVol;
-    void Start()
+    public override void Initialize()
     {
-        /* 초기값 로드 */
-        // mMasterToggle.isOn = AudioBus.MasterMute;
-        // mBgmToggle.isOn = AudioBus.BgmMute;
-        // mSeToggle.isOn = AudioBus.SeMute;
-        // mUiToggle.isOn = AudioBus.UiMute;
+        mMasterToggle.isOn = !UserData.Instance.IsMasterOn;
+        mBgmToggle.isOn = !UserData.Instance.IsBgmOn;
+        mSeToggle.isOn = !UserData.Instance.IsSeOn;
+        mUiToggle.isOn = !UserData.Instance.IsUiOn;
 
-        // mMasterVol.value = AudioBus.MasterVol;
-        // mBgmVol.value = AudioBus.BgmVol;
-        // mSeVol.value = AudioBus.SeVol;
-        // mUiVol.value = AudioBus.UiVol;
+        mMasterVol.value = UserData.Instance.MasterVol;
+        mBgmVol.value = UserData.Instance.BgmVol;
+        mSeVol.value = UserData.Instance.SeVol;
+        mUiVol.value = UserData.Instance.UiVol;
 
-        /* 리스너 */
-        // mMasterToggle.onValueChanged.AddListener(v => AudioBus.SetMasterMute(v));
-        // mBgmToggle.onValueChanged.AddListener(v => AudioBus.SetBgmMute(v));
-        // mSeToggle.onValueChanged.AddListener(v => AudioBus.SetSeMute(v));
-        // mUiToggle.onValueChanged.AddListener(v => AudioBus.SetUiMute(v));
+        mMasterToggle.onValueChanged.AddListener(v => UserData.Instance.IsMasterOn = !v);
+        mBgmToggle.onValueChanged.AddListener(v => UserData.Instance.IsBgmOn = !v);
+        mSeToggle.onValueChanged.AddListener(v => UserData.Instance.IsSeOn = !v);
+        mUiToggle.onValueChanged.AddListener(v => UserData.Instance.IsUiOn = !v);
 
-        // mMasterVol.onValueChanged.AddListener(AudioBus.SetMasterVol);
-        // mBgmVol.onValueChanged.AddListener(AudioBus.SetBgmVol);
-        // mSeVol.onValueChanged.AddListener(AudioBus.SetSeVol);
-        // mUiVol.onValueChanged.AddListener(AudioBus.SetUiVol);
+        mMasterVol.onValueChanged.AddListener(v => UserData.Instance.MasterVol = v);
+        mBgmVol.onValueChanged.AddListener(v => UserData.Instance.BgmVol = v);
+        mSeVol.onValueChanged.AddListener(v => UserData.Instance.SeVol = v);
+        mUiVol.onValueChanged.AddListener(v => UserData.Instance.UiVol = v);
     }
 }

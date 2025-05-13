@@ -15,7 +15,7 @@ public class TempStat
     public float Value { get; set; }
 }
 
-public sealed class InventoryPresenter : MonoBehaviour
+public sealed class InventoryPresenter : TabPresenterBase
 {
     [Header("아이템 목록")]
     [SerializeField] RectTransform mItemContent;
@@ -30,7 +30,7 @@ public sealed class InventoryPresenter : MonoBehaviour
     private bool mIsInit = false;
 
 
-    void OnEnable()
+    public override void Initialize()
     {
         if (!mIsInit)
         {

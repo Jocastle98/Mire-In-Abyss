@@ -2201,9 +2201,9 @@ MonoBehaviour:
   mTabButtonViews:
   - {fileID: 59941023899720558}
   - {fileID: 5038817708762732966}
-  mPanels:
-  - {fileID: 5295334623302777637}
-  - {fileID: 5941108262855979231}
+  mPages:
+  - {fileID: 4277733791425645125}
+  - {fileID: 781894687831311310}
 --- !u!1 &6986756727914936584
 GameObject:
   m_ObjectHideFlags: 0

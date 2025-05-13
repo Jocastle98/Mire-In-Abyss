@@ -166,8 +166,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 140d9cc376b40b346bb4d04545b35a2d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Gold: 5000
   Soul: 10000
+  IsMasterOn: 0
+  IsBgmOn: 0
+  IsSeOn: 0
+  IsUiOn: 0
+  MasterVol: 0
+  BgmVol: 0
+  SeVol: 0
+  UiVol: 0
+  DisplayMode: 0
+  MouseSensitivity: 0
 --- !u!1 &511208924
 GameObject:
   m_ObjectHideFlags: 0
@@ -309,7 +318,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mPanelCanvas: {fileID: 1048028299}
-  mSettingPrefab: {fileID: 4892772301156744234, guid: d7cd69c6032d4d94fa4554b6e61e8ade, type: 3}
+  mSettingPrefab: {fileID: 6463089360026004053, guid: d7cd69c6032d4d94fa4554b6e61e8ade, type: 3}
   mCodexPrefab: {fileID: 1087006600799090707, guid: a905aedf37f44374d874f45e92fb8baa, type: 3}
   mQuestBoardPrefab: {fileID: 2358408809830075226, guid: 4f4c914ca50b8424cb99bfb471646e5a, type: 3}
   mEscGroupPrefab: {fileID: 1275060947987298349, guid: 477d8dbc582d5694b952f58160eea7f8, type: 3}
