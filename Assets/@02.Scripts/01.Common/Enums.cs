@@ -84,6 +84,15 @@ namespace EnemyEnums
         Elite,
         Boss
     }
+
+    public enum EnemySubType
+    {
+        MeleeSkeleton,
+        RangerSkeleton,
+        Golem,
+        Dragon,
+        Other
+    }
 }
 
 namespace QuestEnums

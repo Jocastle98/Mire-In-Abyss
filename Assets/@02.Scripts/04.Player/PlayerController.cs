@@ -1557,7 +1557,8 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         if (!CheckSkillReset())
         {
             // 초기화 실패 - 일반적인 쿨타임 적용
-            mSkill_1_TimeoutDelta = mSkill_1_Timeout;
+            float cooldownReduction = mPlayerStats.GetCoolDownReduction();
+            mSkill_1_TimeoutDelta = mSkill_1_Timeout * (1.0f - cooldownReduction);
         }
         else
         {
@@ -1632,7 +1633,8 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         if (!CheckSkillReset())
         {
             // 초기화 실패 - 일반적인 쿨타임 적용
-            mSkill_2_TimeoutDelta = mSkill_2_Timeout;
+            float cooldownReduction = mPlayerStats.GetCoolDownReduction();
+            mSkill_2_TimeoutDelta = mSkill_2_Timeout * (1.0f - cooldownReduction);
         }
         else
         {
@@ -1768,7 +1770,8 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         if (!CheckSkillReset())
         {
             // 초기화 실패 - 일반적인 쿨타임 적용
-            mSkill_3_TimeoutDelta = mSkill_3_Timeout;
+            float cooldownReduction = mPlayerStats.GetCoolDownReduction();
+            mSkill_3_TimeoutDelta = mSkill_3_Timeout * (1.0f - cooldownReduction);
         }
         else
         {
@@ -2021,7 +2024,8 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         if (!CheckSkillReset())
         {
             // 초기화 실패 - 일반적인 쿨타임 적용
-            mSkill_4_TimeoutDelta = mSkill_4_Timeout;
+            float cooldownReduction = mPlayerStats.GetCoolDownReduction();
+            mSkill_4_TimeoutDelta = mSkill_4_Timeout * (1.0f - cooldownReduction);
         }
         else
         {

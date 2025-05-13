@@ -59,6 +59,7 @@ public class EnemyBTController : MonoBehaviour
 
     [Header("경험치 설정")] 
     [SerializeField] private EnemyType mEnemyType = EnemyType.Common;
+    [SerializeField] private EnemySubType mEnemySubType;
     public EnemyType EnemyType => mEnemyType;
     [SerializeField] private EnemyExpRewardController mExpRewardController;
     
@@ -534,6 +535,10 @@ public class EnemyBTController : MonoBehaviour
     {
         int effective = Mathf.Max(0, damage - mDefense);
         mCurrentHealth -= effective;
+        if (effective >= 100)
+        {
+            PlayerHub.Instance.QuestLog.AddProgress("Q007", 1);
+        }
         Debug.Log($"받은 대미지:{damage} 방어력:{mDefense} 최종:{effective} 남은체력:{mCurrentHealth}");
         if (mCurrentHealth <= 0) mbIsDead = true;
         else mbIsHit = true;
@@ -708,6 +713,26 @@ public class EnemyBTController : MonoBehaviour
             PlayerController playerController = player.GetComponent<PlayerController>();
             playerController.OnEnemyKilled();
         }
+
+        switch (mEnemySubType)
+        {
+            case  EnemySubType.MeleeSkeleton:
+                PlayerHub.Instance.QuestLog.AddProgress("Q001", 1);
+                break;
+            case  EnemySubType.RangerSkeleton:
+                PlayerHub.Instance.QuestLog.AddProgress("Q004", 1);
+                break;
+            case  EnemySubType.Golem:
+                PlayerHub.Instance.QuestLog.AddProgress("Q012", 1);
+                break;
+            case  EnemySubType.Dragon:
+                PlayerHub.Instance.QuestLog.AddProgress("Q014", 1);
+                PlayerHub.Instance.QuestLog.AddProgress("Q011", 1);
+                break;
+            
+        }
+        PlayerHub.Instance.QuestLog.AddProgress("Q009", 1);
+        
         monsterDead.Invoke();
         StartCoroutine(Dissolve());
     }
