@@ -695,7 +695,11 @@ MonoBehaviour:
   mBgmSource: {fileID: 618509346}
   mSfxSource: {fileID: 618509345}
   mUiSource: {fileID: 618509344}
-  mBgmClips: []
+  mBgmClips:
+  - {fileID: 8300000, guid: b6cacb1699ba78143a35c66fc48bed6d, type: 3}
+  - {fileID: 8300000, guid: 1d0250e86b226c84cbee6eee7a59926c, type: 3}
+  - {fileID: 8300000, guid: 47d88bdf17cc7034f91b7982d5e5fec0, type: 3}
+  - {fileID: 8300000, guid: 7f561bd72eac78a48916ff515da81e6d, type: 3}
   mSfxClips: []
   mUiClips: []
 --- !u!1001 &1048028298

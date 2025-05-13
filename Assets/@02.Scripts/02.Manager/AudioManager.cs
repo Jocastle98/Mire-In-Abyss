@@ -11,10 +11,20 @@ public class AudioManager : Singleton<AudioManager>
     [SerializeField] private AudioSource mUiSource;
 
     [Header("오디오 클립")]
-    [SerializeField] private AudioClip[] mBgmClips;
+    [SerializeField] private AudioClip[] mBgmClips; // 0: 인트로, 1: 마을, 2: 필드, 3: 던전
     [SerializeField] private AudioClip[] mSfxClips;
     [SerializeField] private AudioClip[] mUiClips;
 
+    
+    private void OnEnable()
+    {
+        SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+
+    private void OnDisable()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
     private void Start()
     {
         AudioListener.volume = PlayerPrefs.GetFloat(Constants.MasterVolumeKey, 1f);
@@ -151,5 +161,25 @@ public class AudioManager : Singleton<AudioManager>
         mUiSource.PlayOneShot(clip);
     }
 
-    protected override void OnSceneLoaded(Scene scene, LoadSceneMode mode) { }
+    protected override void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        switch (scene.name)
+        {
+            case Constants.MainMenuScene:
+                PlayBgm(EBgmType.Intro);
+                break;
+            case Constants.TownScene:
+                PlayBgm(EBgmType.Town);
+                break;
+            case  Constants.AbyssFieldScene:
+                PlayBgm(EBgmType.Field);
+                break;
+            case Constants.AbyssDungeonScene:
+                PlayBgm(EBgmType.Dungeon);
+                break;
+            default:
+                StopBgm();
+                break;
+        }
+    }
 }
