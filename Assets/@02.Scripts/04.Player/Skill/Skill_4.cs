@@ -71,7 +71,7 @@ public class Skill_4 : MonoBehaviour
             EnemyBTController enemy = hit.GetComponent<EnemyBTController>();
             if (enemy != null)
             {
-                enemy.SetHit((int)(mDamage * mDamageMultiplier),1);
+                enemy.SetHit((int)(mDamage * mDamageMultiplier),- 1);
                 
                 // Todo: 흡혈효과 처리 추가해야함
             }

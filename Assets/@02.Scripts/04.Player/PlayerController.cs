@@ -46,6 +46,8 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     
     [Space(10)]
     [Header("Player Dash Stat")]
+    [SerializeField] private float mDashDamageMultiplier = 1.5f;
+    [SerializeField] private float mDashRadius = 1.5f;
     [SerializeField] private float mDashDistance = 15.0f;
     [SerializeField] private float mDashFunctionDuration = 0.3f;
     [SerializeField] private float mDashTimeout = 5.0f;
@@ -850,6 +852,17 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         yield return new WaitForSeconds(firstDelay);
         
         mPlayerSounds.OnJumpSound();
+
+        GameObject dash_Effect_Prefab = GameManager.Instance.Resource.Instantiate("Dash_Effect", 3, transform);
+        if (dash_Effect_Prefab == null)
+        {
+            yield break;
+        }
+        dash_Effect_Prefab.transform.position = transform.position;
+        dash_Effect_Prefab.transform.rotation = Quaternion.identity;
+        
+        Dash dash = dash_Effect_Prefab.GetComponent<Dash>();
+        dash.Init((int)mPlayerStats.GetAttackDamage(), mDashDamageMultiplier, mDashRadius, LayerMask.GetMask("Enemy"));
         
         DashFunction(true);
         
@@ -857,6 +870,8 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         
         yield return new WaitForSeconds(mDashFunctionDuration);
         DashFunction(false);
+        
+        GameManager.Instance.Resource.Destroy(dash_Effect_Prefab);
         
         yield return null;
         int mobilityLayer = PlayerAnimator.GetLayerIndex("Mobility Layer");
