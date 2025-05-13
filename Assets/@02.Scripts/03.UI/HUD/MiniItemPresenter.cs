@@ -23,9 +23,10 @@ public sealed class ItemSummaryPresenter : HudPresenterBase
                                          / mMiniItemRoot.GetComponent<GridLayoutGroup>().cellSize.y);
         mMaxMiniViewCount = rowCount * colCount;
         mPool = new(mSlotPrefab, mMiniItemRoot, mMaxMiniViewCount);
+        DisableScene = SceneEnums.GameScene.Town;
     }
 
-    void Start()
+    public override void Initialize()
     {
         subscribeEvents();
     }

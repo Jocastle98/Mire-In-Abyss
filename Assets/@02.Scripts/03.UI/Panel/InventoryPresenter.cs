@@ -85,15 +85,7 @@ public sealed class InventoryPresenter : MonoBehaviour
     void showDetail(int id)
     {
         mLargeIcon.sprite = GameDB.Instance.SpriteCache.GetSprite(SpriteType.Item, id);
-        //TODO: 아이템 정보 가져오기
-        //var rec = GameDatabase.Instance.Item.Get(id);
-        // 임시 아이템 정보 생성
-        var rec = new Item
-        {
-            ID = id,
-            ItemName = "아이템 이름",
-            Description = "아이템 설명",
-        };
+        var rec = GameDB.Instance.ItemDatabase.GetItemByID(id);
 
         mItemDetailNameText.text = rec.ItemName;
         mItemDetailDescText.text = rec.Description;

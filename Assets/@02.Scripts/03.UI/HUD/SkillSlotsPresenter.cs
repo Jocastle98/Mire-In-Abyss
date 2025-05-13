@@ -12,19 +12,16 @@ public sealed class SkillSlotsPresenter : HudPresenterBase
     [SerializeField] RectTransform mSkillSlotRoot;
     [SerializeField] List<SkillSlotView> mDefaultSkillSlots = new();
     private readonly Dictionary<int, SkillSlotView> mSlots = new();
+    private bool mSkillInfoLoaded = false;
 
 
-    void Start()
+    public override void Initialize()
     {
         subscribeEvents();
-        R3EventBus.Instance.Receive<Preloaded>()
-            .Subscribe(OnPreloaded)
-            .AddTo(this);
-    }
-
-    private void OnPreloaded(Preloaded e)
-    {
-        setSkillSlots();
+        if (mSkillInfoLoaded)
+        {
+            setSkillSlots();
+        }
     }
 
     private void subscribeEvents()
@@ -46,20 +43,29 @@ public sealed class SkillSlotsPresenter : HudPresenterBase
             {
                 if (mSlots.TryGetValue(e.ID, out var slot))
                 {
-                    slot.Bind(e.CooldownTime, e.KeyCode, e.ID);
+                    slot.Bind(e.CooldownTime, e.KeyString, e.ID);
                 }
+            })
+            .AddTo(mCD);
+
+        R3EventBus.Instance.Receive<SkillInfoLoaded>()
+            .Subscribe(e =>
+            {
+                mSkillInfoLoaded = true;
+                setSkillSlots();
             })
             .AddTo(mCD);
     }
 
     private void setSkillSlots()
     {
-        List<TempSkillInfo> skillInfos = getSkillInfos();
+        int skillCount = mDefaultSkillSlots.Count;
+        List<SkillInfo> skillInfos = PlayerHub.Instance.Skills.GetSkillInfos();
 
         // 기본 스킬 정보 등록
         for (int i = 0; i < mDefaultSkillSlots.Count; i++)
         {
-            mDefaultSkillSlots[i].Bind(skillInfos[i].CooldownTime, skillInfos[i].KeyCode, skillInfos[i].ID);
+            mDefaultSkillSlots[i].Bind(skillInfos[i].CooldownTime, skillInfos[i].KeyString, skillInfos[i].ID);
             mSlots[skillInfos[i].ID] = mDefaultSkillSlots[i];
         }
 
@@ -67,36 +73,18 @@ public sealed class SkillSlotsPresenter : HudPresenterBase
         for (int i = mDefaultSkillSlots.Count; i < skillInfos.Count; i++)
         {
             var slot = Instantiate(mSlotPrefab, mSkillSlotRoot);
-            slot.Bind(skillInfos[i].CooldownTime, skillInfos[i].KeyCode, skillInfos[i].ID);
+            slot.Bind(skillInfos[i].CooldownTime, skillInfos[i].KeyString, skillInfos[i].ID);
             mSlots[skillInfos[i].ID] = slot;
         }
 
     }
 
-    private List<TempSkillInfo> getSkillInfos()
-    {
-        //TODO: 사용할 스킬들 한 번에 받아오기(여기서는 임시 작성)
-        List<TempSkillInfo> skillInfos = new();
-        skillInfos.Add(new TempSkillInfo(0, KeyCode.Mouse0, 0f));
-        skillInfos.Add(new TempSkillInfo(1, KeyCode.Mouse1, 0f));
-        skillInfos.Add(new TempSkillInfo(2, KeyCode.Mouse1, 0f));
-        skillInfos.Add(new TempSkillInfo(3, KeyCode.LeftControl, 0f));
-        skillInfos.Add(new TempSkillInfo(4, KeyCode.LeftShift, 3f));
-        skillInfos.Add(new TempSkillInfo(5, KeyCode.F, 5f));
-        skillInfos.Add(new TempSkillInfo(6, KeyCode.Alpha1, 5f));
-        skillInfos.Add(new TempSkillInfo(7, KeyCode.Alpha2, 5f));
-        skillInfos.Add(new TempSkillInfo(8, KeyCode.Alpha3, 5f));
-        skillInfos.Add(new TempSkillInfo(9, KeyCode.Alpha4, 5f));
-
-        return skillInfos;
-    }
-
     protected override void OnDisable()
     {
         base.OnDisable();
-        foreach (var s in mSlots.Values)
+        for (int i = mDefaultSkillSlots.Count; i < mSlots.Count; i++)
         {
-            Destroy(s.gameObject);
+            Destroy(mSlots[i].gameObject);
         }
         mSlots.Clear();
     }

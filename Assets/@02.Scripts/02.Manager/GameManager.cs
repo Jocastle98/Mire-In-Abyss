@@ -27,7 +27,7 @@ public class GameManager : Singleton<GameManager>
     public ReadOnlyReactiveProperty<GameState> ObserveState => mStateRP;
     private readonly ReactiveProperty<GameState> mStateRP = new(GameState.Gameplay);
 
-    private bool mIsPause = false;
+    //private bool mIsPause = false;
 
 
     protected override void Awake()
@@ -88,12 +88,12 @@ public class GameManager : Singleton<GameManager>
     {
         if (isPaused)
         {
-            mIsPause = true;
+            //mIsPause = true;
             // TODO: 일시정지
         }
         else
         {
-            mIsPause = false;
+            //mIsPause = false;
             // TODO: 일시정지 해제
         }
     }

@@ -50,6 +50,20 @@ namespace PlayerEnums
         LeftToRight,
         TopToBottom,
     }
+
+    public enum SkillType
+    {
+        DefaultAttack,
+        Parry,
+        Defend,
+        Sprint,
+        Roll,
+        Dash,
+        Skill1,
+        Skill2,
+        Skill3,
+        Skill4,
+    }
 }
 
 namespace ItemEnums
@@ -113,6 +127,7 @@ namespace UIPanelEnums
         Setting,
         Codex,
         EscGroup,
+        EscGroup_Item, // 하드코딩, Item탭으로 시작하는 EscGroup 패널
     }
 }
 
@@ -125,6 +140,8 @@ namespace UIHUDEnums
         Boss,
         Shop,
         Portal,
+        QuestBoard,
+        SoulStoneShop, // Upgrade
     }
 
     public enum ProgressBarImageType

@@ -26,7 +26,7 @@ public sealed class ToastPresenter : HudPresenterBase
         mPool = new(mToastPrefab, mToastRoot, mMaxActive);
     }
 
-    void Start()
+    public override void Initialize()
     {
         subscribeEvents();
     }
