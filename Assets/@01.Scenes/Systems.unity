@@ -700,7 +700,8 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 1d0250e86b226c84cbee6eee7a59926c, type: 3}
   - {fileID: 8300000, guid: 47d88bdf17cc7034f91b7982d5e5fec0, type: 3}
   - {fileID: 8300000, guid: 7f561bd72eac78a48916ff515da81e6d, type: 3}
-  mSfxClips: []
+  mSfxClips:
+  - {fileID: 8300000, guid: afe8a7e3dd6f70744abf79d7ca9a0bbf, type: 3}
   mUiClips:
   - {fileID: 8300000, guid: 15a002992dc51c24db17eab31b31eaa2, type: 3}
   - {fileID: 8300000, guid: e620d8e6875599c40a87c5adc266006f, type: 3}

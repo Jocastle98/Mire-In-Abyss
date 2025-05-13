@@ -7,7 +7,6 @@ public class AudioManager : Singleton<AudioManager>
 {
     [Header("오디오 소스")]
     [SerializeField] private AudioSource mBgmSource;
-    [SerializeField] private AudioSource mSfxSource;
     [SerializeField] private AudioSource mUiSource;
 
     [Header("오디오 클립")]
@@ -15,7 +14,28 @@ public class AudioManager : Singleton<AudioManager>
     [SerializeField] private AudioClip[] mSfxClips;
     [SerializeField] private AudioClip[] mUiClips;
 
-    
+    [Header("SFX 풀 세팅")]
+    [SerializeField] private int mSfxPoolSize = 8;
+    private AudioSource[] mSfxSources;
+    private int _nextSfxSrc = 0;
+
+    private void Awake()
+    {
+        mSfxSources = new AudioSource[mSfxPoolSize];
+        for (int i = 0; i < mSfxPoolSize; i++)
+        {
+            GameObject go = new GameObject($"SfxSrc_{i}");
+            go.transform.SetParent(transform);
+            AudioSource src = go.AddComponent<AudioSource>();
+            src.playOnAwake = false;
+            float vol = PlayerPrefs.GetFloat(Constants.SFXVolumeKey, 1f);
+            bool mute = PlayerPrefs.GetInt(Constants.SeMuteKey, 0) == 1;
+            src.volume = vol;
+            src.mute = mute;
+            mSfxSources[i] = src;
+        }
+    }
+
     private void OnEnable()
     {
         SceneManager.sceneLoaded += OnSceneLoaded;
@@ -25,21 +45,27 @@ public class AudioManager : Singleton<AudioManager>
     {
         SceneManager.sceneLoaded -= OnSceneLoaded;
     }
+
     private void Start()
     {
         AudioListener.volume = PlayerPrefs.GetFloat(Constants.MasterVolumeKey, 1f);
         if (mBgmSource != null) mBgmSource.volume = PlayerPrefs.GetFloat(Constants.BGMVolumeKey, 1f);
-        if (mSfxSource != null) mSfxSource.volume = PlayerPrefs.GetFloat(Constants.SFXVolumeKey, 1f);
-        if (mUiSource  != null) mUiSource .volume = PlayerPrefs.GetFloat(Constants.UIVolumeKey, 1f);
-
+        if (mUiSource  != null) mUiSource.volume  = PlayerPrefs.GetFloat(Constants.UIVolumeKey, 1f);
         AudioListener.pause = PlayerPrefs.GetInt(Constants.MasterMuteKey, 0) == 1;
         if (mBgmSource != null) mBgmSource.mute = PlayerPrefs.GetInt(Constants.BgmMuteKey, 0) == 1;
-        if (mSfxSource != null) mSfxSource.mute = PlayerPrefs.GetInt(Constants.SeMuteKey,  0) == 1;
-        if (mUiSource  != null) mUiSource .mute = PlayerPrefs.GetInt(Constants.UiMuteKey,  0) == 1;
+        if (mUiSource  != null) mUiSource.mute  = PlayerPrefs.GetInt(Constants.UiMuteKey,  0) == 1;
+
+        float sfxVol = PlayerPrefs.GetFloat(Constants.SFXVolumeKey, 1f);
+        bool sfxMute = PlayerPrefs.GetInt(Constants.SeMuteKey, 0) == 1;
+        foreach (var src in mSfxSources)
+        {
+            src.volume = sfxVol;
+            src.mute   = sfxMute;
+        }
     }
 
     /// <summary>
-    /// SoundPresenter에서 슬라이더 할당 
+    /// SoundPresenter에서 슬라이더 할당
     /// </summary>
     public void InitSliders(
         Slider masterSlider,
@@ -59,7 +85,7 @@ public class AudioManager : Singleton<AudioManager>
         }
         if (sfxSlider != null)
         {
-            sfxSlider.value = mSfxSource.volume;
+            sfxSlider.value = mSfxSources[0].volume;
             sfxSlider.onValueChanged.AddListener(OnSfxVolumeChanged);
         }
         if (uiSlider != null)
@@ -85,7 +111,8 @@ public class AudioManager : Singleton<AudioManager>
 
     private void OnSfxVolumeChanged(float v)
     {
-        mSfxSource.volume = v;
+        foreach (var src in mSfxSources)
+            src.volume = v;
         PlayerPrefs.SetFloat(Constants.SFXVolumeKey, v);
         PlayerPrefs.Save();
     }
@@ -113,7 +140,8 @@ public class AudioManager : Singleton<AudioManager>
 
     public void SetSeMute(bool isMuted)
     {
-        mSfxSource.mute = isMuted;
+        foreach (var src in mSfxSources)
+            src.mute = isMuted;
         PlayerPrefs.SetInt(Constants.SeMuteKey, isMuted ? 1 : 0);
         PlayerPrefs.Save();
     }
@@ -149,7 +177,10 @@ public class AudioManager : Singleton<AudioManager>
         if (mSfxClips == null || idx < 0 || idx >= mSfxClips.Length) return;
         var clip = mSfxClips[idx];
         if (clip == null) return;
-        mSfxSource.PlayOneShot(clip);
+
+        var src = mSfxSources[_nextSfxSrc];
+        src.PlayOneShot(clip);
+        _nextSfxSrc = (_nextSfxSrc + 1) % mSfxPoolSize;
     }
 
     public void PlayUi(EUiType type)
@@ -171,7 +202,7 @@ public class AudioManager : Singleton<AudioManager>
             case Constants.TownScene:
                 PlayBgm(EBgmType.Town);
                 break;
-            case  Constants.AbyssFieldScene:
+            case Constants.AbyssFieldScene:
                 PlayBgm(EBgmType.Field);
                 break;
             case Constants.AbyssDungeonScene:

@@ -7,6 +7,7 @@ using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.Serialization;
 using Random = UnityEngine.Random;
+using UnityEngine.Rendering;
 
 [RequireComponent(typeof(NavMeshAgent))]
 public class EnemyBTController : MonoBehaviour
@@ -506,6 +507,11 @@ public class EnemyBTController : MonoBehaviour
     {
         if (mbIsDead || mbIgnoreHits) return;
 
+
+        if (mEnemyType == EnemyType.Common)
+        {
+            AudioManager.Instance.PlaySfx(AudioEnums.ESfxType.SkeletonHit);
+        }
         switch (hitType)
         {
             case 0: //스턴
@@ -671,6 +677,11 @@ public class EnemyBTController : MonoBehaviour
 
     private IEnumerator Dissolve()
     {
+        foreach (var r in mRenderers)
+        {
+            r.shadowCastingMode = ShadowCastingMode.Off;
+            r.receiveShadows     = false;
+        }
         var block = new MaterialPropertyBlock();
         float alpha = 1f;
         while (alpha > 0f)
@@ -679,7 +690,8 @@ public class EnemyBTController : MonoBehaviour
             ChangeColorRenderer(new Color(1, 1, 1, alpha), block);
             yield return null;
         }
-        Destroy(gameObject);
+        
+        Destroy(gameObject,1f);
     }
 
     private void ChangeColorRenderer(Color color, MaterialPropertyBlock block)

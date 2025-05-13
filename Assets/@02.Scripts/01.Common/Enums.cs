@@ -187,7 +187,7 @@ namespace BattleAreaEnums
 namespace AudioEnums
 {
     public enum EBgmType { Intro = 0, Town = 1, Field = 2, Dungeon = 3 }
-    public enum ESfxType   { Footstep = 0, Landing = 1, PlayerAttack = 2, Parry = 3}
+    public enum ESfxType   { SkeletonHit = 0 }
     public enum EUiType    { Open = 0, Close = 1, Click = 2  }
 }
 

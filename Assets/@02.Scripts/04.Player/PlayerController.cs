@@ -176,7 +176,6 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         {
             mPlayerStates[CurrentPlayerState].OnUpdate();
         }
-        
         GroundedCheck();
         TimeoutCheck();
     }
