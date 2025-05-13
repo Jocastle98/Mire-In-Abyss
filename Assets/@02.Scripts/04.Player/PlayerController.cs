@@ -6,15 +6,18 @@ using Events.Player;
 using PlayerEnums;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.Serialization;
 using Random = UnityEngine.Random;
 
 [RequireComponent(typeof(Animator))]
 [RequireComponent(typeof(PlayerStats))]
 [RequireComponent(typeof(CharacterController))]
+[RequireComponent(typeof(PlayerSoundController))]
 public class PlayerController : MonoBehaviour, IObserver<GameObject>
 {
     [Header("Reference")]
     [SerializeField] private PlayerStats mPlayerStats;
+    [SerializeField] private PlayerSoundController mPlayerSounds;
     
     [Space(10)]
     [Header("Player Movement Stat")]
@@ -114,11 +117,6 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     [SerializeField] private Transform mRightHandTransform;
     [SerializeField] private Transform mLeftHandTransform;
     
-    [Space(10)]
-    [Header("Player AudioClips")]
-    public AudioClip[] footstepAudioClips;
-    public AudioClip landingAudioClip;
-    
     // Player Internal Calculation Stat
     private float mVerticalVelocity;
     private float mRotationVelocity;
@@ -129,8 +127,8 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     
     // Componenet
     public Animator PlayerAnimator { get; private set; }
-    private CharacterController mCharacterController;
     private GameObject mMainCamera;
+    private CharacterController mCharacterController;
     private WeaponController mWeaponController;
     
     // State
@@ -678,6 +676,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             Vector3 targetDirection = Quaternion.Euler(0.0f, mTargetRotation, 0.0f) * Vector3.forward;
             moveDirection = targetDirection.normalized * mCurrentSpeed;
         }
+        
         mCharacterController.Move(moveDirection * Time.deltaTime 
                                   + new Vector3(0.0f, mVerticalVelocity, 0.0f) * Time.deltaTime);
     }
@@ -1072,6 +1071,9 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
                 //공격력을 PlayerStats에서 가져와 데미지 계산
                 float damage = mPlayerStats.GetAttackDamage();
                 enemyController.SetHit((int)damage, -1);
+
+                mPlayerSounds.OnSwordHitSound();
+                
                 //피해적용 후 흡혈효과 처리
                 mPlayerStats.OnDamageDealt(damage);
             }
@@ -1119,6 +1121,8 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
                 slashEffectObject.transform.rotation = rotation;
                 
                 mSlashCoroutine = StartCoroutine(DisableEffectAfterDelay(slashEffectObject, 0.2f));
+                
+                mPlayerSounds.OnSwordSwingSound();
             }
             
             return slashEffectObject;
@@ -1337,6 +1341,8 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
                 }
             }
 
+            mPlayerSounds.OnHitSound(false);
+            
             // 잠시 무적효과
             if (mParrySuccessInvincibleCoroutine != null)
             {
@@ -1360,6 +1366,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         
         if (mPlayerStats.GetCurrentHP() <= 0)
         {
+            mPlayerSounds.OnDeathSound();
             SetPlayerState(PlayerState.Dead);
         }
         else
@@ -1371,11 +1378,13 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             
             if (CurrentPlayerState == PlayerState.Defend)
             {
+                mPlayerSounds.OnHitSound(true);
                 PlayerAnimator.SetTrigger("DefendHit");
             }
             // 공격 관련 동작들이 끊기지 않도록
             else if(CurrentPlayerState == PlayerState.Idle || CurrentPlayerState == PlayerState.Move)
             {
+                mPlayerSounds.OnHitSound(false);
                 PlayerAnimator.SetFloat("HitPower", hitPower);
                 PlayerAnimator.SetTrigger("Hit");
                 
@@ -1523,7 +1532,9 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         Skill_1 skill_1 = skill_1_Effect_Prefab.GetComponent<Skill_1>();
         skill_1.Init((int)mPlayerStats.GetAttackDamage(), mSkill_1_DamageMultiplier, mSkill_1_Distance, direction);
 
-        yield return new WaitForSeconds(recoveryTime);
+        mPlayerSounds.OnSkillSound(SkillType.Skill1);
+        
+        yield return new WaitForSeconds(recoveryTime); // 애니메이션 후딜
         
         mbInDirection = true;
         
@@ -1596,7 +1607,10 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         skill_2_Effect_Prefab.transform.position = transform.position;
         skill_2_Effect_Prefab.transform.rotation = Quaternion.identity;
         
-        yield return new WaitForSeconds(recoveryTime);
+        mPlayerSounds.OnSkillSound(SkillType.Skill2);
+        
+        yield return new WaitForSeconds(recoveryTime); // 애니메이션 후딜
+        
         GameManager.Instance.Resource.Destroy(skill_2_Effect_Prefab);
         
         SetCombatState(true);
@@ -1729,7 +1743,10 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             }
         }
         
-        yield return new WaitForSeconds(recoveryTime);
+        mPlayerSounds.OnSkillSound(SkillType.Skill3);
+        
+        yield return new WaitForSeconds(recoveryTime); // 애니메이션 후딜
+        
         GameManager.Instance.Resource.Destroy(skill_3_Effect_Prefab);
         
         SetCombatState(true);
@@ -1984,8 +2001,10 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         
         Skill_4 skill_4 = projectilePrefab.GetComponent<Skill_4>();
         skill_4.Init((int)mPlayerStats.GetAttackDamage(), mSkill_4_DamageMultiplier, mSkill_4_Radius, targetPoint);
+
+        mPlayerSounds.OnSkillSound(SkillType.Skill4);
         
-        yield return new WaitForSeconds(recoveryTime);
+        yield return new WaitForSeconds(recoveryTime); // 애니메이션 후딜
         
         // 스킬 쿨타임 초기화 확인
         if (!CheckSkillReset())
@@ -2017,35 +2036,6 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
 
     #endregion
     
-    #endregion
-
-    #region 사운드 관련 기능
-
-    // 발소리, 나중에 사운드매니저로 관리해야 함
-    private void OnFootstepSound(AnimationEvent animationEvent)
-    {
-        var mobilityLayer = PlayerAnimator.GetLayerIndex("Mobility Layer");
-        var skillLayer = PlayerAnimator.GetLayerIndex("Skill Layer");
-        
-        if (animationEvent.animatorClipInfo.weight > 0.5f && 
-            (PlayerAnimator.GetLayerWeight(mobilityLayer) < 1.0f && PlayerAnimator.GetLayerWeight(skillLayer) < 1.0f))
-        {
-            if (footstepAudioClips.Length > 0)
-            {
-                var index = Random.Range(0, footstepAudioClips.Length);
-                AudioSource.PlayClipAtPoint(footstepAudioClips[index], transform.position /*, 볼륨 */);
-            }
-        }
-    }
-
-    private void OnLandSound(AnimationEvent animationEvent)
-    {
-        if (animationEvent.animatorClipInfo.weight > 0.5f)
-        {
-            AudioSource.PlayClipAtPoint(landingAudioClip, transform.position /*, 볼륨 */);
-        }
-    }
-
     #endregion
     
     #region 디버깅 관련
