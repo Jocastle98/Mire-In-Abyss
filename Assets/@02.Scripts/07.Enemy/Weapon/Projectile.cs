@@ -77,14 +77,6 @@ public class Projectile : MonoBehaviour
         // 몬스터 닿으면 
         else if (other.TryGetComponent<EnemyBTController>(out var enemy))
         {
-            // ShooterTransform이(발사한 객체가) 있고, ShooterTransform이(발사한 객체가) 몬스터라면
-            if (ShooterTransform != null && ShooterTransform.GetComponent<EnemyBTController>() != null)
-            {
-                Destroy(gameObject);
-                return; // 아군이니까 피해 없음
-            }
-            
-            // ShooterTransform이(발사한 객체가) 없거나, ShooterTransform이(발사한 객체가) 몬스터가 아니면 피해를 줌
             enemy.SetHit(mDamage, -1);
         }
 
