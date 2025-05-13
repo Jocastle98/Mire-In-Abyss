@@ -3,6 +3,7 @@ using UnityEngine;
 using R3;
 using UIHUDEnums;
 using Events.HUD;
+using Events.Gameplay;
 
 
 public sealed class MiniMapPresenter : HudPresenterBase
@@ -15,6 +16,7 @@ public sealed class MiniMapPresenter : HudPresenterBase
     [SerializeField] private List<MiniMapIcon> mIconPrefabs;
 
     private Camera mMainCam;
+    private MiniMapIcon mPlayerIcon;
     private RectTransform mPlayerIconRT;
     private readonly Dictionary<int, MiniMapIcon> mIconsMap = new(); // id → icon
     private List<ObjectPool<MiniMapIcon>> mIconPools = new();
@@ -31,11 +33,10 @@ public sealed class MiniMapPresenter : HudPresenterBase
         mIconPools.Add(new(mIconPrefabs[(int)MiniMapIconType.SoulStoneShop], mOtherIconLayer, 1));
 
 
-        var playerIcon = mIconPools[(int)MiniMapIconType.Player].Rent();
-        mIconsMap[mPlayer.GetInstanceID()] = playerIcon;
+        mPlayerIcon = mIconPools[(int)MiniMapIconType.Player].Rent();
         
         // 플레이어 아이콘 회전을 위한 할당
-        mPlayerIconRT = playerIcon.GetComponent<RectTransform>();
+        mPlayerIconRT = mPlayerIcon.GetComponent<RectTransform>();
         mMainCam = Camera.main;
     }
 
@@ -48,11 +49,14 @@ public sealed class MiniMapPresenter : HudPresenterBase
 
     void LateUpdate()
     {
-        // 플레이어 아이콘 방향 업데이트
+        // 플레이어 아이콘 업데이트
         var playerIconRotation = mPlayerIconRT.rotation.eulerAngles;
         playerIconRotation.z = -mMainCam.transform.rotation.eulerAngles.y;
         mPlayerIconRT.rotation = Quaternion.Euler(playerIconRotation);
-        
+        var playerWorldPos = mPlayer.position;
+        var playerMinimapPos = mMiniMapCam.transform.InverseTransformPoint(playerWorldPos);
+        mPlayerIconRT.anchoredPosition = playerMinimapPos * mWorldToUIScale;
+
         // 아이콘 업데이트
         foreach (var pair in mIconsMap)
         {
@@ -86,6 +90,9 @@ public sealed class MiniMapPresenter : HudPresenterBase
         R3EventBus.Instance.Receive<EntityDestroyed<IMapTrackable>>()
             .Subscribe(e => despawnIcon(e.Entity.MapAnchor, e.Entity.IconType))
             .AddTo(mCD);
+        R3EventBus.Instance.Receive<EnterDeepAbyss>()
+            .Subscribe(e => despawnAllIconsWithoutPlayer())
+            .AddTo(mCD);
     }
 
     private bool isOutOfMinimap(Vector3 minimapCamPos)
@@ -98,7 +105,7 @@ public sealed class MiniMapPresenter : HudPresenterBase
     private void spawnIcon(Transform target, MiniMapIconType iconType)
     {
         var icon = mIconPools[(int)iconType].Rent();
-        icon.Init(target);
+        icon.Init(target, iconType);
         mIconsMap[target.GetInstanceID()] = icon;
     }
 
@@ -112,13 +119,20 @@ public sealed class MiniMapPresenter : HudPresenterBase
         }
     }
 
+    private void despawnAllIconsWithoutPlayer()
+    {
+        foreach (var pair in mIconsMap)
+        {
+            pair.Value.ResetIcon();
+            mIconPools[(int)pair.Value.IconType].Return(pair.Value);
+        }
+        mIconsMap.Clear();
+    }
+
     protected override void OnDisable()
     {
         base.OnDisable();
-        foreach (var ico in mIconsMap.Values)
-        {
-            ico.ResetIcon();
-        }
+        despawnAllIconsWithoutPlayer();
 
         mIconsMap.Clear();
     }

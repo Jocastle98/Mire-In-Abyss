@@ -17,6 +17,7 @@ namespace Events.Gameplay
         public readonly GameScene NewScene;
         public GameplaySceneChanged(GameScene newScene) => NewScene = newScene;
     }
+    public readonly struct EnterDeepAbyss { } // Abyss -> Abyss
 }
 
 namespace AchievementStructs
