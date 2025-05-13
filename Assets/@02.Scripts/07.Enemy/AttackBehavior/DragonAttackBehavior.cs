@@ -108,6 +108,6 @@ public class DragonAttackBehavior : ScriptableObject, IAttackBehavior
 
         var proj = Instantiate(FireBallPrefab, fp.position, Quaternion.LookRotation(dir));
         if (proj.TryGetComponent<Projectile>(out var ps))
-            ps.Initialize(dir, FireballSpeed, HitLayer, FireballDamage,self);
+            ps.Initialize(dir, FireballSpeed, HitLayer, FireballDamage, self);
     }
 }

@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using PlayerEnums;
+using UIPanelEnums;
 using UnityEngine;
 
 public class PlayerStateInteraction : IPlayerState
@@ -20,8 +22,8 @@ public class PlayerStateInteraction : IPlayerState
             Vector3 directionToInteractable = mInteractablePosition - mPlayerController.transform.position;
             directionToInteractable.y = 0;
             mPlayerController.transform.rotation = Quaternion.LookRotation(directionToInteractable);
-            
-            UIPanelManager.Instance.OpenPanelWithPlayer(interactable.GetPanelType(), playerController);
+
+            UIManager.Instance.Push(interactable.GetPanelType(), mPlayerController);
         }
     }
 

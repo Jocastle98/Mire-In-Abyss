@@ -1,4 +1,5 @@
 using Cysharp.Threading.Tasks;
+using SceneEnums;
 using UIPanelEnums;
 using UnityEngine;
 using UnityEngine.UI;
@@ -10,15 +11,19 @@ public sealed class EscSystemPresenter : MonoBehaviour
 
     void OnEnable()
     {
-        if(!mbIsInit)
+        if (!mbIsInit)
         {
-            mBtnSettings.onClick.AddListener(()=> UIManager.Instance.Push(UIPanelType.Setting).Forget());
-            // mBtnTown.onClick.AddListener(()=> SceneLoader.LoadAsync("TownScene"));
-            mBtnMain.onClick.AddListener(()=> 
+            mBtnSettings.onClick.AddListener(() => UIManager.Instance.Push(UIPanelType.Setting).Forget());
+            if (SceneLoader.CurrentSceneType == GameScene.Abyss)
             {
-                UIManager.Instance.Pop().Forget();
-                SceneLoader.LoadAsync(Constants.MainMenuScene).Forget();
-            });
+                mBtnTown.interactable = true;
+                mBtnTown.onClick.AddListener(() => SceneLoader.LoadSceneAsync(Constants.TownScene).Forget());
+            }
+            else
+            {
+                mBtnTown.interactable = false;
+            }
+            mBtnMain.onClick.AddListener(() => SceneLoader.LoadSceneAsync(Constants.MainMenuScene).Forget());
             mBtnQuit.onClick.AddListener(QuitGame);
 
             //Abyss에 있는 경우에만 활성화

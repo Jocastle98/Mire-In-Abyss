@@ -6,7 +6,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class SoulStoneShopPanelController : PopupPanelController
+public class SoulStoneShopPanelController : BaseUIPanel
 {
     [System.Serializable]
     public class UpgradeButton
@@ -30,30 +30,62 @@ public class SoulStoneShopPanelController : PopupPanelController
     [SerializeField] private TextMeshProUGUI mSoulStoneCountText;   //현재 보유 영혼석
     [SerializeField] private TextMeshProUGUI mCostText;             //강화 비용
     [SerializeField] private Button mUpgradeApplyButton;            //강화 적용 버튼
+    [SerializeField] BackButton mBackButton;
 
     [Header("참조")] 
-    //[SerializeField] private PlayerStats mPlayerStats;
+    [SerializeField] private PlayerStats mPlayerStats;
 
     private SoulStoneUpgradeData.UpgradeInfo mSelectedUpgrade;   //현재 선택된 업그레이드
-    private int mSoulStones = 999;          //현재 임시 보유 영혼석
+    private int mSoulStones = 0;          //현재 보유 영혼석
 
+    private const string UPGRADE_LEVEL_SAVE_KEY = "SoulStoneUpgradeLevels";
+
+    protected override void Awake()
+    {
+        base.Awake();
+
+        if (mBackButton != null)
+        {
+            mBackButton.SetAfterCloseAction(() =>
+            {
+                mPlayer?.SetPlayerState(PlayerState.Idle);
+            });
+        }
+    }
+    
+    private void OnEnable()
+    {
+        mSoulStones = PlayerHub.Instance.Inventory.Soul;
+        UpdateSoulStoneText();
+
+        if (mSelectedUpgrade != null)
+        {
+            UpdateUpgradeApplyButton();
+        }
+    }
+    
     private void Start()
     {
+        if (mPlayerStats == null)
+        {
+            mPlayerStats = FindObjectOfType<PlayerStats>();
+        }
+
         mUpgradeInfos = mUpgradeData.GetAllUpgrades();
         InitializeUI();
+        
     }
 
     private void InitializeUI()
     {
         UpdateSoulStoneText();
-
         mCostText.text = "";
-
+        
         for (int i = 0; i < mUpgradeButtons.Count && i < mUpgradeInfos.Count; i++)
         {
             UpgradeButton button = mUpgradeButtons[i];
             SoulStoneUpgradeData.UpgradeInfo info = mUpgradeInfos[i];
-            
+
             //버튼 설정
             button.TitleText.text = info.Title;
             button.IconImage.sprite = info.Icon;
@@ -95,19 +127,20 @@ public class SoulStoneShopPanelController : PopupPanelController
         //영혼석 충분한지 확인
         if (mSoulStones < cost)
         {
-            //TODO: 영혼석 부족 처리
+            R3EventBus.Instance.Publish(new Events.HUD.ToastPopup("영혼석이 부족합니다.", 2f, Color.red));
             return;
         }
 
         //영혼석 차감
         mSoulStones -= cost;
         UpdateSoulStoneText();
+        PlayerHub.Instance.Inventory.SubTrackSoul(cost);
         
         //현재 레벨 증가
         mSelectedUpgrade.CurrentLevel++;
         
         //강화 효과 적용
-        //ApplyUpgradeEffect();
+        ApplyUpgradeEffect();
 
         //UI 업데이트
         int buttonIndex = mUpgradeInfos.IndexOf(mSelectedUpgrade);
@@ -120,6 +153,8 @@ public class SoulStoneShopPanelController : PopupPanelController
         UpdateDescriptionText();
         //강화 적용 버튼 상태 업데이트
         UpdateUpgradeApplyButton();
+        
+        R3EventBus.Instance.Publish(new Events.HUD.ToastPopup($"{mSelectedUpgrade.Title} 강화 완료!", 2f, Color.yellow));
     }
 
     private void UpdateLevelImages(UpgradeButton button, int level)
@@ -183,7 +218,7 @@ public class SoulStoneShopPanelController : PopupPanelController
 
     private void ApplyUpgradeEffect()
     {
-        //if (mPlayerStats == null || mSelectedUpgrade == null) return;
+        if (mPlayerStats == null || mSelectedUpgrade == null) return;
 
         int level = mSelectedUpgrade.CurrentLevel;
         if (level <= 0 || level > 5) return;
@@ -193,52 +228,54 @@ public class SoulStoneShopPanelController : PopupPanelController
 
         switch (mSelectedUpgrade.UpgradeId)
         {
-            /*case "maxHP"
+            case "maxHP":
+                mPlayerStats.ModifyMaxHP(value, valueType);
                 break;
-            case "attackPower"
+            case "attackPower":
+                mPlayerStats.ModifyAttackPower(value, valueType);
                 break;
-            case "moveSpeed"
+            case "moveSpeed":
+                mPlayerStats.ModifyMoveSpeed(value, valueType);
                 break;
-            case "defence"
+            case "defence":
+                mPlayerStats.ModifyDefence(value, valueType);
                 break;
-            case "critChance"
+            case "critChance":
+                mPlayerStats.ModifyCritChance(value, valueType);
                 break;
-            case "soulStone"
+            case "soulStone":
+                //영혼석 획득량 증가
                 break;
-            case "coolDown"
+            case "coolDown":
+                //쿨다운 감소 로직
                 break;
-            case "itemDrop"
+            case "itemDrop":
+                //아이템 드랍률 증가
                 break;
-            case "level"
+            case "level":
+                //경험치 획득량 증가
                 break;
-            case "gold"
+            case "gold":
+                //골드 획득량 증가
                 break;
             default:
                 Debug.LogWarning($"알수없는 업그레이드 ID : {mSelectedUpgrade.UpgradeId}");
-                break;*/
+                break;
         }
-    }
-
-    public void OnClickCloseButton()
-    {
-        Hide(() =>
-        {
-            mPlayer.SetPlayerState(PlayerState.Idle);
-        });
     }
 
     #region 디버깅 관련
 
     public void SetSoulStone(int amount)
     {
-        mSoulStones = amount;
+        PlayerHub.Instance.Inventory.AddSoul(amount);
         UpdateSoulStoneText();
         UpdateUpgradeApplyButton();
     }
 
     public void AddSoultStone(int amount)
     {
-        mSoulStones += amount;
+        PlayerHub.Instance.Inventory.AddSoul(amount);
         UpdateSoulStoneText();
         UpdateUpgradeApplyButton();
     }

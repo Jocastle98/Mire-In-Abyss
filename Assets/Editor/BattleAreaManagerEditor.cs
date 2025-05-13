@@ -5,7 +5,7 @@ using UnityEditor;
 using UnityEditor.TerrainTools;
 using UnityEngine;
 
-[CustomEditor(typeof(BattleAreaManager))]
+[CustomEditor(typeof(AbyssManager))]
 public class BattleAreaManagerEditor : Editor
 {
     

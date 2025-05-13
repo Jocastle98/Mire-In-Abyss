@@ -124,10 +124,10 @@ MonoBehaviour:
   mRewardAmountText: {fileID: 7181667407841329983}
   mQuestStateImage: {fileID: 4277160552726702796}
   mRewardImage: {fileID: 2712678089571559252}
-  mInactiveSprite: {fileID: -304086896, guid: e2034b435e0f24b4fb43e1bf5c6dc2a3, type: 3}
-  mActiveSprite: {fileID: -1306457139, guid: e2034b435e0f24b4fb43e1bf5c6dc2a3, type: 3}
-  mCompletedSprite: {fileID: 1321042688, guid: e2034b435e0f24b4fb43e1bf5c6dc2a3, type: 3}
-  mRewardedSprite: {fileID: -1948492487, guid: e2034b435e0f24b4fb43e1bf5c6dc2a3, type: 3}
+  mInactiveSprite: {fileID: 978929105, guid: 8b985552c20e3394cadb351159f08bfd, type: 3}
+  mActiveSprite: {fileID: 73178617, guid: 8b985552c20e3394cadb351159f08bfd, type: 3}
+  mCompletedSprite: {fileID: 2120592075, guid: 8b985552c20e3394cadb351159f08bfd, type: 3}
+  mRewardedSprite: {fileID: -1722906846, guid: 8b985552c20e3394cadb351159f08bfd, type: 3}
 --- !u!114 &6052874253614008762
 MonoBehaviour:
   m_ObjectHideFlags: 0

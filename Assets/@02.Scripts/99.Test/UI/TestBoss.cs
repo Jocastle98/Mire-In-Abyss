@@ -8,5 +8,5 @@ public class TestBoss : MonoBehaviour, IMapTrackable
 
     public Transform MapAnchor => mMapAnchor;
 
-    public MiniMapIconType Icon => MiniMapIconType.Boss;
+    public MiniMapIconType IconType => MiniMapIconType.Boss;
 }

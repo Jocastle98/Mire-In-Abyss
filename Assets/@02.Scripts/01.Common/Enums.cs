@@ -1,3 +1,14 @@
+namespace GameEnums
+{
+    public enum GameState
+    {
+        MainMenu,
+        Gameplay,   // 플레이어 조작 중
+        UI,         // Pause
+        GameplayPause,       
+    }
+}
+
 namespace PlayerEnums
 {
     public enum PlayerState
@@ -32,6 +43,27 @@ namespace PlayerEnums
         Poison,
         Bleed
     }
+
+    public enum SlashEffectType
+    {
+        RightToLeft,
+        LeftToRight,
+        TopToBottom,
+    }
+
+    public enum SkillType
+    {
+        DefaultAttack,
+        Parry,
+        Defend,
+        Sprint,
+        Roll,
+        Dash,
+        Skill1,
+        Skill2,
+        Skill3,
+        Skill4,
+    }
 }
 
 namespace ItemEnums
@@ -65,6 +97,16 @@ namespace QuestEnums
     }
 }
 
+namespace SceneEnums
+{
+    public enum GameScene
+    {
+        MainMenu,
+        Town,
+        Abyss,
+    }
+}
+
 namespace UIEnums
 {
     public enum SpriteType
@@ -85,6 +127,7 @@ namespace UIPanelEnums
         Setting,
         Codex,
         EscGroup,
+        EscGroup_Item, // 하드코딩, Item탭으로 시작하는 EscGroup 패널
     }
 }
 
@@ -97,6 +140,8 @@ namespace UIHUDEnums
         Boss,
         Shop,
         Portal,
+        QuestBoard,
+        SoulStoneShop, // Upgrade
     }
 
     public enum ProgressBarImageType
