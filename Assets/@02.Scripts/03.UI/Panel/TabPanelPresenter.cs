@@ -19,7 +19,11 @@ public class TabPanelPresenter : BaseUIPanel
             mPages[i].Initialize();
             mButtons.Add(mTabButtonViews[i].GetComponent<Button>());
             int j = i;
-            mButtons[i].onClick.AddListener(() => show(mPages[j]));
+            mButtons[i].onClick.AddListener(() => 
+            {
+                AudioManager.Instance.PlayUi(AudioEnums.EUiType.Click);
+                show(mPages[j]);
+            });
         }
         show(mPages[0]);                 // 기본 탭 선택
     }

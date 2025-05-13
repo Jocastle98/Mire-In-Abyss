@@ -119,7 +119,7 @@ Transform:
   m_GameObject: {fileID: 195206395013146144}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.233, y: -0, z: -0.173}
+  m_LocalPosition: {x: -0.23, y: 0, z: -0.17}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2356,7 +2356,7 @@ MonoBehaviour:
   mPlayerMask:
     serializedVersion: 2
     m_Bits: 256
-  mPatrolRadius: 5
+  mPatrolRadius: 3
   mAttackBehaviorAsset: {fileID: 11400000, guid: d4421d88b302c33418aaa05ef814bf6a, type: 2}
   mFirePoint: {fileID: 5811797329913469919}
   mBreathPoint: {fileID: 0}

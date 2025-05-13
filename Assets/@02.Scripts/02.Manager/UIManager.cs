@@ -41,6 +41,7 @@ public class UIManager : Singleton<UIManager>
     
     public async UniTask Push(BaseUIPanel prefab, Action onComplete = null)
     {
+        AudioManager.Instance.PlayUi(AudioEnums.EUiType.Open);
         if (mStack.TryPeek(out var top))
         {
             top.CG.interactable = false;
@@ -69,6 +70,8 @@ public class UIManager : Singleton<UIManager>
     // PlayerController를 전달하는 Push 메서드 추가
     public async UniTask Push(BaseUIPanel prefab, PlayerController player, Action onComplete = null, Action onClose = null)
     {
+        AudioManager.Instance.PlayUi(AudioEnums.EUiType.Open);
+
         if (mStack.TryPeek(out var top))
         {
             top.CG.interactable = false;
@@ -109,6 +112,8 @@ public class UIManager : Singleton<UIManager>
 
     public async UniTask Pop()
     {
+        AudioManager.Instance.PlayUi(AudioEnums.EUiType.Close);
+
         if (mStack.Count == 0)
         {
             return;

@@ -97,11 +97,19 @@ public class SoulStoneShopPanelController : BaseUIPanel
             button.SelectorImage.SetActive(false);
 
             int index = i;
-            button.UpgradeButtonUI.onClick.AddListener(()=> OnUpgradeButtonClicked(index));
+            button.UpgradeButtonUI.onClick.AddListener(() =>
+            {
+                // 업그레이드 아이콘 버튼 클릭 시 
+                AudioManager.Instance.PlayUi(AudioEnums.EUiType.Click);
+                OnUpgradeButtonClicked(index);
+            });
         }
         
         //강화 적용 버튼 이벤트 설정
-        mUpgradeApplyButton.onClick.AddListener(OnUpgradeApplyButtonClicked);
+        mUpgradeApplyButton.onClick.AddListener(() => {
+            AudioManager.Instance.PlayUi(AudioEnums.EUiType.Click);  
+            OnUpgradeApplyButtonClicked();
+        });
         mUpgradeApplyButton.interactable = false;
 
         mDescriptionText.text = "강화할 능력을 선택하세요";
