@@ -701,7 +701,10 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 47d88bdf17cc7034f91b7982d5e5fec0, type: 3}
   - {fileID: 8300000, guid: 7f561bd72eac78a48916ff515da81e6d, type: 3}
   mSfxClips: []
-  mUiClips: []
+  mUiClips:
+  - {fileID: 8300000, guid: 15a002992dc51c24db17eab31b31eaa2, type: 3}
+  - {fileID: 8300000, guid: e620d8e6875599c40a87c5adc266006f, type: 3}
+  - {fileID: 8300000, guid: ee81d0f068cc4d244b0f4a2e7b1cefae, type: 3}
 --- !u!1001 &1048028298
 PrefabInstance:
   m_ObjectHideFlags: 0
