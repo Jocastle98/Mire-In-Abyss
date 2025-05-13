@@ -706,7 +706,6 @@ public class EnemyBTController : MonoBehaviour
             PlayerController playerController = player.GetComponent<PlayerController>();
             playerController.OnEnemyKilled();
         }
-
         StartCoroutine(Dissolve());
     }
 
