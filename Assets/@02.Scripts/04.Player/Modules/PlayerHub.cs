@@ -9,6 +9,10 @@ using UnityEngine.SceneManagement;
 [RequireComponent(typeof(BuffController))]
 [RequireComponent(typeof(QuestLog))]
 [RequireComponent(typeof(SkillController))]
+
+// 현재 PlayerHub에 Soul, QuestLog 일부 등 UserData에 저장되어야 하는 데이터가 혼용 되어있음
+// 수정 전까진 "PlayerHub에서 해당 데이터를 관리" 및 구독 전파를 하고 UserData에 직접 변경하는 로직을 넣어두는 방식으로 두고 
+// 수정 후 해당 데이터를 모두 UserData에 저장하고 구독 전파 방식으로 변경 예정
 public class PlayerHub : Singleton<PlayerHub>
 {
     public Inventory Inventory { get; private set; }
@@ -24,6 +28,7 @@ public class PlayerHub : Singleton<PlayerHub>
         QuestLog = GetComponent<QuestLog>();
         Skills = GetComponent<SkillController>();
 
+        // UserData를 통해 Soul, QuestLog 등 데이터 초기화 예정
         Inventory.Init(0, 0);
         SubscribeEvents();
     }

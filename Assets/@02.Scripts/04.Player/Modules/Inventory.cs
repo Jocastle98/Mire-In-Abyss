@@ -35,6 +35,9 @@ public sealed class Inventory : MonoBehaviour
         {
             mItems[id] = cur + addedAmt;
         }
+
+        //TODO: UserData Item 해금 여부 업데이트
+
         ItemAdded.OnNext(new ItemAdded(id, addedAmt, mItems[id]));
     }
 
@@ -84,5 +87,10 @@ public sealed class Inventory : MonoBehaviour
         }
 
         SoulSubTracked.OnNext(new SoulSubTracked(removedAmt, Soul));
+    }
+
+    public void ResetItems()
+    {
+        mItems.Clear();
     }
 }

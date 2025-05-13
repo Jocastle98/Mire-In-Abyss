@@ -38,8 +38,8 @@ public sealed class DisplayPresenter : TabPresenterBase
         mModeDropdown.onValueChanged.AddListener(OnDisplayModeChanged);
         mResolutionDropdown.onValueChanged.AddListener(OnResolutionChanged);
 
-        mModeDropdown.value = Array.FindIndex(mModeTable, mode => mode == UserData.Instance.DisplayMode);
-        mResolutionDropdown.value = Array.FindIndex(mResolutions, res => res.width == UserData.Instance.Resolution.width && res.height == UserData.Instance.Resolution.height);
+        mModeDropdown.value = Array.FindIndex(mModeTable, mode => mode == UserData.Instance.FullScreen);
+        mResolutionDropdown.value = Array.FindIndex(mResolutions, res => res.width == UserData.Instance.ScreenResolution.width && res.height == UserData.Instance.ScreenResolution.height);
     }
 
     void populateModeDropdown()

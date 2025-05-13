@@ -5,7 +5,7 @@ public sealed class SettingTabPanelPresenter : TabPanelPresenter
 {
     public override UniTask Hide(Action onComplete = null)
     {
-        UserData.Instance.SaveSettings();
+        // UserData.Instance.Save();
         return base.Hide(onComplete);
     }
 }

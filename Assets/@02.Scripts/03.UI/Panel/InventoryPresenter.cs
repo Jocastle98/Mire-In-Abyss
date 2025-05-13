@@ -8,6 +8,7 @@ using UnityEngine.UI;
 using R3;
 using UnityEngine.EventSystems;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 
 public class TempStat
 {
@@ -97,5 +98,10 @@ public sealed class InventoryPresenter : TabPresenterBase
 
         mItemDetailNameText.text = rec.ItemName;
         mItemDetailDescText.text = rec.Description;
+    }
+
+    void OnDisable()
+    {
+        
     }
 }

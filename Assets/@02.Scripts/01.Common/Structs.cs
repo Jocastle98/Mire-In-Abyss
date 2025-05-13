@@ -42,6 +42,22 @@ namespace AchievementStructs
     }
 }
 
+namespace Events.UserData
+{
+    public readonly struct AchievementUpdated
+    {
+        public readonly string ID;
+        public readonly int Progress;
+        public AchievementUpdated(string id, int progress)
+            => (ID, Progress) = (id, progress);
+    }
+    public readonly struct AchievementCompleted
+    {
+        public readonly string ID;
+        public AchievementCompleted(string id) => ID = id;
+    }
+}
+
 namespace Events.Player
 {
     public readonly struct PlayerGrounded

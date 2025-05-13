@@ -30,90 +30,74 @@ public class AudioManager : Singleton<AudioManager>
 
     public void InitAudioDataFromUserData()
     {
-        AudioListener.volume = UserData.Instance.SoundData.MasterVol;
-        mBgmSource.volume = UserData.Instance.SoundData.BgmVol;
-        mSfxSource.volume = UserData.Instance.SoundData.SeVol;
-        mUiSource.volume = UserData.Instance.SoundData.UiVol;
+        AudioListener.volume = UserData.Instance.MasterVolume;
+        mBgmSource.volume = UserData.Instance.BgmVolume;
+        mSfxSource.volume = UserData.Instance.SeVolume;
+        mUiSource.volume = UserData.Instance.UiVolume;
 
-        AudioListener.pause = UserData.Instance.SoundData.IsMasterMuted;
-        mBgmSource.mute = UserData.Instance.SoundData.IsBgmMuted;
-        mSfxSource.mute = UserData.Instance.SoundData.IsSeMuted;
-        mUiSource.mute = UserData.Instance.SoundData.IsUiMuted;
+        AudioListener.pause = UserData.Instance.IsMasterMuted;
+        mBgmSource.mute = UserData.Instance.IsBgmMuted;
+        mSfxSource.mute = UserData.Instance.IsSeMuted;
+        mUiSource.mute = UserData.Instance.IsUiMuted;
+
+        subscribeUserAudioData();
     }
 
-    /// <summary>
-    /// SoundPresenter에서 슬라이더 할당 
-    /// </summary>
-    public void InitSliders(
-        Slider masterSlider,
-        Slider bgmSlider,
-        Slider sfxSlider,
-        Slider uiSlider)
+    private void subscribeUserAudioData()
     {
-        if (masterSlider != null)
-        {
-            masterSlider.onValueChanged.AddListener(OnMasterVolumeChanged);
-        }
-        if (bgmSlider != null)
-        {
-            bgmSlider.onValueChanged.AddListener(OnBgmVolumeChanged);
-        }
-        if (sfxSlider != null)
-        {
-            sfxSlider.onValueChanged.AddListener(OnSfxVolumeChanged);
-        }
-        if (uiSlider != null)
-        {
-            uiSlider.onValueChanged.AddListener(OnUIVolumeChanged);
-        }
+        UserData.Instance.ObsMasterVolume.Subscribe(OnMasterVolumeChanged).AddTo(this);
+        UserData.Instance.ObsBgmVolume.Subscribe(OnBgmVolumeChanged).AddTo(this);
+        UserData.Instance.ObsSeVolume.Subscribe(OnSfxVolumeChanged).AddTo(this);
+        UserData.Instance.ObsUiVolume.Subscribe(OnUIVolumeChanged).AddTo(this);
+        
     }
 
     private void OnMasterVolumeChanged(float v)
     {
         AudioListener.volume = v;
-        UserData.Instance.SoundData.MasterVol = v;
+        UserData.Instance.MasterVolume = v;
     }
 
     private void OnBgmVolumeChanged(float v)
     {
         mBgmSource.volume = v;
-        UserData.Instance.SoundData.BgmVol = v;
+        UserData.Instance.BgmVolume = v;
     }
 
     private void OnSfxVolumeChanged(float v)
     {
         mSfxSource.volume = v;
-        UserData.Instance.SoundData.SeVol = v;
+        UserData.Instance.SeVolume = v;
     }
 
     private void OnUIVolumeChanged(float v)
     {
         mUiSource.volume = v;
-        UserData.Instance.SoundData.UiVol = v;
+        UserData.Instance.UiVolume = v;
     }
 
     public void SetMasterMute(bool isMuted)
     {
         AudioListener.pause = isMuted;
-        UserData.Instance.SoundData.IsMasterMuted = isMuted;
+        UserData.Instance.IsMasterMuted = isMuted;
     }
 
     public void SetBgmMute(bool isMuted)
     {
         mBgmSource.mute = isMuted;
-        UserData.Instance.SoundData.IsBgmMuted = isMuted;
+        UserData.Instance.IsBgmMuted = isMuted;
     }
 
     public void SetSeMute(bool isMuted)
     {
         mSfxSource.mute = isMuted;
-        UserData.Instance.SoundData.IsSeMuted = isMuted;
+        UserData.Instance.IsSeMuted = isMuted;
     }
 
     public void SetUiMute(bool isMuted)
     {
         mUiSource.mute = isMuted;
-        UserData.Instance.SoundData.IsUiMuted = isMuted;
+        UserData.Instance.IsUiMuted = isMuted;
     }
 
     public void PlayBgm(EBgmType type)
