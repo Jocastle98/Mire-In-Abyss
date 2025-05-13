@@ -1,9 +1,12 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using Unity.VisualScripting;
 using EnemyEnums;
+using Events.HUD;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.Serialization;
+using Random = UnityEngine.Random;
 
 [RequireComponent(typeof(NavMeshAgent))]
 public class EnemyBTController : MonoBehaviour
@@ -83,6 +86,8 @@ public class EnemyBTController : MonoBehaviour
     private ItemDropper itemDropper;
     private GameObject mBreathVFXInstance;
     private bool mbIgnoreHits = false;
+    
+    public System.Action monsterDead;
 
     
     void Awake()
@@ -703,6 +708,7 @@ public class EnemyBTController : MonoBehaviour
             PlayerController playerController = player.GetComponent<PlayerController>();
             playerController.OnEnemyKilled();
         }
+        monsterDead.Invoke();
         StartCoroutine(Dissolve());
     }
 
