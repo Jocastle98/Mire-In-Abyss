@@ -52,12 +52,30 @@ public class Projectile : MonoBehaviour
     {
         if (mIsBreath) return;
 
-        if ((mHitLayer.value & 1 << other.gameObject.layer) == 0) return;
+        int layer = other.gameObject.layer;
+
+        // 반사화살인지 구분하기
+        bool isReflected = ShooterTransform != null 
+                           && ShooterTransform.GetComponent<PlayerController>() != null;
+
+        // 장애물 외 레이어인지
+        if ((mHitLayer.value & (1 << layer)) == 0)
+        {
+            // 반사화살이 아니라면 장애물에 닿을때 0.5초후 파괴되어서 데미지 안주도록
+            if (!isReflected)
+            {
+                Destroy(gameObject);
+            }
+            return;
+        }
+
+        // 플레이어 닿으면
         if (other.TryGetComponent<PlayerController>(out var player))
         {
             player.SetHit(mDamage, transform, 1);
         }
-        else if (other.TryGetComponent<EnemyBTController>(out var enemy)) // 발사체에 맞은게 몬스터인데
+        // 몬스터 닿으면 
+        else if (other.TryGetComponent<EnemyBTController>(out var enemy))
         {
             // ShooterTransform이(발사한 객체가) 있고, ShooterTransform이(발사한 객체가) 몬스터라면
             if (ShooterTransform != null && ShooterTransform.GetComponent<EnemyBTController>() != null)
@@ -69,7 +87,9 @@ public class Projectile : MonoBehaviour
             // ShooterTransform이(발사한 객체가) 없거나, ShooterTransform이(발사한 객체가) 몬스터가 아니면 피해를 줌
             enemy.SetHit(mDamage, -1);
         }
-        Destroy(gameObject);
+
+        // 패링 포함이라 패링 후에 화살이 몬스터한테 가는 사이 파괴될수있어서 시간조절 잘해야할듯
+        Destroy(gameObject,2.5f);
     }
 
     private void OnTriggerStay(Collider other)
@@ -77,7 +97,6 @@ public class Projectile : MonoBehaviour
         if (!mIsBreath) return;
         if ((mHitLayer.value & 1 << other.gameObject.layer) == 0) return;
 
-        // 간격 체크
         if (Time.time < mLastDamageTime + mDamageInterval) return;
         mLastDamageTime = Time.time;
 
