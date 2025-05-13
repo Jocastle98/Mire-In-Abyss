@@ -1,11 +1,14 @@
+using System;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using Events.Abyss;
 using Events.Combat;
+using Events.Gameplay;
 using Events.HUD;
 using R3;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public sealed class WorldUIManager : MonoBehaviour
 {
@@ -24,6 +27,7 @@ public sealed class WorldUIManager : MonoBehaviour
     [SerializeField] float mDmgTextOffsetX = 0.1f;
     [SerializeField] float mDmgTextOffsetY = 0.8f;
     [SerializeField] float mDmgTextFloatHeight = 0.3f;
+    private readonly HashSet<DamageTextView> mActiveDmgTexts = new();
 
     /* Pools */
     private ObjectPool<DamageTextView> mDmgPool;
@@ -81,36 +85,59 @@ public sealed class WorldUIManager : MonoBehaviour
         R3EventBus.Instance.Receive<EntityDestroyed<IHpTrackable>>()
             .Subscribe(e => DeleteHpBar(e.ID))
             .AddTo(mCD);
+
+        R3EventBus.Instance.Receive<GameplaySceneChanged>()
+            .Subscribe(e => ReturnAllPools())
+            .AddTo(mCD);
+
+
+        R3EventBus.Instance.Receive<EnterDeepAbyss>()
+            .Subscribe(e => ReturnAllPools())
+            .AddTo(mCD);
     }
 
     /* -------- Damage -------- */
     async UniTaskVoid SpawnDamageText(DamagePopup p)
     {
         var view = mDmgPool.Rent();
+        mActiveDmgTexts.Add(view);
+
         view.GetComponent<Billboard>().enabled = true;
         var start = getSpawnPos(p);
         view.transform.position = start;
-        if (p.Color == default)
-        {
-            view.SetText(p.Amount, mDefaultDamageTextColor);
-        }
-        else
-        {
-            view.SetText(p.Amount, p.Color);
-        }
 
-        // 대미지 텍스트 생성 후 날아가는 방향
+        var color = p.Color == default ? mDefaultDamageTextColor : p.Color;
+        view.SetText(p.Amount, color);
+
         Vector2 dir2D = new Vector2(Random.Range(-0.2f, 0.2f), Random.Range(0.5f, 1f)).normalized;
         Vector3 dir3D = mWorldCam.transform.right * dir2D.x + mWorldCam.transform.up * dir2D.y;
 
-        var moveTask = view.transform.DOMove(start + dir3D * mDmgTextFloatHeight, mDmgTextLifeTime).SetEase(Ease.OutQuad).ToUniTask();
+        var moveTween = view.transform.DOMove(start + dir3D * mDmgTextFloatHeight, mDmgTextLifeTime)
+                                      .SetEase(Ease.OutQuad);
+        var fadeTween = view.Text.DOFade(0, mDmgTextFadeTime)
+                                 .SetDelay(mDmgTextFadeDelay)
+                                 .SetEase(Ease.InQuad);
 
-        // 페이드
-        var fadeTask = view.Text.DOFade(0, mDmgTextFadeTime)
-                 .SetDelay(mDmgTextFadeDelay)
-                 .SetEase(Ease.InQuad).ToUniTask();
+        try
+        {
+            await UniTask.WhenAll(moveTween.ToUniTask(), fadeTween.ToUniTask());
+        }
+        catch (OperationCanceledException) { /* Kill된 경우 */ }
 
-        await UniTask.WhenAll(moveTask, fadeTask);
+        CleanupDamageText(view);
+    }
+
+    /* ---------- 정리 헬퍼 ---------- */
+    void CleanupDamageText(DamageTextView view)
+    {
+        if (!mActiveDmgTexts.Remove(view))
+        {
+            return;
+        }
+
+        DOTween.Kill(view.transform);
+        DOTween.Kill(view.Text);
+        view.Text.alpha = 1f;
 
         view.GetComponent<Billboard>().enabled = false;
         mDmgPool.Return(view);
@@ -187,9 +214,14 @@ public sealed class WorldUIManager : MonoBehaviour
         }
     }
 
-    void OnDisable()
+    void ReturnAllPools()
     {
-        mCD.Dispose();
+        foreach (var v in mActiveDmgTexts)
+        {
+            CleanupDamageText(v);
+        }
+        mActiveDmgTexts.Clear();
+
         foreach (var v in mActiveHpBars.Values)
         {
             mHpPool.Return(v);
@@ -200,5 +232,11 @@ public sealed class WorldUIManager : MonoBehaviour
         }
         mActiveHpBars.Clear();
         mPendingHpBars.Clear();
+    }
+
+    void OnDisable()
+    {
+        mCD.Dispose();
+        ReturnAllPools();
     }
 }

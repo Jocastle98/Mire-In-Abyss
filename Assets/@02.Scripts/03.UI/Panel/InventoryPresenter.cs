@@ -13,6 +13,11 @@ public class TempStat
 {
     public string Name { get; set; }
     public float Value { get; set; }
+    public TempStat(string name, float value)
+    {
+        Name = name;
+        Value = value;
+    }
 }
 
 public sealed class InventoryPresenter : TabPresenterBase
@@ -26,6 +31,7 @@ public sealed class InventoryPresenter : TabPresenterBase
     [Header("스탯 목록")]
     [SerializeField] RectTransform mStatContent;
     [SerializeField] StatView mStatViewPrefab;
+    private PlayerStats mPlayerStats;
 
     private bool mIsInit = false;
 
@@ -34,6 +40,7 @@ public sealed class InventoryPresenter : TabPresenterBase
     {
         if (!mIsInit)
         {
+            mPlayerStats = TempRefManager.Instance.PlayerStats;
             mItemDetailNameText.text = "";
             mItemDetailDescText.text = "";
             buildItemArea();
@@ -66,13 +73,14 @@ public sealed class InventoryPresenter : TabPresenterBase
         // 임시 스탯 목록 생성
         var stats = new List<TempStat>
         {
-            new TempStat { Name = "체력", Value = 100 },
-            new TempStat { Name = "공격력", Value = 10 },
-            new TempStat { Name = "방어력", Value = 5 },
-            new TempStat { Name = "치명타 확률", Value = 0.1f },
-            new TempStat { Name = "치명타 데미지", Value = 1.5f },
-            new TempStat { Name = "생명력 흡수", Value = 0.1f },
-            new TempStat { Name = "이동속도", Value = 1.5f },
+            new TempStat("최대 체력", mPlayerStats.GetMaxHP()),
+            new TempStat("현재 체력", mPlayerStats.GetCurrentHP()),
+            new TempStat("이동 속도", mPlayerStats.GetMoveSpeed()),
+            new TempStat("공격력", mPlayerStats.GetAttackPower()),
+            new TempStat("방어력", mPlayerStats.GetDefence()),
+            new TempStat("치명타 확률", mPlayerStats.GetCritChance() * 100),
+            new TempStat("데미지 감소", mPlayerStats.GetDamageReduction() * 100),
+            new TempStat("흡혈 퍼센트", mPlayerStats.GetLifeStealPercentage() * 100),
         };
 
         foreach (var stat in stats)

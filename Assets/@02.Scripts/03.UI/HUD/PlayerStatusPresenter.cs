@@ -34,10 +34,10 @@ public sealed class PlayerStatusPresenter : HudPresenterBase
         subscribeEvents();
         mLevelText.text = "1";
         // TODO: Abyss, Town 진입 시 플레이어 HP 정보 받아오기
-        mHpText.text = "100 / 100";
+        mHpText.text = $"{TempRefManager.Instance.PlayerStats.GetCurrentHP()} / {TempRefManager.Instance.PlayerStats.GetMaxHP()}";
         
         mExpBarUI.SetProgress(0);
-        mHpBarUI.SetProgress(1);
+        mHpBarUI.SetProgress(TempRefManager.Instance.PlayerStats.GetCurrentHP() / TempRefManager.Instance.PlayerStats.GetMaxHP());
     }
     
     private void subscribeEvents()

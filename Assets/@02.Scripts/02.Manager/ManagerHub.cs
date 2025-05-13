@@ -26,5 +26,14 @@ public sealed class ManagersHub : Singleton<ManagersHub>, IInitializable
         await UniTask.WhenAll(tasks);
     }
 
+    public async UniTask InitializeUserDataAsync()
+    {
+        var tasks = new UniTask[]
+        {
+            
+        };
+        await UniTask.WhenAll(tasks);
+    }
+
     protected override void OnSceneLoaded(Scene scene, LoadSceneMode mode) { }
 }

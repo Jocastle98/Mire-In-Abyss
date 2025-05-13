@@ -6,9 +6,11 @@ using R3;
 
 using Events.Data;
 using GameEnums;
+using TMPro;
 
 public sealed class BootLoader : MonoBehaviour
 {
+    [SerializeField] TMP_Text mProgressText;
     public static float Progress { get; private set; }
 
     async void Start()
@@ -23,8 +25,14 @@ public sealed class BootLoader : MonoBehaviour
             ManagersHub.Instance.InitializeAsync(),
             UserData.Instance.InitializeAsync()
         };
-        await WaitWithProgress(initTasks);   // Progress 값 0~1
+        await WaitWithProgress(initTasks, "전역 초기화 중...(1/2)");   // Progress 값 0~1
         R3EventBus.Instance.Publish(new Preloaded());
+
+        var userDataInitTasks = new UniTask[]
+        {
+            ManagersHub.Instance.InitializeUserDataAsync()
+        };
+        await WaitWithProgress(userDataInitTasks, "유저 데이터 불러오는 중...(2/2)");
 
         /* C) MainMenu 씬 Additive */
         var menuOp = SceneManager.LoadSceneAsync(Constants.MainMenuScene,
@@ -50,7 +58,7 @@ public sealed class BootLoader : MonoBehaviour
     }
 
     /* 진행률 헬퍼 */
-    static async UniTask WaitWithProgress(UniTask[] tasks)
+    static async UniTask WaitWithProgress(UniTask[] tasks, string progressText)
     {
         int total = tasks.Length, done = 0;
         var wrapped = tasks.Select(async t =>
