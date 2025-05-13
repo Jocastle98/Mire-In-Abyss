@@ -1070,6 +1070,7 @@ Transform:
   - {fileID: 2320483600910331518}
   - {fileID: 7379884179318204126}
   - {fileID: 8049682154126776483}
+  - {fileID: 474323183038236755}
   m_Father: {fileID: 572425429190469439}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &3880147417705801934
@@ -1145,7 +1146,14 @@ MonoBehaviour:
   airDuration: 10
   mEnemyType: 2
   mExpRewardController: {fileID: 168077520893859685}
-  stunDuration: 2
+  mStunDuration: 2
+  mAttackDebuffDuration: 10
+  mAttackDebuffAmount: 5
+  mFireDotDuration: 3
+  mFireDotDamagePerSecond: 3
+  mIceDebuffDuration: 8
+  mIceAnimSpeed: 0.2
+  mHpBarAnchor: {fileID: 474323183038236755}
 --- !u!95 &6038634554808625915
 Animator:
   serializedVersion: 5
@@ -1290,6 +1298,37 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 9173161282626830428}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &4341454749541672582
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 474323183038236755}
+  m_Layer: 9
+  m_Name: HpBarAnchor
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &474323183038236755
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4341454749541672582}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 6, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 3870283709590560832}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &4363253965030620228
 GameObject:

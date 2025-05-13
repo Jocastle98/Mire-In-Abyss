@@ -4,9 +4,11 @@ using EnemyEnums;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.Serialization;
+using Events.HUD;
+using UIHUDEnums;
 
 [RequireComponent(typeof(NavMeshAgent))]
-public class EnemyBTController : MonoBehaviour
+public class EnemyBTController : MonoBehaviour, IHpTrackable, IMapTrackable
 {
     [Header("체력 설정")]  
     [SerializeField] private int mMaxHealth = 100;
@@ -57,6 +59,7 @@ public class EnemyBTController : MonoBehaviour
     [Header("경험치 설정")] 
     [SerializeField] private EnemyType mEnemyType = EnemyType.Common;
     public EnemyType EnemyType => mEnemyType;
+
     [SerializeField] private EnemyExpRewardController mExpRewardController;
     
     [Header("몬스터 Hit 상태 설정")]
@@ -67,6 +70,9 @@ public class EnemyBTController : MonoBehaviour
     [SerializeField] private int mFireDotDamagePerSecond = 3;
     [SerializeField] private float mIceDebuffDuration = 8f;
     [SerializeField] private float mIceAnimSpeed = 0.2f;
+
+    [Header("몬스터 UI 관련 설정")]
+    [SerializeField] private Transform mHpBarAnchor;
     private float mOriginalAgentSpeed;
     private bool mbAttackDebuffed = false;
     private bool mbIsStunned = false;
@@ -84,6 +90,12 @@ public class EnemyBTController : MonoBehaviour
     private GameObject mBreathVFXInstance;
     private bool mbIgnoreHits = false;
 
+    public Transform HpAnchor => mHpBarAnchor;
+
+    public Transform MapAnchor => transform;
+
+    public MiniMapIconType IconType { get; private set; }
+
     
     void Awake()
     {
@@ -95,6 +107,13 @@ public class EnemyBTController : MonoBehaviour
         mRenderers = GetComponentsInChildren<Renderer>();
         mExpRewardController = GetComponent<EnemyExpRewardController>();
         itemDropper = GetComponent<ItemDropper>();
+
+        IconType = mEnemyType switch
+        {
+            EnemyType.Boss => MiniMapIconType.Boss,
+            _ => MiniMapIconType.Enemy
+        };
+        TrackableEventHelper.PublishSpawned(this);
     }
 
     void Start()
@@ -532,6 +551,9 @@ public class EnemyBTController : MonoBehaviour
         Debug.Log($"받은 대미지:{damage} 방어력:{mDefense} 최종:{effective} 남은체력:{mCurrentHealth}");
         if (mCurrentHealth <= 0) mbIsDead = true;
         else mbIsHit = true;
+
+        R3EventBus.Instance.Publish(new Events.Combat.DamagePopup(transform.position, effective));
+        R3EventBus.Instance.Publish(new Events.Combat.EnemyHpChanged(this.GetInstanceID(), mCurrentHealth, mMaxHealth));
     }
 
     // 스턴 
@@ -668,6 +690,7 @@ public class EnemyBTController : MonoBehaviour
 
     private IEnumerator Dissolve()
     {
+        TrackableEventHelper.PublishDestroyed(this);
         var block = new MaterialPropertyBlock();
         float alpha = 1f;
         while (alpha > 0f)

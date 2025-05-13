@@ -90,7 +90,6 @@ public sealed class WorldUIManager : MonoBehaviour
             .Subscribe(e => ReturnAllPools())
             .AddTo(mCD);
 
-
         R3EventBus.Instance.Receive<EnterDeepAbyss>()
             .Subscribe(e => ReturnAllPools())
             .AddTo(mCD);
