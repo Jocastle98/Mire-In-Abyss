@@ -909,7 +909,7 @@ MonoBehaviour:
   player: {fileID: 0}
   cellSize: 3
   minDungeonRoomSize: 15
-  eventRoomChance: 15
+  eventRoomChance: 0
   divideLineWidth: 2
   minRoomCount: 6
   portalPrefab: {fileID: 731653145237511377, guid: 2d0c8e17c7dedb64e95f33449af90af8, type: 3}

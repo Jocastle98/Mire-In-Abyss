@@ -83,6 +83,8 @@ public class EnemyBTController : MonoBehaviour
     private ItemDropper itemDropper;
     private GameObject mBreathVFXInstance;
     private bool mbIgnoreHits = false;
+    
+    public System.Action monsterDead;
 
     
     void Awake()
@@ -703,6 +705,7 @@ public class EnemyBTController : MonoBehaviour
             PlayerController playerController = player.GetComponent<PlayerController>();
             playerController.OnEnemyKilled();
         }
+        monsterDead.Invoke();
         StartCoroutine(Dissolve());
     }
 
