@@ -1155,33 +1155,40 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     public void Defend()
     {
         SetCombatState(true);
-        
-        if (!GameManager.Instance.Input.IsDefending)
-        {
-            Defending(false);
 
-            if (GameManager.Instance.Input.MoveInput == Vector2.zero)
+        if (bIsGrounded)
+        {
+            if (!GameManager.Instance.Input.IsDefending)
             {
-                SetPlayerState(PlayerState.Idle);
+                Defending(false);
+
+                if (GameManager.Instance.Input.MoveInput == Vector2.zero)
+                {
+                    SetPlayerState(PlayerState.Idle);
+                }
+                else
+                {
+                    SetPlayerState(PlayerState.Move);
+                }
             }
             else
             {
-                SetPlayerState(PlayerState.Move);
+                Defending(true);
+                
+                // 이동 방어시 하반신(Base Layer) 애니메이션
+                if (GameManager.Instance.Input.MoveInput == Vector2.zero)
+                {
+                    Idle();
+                }
+                else
+                {
+                    BattleMove();
+                }
             }
         }
         else
         {
-            Defending(true);
-            
-            // 이동 방어시 하반신(Base Layer) 애니메이션
-            if (GameManager.Instance.Input.MoveInput == Vector2.zero)
-            {
-                Idle();
-            }
-            else
-            {
-                BattleMove();
-            }
+            SetPlayerState(PlayerState.Fall);
         }
     }
     
