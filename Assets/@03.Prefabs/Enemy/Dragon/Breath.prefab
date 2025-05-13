@@ -95,6 +95,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e5442f6c15db4db9b5875759123d5da3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  mSpeed: 15
 --- !u!1001 &4447308779988719816
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -146,6 +147,34 @@ PrefabInstance:
     - target: {fileID: 4753020624446900, guid: 801830a34b3285842a8be1b874330251, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 198736250677286802, guid: 801830a34b3285842a8be1b874330251, type: 3}
+      propertyPath: lengthInSec
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 198736250677286802, guid: 801830a34b3285842a8be1b874330251, type: 3}
+      propertyPath: InitialModule.size3D
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 198736250677286802, guid: 801830a34b3285842a8be1b874330251, type: 3}
+      propertyPath: ShapeModule.radius.value
+      value: 0.29
+      objectReference: {fileID: 0}
+    - target: {fileID: 198736250677286802, guid: 801830a34b3285842a8be1b874330251, type: 3}
+      propertyPath: InitialModule.startSize.scalar
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 199117568712492572, guid: 801830a34b3285842a8be1b874330251, type: 3}
+      propertyPath: m_Materials.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 199473555345371396, guid: 801830a34b3285842a8be1b874330251, type: 3}
+      propertyPath: m_Materials.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 199628257786166078, guid: 801830a34b3285842a8be1b874330251, type: 3}
+      propertyPath: m_Materials.Array.size
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
