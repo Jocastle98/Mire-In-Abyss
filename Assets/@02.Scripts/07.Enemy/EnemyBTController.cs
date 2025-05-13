@@ -1,9 +1,12 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using Unity.VisualScripting;
 using EnemyEnums;
+using Events.HUD;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.Serialization;
+using Random = UnityEngine.Random;
 
 [RequireComponent(typeof(NavMeshAgent))]
 public class EnemyBTController : MonoBehaviour
@@ -703,6 +706,7 @@ public class EnemyBTController : MonoBehaviour
             PlayerController playerController = player.GetComponent<PlayerController>();
             playerController.OnEnemyKilled();
         }
+
         StartCoroutine(Dissolve());
     }
 
