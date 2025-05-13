@@ -2324,7 +2324,7 @@ MonoBehaviour:
   mPlayerMask:
     serializedVersion: 2
     m_Bits: 256
-  mPatrolRadius: 5
+  mPatrolRadius: 3
   mAttackBehaviorAsset: {fileID: 11400000, guid: d4421d88b302c33418aaa05ef814bf6a, type: 2}
   mFirePoint: {fileID: 5811797329913469919}
   mBreathPoint: {fileID: 0}

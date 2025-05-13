@@ -55,7 +55,7 @@ public class RangedAttackBehavior : ScriptableObject, IAttackBehavior
         
         var proj = Instantiate(ProjectilePrefab, fp.position, Quaternion.LookRotation(dir));
         if (proj.TryGetComponent<Projectile>(out var ps))
-            ps.Initialize(dir, ProjectileSpeed, HitLayer, Damage);
+            ps.Initialize(dir, ProjectileSpeed, HitLayer, Damage,self);
         
     }
 

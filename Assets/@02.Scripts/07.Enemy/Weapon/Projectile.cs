@@ -1,18 +1,20 @@
-﻿using UnityEngine;
+﻿// Projectile.cs
+using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody))]
 [RequireComponent(typeof(Collider))]
 public class Projectile : MonoBehaviour
 {
-    private Rigidbody mRb;
-    private Collider mCol;
-    private LayerMask mHitLayer;
-    private int mDamage;
+    public Transform ShooterTransform { get; private set; }
 
-    
-    private bool  mIsBreath = false;
-    private float mLastDamageTime;
-    private float mDamageInterval = 0.3f;
+    private Rigidbody   mRb;
+    private Collider    mCol;
+    private LayerMask   mHitLayer;
+    private int         mDamage;
+    private bool        mIsBreath = false;
+    private float       mLastDamageTime;
+    private float       mDamageInterval = 0.3f;
+
     private void Awake()
     {
         mRb = GetComponent<Rigidbody>();
@@ -23,15 +25,16 @@ public class Projectile : MonoBehaviour
         mCol.isTrigger = true;
     }
 
-
-    public void Initialize(Vector3 direction, float speed, LayerMask hitLayer, int damage)
+    // 발사자 정보를 함께 넘기도록 시그니처 변경
+    public void Initialize(Vector3 direction, float speed, LayerMask hitLayer, int damage, Transform shooter)
     {
-        mRb.velocity = direction.normalized * speed;
-        mHitLayer = hitLayer;
-        mDamage = damage;
-
+        ShooterTransform = shooter;
+        mRb.velocity     = direction.normalized * speed;
+        mHitLayer        = hitLayer;
+        mDamage          = damage;
         Destroy(gameObject, 5f);
     }
+
     public void InitializeBreath(LayerMask hitLayer, int damage)
     {
         mRb.velocity      = Vector3.zero;
@@ -46,31 +49,50 @@ public class Projectile : MonoBehaviour
         if (mIsBreath) 
             return;
 
-        int otherLayer = other.gameObject.layer;
-        int playerLayer = LayerMask.NameToLayer("Player");
-        if (otherLayer != playerLayer)
+        // 1) 비대상 레이어(장애물 등)에 부딪히면 파괴
+        if ((mHitLayer.value & (1 << other.gameObject.layer)) == 0)
         {
-            Destroy(gameObject);
+            Destroy(gameObject,2f);
             return;
         }
 
-        if (other.TryGetComponent<PlayerController>(out var player))
+        // 2) 발사자 자신과 부딪히면 무시
+        if (ShooterTransform != null && other.transform == ShooterTransform)
+            return;
+
+        // 3) 발사자가 몬스터 → 플레이어만 때리고 파괴
+        if (ShooterTransform != null && ShooterTransform.GetComponent<EnemyBTController>() != null)
         {
-            player.SetHit(mDamage, transform, 1);
+            if (other.TryGetComponent<PlayerController>(out var player))
+                player.SetHit(mDamage, transform, 1);
+            Destroy(gameObject,2f);
+            return;
         }
+
+        // 4) 발사자가 플레이어 → 몬스터만 때리고 파괴
+        if (ShooterTransform != null && ShooterTransform.GetComponent<PlayerController>() != null)
+        {
+            if (other.TryGetComponent<EnemyBTController>(out var enemy))
+                enemy.SetHit(mDamage, -1);
+            Destroy(gameObject,1f);
+            return;
+        }
+
+        // 5) 발사자 정보 없을 때 기본 처리 (플레이어에만 데미지)
+        if (other.TryGetComponent<PlayerController>(out var fallbackPlayer))
+            fallbackPlayer.SetHit(mDamage, transform, 1);
         Destroy(gameObject,2f);
     }
 
     private void OnTriggerStay(Collider other)
     {
         if (!mIsBreath) return;
-        if ((mHitLayer.value & 1 << other.gameObject.layer) == 0) return;
+        if ((mHitLayer.value & (1 << other.gameObject.layer)) == 0) return;
 
-        // 간격 체크
         if (Time.time < mLastDamageTime + mDamageInterval) return;
         mLastDamageTime = Time.time;
 
         if (other.TryGetComponent<PlayerController>(out var player))
-            player.SetHit(mDamage, transform, 2); // 2 = 브레스 연속딜 타입
+            player.SetHit(mDamage, transform, 2);
     }
 }
