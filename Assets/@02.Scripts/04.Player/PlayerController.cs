@@ -351,7 +351,9 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             }
             else
             {
-                if (CurrentPlayerState == PlayerState.Attack)
+                if (CurrentPlayerState == PlayerState.Roll || 
+                    CurrentPlayerState == PlayerState.Attack || CurrentPlayerState == PlayerState.Parry || 
+                    CurrentPlayerState == PlayerState.Stun || CurrentPlayerState == PlayerState.Freeze)
                 {
                     Fall();
                 }
@@ -660,25 +662,27 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     {
         mVerticalVelocity = 0.0f;
         mVerticalVelocity = Mathf.Sqrt(mJumpHeight * -2.0f * mGravity);
-
-        Vector3 targetDirection = Quaternion.Euler(0.0f, mTargetRotation, 0.0f) * Vector3.forward;
-        mCharacterController.Move(targetDirection.normalized * (mCurrentSpeed * Time.deltaTime) 
-                                  + new Vector3(0.0f, mVerticalVelocity, 0.0f) * Time.deltaTime);
+        
+        if (GameManager.Instance.Input.MoveInput == Vector2.zero)
+        {
+            Idle();
+        }
+        else
+        {
+            Move();
+        }
     }
     
-    private bool mbInDirection = false;
     public void Fall()
     {
-        Vector3 moveDirection = Vector3.zero;
-        
-        if (!mbInDirection)
+        if (GameManager.Instance.Input.MoveInput == Vector2.zero)
         {
-            Vector3 targetDirection = Quaternion.Euler(0.0f, mTargetRotation, 0.0f) * Vector3.forward;
-            moveDirection = targetDirection.normalized * mCurrentSpeed;
+            Idle();
         }
-        
-        mCharacterController.Move(moveDirection * Time.deltaTime 
-                                  + new Vector3(0.0f, mVerticalVelocity, 0.0f) * Time.deltaTime);
+        else
+        {
+            Move();
+        }
     }
 
     public void Land()
@@ -689,7 +693,6 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
 
     private void Landing()
     {
-        mbInDirection = false;
         SetPlayerState(PlayerState.Idle);
     }
     
@@ -879,8 +882,6 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             }
             else
             {
-                mbInDirection = true;
-                
                 SetPlayerState(PlayerState.Fall);
             }
         }
@@ -1543,8 +1544,6 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         
         yield return new WaitForSeconds(recoveryTime); // 애니메이션 후딜
         
-        mbInDirection = true;
-        
         SetCombatState(true);
         
         // 스킬 쿨타임 초기화 확인
@@ -1973,8 +1972,6 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     
     private void FireProjectile(Vector3 targetPoint)
     {
-        mbInDirection = true;
-        
         mProjectileCoroutine = StartCoroutine(FireProjectileCoroutine(targetPoint));
         
         mSkill_4_TimeoutDelta = mSkill_4_Timeout;
@@ -2035,8 +2032,6 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     private void CancelSkill()
     {
         StartCoroutine(Skill_4_Camera(false));
-
-        mbInDirection = true;
         
         SetPlayerState(PlayerState.Fall);
     }
