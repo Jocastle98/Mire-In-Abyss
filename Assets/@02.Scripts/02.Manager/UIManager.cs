@@ -33,6 +33,12 @@ public class UIManager : Singleton<UIManager>
         mPanels.Add(UIPanelType.SoulStoneShop, mSoulStoneShopPanelPrefab);
         mPanels.Add(UIPanelType.EnterPortal, mPortalPanelPrefab);
     }
+
+    void Update()
+    {
+        ProcessEscInput();
+    }
+    
     public async UniTask Push(BaseUIPanel prefab, Action onComplete = null)
     {
         if (mStack.TryPeek(out var top))
@@ -69,14 +75,14 @@ public class UIManager : Singleton<UIManager>
         }
 
         var inst = Instantiate(prefab, mPanelCanvas.transform);
-        
+
         // PlayerController 설정
         if (player != null)
         {
             inst.SetPlayer(player);
             inst.SetOnCloseCallback(onClose);
         }
-        
+
         mStack.Push(inst);
 
         if (mStack.Count == 1)
@@ -132,33 +138,28 @@ public class UIManager : Singleton<UIManager>
             Destroy(mStack.Pop().gameObject);
         }
     }
-    
-    void Update()
-    {
-        ProcessEscInput();
-    }
 
     private void ProcessEscInput()
     {
-        if(GameManager.Instance.Input.EscInput)
+        if (GameManager.Instance.Input.EscInput)
         {
-            if(GameManager.Instance.CurrentGameState == GameState.UI)
+            if (GameManager.Instance.CurrentGameState == GameState.UI)
             {
                 Pop().Forget();
             }
-            else if(GameManager.Instance.CurrentGameState == GameState.Gameplay)
+            else if (GameManager.Instance.CurrentGameState == GameState.Gameplay)
             {
                 Push(UIPanelType.EscGroup).Forget();
             }
         }
-        else if(GameManager.Instance.Input.TabInput)
+        else if (GameManager.Instance.Input.TabInput)
         {
             //TODO: EscGroup패널을 Inventory 탭으로 시작하게 호출
-            if(GameManager.Instance.CurrentGameState == GameState.UI)
+            if (GameManager.Instance.CurrentGameState == GameState.UI)
             {
                 Pop().Forget();
             }
-            else if(GameManager.Instance.CurrentGameState == GameState.Gameplay)
+            else if (GameManager.Instance.CurrentGameState == GameState.Gameplay)
             {
                 Push(UIPanelType.EscGroup).Forget();
             }
