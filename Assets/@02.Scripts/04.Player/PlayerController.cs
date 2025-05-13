@@ -1328,7 +1328,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
                             LayerMask enemyLayer = LayerMask.GetMask("Enemy"); // 적 레이어 이름에 따라 수정
 
                             // 반사 화살 발사
-                            reflectedProjectile.Initialize(transform.forward, 15.0f, enemyLayer, (int)(mPlayerStats.GetAttackDamage() * mParryDamageMultiplier));
+                            reflectedProjectile.Initialize(transform.forward, 15.0f, enemyLayer, (int)(mPlayerStats.GetAttackDamage() * mParryDamageMultiplier),this.transform);
                             reflectedProjectile.transform.rotation = Quaternion.LookRotation(reflectDir);
                         }
                     }

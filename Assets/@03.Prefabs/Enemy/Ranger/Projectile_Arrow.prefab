@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 4794695279049978}
   - component: {fileID: 198544944858923864}
   - component: {fileID: 199874304870013176}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: Waves
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4911,7 +4911,7 @@ GameObject:
   - component: {fileID: 4039616711004404}
   - component: {fileID: 198362454088448860}
   - component: {fileID: 199589577870613834}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: Sparks
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -9824,7 +9824,7 @@ GameObject:
   - component: {fileID: 2284026797062808455}
   - component: {fileID: 6820377934356772814}
   - component: {fileID: 5326332721465705419}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: Projectile_Arrow
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -14805,6 +14805,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e5442f6c15db4db9b5875759123d5da3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  mSpeed: 15
 --- !u!1 &1214358954199146
 GameObject:
   m_ObjectHideFlags: 0
@@ -14816,7 +14817,7 @@ GameObject:
   - component: {fileID: 4463937287572274}
   - component: {fileID: 198921755268963764}
   - component: {fileID: 199740277830324614}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: SubSparks
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -19658,7 +19659,7 @@ GameObject:
   - component: {fileID: 4816910967890968}
   - component: {fileID: 198205082277334854}
   - component: {fileID: 199045256733629516}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: Glow
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -24500,7 +24501,7 @@ GameObject:
   - component: {fileID: 4074339303465744}
   - component: {fileID: 198897898842092760}
   - component: {fileID: 199704690769407420}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: Flash
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -29400,7 +29401,7 @@ GameObject:
   - component: {fileID: 4412076118273836}
   - component: {fileID: 198656782477980160}
   - component: {fileID: 199195936075333242}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: Shockwave
   m_TagString: Untagged
   m_Icon: {fileID: 0}
