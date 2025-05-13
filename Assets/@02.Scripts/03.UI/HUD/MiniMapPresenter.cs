@@ -27,20 +27,19 @@ public sealed class MiniMapPresenter : HudPresenterBase
         mIconPools.Add(new(mIconPrefabs[(int)MiniMapIconType.Boss], mOtherIconLayer, 2));
         mIconPools.Add(new(mIconPrefabs[(int)MiniMapIconType.Shop], mOtherIconLayer, 1));
         mIconPools.Add(new(mIconPrefabs[(int)MiniMapIconType.Portal], mOtherIconLayer, 2));
-    }
+        mIconPools.Add(new(mIconPrefabs[(int)MiniMapIconType.QuestBoard], mOtherIconLayer, 1));
+        mIconPools.Add(new(mIconPrefabs[(int)MiniMapIconType.SoulStoneShop], mOtherIconLayer, 1));
 
-    void OnEnable()
-    {
+
         var playerIcon = mIconPools[(int)MiniMapIconType.Player].Rent();
         mIconsMap[mPlayer.GetInstanceID()] = playerIcon;
         
         // 플레이어 아이콘 회전을 위한 할당
         mPlayerIconRT = playerIcon.GetComponent<RectTransform>();
         mMainCam = Camera.main;
-
     }
 
-    private void Start()
+    public override void Initialize()
     {
         subscribeEvents();
 
@@ -82,10 +81,10 @@ public sealed class MiniMapPresenter : HudPresenterBase
     private void subscribeEvents()
     {
         R3EventBus.Instance.Receive<EntitySpawned<IMapTrackable>>()
-            .Subscribe(e => spawnIcon(e.Entity.MapAnchor, e.Entity.Icon))
+            .Subscribe(e => spawnIcon(e.Entity.MapAnchor, e.Entity.IconType))
             .AddTo(mCD);
         R3EventBus.Instance.Receive<EntityDestroyed<IMapTrackable>>()
-            .Subscribe(e => despawnIcon(e.Entity.MapAnchor, e.Entity.Icon))
+            .Subscribe(e => despawnIcon(e.Entity.MapAnchor, e.Entity.IconType))
             .AddTo(mCD);
     }
 

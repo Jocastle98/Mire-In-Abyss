@@ -41,7 +41,11 @@ public class QuestCardView : MonoBehaviour
         mRewardAmountText.text = $"x{quest.RewardSoul}";
         SetQuestState(QuestOfferService.Instance.GetQuestState(quest.Id));
 
-        mShowDetailButton.onClick.AddListener(() => onClickCallback?.Invoke(quest.Id));
+        mShowDetailButton.onClick.AddListener(() =>
+        {
+            AudioManager.Instance.PlayUi(AudioEnums.EUiType.Click);
+            onClickCallback?.Invoke(quest.Id);
+        });
     }
 
     public void Bind(String questId, Action<string> onClickCallback)

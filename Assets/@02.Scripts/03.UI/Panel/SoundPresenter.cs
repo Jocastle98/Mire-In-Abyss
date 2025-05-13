@@ -3,30 +3,35 @@ using UnityEngine.UI;
 
 public sealed class SoundPresenter : MonoBehaviour
 {
-    [SerializeField] Toggle mMasterToggle, mBgmToggle, mSeToggle, mUiToggle;
-    [SerializeField] Slider mMasterVol, mBgmVol, mSeVol, mUiVol;
+    [Header("Mute Toggles")]
+    [SerializeField] private Toggle mMasterToggle;
+    [SerializeField] private Toggle mBgmToggle;
+    [SerializeField] private Toggle mSeToggle;
+    [SerializeField] private Toggle mUiToggle;
+
+    [Header("Volume Sliders")]
+    [SerializeField] private Slider mMasterVol;
+    [SerializeField] private Slider mBgmVol;
+    [SerializeField] private Slider mSeVol;
+    [SerializeField] private Slider mUiVol;
+
     void Start()
     {
-        /* 초기값 로드 */
-        // mMasterToggle.isOn = AudioBus.MasterMute;
-        // mBgmToggle.isOn = AudioBus.BgmMute;
-        // mSeToggle.isOn = AudioBus.SeMute;
-        // mUiToggle.isOn = AudioBus.UiMute;
+        mMasterToggle.isOn = PlayerPrefs.GetInt(Constants.MasterMuteKey, 0) == 1;
+        mBgmToggle   .isOn = PlayerPrefs.GetInt(Constants.BgmMuteKey,   0) == 1;
+        mSeToggle    .isOn = PlayerPrefs.GetInt(Constants.SeMuteKey,    0) == 1;
+        mUiToggle    .isOn = PlayerPrefs.GetInt(Constants.UiMuteKey,    0) == 1;
 
-        // mMasterVol.value = AudioBus.MasterVol;
-        // mBgmVol.value = AudioBus.BgmVol;
-        // mSeVol.value = AudioBus.SeVol;
-        // mUiVol.value = AudioBus.UiVol;
+        mMasterToggle.onValueChanged.AddListener(AudioManager.Instance.SetMasterMute);
+        mBgmToggle   .onValueChanged.AddListener(AudioManager.Instance.SetBgmMute);
+        mSeToggle    .onValueChanged.AddListener(AudioManager.Instance.SetSeMute);
+        mUiToggle    .onValueChanged.AddListener(AudioManager.Instance.SetUiMute);
 
-        /* 리스너 */
-        // mMasterToggle.onValueChanged.AddListener(v => AudioBus.SetMasterMute(v));
-        // mBgmToggle.onValueChanged.AddListener(v => AudioBus.SetBgmMute(v));
-        // mSeToggle.onValueChanged.AddListener(v => AudioBus.SetSeMute(v));
-        // mUiToggle.onValueChanged.AddListener(v => AudioBus.SetUiMute(v));
-
-        // mMasterVol.onValueChanged.AddListener(AudioBus.SetMasterVol);
-        // mBgmVol.onValueChanged.AddListener(AudioBus.SetBgmVol);
-        // mSeVol.onValueChanged.AddListener(AudioBus.SetSeVol);
-        // mUiVol.onValueChanged.AddListener(AudioBus.SetUiVol);
+        AudioManager.Instance.InitSliders(
+            mMasterVol,
+            mBgmVol,
+            mSeVol,
+            mUiVol
+        );
     }
 }

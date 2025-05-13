@@ -6,10 +6,9 @@ using Events.Player;
 using PlayerEnums;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.Serialization;
+using Random = UnityEngine.Random;
 
 [RequireComponent(typeof(Animator))]
-[RequireComponent(typeof(PlayerInput))]
 [RequireComponent(typeof(PlayerStats))]
 [RequireComponent(typeof(CharacterController))]
 public class PlayerController : MonoBehaviour, IObserver<GameObject>
@@ -63,7 +62,6 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     [SerializeField] private float mParryTimeout = 6.0f;
     [SerializeField] private float mParryTimeoutDelta;
     public float ParryTimeoutDelta => mParryTimeoutDelta;
-    private bool mbIsParrySucessful = false;
     
     [Space(10)] 
     [Header("Player Skill_1 Stat")]
@@ -98,11 +96,12 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     public float Skill_4_TimeoutDelta => mSkill_4_TimeoutDelta;
     
     [Space(10)]
-    [Header("Player Grouned Check")]
+    [Header("Player Surroundings Check")]
     [SerializeField] private LayerMask mGroundLayers;
     [SerializeField] private float mGroundedOffset = -0.15f;
     [SerializeField] private float mGroundedRadius = 0.3f;
     public bool bIsGrounded { get; private set; }
+    public InteractableObject NearestInteractableObject { get; private set; }
 
     [Space(10)]
     [Header("Player Combat Check")]
@@ -111,20 +110,16 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     [SerializeField] private bool mbInCombat = false;
     
     [Space(10)]
-    [Header("Player Interactables Check")]
-    [SerializeField] private LayerMask mInteractableLayers;
-    [SerializeField] private float mInteractableRadius = 3.0f;
-    [SerializeField] private Collider[] mDetectedInteractables = new Collider[5];
-    [SerializeField] private List<Collider> mActiveInteractables = new List<Collider>();
-    public InteractableObject NearestInteractableObject { get; private set; }
-    
-    [Space(10)]
     [Header("Player Attach Point")]
     [SerializeField] private Transform mRightHandTransform;
     [SerializeField] private Transform mLeftHandTransform;
     
+    [Space(10)]
+    [Header("Player AudioClips")]
+    public AudioClip[] footstepAudioClips;
+    public AudioClip landingAudioClip;
+    
     // Player Internal Calculation Stat
-    [SerializeField]
     private float mVerticalVelocity;
     private float mRotationVelocity;
     private float mTerminalVelocity = 53.0f;
@@ -207,6 +202,29 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         
         // 무기 할당
         SetPlayerWeapon(mRightHandTransform, "Longsword", mLeftHandTransform, "Shield");
+
+        //TODO: 스킬 데이터 관리 기능 추가 시 삭제
+        initPlayerHubSkillData();
+    }
+
+    /// <summary>
+    /// 스킬 데이터 PlayerHub에 전달 메서드(임시)
+    /// </summary>
+    private void initPlayerHubSkillData()
+    {
+        Dictionary<SkillType, SkillInfo> skillInfos = new();
+        skillInfos.Add(SkillType.DefaultAttack, new SkillInfo(0, GameManager.Instance.Input.GetSkillKey(SkillType.DefaultAttack), 0f));
+        skillInfos.Add(SkillType.Parry, new SkillInfo(1, GameManager.Instance.Input.GetSkillKey(SkillType.Parry), mParryTimeout));
+        skillInfos.Add(SkillType.Defend, new SkillInfo(2, GameManager.Instance.Input.GetSkillKey(SkillType.Defend), 0f));
+        skillInfos.Add(SkillType.Sprint, new SkillInfo(3, GameManager.Instance.Input.GetSkillKey(SkillType.Sprint), 0f));
+        skillInfos.Add(SkillType.Roll, new SkillInfo(4, GameManager.Instance.Input.GetSkillKey(SkillType.Roll), mRollTimeout));
+        skillInfos.Add(SkillType.Dash, new SkillInfo(5, GameManager.Instance.Input.GetSkillKey(SkillType.Dash), mDashTimeout));
+        skillInfos.Add(SkillType.Skill1, new SkillInfo(6, GameManager.Instance.Input.GetSkillKey(SkillType.Skill1), mSkill_1_Timeout));
+        skillInfos.Add(SkillType.Skill2, new SkillInfo(7, GameManager.Instance.Input.GetSkillKey(SkillType.Skill2), mSkill_2_Timeout));
+        skillInfos.Add(SkillType.Skill3, new SkillInfo(8, GameManager.Instance.Input.GetSkillKey(SkillType.Skill3), mSkill_3_Timeout));
+        skillInfos.Add(SkillType.Skill4, new SkillInfo(9, GameManager.Instance.Input.GetSkillKey(SkillType.Skill4), mSkill_4_Timeout));
+
+        PlayerHub.Instance.Skills.SetSkills(skillInfos);
     }
 
     private void StateInit()
@@ -271,7 +289,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         mSkill_3_TimeoutDelta = 0.0f;
         mSkill_4_TimeoutDelta = 0.0f;
     }
-
+    
     /// <summary>
     /// 플레이어 캐릭터 상태전환 메서드
     /// </summary>
@@ -888,6 +906,9 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
                 distanceCovered += moveAmount;
                 yield return null;
             }
+
+            GameObject slashEffectObject = SlashEffect(SlashEffectType.LeftToRight);
+            Destroy(slashEffectObject, 0.2f);
         }
     }
 
@@ -903,7 +924,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             mCharacterController.excludeLayers = LayerMask.GetMask("Nothing");
         }
     }
-
+    
     #endregion
     
     #region 공격 관련 기능
@@ -1028,6 +1049,11 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         mWeaponController.AttackStart();
         mPlayerStateAttack.HasReceivedNextAttackInput = false;
         mPlayerStateAttack.bIsComboActive = true;
+
+        if (CurrentPlayerState == PlayerState.Attack)
+        {
+            mPlayerStateAttack.AttackEffect();
+        }
     }
 
     // 공격 애니메이션 중 공격 행동 종료 시점에 호출되는 메서드
@@ -1045,7 +1071,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             {
                 //공격력을 PlayerStats에서 가져와 데미지 계산
                 float damage = mPlayerStats.GetAttackDamage();
-                enemyController.SetHit((int)damage,1);
+                enemyController.SetHit((int)damage, -1);
                 //피해적용 후 흡혈효과 처리
                 mPlayerStats.OnDamageDealt(damage);
             }
@@ -1061,6 +1087,54 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             mWeaponController.Unsubscribe(this);
         }
             
+    #endregion
+    
+    #region 일반 공격 이펙트 관련 기능
+
+        private Coroutine mSlashCoroutine = null;
+        public GameObject SlashEffect(SlashEffectType type)
+        {
+            var slashEffect = GameManager.Instance.Resource.Instantiate("Slash_Effect");
+            GameObject slashEffectObject = slashEffect.gameObject;
+            
+            if (slashEffect != null)
+            {
+                Vector3 firePosition = transform.position + transform.forward + Vector3.up;
+                Quaternion rotation = Quaternion.Euler(0.0f, 0.0f, 0.0f);
+                
+                switch (type)
+                {
+                    case SlashEffectType.RightToLeft:
+                        rotation = transform.rotation;
+                        break;
+                    case SlashEffectType.LeftToRight:
+                        rotation = transform.rotation * Quaternion.Euler(0.0f, 0.0f, 180.0f);
+                        break;
+                    case SlashEffectType.TopToBottom:
+                        rotation = transform.rotation * Quaternion.Euler(0.0f, 0.0f, 90.0f);
+                        break;
+                }
+                
+                slashEffectObject.transform.position = firePosition;
+                slashEffectObject.transform.rotation = rotation;
+                
+                mSlashCoroutine = StartCoroutine(DisableEffectAfterDelay(slashEffectObject, 0.2f));
+            }
+            
+            return slashEffectObject;
+        }
+
+        private IEnumerator DisableEffectAfterDelay(GameObject obj, float delay)
+        {
+            yield return new WaitForSeconds(delay);
+            GameManager.Instance.Resource.Destroy(obj); // 풀링 객체면 풀로, 아니면 파괴
+        }
+
+        public void StopSlashCoroutine()
+        {
+            StopCoroutine(mSlashCoroutine);
+        }
+    
     #endregion
     
     #endregion
@@ -1141,6 +1215,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             mParryCoroutine = null;
         }
         
+        mbIsParryActive = false;
         mbIsDamageReduced = false;
         ParryCooldownTime();
     }
@@ -1233,7 +1308,6 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
                 if (enemy != null)
                 {
                     enemy.SetHit((int)(mPlayerStats.GetAttackDamage() * mParryDamageMultiplier),0);
-                    // todo: 적에게 상태이상 기절 부여
                 }
                 else
                 {
@@ -1241,7 +1315,22 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
                     Projectile enemyProjectile = enemyTransform.GetComponent<Projectile>();
                     if (enemyProjectile != null)
                     {
-                        
+                        // 화살 프리팹 인스턴스 생성 (반사용)
+                        GameObject reflectedObject = Instantiate(enemyProjectile.gameObject, transform.position + transform.forward + Vector3.up, Quaternion.identity);
+                       
+                        Projectile reflectedProjectile = reflectedObject.GetComponent<Projectile>();
+                        if (reflectedProjectile != null)
+                        {
+                            // 방향: 적 방향으로
+                            Vector3 reflectDir = (enemyProjectile.ShooterTransform.transform.position - transform.position).normalized;
+
+                            // 반사 레이어: 적만 맞도록 설정
+                            LayerMask enemyLayer = LayerMask.GetMask("Enemy"); // 적 레이어 이름에 따라 수정
+
+                            // 반사 화살 발사
+                            reflectedProjectile.Initialize(transform.forward, 15.0f, enemyLayer, (int)(mPlayerStats.GetAttackDamage() * mParryDamageMultiplier),this.transform);
+                            reflectedProjectile.transform.rotation = Quaternion.LookRotation(reflectDir);
+                        }
                     }
                 }
             }
@@ -1374,16 +1463,16 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     {
         mPlayerStats.OnEnemyKilled();
     }
+    
+    #endregion
+
+    #region 스킬 관련 기능
 
     public bool CheckSkillReset()
     {
         return mPlayerStats.OnSkillUse();
     }
-
-    #endregion
-
-    #region 스킬 관련 기능
-
+    
     #region 1번 스킬
 
     private Coroutine mSkill1Coroutine;
@@ -1409,21 +1498,23 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         float recoveryTime = 1.0f * invAttackSpeed;
         
         yield return new WaitForSeconds(startupTime); // 애니메이션 선딜
+
+        SlashEffect(SlashEffectType.LeftToRight);
         
-        GameObject skill_1_Effect_Prefab = Resources.Load<GameObject>("Player/Effects/Skill_1_Projectile");
+        var skill_1_Effect_Prefab = GameManager.Instance.Resource.Instantiate("Skill_1_Projectile");
         if (skill_1_Effect_Prefab == null)
         {
             yield break;
         }
+        
         Vector3 firePosition = transform.position + transform.forward * 2.0f + Vector3.up;
         Vector3 direction = GetActionDirection(false, false);
         
-        GameObject skill_1_Effect_Object = GameObject.Instantiate(skill_1_Effect_Prefab,
-                                                             firePosition,
-                                                             Quaternion.LookRotation(direction));
+        skill_1_Effect_Prefab.transform.position = firePosition;
+        skill_1_Effect_Prefab.transform.rotation = Quaternion.LookRotation(direction);
         
         // 검기 스크립트에 방향 및 속도 설정
-        Skill_1 skill_1 = skill_1_Effect_Object.GetComponent<Skill_1>();
+        Skill_1 skill_1 = skill_1_Effect_Prefab.GetComponent<Skill_1>();
         skill_1.Init((int)mPlayerStats.GetAttackDamage(), mSkill_1_DamageMultiplier, mSkill_1_Distance, direction);
 
         yield return new WaitForSeconds(recoveryTime);
@@ -1431,6 +1522,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         mbInDirection = true;
         
         SetCombatState(true);
+        
         // 스킬 쿨타임 초기화 확인
         if (!CheckSkillReset())
         {
@@ -1440,7 +1532,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         else
         {
             // 초기화 성공 - 쿨타임 즉시 완료
-            mSkill_1_TimeoutDelta = 0f;
+            mSkill_1_TimeoutDelta = 0.0f;
             Debug.Log("스킬 1 쿨타임 초기화!");
         }
     }
@@ -1482,24 +1574,25 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
                 EnemyBTController enemy = hitCollider.GetComponent<EnemyBTController>();
                 if (enemy != null)
                 {
-                    // 상태이상(이속감소? 공격력 감소?) 부여
+                    // 공격력 감소 부여
                     enemy.SetHit((int)(mPlayerStats.GetAttackDamage() * mSkill_2_DamageMultiplier),1);
                 }
             }
         }
         
-        GameObject skill_2_Effect_Prefab = Resources.Load<GameObject>("Player/Effects/Skill_2_Effect");
+        GameObject skill_2_Effect_Prefab = GameManager.Instance.Resource.Instantiate("Skill_2_Effect");
         if (skill_2_Effect_Prefab == null)
         {
             yield break;
         }
-        
-        GameObject skill_2_Effect_Object = GameObject.Instantiate(skill_2_Effect_Prefab, transform.position, Quaternion.identity);
+        skill_2_Effect_Prefab.transform.position = transform.position;
+        skill_2_Effect_Prefab.transform.rotation = Quaternion.identity;
         
         yield return new WaitForSeconds(recoveryTime);
-        Destroy(skill_2_Effect_Object);
+        GameManager.Instance.Resource.Destroy(skill_2_Effect_Prefab);
         
         SetCombatState(true);
+        
         // 스킬 쿨타임 초기화 확인
         if (!CheckSkillReset())
         {
@@ -1509,7 +1602,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         else
         {
             // 초기화 성공 - 쿨타임 즉시 완료
-            mSkill_2_TimeoutDelta = 0f;
+            mSkill_2_TimeoutDelta = 0.0f;
             Debug.Log("스킬 2 쿨타임 초기화!");
         }
     }
@@ -1604,13 +1697,13 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         
         yield return new WaitForSeconds(startupTime); // 애니메이션 선딜
         
-        GameObject skill_3_Effect_Prefab = Resources.Load<GameObject>("Player/Effects/Skill_3_Effect");
+        GameObject skill_3_Effect_Prefab = GameManager.Instance.Resource.Instantiate("Skill_3_Effect");
         if (skill_3_Effect_Prefab == null)
         {
             yield break;
         }
-        
-        GameObject skill_3_Effect_Object = GameObject.Instantiate(skill_3_Effect_Prefab, transform.position, Quaternion.identity);
+        skill_3_Effect_Prefab.transform.position = transform.position;
+        skill_3_Effect_Prefab.transform.rotation = Quaternion.identity;
         
         // 주변 적에게 데미지 주는 로직
         Collider[] hitColliders = Physics.OverlapSphere(transform.position, mSkill_3_Radius);
@@ -1627,7 +1720,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         }
         
         yield return new WaitForSeconds(recoveryTime);
-        Destroy(skill_3_Effect_Object);
+        GameManager.Instance.Resource.Destroy(skill_3_Effect_Prefab);
         
         SetCombatState(true);
         
@@ -1753,7 +1846,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             float duration = 0.5f;
             float targetDistance = 20.0f;
             
-            while (timeElapsed < 1.0f)
+            while (timeElapsed < duration)
             {
                 threePersonFollow.CameraDistance = Mathf.Lerp(originCameraDistance, targetDistance, timeElapsed / duration);
                 timeElapsed += Time.deltaTime;
@@ -1776,7 +1869,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             float duration = 0.5f;
             float startDistance = threePersonFollow.CameraDistance;
             
-            while (timeElapsed < 1.0f)
+            while (timeElapsed < duration)
             {
                 threePersonFollow.CameraDistance = Mathf.Lerp(startDistance, originCameraDistance, timeElapsed / duration);
                 timeElapsed += Time.deltaTime;
@@ -1790,8 +1883,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     
     private IEnumerator Skill_4_AimAndFire()
     {
-        GameObject rangeIndicatorObject = Resources.Load<GameObject>("Player/Effects/Skill_4_RangeIndicator");
-        GameObject rangeIndicator = GameObject.Instantiate(rangeIndicatorObject);
+        GameObject rangeIndicatorObject = GameManager.Instance.Resource.Instantiate("Skill_4_RangeIndicator");
 
         float timer = 5.0f;
         bool isAttackCompleted = false;
@@ -1805,7 +1897,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             RaycastHit hit;
             if (Physics.Raycast(ray, out hit, 100.0f, mGroundLayers))
             {
-                rangeIndicator.transform.position = hit.point;
+                rangeIndicatorObject.transform.position = hit.point;
                 finalTargetPoint = hit.point;
             }
 
@@ -1835,10 +1927,10 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         if (!isAttackCompleted)
         {
             FireProjectile(finalTargetPoint);
+            yield return null;
         }
         
-        Destroy(rangeIndicator);
-        rangeIndicator = null;
+        GameManager.Instance.Resource.Destroy(rangeIndicatorObject);
         
         SetCombatState(true);
     }
@@ -1857,23 +1949,28 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         float attackSpeed = PlayerAnimator.GetFloat("AttackSpeed");
         float invAttackSpeed = 1.0f / attackSpeed;
         float startupTime = 0.3f * invAttackSpeed;
-        float recoveryTime = 0.0f * invAttackSpeed;
+        float recoveryTime = 0.1f * invAttackSpeed;
         
         PlayerAnimator.SetTrigger("Skill");
         PlayerAnimator.SetInteger("Skill_Index", 4);
         
         yield return new WaitForSeconds(startupTime); // 애니메이션 선딜
-        
-        GameObject projectilePrefab = Resources.Load<GameObject>("Player/Effects/Skill_4_Projectile");
+
+        SlashEffect(SlashEffectType.TopToBottom);
+
+        GameObject projectilePrefab = GameManager.Instance.Resource.Instantiate("Skill_4_Projectile");
         if (projectilePrefab == null)
         {
             yield break;
         }
+        
         Vector3 firePosition = targetPoint + Vector3.up * 10.0f;
+        Quaternion rotation = Quaternion.LookRotation(- mMainCamera.transform.right);
         
-        GameObject projectileObject = GameObject.Instantiate(projectilePrefab, firePosition, Quaternion.LookRotation(- mMainCamera.transform.right));
+        projectilePrefab.transform.position = firePosition;
+        projectilePrefab.transform.rotation = rotation;
         
-        Skill_4 skill_4 = projectileObject.GetComponent<Skill_4>();
+        Skill_4 skill_4 = projectilePrefab.GetComponent<Skill_4>();
         skill_4.Init((int)mPlayerStats.GetAttackDamage(), mSkill_4_DamageMultiplier, mSkill_4_Radius, targetPoint);
         
         yield return new WaitForSeconds(recoveryTime);
@@ -1890,7 +1987,9 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             mSkill_4_TimeoutDelta = 0f;
             Debug.Log("스킬 4 쿨타임 초기화!");
         }
-        StartCoroutine(Skill_4_Camera(false));
+        
+        yield return StartCoroutine(Skill_4_Camera(false));
+        yield return null;
     }
 
     private void CancelSkill()
@@ -1898,11 +1997,41 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         StartCoroutine(Skill_4_Camera(false));
 
         mbInDirection = true;
+        
         SetPlayerState(PlayerState.Fall);
     }
     
     #endregion
     
+    #endregion
+
+    #region 사운드 관련 기능
+
+    // 발소리, 나중에 사운드매니저로 관리해야 함
+    private void OnFootstepSound(AnimationEvent animationEvent)
+    {
+        var mobilityLayer = PlayerAnimator.GetLayerIndex("Mobility Layer");
+        var skillLayer = PlayerAnimator.GetLayerIndex("Skill Layer");
+        
+        if (animationEvent.animatorClipInfo.weight > 0.5f && 
+            (PlayerAnimator.GetLayerWeight(mobilityLayer) < 1.0f && PlayerAnimator.GetLayerWeight(skillLayer) < 1.0f))
+        {
+            if (footstepAudioClips.Length > 0)
+            {
+                var index = Random.Range(0, footstepAudioClips.Length);
+                AudioSource.PlayClipAtPoint(footstepAudioClips[index], transform.position /*, 볼륨 */);
+            }
+        }
+    }
+
+    private void OnLandSound(AnimationEvent animationEvent)
+    {
+        if (animationEvent.animatorClipInfo.weight > 0.5f)
+        {
+            AudioSource.PlayClipAtPoint(landingAudioClip, transform.position /*, 볼륨 */);
+        }
+    }
+
     #endregion
     
     #region 디버깅 관련

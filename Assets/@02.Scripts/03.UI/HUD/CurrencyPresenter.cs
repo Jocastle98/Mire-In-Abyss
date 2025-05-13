@@ -10,7 +10,7 @@ public sealed class CurrencyPresenter : HudPresenterBase
     [SerializeField] private TextMeshProUGUI mGoldText;
     [SerializeField] private TextMeshProUGUI mSoulText;
 
-    private void Start()
+    public override void Initialize()
     {
         subscribeEvents();
     }

@@ -5433,6 +5433,7 @@ MonoBehaviour:
   mBtnSettings: {fileID: 9137088493631967204}
   mBtnMain: {fileID: 275958768476899608}
   mBtnQuit: {fileID: 6630569679526839051}
+  mTownButtonDarkMaskObj: {fileID: 0}
 --- !u!1 &8170632607387216923
 GameObject:
   m_ObjectHideFlags: 0

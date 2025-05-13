@@ -49361,6 +49361,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7366611560427696089}
+  - component: {fileID: 6305799670221356236}
   m_Layer: 0
   m_Name: Skill_2_Effect
   m_TagString: Untagged
@@ -49384,6 +49385,19 @@ Transform:
   - {fileID: 1972717589343936096}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &6305799670221356236
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8738922886915126847}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7b74e07d6aa606f4d8e20e90e86bf38c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  IsUsing: 0
 --- !u!1 &9069436835281438250
 GameObject:
   m_ObjectHideFlags: 0

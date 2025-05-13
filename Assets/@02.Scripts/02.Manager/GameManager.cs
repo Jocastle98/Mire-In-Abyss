@@ -1,3 +1,4 @@
+using System.Collections;
 using Cysharp.Threading.Tasks;
 using Events.Gameplay;
 using GameEnums;
@@ -11,24 +12,31 @@ using UnityEngine.SceneManagement;
 public class GameManager : Singleton<GameManager>
 {
     [Header("Input")]
-    [SerializeField] PlayerInput mPlayerInput;
-    public InputManager Input { get { return Instance.mInput; } }
+    [SerializeField] private PlayerInput mPlayerInput;
+    
     private InputManager mInput = new InputManager();
+    private PoolManager mPool = new PoolManager();
+    private ResourceManager mResource = new ResourceManager();
+    
+    public InputManager Input { get { return Instance.mInput; } }
+    public PoolManager Pool { get { return Instance.mPool; } }
+    public ResourceManager Resource { get { return Instance.mResource; } }
 
     public GameState CurrentGameState => mStateRP.Value;
     private GameState mPreviousGameState;
     public ReadOnlyReactiveProperty<GameState> ObserveState => mStateRP;
     private readonly ReactiveProperty<GameState> mStateRP = new(GameState.Gameplay);
 
-    private bool mIsPause = false;
+    //private bool mIsPause = false;
 
 
     protected override void Awake()
     {
         base.Awake();
         mPlayerInput = GetComponent<PlayerInput>();
-        Input.Init(mPlayerInput);
         mStateRP.Subscribe(onStateChanged);
+
+        Init();
     }
     
     private void Start()
@@ -47,6 +55,12 @@ public class GameManager : Singleton<GameManager>
         mInput.OnInputUpdate();
     }
 
+    private void Init()
+    {
+        Instance.Input.Init(mPlayerInput);
+        Instance.Pool.Init();
+    }
+    
     public void SetGameState(GameState next)
     {
         if (CurrentGameState != next) 
@@ -74,12 +88,12 @@ public class GameManager : Singleton<GameManager>
     {
         if (isPaused)
         {
-            mIsPause = true;
+            //mIsPause = true;
             // TODO: 일시정지
         }
         else
         {
-            mIsPause = false;
+            //mIsPause = false;
             // TODO: 일시정지 해제
         }
     }
@@ -127,6 +141,11 @@ public class GameManager : Singleton<GameManager>
             case GameState.GameplayPause: 
                 SetPause(true);    break;
         }
+    }
+
+    public void Clear()
+    {
+        Instance.Pool.Clear();
     }
     
     protected override void OnSceneLoaded(Scene scene, LoadSceneMode mode)

@@ -43,6 +43,27 @@ namespace PlayerEnums
         Poison,
         Bleed
     }
+
+    public enum SlashEffectType
+    {
+        RightToLeft,
+        LeftToRight,
+        TopToBottom,
+    }
+
+    public enum SkillType
+    {
+        DefaultAttack,
+        Parry,
+        Defend,
+        Sprint,
+        Roll,
+        Dash,
+        Skill1,
+        Skill2,
+        Skill3,
+        Skill4,
+    }
 }
 
 namespace ItemEnums
@@ -106,6 +127,7 @@ namespace UIPanelEnums
         Setting,
         Codex,
         EscGroup,
+        EscGroup_Item, // 하드코딩, Item탭으로 시작하는 EscGroup 패널
     }
 }
 
@@ -118,6 +140,8 @@ namespace UIHUDEnums
         Boss,
         Shop,
         Portal,
+        QuestBoard,
+        SoulStoneShop, // Upgrade
     }
 
     public enum ProgressBarImageType
@@ -157,3 +181,14 @@ namespace BattleAreaEnums
         Boss,
     }
 }
+
+#region 사운드 
+
+namespace AudioEnums
+{
+    public enum EBgmType { Intro = 0, Town = 1, Field = 2, Dungeon = 3 }
+    public enum ESfxType   { Footstep = 0, Landing = 1, PlayerAttack = 2, Parry = 3}
+    public enum EUiType    { Open = 0, Close = 1, Click = 2  }
+}
+
+#endregion

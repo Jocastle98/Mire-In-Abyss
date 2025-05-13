@@ -26,7 +26,7 @@ public sealed class MiniQuestCardView : MonoBehaviour
 
         var quest = getQuestInfo(id);
         mTitleText.text  = quest.Title;
-        mDescText.text   = quest.RequestInformation;
+        mDescText.text   = quest.Goal;
         mProgressText.text = $"{Progress} / {Target}";
         mBG.color        = IsCompleted ? CompletedColor : ActiveColor;
     }

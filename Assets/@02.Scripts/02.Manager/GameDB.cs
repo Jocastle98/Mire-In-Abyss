@@ -3,17 +3,20 @@ using Events.Data;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-[RequireComponent(typeof(QuestDatabase))]
 public class GameDB : Singleton<GameDB>, IInitializable
 {
     public QuestDatabase QuestDatabase { get; private set; }
     public SpriteCache SpriteCache { get; private set; }
+    public AchievementDatabase AchievementDatabase { get; private set; }
+    public ItemDatabase ItemDatabase { get; private set; }
 
     protected override void Awake()
     {
         base.Awake();
-        QuestDatabase = GetComponent<QuestDatabase>();
         SpriteCache = new SpriteCache();
+        QuestDatabase = GetComponent<QuestDatabase>();
+        AchievementDatabase = GetComponent<AchievementDatabase>();
+        ItemDatabase = GetComponent<ItemDatabase>();
     }
 
 

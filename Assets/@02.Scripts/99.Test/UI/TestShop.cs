@@ -8,5 +8,5 @@ public class TestShop : MonoBehaviour, IMapTrackable
 
     public Transform MapAnchor => mMapAnchor;
 
-    public MiniMapIconType Icon => MiniMapIconType.Shop;
+    public MiniMapIconType IconType => MiniMapIconType.Shop;
 }
