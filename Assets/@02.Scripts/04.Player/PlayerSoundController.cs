@@ -1,41 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
+using AudioEnums;
 using PlayerEnums;
 using UnityEngine;
 
 public class PlayerSoundController : MonoBehaviour
 {
-    [Header("Player Movement AudioClips")]
-    // 이동 중 호흡 보이스?
-    public AudioClip[] footstepAudioClips;
-    
-    [Space(10)]
-    [Header("Player Jump AudioClips")]
-    public AudioClip[] jumpVoiceAudioClips;
-    public AudioClip[] landingVoiceAudioClips;
-    public AudioClip landingAudioClip;
-    
-    [Space(10)]
-    [Header("Player Attack AudioClips")]
-    public AudioClip[] attackVoiceAudioClips;
-    public AudioClip[] swordSwingAudioClips;
-    public AudioClip[] swordHitAudioClips;
-    
-    [Space(10)]
-    [Header("Player Hit AudioClips")]
-    public AudioClip[] hitVoiceAudioClips;
-    public AudioClip[] hitAudioClips;
-    public AudioClip[] blockShieldAudioClips;
-    
-    [Space(10)]
-    [Header("Player Death AudioClips")]
-    public AudioClip[] deathVoiceAudioClips;
-    
-    [Space(10)]
-    [Header("Player Skill AudioClips")]
-    public AudioClip[] skillVoiceAudioClips;
-    public AudioClip[] skillAudioClips;
-    
     private Animator mPlayerAnimator;
     
     private void Start()
@@ -52,110 +22,68 @@ public class PlayerSoundController : MonoBehaviour
         if (animationEvent.animatorClipInfo.weight > 0.5f && 
             (mPlayerAnimator.GetLayerWeight(mobilityLayer) < 1.0f && mPlayerAnimator.GetLayerWeight(skillLayer) < 1.0f))
         {
-            if (footstepAudioClips.Length > 0)
-            {
-                var index = Random.Range(0, footstepAudioClips.Length);
-                AudioSource.PlayClipAtPoint(footstepAudioClips[index], transform.position /*, 볼륨 */);
-            }
+            AudioManager.Instance.PlaySfx(ESfxType.FootstepEffect);
         }
     }
 
     private void OnJumpSound(AnimationEvent animationEvent)
     {
-        if (animationEvent.animatorClipInfo.weight > 0.5f)
-        {
-            var index = Random.Range(0, jumpVoiceAudioClips.Length);
-            AudioSource.PlayClipAtPoint(jumpVoiceAudioClips[index], transform.position);
-        }
+        AudioManager.Instance.PlaySfx(ESfxType.JumpVoice);
     }
     
     private void OnLandSound(AnimationEvent animationEvent)
     {
-        if (animationEvent.animatorClipInfo.weight > 0.5f)
-        {
-            AudioSource.PlayClipAtPoint(landingAudioClip, transform.position /*, 볼륨 */);
-            
-            var index = Random.Range(0, landingVoiceAudioClips.Length);
-            AudioSource.PlayClipAtPoint(landingVoiceAudioClips[index], transform.position);
-        }
+        AudioManager.Instance.PlaySfx(ESfxType.LandVoice);
+        AudioManager.Instance.PlaySfx(ESfxType.LandEffect);
     }
 
     public void OnSwordSwingSound()
     {
-        if (swordSwingAudioClips.Length > 0)
-        {
-            var index = Random.Range(0, swordSwingAudioClips.Length);
-            AudioSource.PlayClipAtPoint(swordSwingAudioClips[index], transform.position);
-            
-            var index2 = Random.Range(0, attackVoiceAudioClips.Length);
-            AudioSource.PlayClipAtPoint(attackVoiceAudioClips[index2], transform.position);
-        }
+        AudioManager.Instance.PlaySfx(ESfxType.AttackVoice);
+        AudioManager.Instance.PlaySfx(ESfxType.SwordSwingEffect);
     }
     
     public void OnSwordHitSound()
     {
-        // 맞는 몬스터에 따라 타격음을 다르게 할지?
-        if (swordHitAudioClips.Length > 0)
-        {
-            var index = Random.Range(0, swordHitAudioClips.Length);
-            AudioSource.PlayClipAtPoint(swordHitAudioClips[index], transform.position);
-        }
+        AudioManager.Instance.PlaySfx(ESfxType.EnemyHitEffect);
     }
 
     public void OnHitSound(bool isDefend)
     {
         if (isDefend)
         {
-            if (blockShieldAudioClips.Length > 0)
-            {
-                var index = Random.Range(0, blockShieldAudioClips.Length);
-                AudioSource.PlayClipAtPoint(blockShieldAudioClips[index], transform.position);
-            }
+            AudioManager.Instance.PlaySfx(ESfxType.ShieldBlockEffect);
         }
         else
         {
-            if (hitAudioClips.Length > 0)
-            {
-                var index = Random.Range(0, hitAudioClips.Length);
-                AudioSource.PlayClipAtPoint(hitAudioClips[index], transform.position);
-                
-                var index2 = Random.Range(0, hitVoiceAudioClips.Length);
-                AudioSource.PlayClipAtPoint(hitVoiceAudioClips[index2], transform.position);
-            }
+            AudioManager.Instance.PlaySfx(ESfxType.PlayerHitVoice);
+            AudioManager.Instance.PlaySfx(ESfxType.PlayerHitEffect);
         }
     }
 
     public void OnDeathSound()
     {
-        if (deathVoiceAudioClips.Length > 0)
-        {
-            var index = Random.Range(0, deathVoiceAudioClips.Length);
-            AudioSource.PlayClipAtPoint(deathVoiceAudioClips[index], transform.position);
-        }
+        AudioManager.Instance.PlaySfx(ESfxType.DeathVoice);
     }
     
     public void OnSkillSound(SkillType skillType)
     {
+        AudioManager.Instance.PlaySfx(ESfxType.SkillVoice);
+        
         switch (skillType)
         {
             case SkillType.Skill1:
-                AudioSource.PlayClipAtPoint(skillAudioClips[0], transform.position);
+                AudioManager.Instance.PlaySfx(ESfxType.Skill1Effect);
                 break;
             case SkillType.Skill2:
-                AudioSource.PlayClipAtPoint(skillAudioClips[1], transform.position);
+                AudioManager.Instance.PlaySfx(ESfxType.Skill2Effect);
                 break;
             case SkillType.Skill3:
-                AudioSource.PlayClipAtPoint(skillAudioClips[2], transform.position);
+                AudioManager.Instance.PlaySfx(ESfxType.Skill3Effect);
                 break;
             case SkillType.Skill4:
-                AudioSource.PlayClipAtPoint(skillAudioClips[3], transform.position);
+                AudioManager.Instance.PlaySfx(ESfxType.Skill4Effect);
                 break;
-        }
-
-        if (skillVoiceAudioClips.Length > 0)
-        {
-            var index = Random.Range(0, skillVoiceAudioClips.Length);
-            AudioSource.PlayClipAtPoint(skillVoiceAudioClips[index], transform.position);
         }
     }
 }

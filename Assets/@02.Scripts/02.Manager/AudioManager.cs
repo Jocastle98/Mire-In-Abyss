@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
@@ -12,9 +13,28 @@ public class AudioManager : Singleton<AudioManager>
 
     [Header("오디오 클립")]
     [SerializeField] private AudioClip[] mBgmClips; // 0: 인트로, 1: 마을, 2: 필드, 3: 던전
-    [SerializeField] private AudioClip[] mSfxClips;
     [SerializeField] private AudioClip[] mUiClips;
-
+    
+    [Space(10)]
+    [Header("SFX 클립")]
+    public AudioClip[] footstepAudioClips;
+    public AudioClip[] jumpVoiceAudioClips;
+    public AudioClip[] landingVoiceAudioClips;
+    public AudioClip[] landingAudioClips;
+    public AudioClip[] attackVoiceAudioClips;
+    public AudioClip[] swordSwingAudioClips;
+    public AudioClip[] swordHitAudioClips;
+    public AudioClip[] hitVoiceAudioClips;
+    public AudioClip[] hitAudioClips;
+    public AudioClip[] blockShieldAudioClips;
+    public AudioClip[] deathVoiceAudioClips;
+    public AudioClip[] skillVoiceAudioClips;
+    public AudioClip[] skill1AudioClips;
+    public AudioClip[] skill2AudioClips;
+    public AudioClip[] skill3AudioClips;
+    public AudioClip[] skill4AudioClips;
+    
+    private Dictionary<ESfxType, AudioClip[]> mSfxClips;
     
     private void OnEnable()
     {
@@ -36,6 +56,8 @@ public class AudioManager : Singleton<AudioManager>
         if (mBgmSource != null) mBgmSource.mute = PlayerPrefs.GetInt(Constants.BgmMuteKey, 0) == 1;
         if (mSfxSource != null) mSfxSource.mute = PlayerPrefs.GetInt(Constants.SeMuteKey,  0) == 1;
         if (mUiSource  != null) mUiSource .mute = PlayerPrefs.GetInt(Constants.UiMuteKey,  0) == 1;
+
+        InitPlayerSfx();
     }
 
     /// <summary>
@@ -69,6 +91,29 @@ public class AudioManager : Singleton<AudioManager>
         }
     }
 
+    private void InitPlayerSfx()
+    {
+        mSfxClips = new Dictionary<ESfxType, AudioClip[]>
+        {
+            { ESfxType.FootstepEffect, footstepAudioClips },
+            { ESfxType.JumpVoice, jumpVoiceAudioClips },
+            { ESfxType.LandVoice, landingVoiceAudioClips },
+            { ESfxType.LandEffect, landingAudioClips },
+            { ESfxType.AttackVoice, attackVoiceAudioClips },
+            { ESfxType.SwordSwingEffect, swordSwingAudioClips },
+            { ESfxType.EnemyHitEffect, swordHitAudioClips },
+            { ESfxType.PlayerHitVoice, hitVoiceAudioClips },
+            { ESfxType.PlayerHitEffect, hitAudioClips },
+            { ESfxType.ShieldBlockEffect, blockShieldAudioClips },
+            { ESfxType.DeathVoice, deathVoiceAudioClips },
+            { ESfxType.SkillVoice, skillVoiceAudioClips },
+            { ESfxType.Skill1Effect, skill1AudioClips },
+            { ESfxType.Skill2Effect, skill2AudioClips },
+            { ESfxType.Skill3Effect, skill3AudioClips },
+            { ESfxType.Skill4Effect, skill4AudioClips }
+        };
+    }
+    
     private void OnMasterVolumeChanged(float v)
     {
         AudioListener.volume = v;
@@ -145,9 +190,8 @@ public class AudioManager : Singleton<AudioManager>
 
     public void PlaySfx(ESfxType type)
     {
-        int idx = (int)type;
-        if (mSfxClips == null || idx < 0 || idx >= mSfxClips.Length) return;
-        var clip = mSfxClips[idx];
+        if (mSfxClips == null || !mSfxClips.TryGetValue(type, out var clips) || clips == null || clips.Length == 0) return;
+        var clip = clips[Random.Range(0, clips.Length)];
         if (clip == null) return;
         mSfxSource.PlayOneShot(clip);
     }
