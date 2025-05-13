@@ -200,7 +200,7 @@ namespace AudioEnums
     public enum ESfxType
     {
         FootstepEffect,
-        JumpVoice,
+        GruntVoice,
         LandVoice,
         LandEffect,
         AttackVoice,

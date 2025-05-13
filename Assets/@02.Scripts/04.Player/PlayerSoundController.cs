@@ -13,7 +13,6 @@ public class PlayerSoundController : MonoBehaviour
         mPlayerAnimator = GetComponent<Animator>();
     }
     
-    // 발소리, 나중에 사운드매니저로 관리해야 함
     private void OnFootstepSound(AnimationEvent animationEvent)
     {
         var mobilityLayer = mPlayerAnimator.GetLayerIndex("Mobility Layer");
@@ -27,9 +26,9 @@ public class PlayerSoundController : MonoBehaviour
     }
 
     // 구르기나 돌진기도 같이 사용
-    public void OnJumpSound()
+    public void OnGruntSound()
     {
-        AudioManager.Instance.PlaySfx(ESfxType.JumpVoice);
+        AudioManager.Instance.PlaySfx(ESfxType.GruntVoice);
     }
     
     public void OnLandSound()

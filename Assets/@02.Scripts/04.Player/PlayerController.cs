@@ -731,7 +731,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
 
         yield return new WaitForSeconds(startupTime); // 선딜(현재 애니메이션 선딜 없음)
         
-        mPlayerSounds.OnJumpSound();
+        mPlayerSounds.OnGruntSound();
         
         RollFunction(true);
      
@@ -851,7 +851,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         // 애니메이션 선딜
         yield return new WaitForSeconds(firstDelay);
         
-        mPlayerSounds.OnJumpSound();
+        mPlayerSounds.OnGruntSound();
 
         GameObject dash_Effect_Prefab = GameManager.Instance.Resource.Instantiate("Dash_Effect", 3, transform);
         if (dash_Effect_Prefab == null)

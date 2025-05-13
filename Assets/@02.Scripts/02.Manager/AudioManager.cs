@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using AudioEnums;
+using UnityEngine.Serialization;
 
 public class AudioManager : Singleton<AudioManager>
 {
@@ -18,7 +19,7 @@ public class AudioManager : Singleton<AudioManager>
     [Space(10)]
     [Header("SFX 클립")]
     public AudioClip[] footstepAudioClips;
-    public AudioClip[] jumpVoiceAudioClips;
+    public AudioClip[] gruntVoiceAudioClips;
     public AudioClip[] landingVoiceAudioClips;
     public AudioClip[] landingAudioClips;
     public AudioClip[] attackVoiceAudioClips;
@@ -98,7 +99,7 @@ public class AudioManager : Singleton<AudioManager>
         mSfxClips = new Dictionary<ESfxType, AudioClip[]>
         {
             { ESfxType.FootstepEffect, footstepAudioClips },
-            { ESfxType.JumpVoice, jumpVoiceAudioClips },
+            { ESfxType.GruntVoice, gruntVoiceAudioClips },
             { ESfxType.LandVoice, landingVoiceAudioClips },
             { ESfxType.LandEffect, landingAudioClips },
             { ESfxType.AttackVoice, attackVoiceAudioClips },
