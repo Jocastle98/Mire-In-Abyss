@@ -1432,11 +1432,11 @@ MonoBehaviour:
   mPatrolRadius: 2
   mAttackBehaviorAsset: {fileID: 11400000, guid: 5c66b92f2a3ce7240a25cbb00f7c23a5, type: 2}
   mFirePoint: {fileID: 0}
+  mBreathPoint: {fileID: 0}
   ImpactProjectorPrefab: {fileID: 445203090441399207, guid: 205db9980c8e90b48bb068dd407c43e7, type: 3}
   ImpactHitLayer:
     serializedVersion: 2
     m_Bits: 256
-  mFlightDuration: 10
   mRenderers:
   - {fileID: 4775264756205059350}
   - {fileID: 8464983910157389335}
@@ -1445,7 +1445,15 @@ MonoBehaviour:
   airInterval: 30
   airDuration: 10
   mEnemyType: 1
+  mEnemySubType: 2
   mExpRewardController: {fileID: 2102722839808726814}
+  mStunDuration: 2
+  mAttackDebuffDuration: 10
+  mAttackDebuffAmount: 5
+  mFireDotDuration: 3
+  mFireDotDamagePerSecond: 3
+  mIceDebuffDuration: 8
+  mIceAnimSpeed: 0.2
 --- !u!95 &7874942562687051533
 Animator:
   serializedVersion: 5
