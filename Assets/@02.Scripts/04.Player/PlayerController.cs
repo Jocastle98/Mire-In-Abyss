@@ -715,6 +715,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         }
         
         mRollTimeoutDelta = mRollTimeout;
+        PlayerHub.Instance.Skills.UseSkill(SkillType.Roll);
     }
 
     private IEnumerator RollCoroutine(Vector3 targetDirection)
@@ -729,7 +730,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
      
         StartCoroutine(RollingCoroutine(targetDirection));
         
-        yield return new WaitForSeconds(mRollFunctionDuration); // 무적시간?
+        yield return new WaitForSeconds(mRollFunctionDuration); // 무적시간
         RollFunction(false);
 
         yield return null;
@@ -795,14 +796,12 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             // 무적 시작
             mbIsDamageReduced = true;
             OverrideDamageReduction = 1.0f;
-            Debug.Log("무적 시작");
         }
         else
         {
             // 무적 끝
             mbIsDamageReduced = false;
             OverrideDamageReduction = 0.0f;
-            Debug.Log("무적 끝");
         }
     }
     
@@ -832,6 +831,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         }
         
         mDashTimeoutDelta = mDashTimeout;
+        PlayerHub.Instance.Skills.UseSkill(SkillType.Dash);
     }
     
     private IEnumerator DashCoroutine(Vector3 cameraCenterDirection)
@@ -1276,6 +1276,8 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             // 패리 실패 시 재사용대기시간 적용
             mParryTimeoutDelta = mParryTimeout;
         }
+        
+        PlayerHub.Instance.Skills.UseSkill(SkillType.Parry);
     }
     
     #endregion
@@ -1354,7 +1356,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         mPlayerStats.TakeDamage(enemyAttackPower, OverrideDamageReduction);
         
         // 체력 UI 업데이트
-        // GameManager.Instance.SetHP((float)mPlayerStats.GetCurrentHP() / mPlayerStats.GetMaxHP());
+        R3EventBus.Instance.Publish(new PlayerHpChanged((int)mPlayerStats.GetCurrentHP(), (int)mPlayerStats.GetMaxHP()));
         
         if (mPlayerStats.GetCurrentHP() <= 0)
         {
@@ -1468,10 +1470,14 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
 
     #region 스킬 관련 기능
 
+    #region 스킬 사용 확인
+
     public bool CheckSkillReset()
     {
         return mPlayerStats.OnSkillUse();
     }
+
+    #endregion
     
     #region 1번 스킬
 
@@ -1535,6 +1541,8 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             mSkill_1_TimeoutDelta = 0.0f;
             Debug.Log("스킬 1 쿨타임 초기화!");
         }
+        
+        PlayerHub.Instance.Skills.UseSkill(SkillType.Skill1);
     }
 
     #endregion
@@ -1605,6 +1613,8 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             mSkill_2_TimeoutDelta = 0.0f;
             Debug.Log("스킬 2 쿨타임 초기화!");
         }
+        
+        PlayerHub.Instance.Skills.UseSkill(SkillType.Skill2);
     }
 
     #endregion
@@ -1735,7 +1745,9 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             // 초기화 성공 - 쿨타임 즉시 완료
             mSkill_3_TimeoutDelta = 0f;
             Debug.Log("스킬 3 쿨타임 초기화!");
-        }    
+        } 
+        
+        PlayerHub.Instance.Skills.UseSkill(SkillType.Skill3);
     }
     
     #endregion
@@ -1988,6 +2000,8 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             Debug.Log("스킬 4 쿨타임 초기화!");
         }
         
+        PlayerHub.Instance.Skills.UseSkill(SkillType.Skill4);
+        
         yield return StartCoroutine(Skill_4_Camera(false));
         yield return null;
     }
@@ -2000,7 +2014,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         
         SetPlayerState(PlayerState.Fall);
     }
-    
+
     #endregion
     
     #endregion
