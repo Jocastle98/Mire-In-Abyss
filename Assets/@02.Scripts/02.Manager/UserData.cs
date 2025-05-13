@@ -50,10 +50,10 @@ public class UserData : Singleton<UserData>, IInitializable
         //TODO: 모든 데이터 로드
         SoundData = new SoundData()
         {
-            IsMasterOn = true,
-            IsBgmOn = true,
-            IsSeOn = true,
-            IsUiOn = true,
+            IsMasterMuted = false,
+            IsBgmMuted = false,
+            IsSeMuted = false,
+            IsUiMuted = false,
             MasterVol = 0.5f,
             BgmVol = 0.5f,
             SeVol = 0.5f,
@@ -129,10 +129,10 @@ public class UserItemData
 
 public class SoundData
 {
-    public bool IsMasterOn;
-    public bool IsBgmOn;
-    public bool IsSeOn;
-    public bool IsUiOn;
+    public bool IsMasterMuted;
+    public bool IsBgmMuted;
+    public bool IsSeMuted;
+    public bool IsUiMuted;
     public float MasterVol;
     public float BgmVol;
     public float SeVol;

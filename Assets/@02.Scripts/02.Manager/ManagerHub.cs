@@ -7,12 +7,14 @@ public sealed class ManagersHub : Singleton<ManagersHub>, IInitializable
 {
     GameManager mGameManager;
     UIManager mUIManager;
+    AudioManager mAudioManager;
     
 
     void Start()
     {
         mGameManager = GameManager.Instance;
         mUIManager = UIManager.Instance;
+        mAudioManager = AudioManager.Instance;
     }
 
     /* IInitializable – BootLoader 가 호출 */
@@ -28,9 +30,11 @@ public sealed class ManagersHub : Singleton<ManagersHub>, IInitializable
 
     public async UniTask InitializeUserDataAsync()
     {
+        mAudioManager.InitAudioDataFromUserData();
+
         var tasks = new UniTask[]
         {
-            
+
         };
         await UniTask.WhenAll(tasks);
     }

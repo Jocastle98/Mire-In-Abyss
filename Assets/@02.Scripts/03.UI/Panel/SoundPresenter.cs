@@ -17,10 +17,15 @@ public sealed class SoundPresenter : TabPresenterBase
 
     public override void Initialize()
     {
-        mMasterToggle.isOn = PlayerPrefs.GetInt(Constants.MasterMuteKey, 0) == 1;
-        mBgmToggle   .isOn = PlayerPrefs.GetInt(Constants.BgmMuteKey,   0) == 1;
-        mSeToggle    .isOn = PlayerPrefs.GetInt(Constants.SeMuteKey,    0) == 1;
-        mUiToggle    .isOn = PlayerPrefs.GetInt(Constants.UiMuteKey,    0) == 1;
+        mMasterToggle.isOn = UserData.Instance.SoundData.IsMasterMuted;
+        mBgmToggle   .isOn = UserData.Instance.SoundData.IsBgmMuted;
+        mSeToggle    .isOn = UserData.Instance.SoundData.IsSeMuted;
+        mUiToggle    .isOn = UserData.Instance.SoundData.IsUiMuted;
+
+        mMasterVol.value = UserData.Instance.SoundData.MasterVol;
+        mBgmVol.value = UserData.Instance.SoundData.BgmVol;
+        mSeVol.value = UserData.Instance.SoundData.SeVol;
+        mUiVol.value = UserData.Instance.SoundData.UiVol;
 
         mMasterToggle.onValueChanged.AddListener(AudioManager.Instance.SetMasterMute);
         mBgmToggle   .onValueChanged.AddListener(AudioManager.Instance.SetBgmMute);
