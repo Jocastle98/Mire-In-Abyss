@@ -27,12 +27,14 @@ public class AudioManager : Singleton<AudioManager>
     public AudioClip[] hitVoiceAudioClips;
     public AudioClip[] hitAudioClips;
     public AudioClip[] blockShieldAudioClips;
+    public AudioClip[] stunVoiceAudioClips;
     public AudioClip[] deathVoiceAudioClips;
     public AudioClip[] skillVoiceAudioClips;
     public AudioClip[] skill1AudioClips;
     public AudioClip[] skill2AudioClips;
     public AudioClip[] skill3AudioClips;
     public AudioClip[] skill4AudioClips;
+    public AudioClip[] interactionVoiceAudioClips;
     
     private Dictionary<ESfxType, AudioClip[]> mSfxClips;
     
@@ -105,12 +107,14 @@ public class AudioManager : Singleton<AudioManager>
             { ESfxType.PlayerHitVoice, hitVoiceAudioClips },
             { ESfxType.PlayerHitEffect, hitAudioClips },
             { ESfxType.ShieldBlockEffect, blockShieldAudioClips },
+            { ESfxType.StunVoice, stunVoiceAudioClips },
             { ESfxType.DeathVoice, deathVoiceAudioClips },
             { ESfxType.SkillVoice, skillVoiceAudioClips },
             { ESfxType.Skill1Effect, skill1AudioClips },
             { ESfxType.Skill2Effect, skill2AudioClips },
             { ESfxType.Skill3Effect, skill3AudioClips },
-            { ESfxType.Skill4Effect, skill4AudioClips }
+            { ESfxType.Skill4Effect, skill4AudioClips },
+            { ESfxType.InteractionVoice, interactionVoiceAudioClips }
         };
     }
     

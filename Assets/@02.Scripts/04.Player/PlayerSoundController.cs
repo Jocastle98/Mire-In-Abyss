@@ -62,6 +62,11 @@ public class PlayerSoundController : MonoBehaviour
         }
     }
 
+    public void OnStunSound()
+    {
+        AudioManager.Instance.PlaySfx(ESfxType.StunVoice);
+    }
+
     public void OnDeathSound()
     {
         AudioManager.Instance.PlaySfx(ESfxType.DeathVoice);

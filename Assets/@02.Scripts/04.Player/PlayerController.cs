@@ -1429,7 +1429,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
                 {
                     SetPlayerState(PlayerState.Stun);
                     StartCoroutine(StatusEffectDuration(
-                        onStart: () => { },
+                        onStart: () => { mPlayerSounds.OnStunSound(); },
                         duration,
                         onEnd: () => { SetPlayerState(PlayerState.Idle); }));
                 }
@@ -1439,7 +1439,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
                 {
                     SetPlayerState(PlayerState.Freeze);
                     StartCoroutine(StatusEffectDuration(
-                        onStart: () => { PlayerAnimator.speed = 0.0f; },
+                        onStart: () => { PlayerAnimator.speed = 0.0f; mPlayerSounds.OnSkillSound(SkillType.Skill1); },
                         duration,
                         onEnd: () => { PlayerAnimator.speed = 1.0f; SetPlayerState(PlayerState.Idle); }));
                 }

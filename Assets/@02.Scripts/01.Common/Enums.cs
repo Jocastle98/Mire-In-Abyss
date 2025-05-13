@@ -200,12 +200,14 @@ namespace AudioEnums
         PlayerHitVoice,
         PlayerHitEffect,
         ShieldBlockEffect,
+        StunVoice,
         DeathVoice,
         SkillVoice,
         Skill1Effect,
         Skill2Effect,
         Skill3Effect,
         Skill4Effect,
+        InteractionVoice,
     }
 
     public enum EUiType    { Open = 0, Close = 1, Click = 2  }
