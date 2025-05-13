@@ -18,7 +18,11 @@ public sealed class TabPanelPresenter : BaseUIPanel
         {
             mButtons.Add(mTabButtonViews[i].GetComponent<Button>());
             int j = i;
-            mButtons[i].onClick.AddListener(() => Show(mPanels[j]));
+            mButtons[i].onClick.AddListener(() =>
+            {
+                AudioManager.Instance.PlayUi(AudioEnums.EUiType.Click);
+                Show(mPanels[j]);
+            });
         }
         Show(mPanels[0]);                 // 기본 탭 선택
     }
