@@ -24,6 +24,7 @@ public class CollectableItem : MonoBehaviour
     private void CollectItem(GameObject player)
     {
         PlayerHub.Instance.Inventory.AddItem(mItemID, 1);
+        PlayerHub.Instance.QuestLog.AddProgress("Q006", 1);
         
         mItemDatabase = FindObjectOfType<ItemDatabase>(); //임시 코드
         

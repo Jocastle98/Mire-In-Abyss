@@ -60,6 +60,11 @@ public class PlayerStats : MonoBehaviour
     private float mExpMultiplier = 1.0f;
     private float mGoldMultiplier = 1.0f;
     
+    //퀘스트 용 변수
+    private bool mIsLowHealthTracking = false;
+    private float mLowHealthStartTime = 0f;
+    private bool mLowHealthQuestCompleted = false;
+    
     //스탯 변경 추적을 위한 리스트
     private List<(float value, string type)> mMaxHPModifiers = new List<(float, string)>();
     private List<(float value, string type)> mMoveSpeedModifiers = new List<(float, string)>();
@@ -90,6 +95,7 @@ public class PlayerStats : MonoBehaviour
     {
         UpdateBuffDuration();
         UpdateAoeDamageTimer();
+        CheckLowHealthQuest();
     }
 
     private void OnDestroy()
@@ -125,6 +131,11 @@ public class PlayerStats : MonoBehaviour
         if (mCurrentHP > mMaxHP)
             mCurrentHP = mMaxHP;
 
+        if (mMoveSpeed >= 10f)
+        {
+            PlayerHub.Instance.QuestLog.AddProgress("Q010", 1);
+        }
+
         //크리티컬 0~100% 사잇값만 가짐
         mCritChance = Mathf.Clamp01(mCritChance);
         UpdateAttackSpeedToController();
@@ -154,6 +165,37 @@ public class PlayerStats : MonoBehaviour
         }
         
         stat = (baseStat + (baseStat * percentSum) + flatAdd) * mulSum;
+    }
+
+    private void CheckLowHealthQuest()
+    {
+        if (mLowHealthQuestCompleted) return;
+        float healthPercentage = mCurrentHP / mMaxHP;
+
+        if (healthPercentage <= 0.2)
+        {
+            if (!mIsLowHealthTracking)
+            {
+                mIsLowHealthTracking = true;
+                mLowHealthStartTime = Time.time;
+            }
+            else
+            {
+                float timeInLowHealth = Time.time - mLowHealthStartTime;
+                if (timeInLowHealth >= 60f)
+                {
+                    PlayerHub.Instance.QuestLog.AddProgress("Q008", 1);
+                    mLowHealthQuestCompleted = true;
+                }
+            }
+        }
+        else
+        {
+            if (mIsLowHealthTracking)
+            {
+                mIsLowHealthTracking = false;
+            }
+        }
     }
 
     private void UpdateAttackSpeedToController()
@@ -387,6 +429,8 @@ public class PlayerStats : MonoBehaviour
             Debug.Log($"가드 성공, 방어 버프 활성화 {mDefenceBuffValue * 100}%");
             RecalculateAllStats();
         }
+
+        PlayerHub.Instance.QuestLog.AddProgress("Q003", 1);
     }
 
     /// <summary>
@@ -414,6 +458,7 @@ public class PlayerStats : MonoBehaviour
         {
             float healAmount = damage * mLifeStealPercentage;
             Heal(healAmount);
+            PlayerHub.Instance.QuestLog.AddProgress("Q005", (int)healAmount);
             Debug.Log($"흡혈 {healAmount} 회복");
             return healAmount;
         }
@@ -476,6 +521,7 @@ public class PlayerStats : MonoBehaviour
     private void Die()
     {
         Debug.Log("플레이어 사망!");
+        mIsLowHealthTracking = false;
         OnDeath?.Invoke();
     }
     
