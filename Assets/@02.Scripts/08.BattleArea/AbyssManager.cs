@@ -95,6 +95,8 @@ public class AbyssManager : Singleton<AbyssManager>
         Instance.abyssClearCount = 0;
         Instance.levelDesign = 0;
         
+        AchievementManager.Instance.AddProgress("A011", 1);
+        
         SceneLoader.LoadSceneAsync(Constants.TownScene).ContinueWith(() =>
         {
             var playerStats = Instance.player.GetComponent<PlayerStats>();

@@ -136,6 +136,11 @@ public class PlayerStats : MonoBehaviour
             PlayerHub.Instance.QuestLog.AddProgress("Q010", 1);
         }
 
+        if (mDefence >= 10f)
+        {
+            PlayerHub.Instance.QuestLog.AddProgress("Q002", 1);
+        }
+
         //크리티컬 0~100% 사잇값만 가짐
         mCritChance = Mathf.Clamp01(mCritChance);
         UpdateAttackSpeedToController();
@@ -504,6 +509,7 @@ public class PlayerStats : MonoBehaviour
         mCurrentHP = mMaxHP;
         OnHealthChanged?.Invoke(mCurrentHP);
         PlayerHub.Instance.QuestLog.AddProgress("Q013", 1);
+        AchievementManager.Instance.AddProgress("A019", 1);
 
         Debug.Log($"부활 완료, 남은 부활 횟수 : {mReviveCount}");
     }

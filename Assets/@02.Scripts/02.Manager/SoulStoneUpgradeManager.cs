@@ -14,14 +14,18 @@ public sealed class SoulStoneUpgradeManager : Singleton<SoulStoneUpgradeManager>
     void Start()
     {
         mPlayerStats = TempRefManager.Instance.Player.GetComponent<PlayerStats>();
-        
+
         var upgradeInfos = mUpgradeData.GetAllUpgrades();
         foreach (var info in upgradeInfos)
         {
             info.CurrentLevel = UserData.Instance.GetSoulUpgradeLevel(info.UpgradeId);
             int level = info.CurrentLevel - 1;
             if (level < 0 || level >= 5) continue;
-            ApplyStat(info.UpgradeId, info.Values[level], info.ValueType);
+
+            for (int i = 0; i <= level; i++)
+            {
+                ApplyStat(info.UpgradeId, info.Values[i], info.ValueType);
+            }
         }
     }
 

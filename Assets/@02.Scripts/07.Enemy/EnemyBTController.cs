@@ -756,10 +756,19 @@ public class EnemyBTController : MonoBehaviour, IHpTrackable, IMapTrackable
             case  EnemySubType.Dragon:
                 PlayerHub.Instance.QuestLog.AddProgress("Q014", 1);
                 PlayerHub.Instance.QuestLog.AddProgress("Q011", 1);
+                AchievementManager.Instance.AddProgress("A004", 1);
+                AchievementManager.Instance.AddProgress("A005", 1);
+                if (PlayerHub.Instance.Inventory.Items == null)
+                {
+                    AchievementManager.Instance.AddProgress("A014", 1);
+                }
                 break;
             
         }
         PlayerHub.Instance.QuestLog.AddProgress("Q009", 1);
+        AchievementManager.Instance.AddProgress("A001", 1);
+        AchievementManager.Instance.AddProgress("A002", 1);
+        AchievementManager.Instance.AddProgress("A003", 1);
         
         monsterDead.Invoke();
         StartCoroutine(Dissolve());
