@@ -28,7 +28,7 @@ public sealed class ItemCodexPresenter : TabPresenterBase
         foreach (var rec in dict)
         {
             var v = Instantiate(mItemIconPrefab, mContent);
-            if(UserData.Instance.GetItemData(rec.Key).IsUnlocked)
+            if(UserData.Instance.GetItemUnlock(rec.Key))
             {
                 v.Bind(rec.Key, rec.Value, showDetail);
             }
@@ -47,7 +47,7 @@ public sealed class ItemCodexPresenter : TabPresenterBase
 
     void showDetail(int id)
     {
-        if (UserData.Instance.GetItemData(id).IsUnlocked)
+        if (UserData.Instance.GetItemUnlock(id))
         {
             mLargeIcon.sprite = GameDB.Instance.SpriteCache.GetSprite(SpriteType.Item, id);
             //TODO: 아이템 정보 가져오기

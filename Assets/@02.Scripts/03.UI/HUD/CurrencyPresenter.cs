@@ -23,5 +23,11 @@ public sealed class CurrencyPresenter : HudPresenterBase
         R3EventBus.Instance.Receive<SoulAdded>()
             .Subscribe(e => mSoulText.text = PlayerHub.Instance.Inventory.Soul.ToString())
             .AddTo(mCD);
+        R3EventBus.Instance.Receive<GoldSubTracked>()
+            .Subscribe(e => mGoldText.text = PlayerHub.Instance.Inventory.Gold.ToString())
+            .AddTo(mCD);
+        R3EventBus.Instance.Receive<SoulSubTracked>()
+            .Subscribe(e => mSoulText.text = PlayerHub.Instance.Inventory.Soul.ToString())
+            .AddTo(mCD);
     }
 }

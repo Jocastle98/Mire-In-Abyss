@@ -18,6 +18,22 @@ public sealed class AchievementManager : Singleton<AchievementManager>
     public readonly Subject<AchievementCompleted> Completed = new();
 
 
+    public void InitAchievementDataFromUserData()
+    {
+        var achievements = UserData.Instance.AchievementDataMap;
+        foreach (var achievement in achievements)
+        {
+            if (achievement.Value.IsCompleted)
+            {
+                mCompletedAchievements.Add(achievement.Key, achievement.Value);
+            }
+            else
+            {
+                mActiveAchievements.Add(achievement.Key, achievement.Value);
+            }
+        }
+    }
+
     public UserAchievementData GetUserAchievementData(string id)
     {
         if (mActiveAchievements.TryGetValue(id, out var a))
@@ -57,9 +73,7 @@ public sealed class AchievementManager : Singleton<AchievementManager>
             return;
         }
 
-        // Temp 값 할당
-        //int targetAmount = GameDB.Instance.AchievementDatabase.GetAchievement(id).targetAmount;
-        int targetAmount = 10;
+        int targetAmount = GameDB.Instance.AchievementDatabase.GetAchievementById(id).TargetAmount;
 
         a.CurrentAmount = Mathf.Min(a.CurrentAmount + addedAmt, targetAmount);
         Progress.OnNext(new AchievementUpdated(id, a.CurrentAmount));
@@ -80,8 +94,5 @@ public sealed class AchievementManager : Singleton<AchievementManager>
         }
     }
 
-    protected override void OnSceneLoaded(Scene scene, LoadSceneMode mode)
-    {
-        throw new System.NotImplementedException();
-    }
+    protected override void OnSceneLoaded(Scene scene, LoadSceneMode mode) { }
 }

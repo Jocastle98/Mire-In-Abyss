@@ -41,6 +41,12 @@ public class AudioManager : Singleton<AudioManager>
     
     private Dictionary<ESfxType, AudioClip[]> mSfxClips;
     
+    protected override void Awake()
+    {
+        base.Awake();
+        InitPlayerSfx();
+    }
+
     private void OnEnable()
     {
         SceneManager.sceneLoaded += OnSceneLoaded;
@@ -63,7 +69,6 @@ public class AudioManager : Singleton<AudioManager>
         mSfxSource.mute = UserData.Instance.IsSeMuted;
         mUiSource.mute = UserData.Instance.IsUiMuted;
         
-        InitPlayerSfx();
 
         subscribeUserAudioData();
     }
@@ -74,7 +79,10 @@ public class AudioManager : Singleton<AudioManager>
         UserData.Instance.ObsBgmVolume.Subscribe(OnBgmVolumeChanged).AddTo(this);
         UserData.Instance.ObsSeVolume.Subscribe(OnSfxVolumeChanged).AddTo(this);
         UserData.Instance.ObsUiVolume.Subscribe(OnUIVolumeChanged).AddTo(this);
-        
+        UserData.Instance.ObsMasterMuted.Subscribe(SetMasterMute).AddTo(this);
+        UserData.Instance.ObsBgmMuted.Subscribe(SetBgmMute).AddTo(this);
+        UserData.Instance.ObsSeMuted.Subscribe(SetSeMute).AddTo(this);
+        UserData.Instance.ObsUiMuted.Subscribe(SetUiMute).AddTo(this);
     }
 
     private void InitPlayerSfx()

@@ -11,6 +11,7 @@ using UnityEngine.SceneManagement;
 
 public sealed class UserData : Singleton<UserData>
 {
+    [SerializeField] private SoulStoneUpgradeData mSoulStoneUpgradeData;
     private const string DATA_FILE = "userdata.json";
 
     // ───────── Settings ─────────
@@ -85,7 +86,12 @@ public sealed class UserData : Singleton<UserData>
     async UniTask LoadFromDiskAsync()
     {
         string path = Path.Combine(Application.persistentDataPath, DATA_FILE);
-        if (!File.Exists(path)) return;
+        if (!File.Exists(path))
+        {
+            setDefaultUserData();
+            SaveToDisk();
+            return;
+        }
 
         string json = await UniTask.RunOnThreadPool(() => File.ReadAllText(path));
         var dto = JsonUtility.FromJson<UserDataDTO>(json);
@@ -154,6 +160,48 @@ public sealed class UserData : Singleton<UserData>
         File.WriteAllText(path, json);
     }
 
+    private void setDefaultUserData()
+    {
+        // Settings
+        MouseSensitivity = 1.0f;
+        IsMasterMuted = false;
+        IsBgmMuted = false;
+        IsSeMuted = false;
+        IsUiMuted = false;
+        MasterVolume = 0.5f;
+        BgmVolume = 0.5f;
+        SeVolume = 0.5f;
+        UiVolume = 0.5f;
+        FullScreen = FullScreenMode.ExclusiveFullScreen;
+        ScreenResolution = new Resolution { width = 1920, height = 1080 };
+
+        // Currency
+        Soul = 0;
+
+        // Codex
+        AchievementDataMap = new Dictionary<string, UserAchievementData>();
+        ItemDataMap = new Dictionary<int, UserItemData>();
+        SoulUpgradeDataMap = new Dictionary<string, int>();
+
+        var achievements = GameDB.Instance.AchievementDatabase.AllAchievements;
+        foreach (var achievement in achievements)
+        {
+            AchievementDataMap.Add(achievement.Id, new UserAchievementData(achievement.Id, 0, false));
+        }
+
+        var items = GameDB.Instance.ItemDatabase.ItemIDs;
+        foreach (var item in items)
+        {
+            ItemDataMap.Add(item, new UserItemData(item, false));
+        }
+
+        int count = mSoulStoneUpgradeData.GetAllUpgrades().Count;
+        for (int i = 0; i < count; i++)
+        {
+            SoulUpgradeDataMap.Add(i.ToString(), 0);
+        }
+    }
+
     // ───────── Data Access ─────────
     public void UpdateAchievementData(string id, int currentAmount, bool isCompleted = false)
     {
@@ -180,15 +228,15 @@ public sealed class UserData : Singleton<UserData>
             : null;
     }
 
-    public void SetItemData(UserItemData data)
+    public void SetItemUnlock(int id)
     {
-        ItemDataMap[data.Id] = data;
+        ItemDataMap[id].IsUnlocked = true;
     }
-    public UserItemData GetItemData(int id)
+    public bool GetItemUnlock(int id)
     {
         return ItemDataMap.TryGetValue(id, out var data)
-            ? data
-            : null;
+            ? data.IsUnlocked
+            : false;
     }
 
     public void SetSoulUpgradeLevel(string id, int level)
@@ -200,9 +248,11 @@ public sealed class UserData : Singleton<UserData>
         return SoulUpgradeDataMap.TryGetValue(id, out var lvl) ? lvl : 0;
     }
 
-    protected override void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    protected override void OnSceneLoaded(Scene scene, LoadSceneMode mode) { }
+
+    private void OnApplicationQuit()
     {
-        throw new NotImplementedException();
+        SaveToDisk();
     }
 
     // ───────── DTOs ─────────
