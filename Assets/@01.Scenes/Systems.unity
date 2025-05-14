@@ -710,16 +710,16 @@ MonoBehaviour:
   mSfxPoolSize: 16
   mBgmPoolSize: 4
   footstepAudioClips:
-  - {fileID: 8300000, guid: 72f526a6a9890f643a88e85a61c86c8a, type: 3}
-  - {fileID: 8300000, guid: 85016e0f2b01da248b9663dd49a161b0, type: 3}
-  - {fileID: 8300000, guid: 186de84b3207156479abe98f4958fed0, type: 3}
-  - {fileID: 8300000, guid: 1a91fcd19acf1e54bba0945d9f390849, type: 3}
-  - {fileID: 8300000, guid: 14e8a8d2158bec840b56c54f5266e692, type: 3}
-  - {fileID: 8300000, guid: 29841e7d5bbfb5b419c9ad16ca8bc4c1, type: 3}
-  - {fileID: 8300000, guid: dd1af302b8902684d9381de1f2d3a5af, type: 3}
-  - {fileID: 8300000, guid: 67c8b33e424ccdc4486edf538ab91c5a, type: 3}
-  - {fileID: 8300000, guid: 274649b0e221539409070ebf6c18918b, type: 3}
-  - {fileID: 8300000, guid: a3194b8bbc96ef84fab1f98f4b7dae3e, type: 3}
+  - {fileID: 8300000, guid: c9853ab21efd07e4984378826b1d06f7, type: 3}
+  - {fileID: 8300000, guid: 2641ff6f6e926914aacaec81fc30a6ad, type: 3}
+  - {fileID: 8300000, guid: 4f061c75f53e7e446afdf1e811bbb6f5, type: 3}
+  - {fileID: 8300000, guid: c2a878419e9baa9478b151fbf8b7584a, type: 3}
+  - {fileID: 8300000, guid: 958b9553b472bc24ab272bfef71cad42, type: 3}
+  - {fileID: 8300000, guid: 930ae5f0c8e491f43916309dc51fb566, type: 3}
+  - {fileID: 8300000, guid: 5cceaec7c6bf9f7499a6a3dc89593e38, type: 3}
+  - {fileID: 8300000, guid: 3894dd0f830152b4f84db8a5ea9fb1fb, type: 3}
+  - {fileID: 8300000, guid: 71ba1f1e2a3191644a1601cf17962d04, type: 3}
+  - {fileID: 8300000, guid: 0db9491ac1437d14283456f6bab305e3, type: 3}
   gruntVoiceAudioClips:
   - {fileID: 8300000, guid: e03c401494466364885549a06b42778a, type: 3}
   - {fileID: 8300000, guid: 407eff126444d6b41993548606ff87c1, type: 3}
