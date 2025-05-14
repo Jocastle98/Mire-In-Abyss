@@ -195,10 +195,10 @@ public sealed class UserData : Singleton<UserData>
             ItemDataMap.Add(item, new UserItemData(item, false));
         }
 
-        int count = mSoulStoneUpgradeData.GetAllUpgrades().Count;
-        for (int i = 0; i < count; i++)
+        var upgrades = mSoulStoneUpgradeData.GetAllUpgrades();
+        foreach (var upgrade in upgrades)
         {
-            SoulUpgradeDataMap.Add(i.ToString(), 0);
+            SoulUpgradeDataMap.Add(upgrade.UpgradeId, 0);
         }
     }
 
