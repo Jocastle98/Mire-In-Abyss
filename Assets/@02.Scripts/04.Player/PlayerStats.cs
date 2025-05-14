@@ -503,6 +503,7 @@ public class PlayerStats : MonoBehaviour
         
         mCurrentHP = mMaxHP;
         OnHealthChanged?.Invoke(mCurrentHP);
+        PlayerHub.Instance.QuestLog.AddProgress("Q013", 1);
 
         Debug.Log($"부활 완료, 남은 부활 횟수 : {mReviveCount}");
     }
