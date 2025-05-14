@@ -620,13 +620,11 @@ public class PlayerStats : MonoBehaviour
         RecalculateAllStats();
     }
 
-    public void ResetStatsExceptSoulStoneUpgrades()
+    public void ResetStatsFromAbyssToTown()
     {
         ResetAllEffects();              //모든 버프, 특수효과 초기화
         
         ResetStats();                   //기본 스탯 초기화
-
-        //ApplySoulStoneUpgradeOnly();    //영혼석 상점 업그레이드만 다시 적용
         
         Heal(GetMaxHP());        //최대 체력으로 회복
         
@@ -652,74 +650,7 @@ public class PlayerStats : MonoBehaviour
         mMoveSpeedModifiers.Clear();
         mMaxHPModifiers.Clear();
     }
-
-    /*private void ApplySoulStoneUpgradeOnly()
-    {
-        SoulStoneUpgradeData upgradeData = FindObjectOfType<SoulStoneShopPanelController>()?.UpgradeData; //TODO: UserInfo에서 업그레이드 정보를 받아와야함
-        if (upgradeData == null) return;
-
-        foreach (var upgrade in upgradeData.GetAllUpgrades())
-        {
-            if(upgrade.CurrentLevel <= 0) continue;
-
-            float value = upgrade.Values[upgrade.CurrentLevel - 1];
-            string valueType = upgrade.ValueType;
-            
-            switch (upgrade.UpgradeId)
-            {
-                case "maxHP":
-                    ModifyMaxHP(value, valueType);
-                    break;
-                case "attackPower":
-                    ModifyAttackPower(value, valueType);
-                    break;
-                case "moveSpeed":
-                    ModifyMoveSpeed(value, valueType);
-                    break;
-                case "defence":
-                    ModifyDefence(value, valueType);
-                    break;
-                case "critChance":
-                    ModifyCritChance(value, valueType);
-                    break;
-                case "soulStone":
-                    if (valueType == "percent")
-                    {
-                        SetSoulStoneMultiplier(0);
-                        SetSoulStoneMultiplier(value);
-                    }
-                    break;
-                case "coolDown":
-                    if (valueType == "percent")
-                    {
-                        SetCoolDownReduction(0);
-                        SetCoolDownReduction(value);
-                    }
-                    break;
-                case "itemDrop":
-                    if (valueType == "percent")
-                    {
-                        SetItemDropRateBonus(0);
-                        SetItemDropRateBonus(value);
-                    }
-                    break;
-                case "level":
-                    if (valueType == "percent")
-                    {
-                        SetExpMultiplier(0);
-                        SetExpMultiplier(value);
-                    }
-                    break;
-                case "gold":
-                    if (valueType == "percent")
-                    {
-                        SetGoldMultiplier(0);
-                        SetGoldMultiplier(value);
-                    }
-                    break;
-            }
-        }
-    }*/
+    
     
     public void RemoveLevelBonuses()
     {
@@ -729,32 +660,7 @@ public class PlayerStats : MonoBehaviour
         RecalculateAllStats();
     }
     
-    /*public void RemoveStatModifier(string statType, float value, string valueType)
-    {
-        List<(float value, string type)> targetList = statType switch
-        {
-            "maxHP" or "hp" => mMaxHPModifiers,
-            "attackPower" => mAttackPowerModifiers,
-            "moveSpeed" => mMoveSpeedModifiers,
-            "defence" or "damageDefence" => mDefenceModifiers,
-            "critChance" => mCritChanceModifiers,
-            "attackSpeed" => mAttackSpeedModifiers,
-            _ => null
-        };
-
-        if (targetList == null) return;
-
-        for (int i = 0; i < targetList.Count; i++)
-        {
-            if (Mathf.Approximately(targetList[i].value, value) && targetList[i].type == valueType)
-            {
-                targetList.RemoveAt(i);
-                break; // 동일한 효과 하나만 제거
-            }
-        }
-
-        RecalculateAllStats();
-    }*/
+    
     #endregion
 
     #region 특수 효과 활성화/비활성화 메서드

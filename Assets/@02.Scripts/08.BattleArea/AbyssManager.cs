@@ -96,15 +96,13 @@ public class AbyssManager : Singleton<AbyssManager>
         Instance.levelDesign = 0;
         
         AchievementManager.Instance.AddProgress("A011", 1);
-        
-        SceneLoader.LoadSceneAsync(Constants.TownScene).ContinueWith(() =>
+        var playerStats = Instance.player.GetComponent<PlayerStats>();
+        if (playerStats != null)
         {
-            var playerStats = Instance.player.GetComponent<PlayerStats>();
-            if (playerStats != null)
-            {
-                playerStats.ResetStatsExceptSoulStoneUpgrades();
-            }
-        }).Forget();
+            playerStats.ResetStatsFromAbyssToTown();
+        }
+        
+        SceneLoader.LoadSceneAsync(Constants.TownScene).Forget();
     }
 
     protected override void OnSceneLoaded(Scene scene, LoadSceneMode mode)
