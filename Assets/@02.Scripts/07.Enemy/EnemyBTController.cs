@@ -513,7 +513,7 @@ public class EnemyBTController : MonoBehaviour
 
         if (mEnemyType == EnemyType.Common)
         {
-            AudioManager.Instance.PlaySfx(AudioEnums.ESfxType.SkeletonHit);
+            //rAudioManager.Instance.PlaySfx(AudioEnums.ESfxType.SkeletonHit);
         }
         switch (hitType)
         {
