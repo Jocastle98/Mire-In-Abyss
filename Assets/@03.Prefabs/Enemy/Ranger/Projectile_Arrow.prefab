@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 4794695279049978}
   - component: {fileID: 198544944858923864}
   - component: {fileID: 199874304870013176}
-  m_Layer: 11
+  m_Layer: 0
   m_Name: Waves
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4911,7 +4911,7 @@ GameObject:
   - component: {fileID: 4039616711004404}
   - component: {fileID: 198362454088448860}
   - component: {fileID: 199589577870613834}
-  m_Layer: 11
+  m_Layer: 0
   m_Name: Sparks
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -9824,7 +9824,8 @@ GameObject:
   - component: {fileID: 2284026797062808455}
   - component: {fileID: 6820377934356772814}
   - component: {fileID: 5326332721465705419}
-  m_Layer: 11
+  - component: {fileID: 9023841916349709908}
+  m_Layer: 0
   m_Name: Projectile_Arrow
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -14806,6 +14807,48 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mSpeed: 15
+--- !u!23 &9023841916349709908
+MeshRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1168065043843762}
+  m_Enabled: 1
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: 6e3575b5e481bdb459b64fc1c0f445be, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  m_AdditionalVertexStreams: {fileID: 0}
 --- !u!1 &1214358954199146
 GameObject:
   m_ObjectHideFlags: 0
@@ -14817,7 +14860,7 @@ GameObject:
   - component: {fileID: 4463937287572274}
   - component: {fileID: 198921755268963764}
   - component: {fileID: 199740277830324614}
-  m_Layer: 11
+  m_Layer: 0
   m_Name: SubSparks
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -19659,7 +19702,7 @@ GameObject:
   - component: {fileID: 4816910967890968}
   - component: {fileID: 198205082277334854}
   - component: {fileID: 199045256733629516}
-  m_Layer: 11
+  m_Layer: 0
   m_Name: Glow
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -24501,7 +24544,7 @@ GameObject:
   - component: {fileID: 4074339303465744}
   - component: {fileID: 198897898842092760}
   - component: {fileID: 199704690769407420}
-  m_Layer: 11
+  m_Layer: 0
   m_Name: Flash
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -29401,7 +29444,7 @@ GameObject:
   - component: {fileID: 4412076118273836}
   - component: {fileID: 198656782477980160}
   - component: {fileID: 199195936075333242}
-  m_Layer: 11
+  m_Layer: 0
   m_Name: Shockwave
   m_TagString: Untagged
   m_Icon: {fileID: 0}
