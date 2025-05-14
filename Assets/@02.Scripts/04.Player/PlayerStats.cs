@@ -614,9 +614,9 @@ public class PlayerStats : MonoBehaviour
 
     public void ResetStatsExceptSoulStoneUpgrades()
     {
-        ResetStats();                   //기본 스탯 초기화
-
         ResetAllEffects();              //모든 버프, 특수효과 초기화
+        
+        ResetStats();                   //기본 스탯 초기화
 
         //ApplySoulStoneUpgradeOnly();    //영혼석 상점 업그레이드만 다시 적용
         

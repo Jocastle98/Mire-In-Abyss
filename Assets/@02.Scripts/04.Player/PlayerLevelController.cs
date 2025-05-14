@@ -71,16 +71,15 @@ public class PlayerLevelController : MonoBehaviour
         for (int i = 0; i < mMaxLevel; i++)
         {
             int level = i + 1;
-            int expRequired = 20 * level; //필요 경험치
+            int expRequired = 30 * level; //필요 경험치
 
             mLevelTable[i] = new LevelData
             {
-                //TODO: 수치 조정
                 level = level,
                 expRequired = expRequired,
-                hpBonus = level * 5f,
-                attackBonus = level * 2f,
-                defenceBonus = level * 1f
+                hpBonus = 5f,
+                attackBonus = 2f,
+                defenceBonus = 2f
             };
         }
     }
@@ -158,9 +157,9 @@ public class PlayerLevelController : MonoBehaviour
 
         if (mPlayerStats != null)
         {
-            mPlayerStats.ModifyMaxHP(levelData.hpBonus, "add");
-            mPlayerStats.ModifyAttackPower(levelData.attackBonus, "add");
-            mPlayerStats.ModifyDefence(levelData.defenceBonus, "add");
+            mPlayerStats.ModifyMaxHP(levelData.hpBonus, "flat");
+            mPlayerStats.ModifyAttackPower(levelData.attackBonus, "flat");
+            mPlayerStats.ModifyDefence(levelData.defenceBonus, "flat");
             
             //레벨업 시 최대 체력으로 회복
             mPlayerStats.Heal(mPlayerStats.GetMaxHP());
