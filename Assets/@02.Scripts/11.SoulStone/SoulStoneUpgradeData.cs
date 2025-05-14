@@ -157,7 +157,22 @@ public class SoulStoneUpgradeData : ScriptableObject
         };
         mUpgrades.Add(goldAcquisition);
     }
+    
+    public bool AllUpgradeMaxLevel()
+    {
+        foreach (var upgrade in mUpgrades)
+        {
+            if (upgrade.CurrentLevel < 5)
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
 }
+
+
 
 #if UNITY_EDITOR
 [UnityEditor.CustomEditor(typeof(SoulStoneUpgradeData))]
