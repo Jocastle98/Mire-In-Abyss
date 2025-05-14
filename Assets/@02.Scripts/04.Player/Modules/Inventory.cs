@@ -22,6 +22,8 @@ public sealed class Inventory : MonoBehaviour
     public void Init(int soul)
     {
         Soul = soul;
+        SoulAdded.OnNext(new SoulAdded(soul, Soul));
+        AddSoul(0);
     }
 
     public void AddItem(int id, int addedAmt = 1)

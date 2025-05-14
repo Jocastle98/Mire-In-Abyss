@@ -26,10 +26,10 @@ public sealed class UserData : Singleton<UserData>
     readonly ReactiveProperty<bool> mSeMute = new(false);
     readonly ReactiveProperty<bool> mUiMute = new(false);
     readonly ReactiveProperty<FullScreenMode> mFullScreen = new(FullScreenMode.ExclusiveFullScreen);
-    readonly ReactiveProperty<Resolution> mResolution = new(new Resolution { width = 1920, height = 1080 });
+    readonly ReactiveProperty<Vector2Int> mResolution = new(new Vector2Int(1920, 1080));
 
     // ───────── Public Accessors ─────────
-    public float MouseSensitivity { get => mMouseSens.Value; set => mMouseSens.Value = Mathf.Clamp(value, 0.1f, 10f); }
+    public float MouseSensitivity { get => mMouseSens.Value; set => mMouseSens.Value = Mathf.Clamp(value, 0.01f, 10f); }
     public float MasterVolume { get => mMasterVol.Value; set => mMasterVol.Value = Mathf.Clamp01(value); }
     public float BgmVolume { get => mBgmVol.Value; set => mBgmVol.Value = Mathf.Clamp01(value); }
     public float SeVolume { get => mSeVol.Value; set => mSeVol.Value = Mathf.Clamp01(value); }
@@ -39,7 +39,7 @@ public sealed class UserData : Singleton<UserData>
     public bool IsSeMuted { get => mSeMute.Value; set => mSeMute.Value = value; }
     public bool IsUiMuted { get => mUiMute.Value; set => mUiMute.Value = value; }
     public FullScreenMode FullScreen { get => mFullScreen.Value; set => mFullScreen.Value = value; }
-    public Resolution ScreenResolution { get => mResolution.Value; set => mResolution.Value = value; }
+    public Vector2Int ScreenResolution { get => mResolution.Value; set => mResolution.Value = value; }
 
     // Reactive streams
     public ReadOnlyReactiveProperty<float> ObsMouseSensitivity => mMouseSens;
@@ -52,7 +52,7 @@ public sealed class UserData : Singleton<UserData>
     public ReadOnlyReactiveProperty<bool> ObsSeMuted => mSeMute;
     public ReadOnlyReactiveProperty<bool> ObsUiMuted => mUiMute;
     public ReadOnlyReactiveProperty<FullScreenMode> ObsFullScreen => mFullScreen;
-    public ReadOnlyReactiveProperty<Resolution> ObsResolution => mResolution;
+    public ReadOnlyReactiveProperty<Vector2Int> ObsResolution => mResolution;
 
     // ───────── Currency ─────────
     // PlayerHub의 Inventory를 통해서만 변경
@@ -173,7 +173,7 @@ public sealed class UserData : Singleton<UserData>
         SeVolume = 0.5f;
         UiVolume = 0.5f;
         FullScreen = FullScreenMode.ExclusiveFullScreen;
-        ScreenResolution = new Resolution { width = 1920, height = 1080 };
+        ScreenResolution = new Vector2Int(1920, 1080);
 
         // Currency
         Soul = 0;
@@ -279,7 +279,7 @@ public sealed class UserData : Singleton<UserData>
         public float seVol;
         public float uiVol;
         public FullScreenMode displayMode;
-        public Resolution resolution;
+        public Vector2Int resolution;
     }
 
     [Serializable]

@@ -39,7 +39,7 @@ public sealed class DisplayPresenter : TabPresenterBase
         mResolutionDropdown.onValueChanged.AddListener(OnResolutionChanged);
 
         mModeDropdown.value = Array.FindIndex(mModeTable, mode => mode == UserData.Instance.FullScreen);
-        mResolutionDropdown.value = Array.FindIndex(mResolutions, res => res.width == UserData.Instance.ScreenResolution.width && res.height == UserData.Instance.ScreenResolution.height);
+        mResolutionDropdown.value = Array.FindIndex(mResolutions, res => res.width == UserData.Instance.ScreenResolution.x && res.height == UserData.Instance.ScreenResolution.y);
     }
 
     void populateModeDropdown()
@@ -70,7 +70,7 @@ public sealed class DisplayPresenter : TabPresenterBase
                 height = v.y,
                 refreshRateRatio = Screen.currentResolution.refreshRateRatio
             })
-            .OrderBy(r => r.width)
+            .OrderBy(r => -r.width)
             .ToArray();
 
         mResolutionDropdown.ClearOptions();
@@ -93,6 +93,8 @@ public sealed class DisplayPresenter : TabPresenterBase
         Screen.fullScreenMode = mode;
 
         ApplyResolution(mResolutionDropdown.value, mode);
+
+        UserData.Instance.FullScreen = mode;
     }
 
     void OnResolutionChanged(int idx)
@@ -104,5 +106,7 @@ public sealed class DisplayPresenter : TabPresenterBase
     {
         var res = mResolutions[Mathf.Clamp(idx, 0, mResolutions.Length - 1)];
         Screen.SetResolution(res.width, res.height, mode);
+
+        UserData.Instance.ScreenResolution = new Vector2Int(res.width, res.height);
     }
 }

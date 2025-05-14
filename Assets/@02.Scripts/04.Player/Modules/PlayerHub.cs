@@ -29,8 +29,12 @@ public class PlayerHub : Singleton<PlayerHub>
         Skills = GetComponent<SkillController>();
 
         // UserData를 통해 Soul, QuestLog 등 데이터 초기화 예정
-        Inventory.Init(UserData.Instance.Soul);
         SubscribeEvents();
+    }
+    void Start()
+    {
+        Inventory.Init(UserData.Instance.Soul);
+        
     }
 
     private void SubscribeEvents()

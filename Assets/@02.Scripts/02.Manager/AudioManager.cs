@@ -57,6 +57,9 @@ public class AudioManager : Singleton<AudioManager>
         SceneManager.sceneLoaded -= OnSceneLoaded;
     }
 
+    /// <summary>
+    /// Init volume and mute data from UserData in ManagerHub
+    /// </summary>
     public void InitAudioDataFromUserData()
     {
         AudioListener.volume = UserData.Instance.MasterVolume;
@@ -75,14 +78,14 @@ public class AudioManager : Singleton<AudioManager>
 
     private void subscribeUserAudioData()
     {
-        UserData.Instance.ObsMasterVolume.Subscribe(OnMasterVolumeChanged).AddTo(this);
-        UserData.Instance.ObsBgmVolume.Subscribe(OnBgmVolumeChanged).AddTo(this);
-        UserData.Instance.ObsSeVolume.Subscribe(OnSfxVolumeChanged).AddTo(this);
-        UserData.Instance.ObsUiVolume.Subscribe(OnUIVolumeChanged).AddTo(this);
-        UserData.Instance.ObsMasterMuted.Subscribe(SetMasterMute).AddTo(this);
-        UserData.Instance.ObsBgmMuted.Subscribe(SetBgmMute).AddTo(this);
-        UserData.Instance.ObsSeMuted.Subscribe(SetSeMute).AddTo(this);
-        UserData.Instance.ObsUiMuted.Subscribe(SetUiMute).AddTo(this);
+        UserData.Instance.ObsMasterVolume.Subscribe(e => AudioListener.volume = e).AddTo(this);
+        UserData.Instance.ObsBgmVolume.Subscribe(e => mBgmSource.volume = e).AddTo(this);
+        UserData.Instance.ObsSeVolume.Subscribe(e => mSfxSource.volume = e).AddTo(this);
+        UserData.Instance.ObsUiVolume.Subscribe(e => mUiSource.volume = e).AddTo(this);
+        UserData.Instance.ObsMasterMuted.Subscribe(e => AudioListener.pause = e).AddTo(this);
+        UserData.Instance.ObsBgmMuted.Subscribe(e => mBgmSource.mute = e).AddTo(this);
+        UserData.Instance.ObsSeMuted.Subscribe(e => mSfxSource.mute = e).AddTo(this);
+        UserData.Instance.ObsUiMuted.Subscribe(e => mUiSource.mute = e).AddTo(this);
     }
 
     private void InitPlayerSfx()
@@ -108,54 +111,6 @@ public class AudioManager : Singleton<AudioManager>
             { ESfxType.Skill4Effect, skill4AudioClips },
             { ESfxType.InteractionVoice, interactionVoiceAudioClips }
         };
-    }
-    
-    private void OnMasterVolumeChanged(float v)
-    {
-        AudioListener.volume = v;
-        UserData.Instance.MasterVolume = v;
-    }
-
-    private void OnBgmVolumeChanged(float v)
-    {
-        mBgmSource.volume = v;
-        UserData.Instance.BgmVolume = v;
-    }
-
-    private void OnSfxVolumeChanged(float v)
-    {
-        mSfxSource.volume = v;
-        UserData.Instance.SeVolume = v;
-    }
-
-    private void OnUIVolumeChanged(float v)
-    {
-        mUiSource.volume = v;
-        UserData.Instance.UiVolume = v;
-    }
-
-    public void SetMasterMute(bool isMuted)
-    {
-        AudioListener.pause = isMuted;
-        UserData.Instance.IsMasterMuted = isMuted;
-    }
-
-    public void SetBgmMute(bool isMuted)
-    {
-        mBgmSource.mute = isMuted;
-        UserData.Instance.IsBgmMuted = isMuted;
-    }
-
-    public void SetSeMute(bool isMuted)
-    {
-        mSfxSource.mute = isMuted;
-        UserData.Instance.IsSeMuted = isMuted;
-    }
-
-    public void SetUiMute(bool isMuted)
-    {
-        mUiSource.mute = isMuted;
-        UserData.Instance.IsUiMuted = isMuted;
     }
 
     public void PlayBgm(EBgmType type)

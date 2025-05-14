@@ -33,6 +33,8 @@ public sealed class BootLoader : MonoBehaviour
             ManagersHub.Instance.InitializeUserDataAsync()
         };
         await WaitWithProgress(userDataInitTasks, "유저 데이터 불러오는 중...(2/2)");
+        // UserData의 Display 설정 적용
+        applyDisplaySettings();
 
         /* C) MainMenu 씬 Additive */
         var menuOp = SceneManager.LoadSceneAsync(Constants.MainMenuScene,
@@ -66,5 +68,14 @@ public sealed class BootLoader : MonoBehaviour
             await t; Progress = ++done / (float)total;
         });
         await UniTask.WhenAll(wrapped);
+    }
+
+    private void applyDisplaySettings()
+    {
+        // UserData의 디스플레이 설정 적용
+        var mode = UserData.Instance.FullScreen;
+        var res = UserData.Instance.ScreenResolution;
+        Screen.fullScreenMode = mode;
+        Screen.SetResolution(res.x, res.y, mode);
     }
 }

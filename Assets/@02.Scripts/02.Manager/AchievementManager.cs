@@ -78,7 +78,7 @@ public sealed class AchievementManager : Singleton<AchievementManager>
         a.CurrentAmount = Mathf.Min(a.CurrentAmount + addedAmt, targetAmount);
         Progress.OnNext(new AchievementUpdated(id, a.CurrentAmount));
 
-        // 업적 달성 시
+        // 업적 달성 시 처리
         if (a.CurrentAmount == targetAmount)
         {
             a.IsCompleted = true;
@@ -88,7 +88,7 @@ public sealed class AchievementManager : Singleton<AchievementManager>
 
             UserData.Instance.UpdateAchievementData(id, a.CurrentAmount, true);
         }
-        else
+        else // Userdata 업적 진행도 증가 처리
         {
             UserData.Instance.UpdateAchievementData(id, a.CurrentAmount);
         }
