@@ -80,6 +80,7 @@ public class PlayerStats : MonoBehaviour
     public event Action OnDeath;
     public event Action<float> OnHealthChanged;
     public event Action OnReturnToTown;
+    public event Action OnCooldownReduced;
 
     private void Awake()
     {
@@ -914,6 +915,7 @@ public class PlayerStats : MonoBehaviour
     public void SetCoolDownReduction(float reduction)
     {
         mCoolDownReduction = reduction;
+        OnCooldownReduced?.Invoke();
     }
 
     public float GetCoolDownReduction()

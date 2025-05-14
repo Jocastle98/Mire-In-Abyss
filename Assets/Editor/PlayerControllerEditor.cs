@@ -13,6 +13,7 @@ public class PlayerControllerEditor : Editor
         
         // 타겟 컴포넌트 참조 가져오기
         PlayerController playerController = (PlayerController)target;
+        PlayerStats playerStats = playerController.GetComponent<PlayerStats>();
         
         // 여백 추가
         EditorGUILayout.Space();
@@ -117,6 +118,10 @@ public class PlayerControllerEditor : Editor
         if (GUILayout.Button("Dead"))
         {
             playerController.SetPlayerState(PlayerState.Dead);
+        }
+        if (GUILayout.Button("CooltimeReduction"))
+        {
+            playerStats.SetCoolDownReduction(0.5f);
         }
         EditorGUILayout.EndHorizontal();
         EditorGUILayout.EndVertical();
