@@ -123,7 +123,7 @@ public sealed class MiniQuestBoxPresenter : HudPresenterBase
     {
         var card = mCardPool.Rent();
         Quest quest = PlayerHub.Instance.QuestLog.GetQuest(id);
-        card.Bind(id, quest.CurrentAmount, quest.TargetAmount);
+        card.Bind(id, quest.CurrentAmount, quest.TargetAmount, quest.isCompleted);
         if (quest.CurrentAmount >= quest.TargetAmount)
         {
             card.transform.SetAsLastSibling();
@@ -140,7 +140,7 @@ public sealed class MiniQuestBoxPresenter : HudPresenterBase
     {
         foreach (var kv in mVisibleCards)
         {
-            if (kv.Value.IsCompleted)
+            if (PlayerHub.Instance.QuestLog.GetQuest(kv.Key).isCompleted)
             {
                 return kv.Value;
             }

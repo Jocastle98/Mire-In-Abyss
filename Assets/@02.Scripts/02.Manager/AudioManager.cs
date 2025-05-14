@@ -16,7 +16,7 @@ public class AudioManager : Singleton<AudioManager>
 
     [Header("오디오 클립")]
     [SerializeField] private AudioClip[] mUiClips;
-    
+
     [Header("오브젝트 풀 클립")]
     [SerializeField] private AudioClip[] mPooledSfxClips;
     [SerializeField] private AudioClip[] mBgmClips; // 0: 인트로, 1: 마을, 2: 필드, 3: 던전
@@ -51,13 +51,13 @@ public class AudioManager : Singleton<AudioManager>
     public AudioClip[] skill3AudioClips;
     public AudioClip[] skill4AudioClips;
     public AudioClip[] interactionVoiceAudioClips;
-    
+
     private Dictionary<ESfxType, AudioClip[]> mSfxClips;
 
     #endregion
-    
-    
-    
+
+
+
     protected override void Awake()
     {
         base.Awake();
@@ -93,35 +93,6 @@ public class AudioManager : Singleton<AudioManager>
     {
         SceneManager.sceneLoaded -= OnSceneLoaded;
     }
-  
-    private void Start()
-    {
-        AudioListener.volume = PlayerPrefs.GetFloat(Constants.MasterVolumeKey, 1f);
-        AudioListener.pause  = PlayerPrefs.GetInt(Constants.MasterMuteKey, 0) == 1;
-
-        float bgmVol  = PlayerPrefs.GetFloat(Constants.BGMVolumeKey, 1f);
-        bool  bgmMute = PlayerPrefs.GetInt(Constants.BgmMuteKey, 0) == 1;
-        foreach (var src in mBgmSources)
-        {
-            src.volume = bgmVol;
-            src.mute   = bgmMute;
-            src.loop   = true;
-        }
-
-        mUiSource.volume = PlayerPrefs.GetFloat(Constants.UIVolumeKey, 1f);
-        mUiSource.mute   = PlayerPrefs.GetInt(Constants.UiMuteKey,  0) == 1;
-        
-        mSfxSource.volume = PlayerPrefs.GetFloat(Constants.SFXVolumeKey, 1f);
-        mSfxSource.mute   = PlayerPrefs.GetInt(Constants.SeMuteKey,    0) == 1;
-
-        float poolVol  = PlayerPrefs.GetFloat(Constants.SFXVolumeKey, 1f);
-        bool poolMute  = PlayerPrefs.GetInt(Constants.SeMuteKey,    0) == 1;
-        foreach (var src in mPooledSources)
-        {
-            src.volume = poolVol;
-            src.mute   = poolMute;
-        }
-    }
 
     /// <summary>
     /// Init volume and mute data from UserData in ManagerHub
@@ -137,22 +108,68 @@ public class AudioManager : Singleton<AudioManager>
         mBgmSource.mute = UserData.Instance.IsBgmMuted;
         mSfxSource.mute = UserData.Instance.IsSeMuted;
         mUiSource.mute = UserData.Instance.IsUiMuted;
-        
+
+        foreach (var src in mBgmSources)
+        {
+            src.volume = UserData.Instance.BgmVolume;
+            src.mute = UserData.Instance.IsBgmMuted;
+            src.loop = true;
+        }
+        foreach (var src in mPooledSources)
+        {
+            src.volume = UserData.Instance.SeVolume;
+            src.mute = UserData.Instance.IsSeMuted;
+        }
+
 
         subscribeUserAudioData();
     }
 
-    private void subscribeUserAudioData()
-    {
-        UserData.Instance.ObsMasterVolume.Subscribe(e => AudioListener.volume = e).AddTo(this);
-        UserData.Instance.ObsBgmVolume.Subscribe(e => mBgmSource.volume = e).AddTo(this);
-        UserData.Instance.ObsSeVolume.Subscribe(e => mSfxSource.volume = e).AddTo(this);
-        UserData.Instance.ObsUiVolume.Subscribe(e => mUiSource.volume = e).AddTo(this);
-        UserData.Instance.ObsMasterMuted.Subscribe(e => AudioListener.pause = e).AddTo(this);
-        UserData.Instance.ObsBgmMuted.Subscribe(e => mBgmSource.mute = e).AddTo(this);
-        UserData.Instance.ObsSeMuted.Subscribe(e => mSfxSource.mute = e).AddTo(this);
-        UserData.Instance.ObsUiMuted.Subscribe(e => mUiSource.mute = e).AddTo(this);
-    }
+private void subscribeUserAudioData()
+{
+    UserData.Instance.ObsMasterVolume.Subscribe(e => AudioListener.volume = e).AddTo(this);
+    UserData.Instance.ObsBgmVolume
+        .Subscribe(e =>
+        {
+            mBgmSource.volume = e;
+            foreach (var src in mBgmSources)
+            {
+                src.volume = e;
+            }
+        }).AddTo(this);
+    UserData.Instance.ObsSeVolume
+        .Subscribe(e =>
+        {
+            mSfxSource.volume = e;
+            foreach (var src in mPooledSources)
+            {
+                src.volume = e;
+            }
+        }).AddTo(this);
+    UserData.Instance.ObsUiVolume.Subscribe(e => mUiSource.volume = e).AddTo(this);
+
+
+    UserData.Instance.ObsMasterMuted.Subscribe(e => AudioListener.pause = e).AddTo(this);
+    UserData.Instance.ObsBgmMuted
+        .Subscribe(e =>
+        {
+            mBgmSource.mute = e;
+            foreach (var src in mBgmSources)
+            {
+                src.mute = e;
+            }
+        }).AddTo(this);
+    UserData.Instance.ObsSeMuted
+        .Subscribe(e =>
+        {
+            mSfxSource.mute = e;
+            foreach (var src in mPooledSources)
+            {
+                src.mute = e;
+            }
+        }).AddTo(this);
+    UserData.Instance.ObsUiMuted.Subscribe(e => mUiSource.mute = e).AddTo(this);
+}
 
     private void InitPlayerSfx()
     {
@@ -240,7 +257,7 @@ public class AudioManager : Singleton<AudioManager>
             case Constants.TownScene:
                 PlayBgm(EBgmType.Town);
                 break;
-            case  Constants.AbyssFieldScene:
+            case Constants.AbyssFieldScene:
                 PlayBgm(EBgmType.Field);
                 break;
             case Constants.AbyssDungeonScene:
