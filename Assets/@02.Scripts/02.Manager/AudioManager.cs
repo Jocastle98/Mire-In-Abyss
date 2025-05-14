@@ -1,7 +1,11 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using AudioEnums;
+using R3;
+using Cysharp.Threading.Tasks;
+using UnityEngine.Serialization;
 
 public class AudioManager : Singleton<AudioManager>
 {
@@ -11,11 +15,76 @@ public class AudioManager : Singleton<AudioManager>
     [SerializeField] private AudioSource mUiSource;
 
     [Header("오디오 클립")]
-    [SerializeField] private AudioClip[] mBgmClips; // 0: 인트로, 1: 마을, 2: 필드, 3: 던전
-    [SerializeField] private AudioClip[] mSfxClips;
     [SerializeField] private AudioClip[] mUiClips;
-
     
+    [Header("오브젝트 풀 클립")]
+    [SerializeField] private AudioClip[] mPooledSfxClips;
+    [SerializeField] private AudioClip[] mBgmClips; // 0: 인트로, 1: 마을, 2: 필드, 3: 던전
+
+    [Header("오브젝트 풀 세팅")]
+    [SerializeField] private int mSfxPoolSize = 16;
+    [SerializeField] private int mBgmPoolSize = 2;
+    private AudioSource[] mPooledSources;
+    private AudioSource[] mBgmSources;
+    private int mNextPool = 0;
+    private int mNextBgm = 0;
+
+    #region Player SFX 클립
+
+    [Space(10)]
+    [Header("SFX 클립")]
+    public AudioClip[] footstepAudioClips;
+    public AudioClip[] gruntVoiceAudioClips;
+    public AudioClip[] landingVoiceAudioClips;
+    public AudioClip[] landingAudioClips;
+    public AudioClip[] attackVoiceAudioClips;
+    public AudioClip[] swordSwingAudioClips;
+    public AudioClip[] swordHitAudioClips;
+    public AudioClip[] hitVoiceAudioClips;
+    public AudioClip[] hitAudioClips;
+    public AudioClip[] blockShieldAudioClips;
+    public AudioClip[] stunVoiceAudioClips;
+    public AudioClip[] deathVoiceAudioClips;
+    public AudioClip[] skillVoiceAudioClips;
+    public AudioClip[] projectileFireAudioClips;
+    public AudioClip[] skill1AudioClips;
+    public AudioClip[] skill2AudioClips;
+    public AudioClip[] skill3AudioClips;
+    public AudioClip[] skill4AudioClips;
+    public AudioClip[] interactionVoiceAudioClips;
+    
+    private Dictionary<ESfxType, AudioClip[]> mSfxClips;
+
+    #endregion
+    
+    
+    
+    protected override void Awake()
+    {
+        base.Awake();
+        InitPlayerSfx();
+        mPooledSources = new AudioSource[mSfxPoolSize];
+        for (int i = 0; i < mSfxPoolSize; i++)
+        {
+            var go = new GameObject($"PooledSfx_{i}");
+            go.transform.SetParent(transform, false);
+            var src = go.AddComponent<AudioSource>();
+            src.playOnAwake = false;
+            mPooledSources[i] = src;
+        }
+        mBgmSources = new AudioSource[mBgmPoolSize];
+        mBgmSources[0] = mBgmSource;
+        for (int i = 1; i < mBgmPoolSize; i++)
+        {
+            var go = new GameObject($"BgmSrc_{i}");
+            go.transform.SetParent(transform, false);
+            var src = go.AddComponent<AudioSource>();
+            src.playOnAwake = false;
+            src.loop = true;
+            mBgmSources[i] = src;
+        }
+    }
+
     private void OnEnable()
     {
         SceneManager.sceneLoaded += OnSceneLoaded;
@@ -25,133 +94,152 @@ public class AudioManager : Singleton<AudioManager>
     {
         SceneManager.sceneLoaded -= OnSceneLoaded;
     }
-    private void Start()
-    {
-        AudioListener.volume = PlayerPrefs.GetFloat(Constants.MasterVolumeKey, 1f);
-        if (mBgmSource != null) mBgmSource.volume = PlayerPrefs.GetFloat(Constants.BGMVolumeKey, 1f);
-        if (mSfxSource != null) mSfxSource.volume = PlayerPrefs.GetFloat(Constants.SFXVolumeKey, 1f);
-        if (mUiSource  != null) mUiSource .volume = PlayerPrefs.GetFloat(Constants.UIVolumeKey, 1f);
-
-        AudioListener.pause = PlayerPrefs.GetInt(Constants.MasterMuteKey, 0) == 1;
-        if (mBgmSource != null) mBgmSource.mute = PlayerPrefs.GetInt(Constants.BgmMuteKey, 0) == 1;
-        if (mSfxSource != null) mSfxSource.mute = PlayerPrefs.GetInt(Constants.SeMuteKey,  0) == 1;
-        if (mUiSource  != null) mUiSource .mute = PlayerPrefs.GetInt(Constants.UiMuteKey,  0) == 1;
-    }
-
+  
     /// <summary>
-    /// SoundPresenter에서 슬라이더 할당 
+    /// Init volume and mute data from UserData in ManagerHub
     /// </summary>
-    public void InitSliders(
-        Slider masterSlider,
-        Slider bgmSlider,
-        Slider sfxSlider,
-        Slider uiSlider)
+    public void InitAudioDataFromUserData()
     {
-        if (masterSlider != null)
+        AudioListener.volume = UserData.Instance.MasterVolume;
+        mBgmSource.volume = UserData.Instance.BgmVolume;
+        mSfxSource.volume = UserData.Instance.SeVolume;
+        mUiSource.volume = UserData.Instance.UiVolume;
+
+        AudioListener.pause = UserData.Instance.IsMasterMuted;
+        mBgmSource.mute = UserData.Instance.IsBgmMuted;
+        mSfxSource.mute = UserData.Instance.IsSeMuted;
+        mUiSource.mute = UserData.Instance.IsUiMuted;
+
+        foreach (var src in mBgmSources)
         {
-            masterSlider.value = AudioListener.volume;
-            masterSlider.onValueChanged.AddListener(OnMasterVolumeChanged);
+            src.volume = UserData.Instance.BgmVolume;
+            src.mute = UserData.Instance.IsBgmMuted;
+            src.loop = true;
         }
-        if (bgmSlider != null)
+        foreach (var src in mPooledSources)
         {
-            bgmSlider.value = mBgmSource.volume;
-            bgmSlider.onValueChanged.AddListener(OnBgmVolumeChanged);
+            src.volume = UserData.Instance.SeVolume;
+            src.mute = UserData.Instance.IsSeMuted;
         }
-        if (sfxSlider != null)
+
+
+        subscribeUserAudioData();
+    }
+
+    private void subscribeUserAudioData()
+    {
+        UserData.Instance.ObsMasterVolume.Subscribe(e => AudioListener.volume = e).AddTo(this);
+        UserData.Instance.ObsBgmVolume
+            .Subscribe(e =>
+            {
+                mBgmSource.volume = e;
+                foreach (var src in mBgmSources)
+                {
+                    src.volume = e;
+                }
+            }).AddTo(this);
+        UserData.Instance.ObsSeVolume
+            .Subscribe(e =>
+            {
+                mSfxSource.volume = e;
+                foreach (var src in mPooledSources)
+                {
+                    src.volume = e;
+                }
+            }).AddTo(this);
+        UserData.Instance.ObsUiVolume.Subscribe(e => mUiSource.volume = e).AddTo(this);
+
+
+        UserData.Instance.ObsMasterMuted.Subscribe(e => AudioListener.pause = e).AddTo(this);
+        UserData.Instance.ObsBgmMuted
+            .Subscribe(e =>
+            {
+                mBgmSource.mute = e;
+                foreach (var src in mBgmSources)
+                {
+                    src.mute = e;
+                }
+            }).AddTo(this);
+        UserData.Instance.ObsSeMuted
+            .Subscribe(e =>
+            {
+                mSfxSource.mute = e;
+                foreach (var src in mPooledSources)
+                {
+                    src.mute = e;
+                }
+            }).AddTo(this);
+        UserData.Instance.ObsUiMuted.Subscribe(e => mUiSource.mute = e).AddTo(this);
+    }
+
+    private void InitPlayerSfx()
+    {
+        mSfxClips = new Dictionary<ESfxType, AudioClip[]>
         {
-            sfxSlider.value = mSfxSource.volume;
-            sfxSlider.onValueChanged.AddListener(OnSfxVolumeChanged);
-        }
-        if (uiSlider != null)
-        {
-            uiSlider.value = mUiSource.volume;
-            uiSlider.onValueChanged.AddListener(OnUIVolumeChanged);
-        }
-    }
-
-    private void OnMasterVolumeChanged(float v)
-    {
-        AudioListener.volume = v;
-        PlayerPrefs.SetFloat(Constants.MasterVolumeKey, v);
-        PlayerPrefs.Save();
-    }
-
-    private void OnBgmVolumeChanged(float v)
-    {
-        mBgmSource.volume = v;
-        PlayerPrefs.SetFloat(Constants.BGMVolumeKey, v);
-        PlayerPrefs.Save();
-    }
-
-    private void OnSfxVolumeChanged(float v)
-    {
-        mSfxSource.volume = v;
-        PlayerPrefs.SetFloat(Constants.SFXVolumeKey, v);
-        PlayerPrefs.Save();
-    }
-
-    private void OnUIVolumeChanged(float v)
-    {
-        mUiSource.volume = v;
-        PlayerPrefs.SetFloat(Constants.UIVolumeKey, v);
-        PlayerPrefs.Save();
-    }
-
-    public void SetMasterMute(bool isMuted)
-    {
-        AudioListener.pause = isMuted;
-        PlayerPrefs.SetInt(Constants.MasterMuteKey, isMuted ? 1 : 0);
-        PlayerPrefs.Save();
-    }
-
-    public void SetBgmMute(bool isMuted)
-    {
-        mBgmSource.mute = isMuted;
-        PlayerPrefs.SetInt(Constants.BgmMuteKey, isMuted ? 1 : 0);
-        PlayerPrefs.Save();
-    }
-
-    public void SetSeMute(bool isMuted)
-    {
-        mSfxSource.mute = isMuted;
-        PlayerPrefs.SetInt(Constants.SeMuteKey, isMuted ? 1 : 0);
-        PlayerPrefs.Save();
-    }
-
-    public void SetUiMute(bool isMuted)
-    {
-        mUiSource.mute = isMuted;
-        PlayerPrefs.SetInt(Constants.UiMuteKey, isMuted ? 1 : 0);
-        PlayerPrefs.Save();
+            { ESfxType.FootstepEffect, footstepAudioClips },
+            { ESfxType.GruntVoice, gruntVoiceAudioClips },
+            { ESfxType.LandVoice, landingVoiceAudioClips },
+            { ESfxType.LandEffect, landingAudioClips },
+            { ESfxType.AttackVoice, attackVoiceAudioClips },
+            { ESfxType.SwordSwingEffect, swordSwingAudioClips },
+            { ESfxType.EnemyHitEffect, swordHitAudioClips },
+            { ESfxType.PlayerHitVoice, hitVoiceAudioClips },
+            { ESfxType.PlayerHitEffect, hitAudioClips },
+            { ESfxType.ShieldBlockEffect, blockShieldAudioClips },
+            { ESfxType.StunVoice, stunVoiceAudioClips },
+            { ESfxType.DeathVoice, deathVoiceAudioClips },
+            { ESfxType.SkillVoice, skillVoiceAudioClips },
+            { ESfxType.ProjectileFire, projectileFireAudioClips },
+            { ESfxType.Skill1Effect, skill1AudioClips },
+            { ESfxType.Skill2Effect, skill2AudioClips },
+            { ESfxType.Skill3Effect, skill3AudioClips },
+            { ESfxType.Skill4Effect, skill4AudioClips },
+            { ESfxType.InteractionVoice, interactionVoiceAudioClips }
+        };
     }
 
     public void PlayBgm(EBgmType type)
     {
         int idx = (int)type;
-        if (mBgmClips == null || idx < 0 || idx >= mBgmClips.Length)
-            return;
+        if (mBgmClips == null || idx < 0 || idx >= mBgmClips.Length) return;
         var clip = mBgmClips[idx];
         if (clip == null) return;
-        mBgmSource.clip = clip;
-        mBgmSource.loop = true;
-        mBgmSource.Play();
+
+        // 이전 BGM 정지
+        int prev = (mNextBgm + mBgmPoolSize - 1) % mBgmPoolSize;
+        mBgmSources[prev].Stop();
+
+        // 다음 풀 소스에서 재생
+        var src = mBgmSources[mNextBgm];
+        src.clip = clip;
+        src.Play();
+        mNextBgm = (mNextBgm + 1) % mBgmPoolSize;
     }
 
     public void StopBgm()
     {
-        if (mBgmSource.isPlaying)
-            mBgmSource.Stop();
+        foreach (var src in mBgmSources)
+            if (src.isPlaying) src.Stop();
     }
 
     public void PlaySfx(ESfxType type)
     {
-        int idx = (int)type;
-        if (mSfxClips == null || idx < 0 || idx >= mSfxClips.Length) return;
-        var clip = mSfxClips[idx];
+        if (mSfxClips == null || !mSfxClips.TryGetValue(type, out var clips) || clips == null || clips.Length == 0) return;
+        var clip = clips[Random.Range(0, clips.Length)];
         if (clip == null) return;
         mSfxSource.PlayOneShot(clip);
     }
 
+    public void PlayPoolSfx(ExSfxType type)
+    {
+        int idx = (int)type;
+        if (mPooledSfxClips == null || idx < 0 || idx >= mPooledSfxClips.Length) return;
+        var clip = mPooledSfxClips[idx];
+        if (clip == null) return;
+        var src = mPooledSources[mNextPool];
+        src.PlayOneShot(clip);
+        mNextPool = (mNextPool + 1) % mSfxPoolSize;
+    }
     public void PlayUi(EUiType type)
     {
         int idx = (int)type;

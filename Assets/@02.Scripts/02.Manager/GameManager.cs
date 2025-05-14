@@ -1,5 +1,6 @@
 using System.Collections;
 using Cysharp.Threading.Tasks;
+using DG.Tweening;
 using Events.Gameplay;
 using GameEnums;
 using R3;
@@ -13,11 +14,11 @@ public class GameManager : Singleton<GameManager>
 {
     [Header("Input")]
     [SerializeField] private PlayerInput mPlayerInput;
-    
+
     private InputManager mInput = new InputManager();
     private PoolManager mPool = new PoolManager();
     private ResourceManager mResource = new ResourceManager();
-    
+
     public InputManager Input { get { return Instance.mInput; } }
     public PoolManager Pool { get { return Instance.mPool; } }
     public ResourceManager Resource { get { return Instance.mResource; } }
@@ -27,7 +28,7 @@ public class GameManager : Singleton<GameManager>
     public ReadOnlyReactiveProperty<GameState> ObserveState => mStateRP;
     private readonly ReactiveProperty<GameState> mStateRP = new(GameState.Gameplay);
 
-    //private bool mIsPause = false;
+    private bool mIsPause = false;
 
 
     protected override void Awake()
@@ -38,7 +39,7 @@ public class GameManager : Singleton<GameManager>
 
         Init();
     }
-    
+
     private void Start()
     {
         subscribeEvents();
@@ -60,13 +61,13 @@ public class GameManager : Singleton<GameManager>
         Instance.Input.Init(mPlayerInput);
         Instance.Pool.Init();
     }
-    
+
     public void SetGameState(GameState next)
     {
-        if (CurrentGameState != next) 
+        if (CurrentGameState != next)
         {
             mPreviousGameState = CurrentGameState;
-            mStateRP.Value = next; 
+            mStateRP.Value = next;
         }
     }
 
@@ -88,12 +89,16 @@ public class GameManager : Singleton<GameManager>
     {
         if (isPaused)
         {
-            //mIsPause = true;
+            mIsPause = true;
+            DOTween.defaultTimeScaleIndependent = true;
+            Time.timeScale = 0;
             // TODO: 일시정지
         }
         else
         {
-            //mIsPause = false;
+            mIsPause = false;
+            Time.timeScale = 1;
+            DOTween.defaultTimeScaleIndependent = false;
             // TODO: 일시정지 해제
         }
     }
@@ -101,7 +106,7 @@ public class GameManager : Singleton<GameManager>
     private void updateGameStateForScene(GameplaySceneChanged e)
     {
         GameState next;
-        if(e.NewScene == GameScene.MainMenu)
+        if (e.NewScene == GameScene.MainMenu)
         {
             next = GameState.MainMenu;
         }
@@ -110,7 +115,7 @@ public class GameManager : Singleton<GameManager>
             next = GameState.Gameplay;
         }
 
-        if(CurrentGameState != next)
+        if (CurrentGameState != next)
         {
             SetGameState(next);
         }
@@ -130,16 +135,17 @@ public class GameManager : Singleton<GameManager>
                 SetPause(false);
                 setMouseCursor(true);
                 break;
-            case GameState.UI:   
-                SetPause(true);
+            case GameState.UI:
+                bool isPause = SceneLoader.CurrentSceneType == GameScene.Abyss;
+                SetPause(isPause);
                 setMouseCursor(true);
                 break;
-            case GameState.Gameplay:   
+            case GameState.Gameplay:
                 SetPause(false);
                 setMouseCursor(false);
                 break;
-            case GameState.GameplayPause: 
-                SetPause(true);    break;
+            case GameState.GameplayPause:
+                SetPause(true); break;
         }
     }
 
@@ -147,9 +153,9 @@ public class GameManager : Singleton<GameManager>
     {
         Instance.Pool.Clear();
     }
-    
+
     protected override void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        
+
     }
 }

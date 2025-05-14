@@ -7,9 +7,12 @@ using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.Serialization;
 using Random = UnityEngine.Random;
+using Events.HUD;
+using UIHUDEnums;
+using AudioEnums;
 
 [RequireComponent(typeof(NavMeshAgent))]
-public class EnemyBTController : MonoBehaviour
+public class EnemyBTController : MonoBehaviour, IHpTrackable, IMapTrackable
 {
     [Header("체력 설정")]  
     [SerializeField] private int mMaxHealth = 100;
@@ -59,7 +62,9 @@ public class EnemyBTController : MonoBehaviour
 
     [Header("경험치 설정")] 
     [SerializeField] private EnemyType mEnemyType = EnemyType.Common;
+    [SerializeField] private EnemySubType mEnemySubType;
     public EnemyType EnemyType => mEnemyType;
+
     [SerializeField] private EnemyExpRewardController mExpRewardController;
     
     [Header("몬스터 Hit 상태 설정")]
@@ -70,6 +75,9 @@ public class EnemyBTController : MonoBehaviour
     [SerializeField] private int mFireDotDamagePerSecond = 3;
     [SerializeField] private float mIceDebuffDuration = 8f;
     [SerializeField] private float mIceAnimSpeed = 0.2f;
+
+    [Header("몬스터 UI 관련 설정")]
+    [SerializeField] private Transform mHpBarAnchor;
     private float mOriginalAgentSpeed;
     private bool mbAttackDebuffed = false;
     private bool mbIsStunned = false;
@@ -89,6 +97,12 @@ public class EnemyBTController : MonoBehaviour
     
     public System.Action monsterDead;
 
+    public Transform HpAnchor => mHpBarAnchor;
+
+    public Transform MapAnchor => transform;
+
+    public MiniMapIconType IconType { get; private set; }
+
     
     void Awake()
     {
@@ -100,6 +114,13 @@ public class EnemyBTController : MonoBehaviour
         mRenderers = GetComponentsInChildren<Renderer>();
         mExpRewardController = GetComponent<EnemyExpRewardController>();
         itemDropper = GetComponent<ItemDropper>();
+
+        IconType = mEnemyType switch
+        {
+            EnemyType.Boss => MiniMapIconType.Boss,
+            _ => MiniMapIconType.Enemy
+        };
+        TrackableEventHelper.PublishSpawned(this);
     }
 
     void Start()
@@ -507,7 +528,11 @@ public class EnemyBTController : MonoBehaviour
     public void SetHit(int damage, int hitType)
     {
         if (mbIsDead || mbIgnoreHits) return;
-
+        if (mEnemyType == EnemyType.Common)
+        {
+            AudioManager.Instance.PlayPoolSfx(ExSfxType.SkeletonHit);
+        }
+        
         switch (hitType)
         {
             case 0: //스턴
@@ -534,9 +559,16 @@ public class EnemyBTController : MonoBehaviour
     {
         int effective = Mathf.Max(0, damage - mDefense);
         mCurrentHealth -= effective;
+        if (effective >= 100)
+        {
+            PlayerHub.Instance.QuestLog.AddProgress("Q007", 1);
+        }
         Debug.Log($"받은 대미지:{damage} 방어력:{mDefense} 최종:{effective} 남은체력:{mCurrentHealth}");
         if (mCurrentHealth <= 0) mbIsDead = true;
         else mbIsHit = true;
+
+        R3EventBus.Instance.Publish(new Events.Combat.DamagePopup(transform.position, effective));
+        R3EventBus.Instance.Publish(new Events.Combat.EnemyHpChanged(this.GetInstanceID(), mCurrentHealth, mMaxHealth));
     }
 
     // 스턴 
@@ -673,6 +705,7 @@ public class EnemyBTController : MonoBehaviour
 
     private IEnumerator Dissolve()
     {
+        TrackableEventHelper.PublishDestroyed(this);
         var block = new MaterialPropertyBlock();
         float alpha = 1f;
         while (alpha > 0f)
@@ -708,6 +741,26 @@ public class EnemyBTController : MonoBehaviour
             PlayerController playerController = player.GetComponent<PlayerController>();
             playerController.OnEnemyKilled();
         }
+
+        switch (mEnemySubType)
+        {
+            case  EnemySubType.MeleeSkeleton:
+                PlayerHub.Instance.QuestLog.AddProgress("Q001", 1);
+                break;
+            case  EnemySubType.RangerSkeleton:
+                PlayerHub.Instance.QuestLog.AddProgress("Q004", 1);
+                break;
+            case  EnemySubType.Golem:
+                PlayerHub.Instance.QuestLog.AddProgress("Q012", 1);
+                break;
+            case  EnemySubType.Dragon:
+                PlayerHub.Instance.QuestLog.AddProgress("Q014", 1);
+                PlayerHub.Instance.QuestLog.AddProgress("Q011", 1);
+                break;
+            
+        }
+        PlayerHub.Instance.QuestLog.AddProgress("Q009", 1);
+        
         monsterDead.Invoke();
         StartCoroutine(Dissolve());
     }
@@ -800,8 +853,12 @@ public class EnemyBTController : MonoBehaviour
     {
         mbIgnoreHits = true;
         if (!(mAttackBehaviorAsset is DragonAttackBehavior dragon)) return;
-        if (dragon.BreathProjectorPrefab == null) return;
-
+        Debug.Log($"[OnBreathIndicator] called! prefab={dragon.BreathProjectorPrefab}", this);
+        if (dragon.BreathProjectorPrefab == null)
+        {
+            Debug.LogWarning("DragonAttackBehavior.BreathProjectorPrefab is NULL!", this);
+            return;
+        }
         var go = Instantiate(dragon.BreathProjectorPrefab, mFirePoint);
         go.transform.localPosition = Vector3.up * 0.1f;
         currentProjector = go.GetComponent<Projector>();

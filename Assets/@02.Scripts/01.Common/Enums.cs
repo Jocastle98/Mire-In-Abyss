@@ -2,9 +2,9 @@ namespace GameEnums
 {
     public enum GameState
     {
-        MainMenu,
+        MainMenu,   // 메인 메뉴 화면
         Gameplay,   // 플레이어 조작 중
-        UI,         // Pause
+        UI,         // Pause 메인 메뉴, Gameplay 화면 중 모두 될 수 있음
         GameplayPause,       
     }
 }
@@ -59,6 +59,7 @@ namespace PlayerEnums
         Sprint,
         Roll,
         Dash,
+        ProjectileFire,
         Skill1,
         Skill2,
         Skill3,
@@ -83,6 +84,15 @@ namespace EnemyEnums
         Common,
         Elite,
         Boss
+    }
+
+    public enum EnemySubType
+    {
+        MeleeSkeleton,
+        RangerSkeleton,
+        Golem,
+        Dragon,
+        Other
     }
 }
 
@@ -187,7 +197,34 @@ namespace BattleAreaEnums
 namespace AudioEnums
 {
     public enum EBgmType { Intro = 0, Town = 1, Field = 2, Dungeon = 3 }
-    public enum ESfxType   { Footstep = 0, Landing = 1, PlayerAttack = 2, Parry = 3}
+
+    public enum ESfxType
+    {
+        FootstepEffect,
+        GruntVoice,
+        LandVoice,
+        LandEffect,
+        AttackVoice,
+        SwordSwingEffect,
+        EnemyHitEffect,
+        PlayerHitVoice,
+        PlayerHitEffect,
+        ShieldBlockEffect,
+        StunVoice,
+        DeathVoice,
+        SkillVoice,
+        ProjectileFire,
+        Skill1Effect,
+        Skill2Effect,
+        Skill3Effect,
+        Skill4Effect,
+        InteractionVoice,
+    }
+
+    public enum ExSfxType
+    {
+        SkeletonHit =0
+    }
     public enum EUiType    { Open = 0, Close = 1, Click = 2  }
 }
 

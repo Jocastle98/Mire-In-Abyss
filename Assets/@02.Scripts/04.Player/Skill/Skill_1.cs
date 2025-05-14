@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -6,9 +7,11 @@ public class Skill_1 : MonoBehaviour
 {
     private int mDamage;
     private float mDamageMultiplier;
-    private Vector3 mDirection;
-    private float mSpeed = 20.0f;
     private float mDistance;
+    private Vector3 mDirection;
+    private Action mFireSoundPlay;
+    
+    private float mSpeed = 20.0f;
     private float mDistanceTraveled;
 
     private void FixedUpdate()
@@ -16,13 +19,16 @@ public class Skill_1 : MonoBehaviour
         MoveEffect();
     }
     
-    public void Init(int damage, float damageMultiplier, float distance, Vector3 direction)
+    public void Init(int damage, float damageMultiplier, float distance, Vector3 direction, Action fireSoundPlay)
     {
         mDamage = damage;
         mDamageMultiplier = damageMultiplier;
         mDistance = distance;
         mDirection = direction;
+        mFireSoundPlay = fireSoundPlay;
+        
         mDistanceTraveled = 0.0f;
+        mFireSoundPlay?.Invoke();
     }
 
     private void MoveEffect()
@@ -45,7 +51,7 @@ public class Skill_1 : MonoBehaviour
             var enemy = other.gameObject.GetComponent<EnemyBTController>();
             if (enemy != null)
             {
-                enemy.SetHit((int)(mDamage * mDamageMultiplier),1);
+                enemy.SetHit((int)(mDamage * mDamageMultiplier),- 1);
                 
                 // Todo: 흡혈효과 처리 추가해야함
             }

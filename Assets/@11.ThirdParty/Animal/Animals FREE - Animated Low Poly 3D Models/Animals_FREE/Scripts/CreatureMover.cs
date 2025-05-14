@@ -1,6 +1,8 @@
 using System;
+using System.Collections;
 using UnityEditor;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 namespace Controller
 {
@@ -20,6 +22,20 @@ namespace Controller
         private Space m_Space = Space.Self;
         [SerializeField]
         private float m_JumpHeight = 5f;
+        
+        [Header("Random Movement")]
+        [SerializeField]
+        private BoxCollider m_MovementArea; // 이동 영역을 지정하는 BoxCollider
+        [SerializeField]
+        private float m_MinMoveTime = 2f; // 최소 이동 시간
+        [SerializeField]
+        private float m_MaxMoveTime = 5f; // 최대 이동 시간
+        [SerializeField]
+        private float m_MinIdleTime = 1f; // 최소 대기 시간
+        [SerializeField]
+        private float m_MaxIdleTime = 3f; // 최대 대기 시간
+        [SerializeField]
+        private float m_RunChance = 0.3f; // 달릴 확률 (0-1)
 
         [Header("Animator")]
         [SerializeField]
@@ -39,13 +55,11 @@ namespace Controller
         private Vector2 m_Axis;
         private Vector3 m_Target;
         private bool m_IsRun;
-
         private bool m_IsMoving;
 
-        public Vector2 Axis => m_Axis;
-        public Vector3 Target => m_Target;
-        public bool IsRun => m_IsRun;
-
+        private Vector3 mCurrentDestination;
+        private Coroutine mMovementCoroutine;
+       
         private void OnValidate()
         {
             m_WalkSpeed = Mathf.Max(m_WalkSpeed, 0f);
@@ -62,6 +76,15 @@ namespace Controller
 
             m_Movement = new MovementHandler(m_Controller, m_Transform, m_WalkSpeed, m_RunSpeed, m_RotateSpeed, m_JumpHeight, m_Space);
             m_Animation = new AnimationHandler(m_Animator, m_VerticalID, m_StateID);
+            
+        }
+
+        private void Start()
+        {
+            if (m_MovementArea != null)
+            {
+                mMovementCoroutine = StartCoroutine(RandomMovementCoroutine());
+            }
         }
 
         private void Update()
@@ -70,26 +93,25 @@ namespace Controller
             m_Animation.Animate(in animAxis, m_IsRun ? 1f : 0f, Time.deltaTime);
         }
 
+        private void OnCollisionEnter(Collision other)
+        {
+            GetRandomPointInBounds();
+        }
+
         private void OnAnimatorIK()
         {
             m_Animation.AnimateIK(in m_Target, m_LookWeight);
         }
 
-        public void SetInput(in Vector2 axis, in Vector3 target, in bool isRun, in bool isJump)
+        private IEnumerator RandomMovementCoroutine()
         {
-            m_Axis = axis;
-            m_Target = target;
-            m_IsRun = isRun;
+            while (true)
+            {
+                float idleTime = Random.Range(m_MinIdleTime, m_MaxIdleTime);
+                yield return StartCoroutine(IdleCoroutine(idleTime));
 
-            if (m_Axis.sqrMagnitude < Mathf.Epsilon)
-            {
-                m_Axis = Vector2.zero;
-                m_IsMoving = false;
-            }
-            else
-            {
-                m_Axis = Vector3.ClampMagnitude(m_Axis, 1f);
-                m_IsMoving = true;
+                float moveTime = Random.Range(m_MinMoveTime, m_MaxMoveTime);
+                yield return StartCoroutine(MoveCoroutine(moveTime));
             }
         }
 
@@ -98,6 +120,80 @@ namespace Controller
             if(hit.normal.y > m_Controller.stepOffset)
             {
                 m_Movement.SetSurface(hit.normal);
+            }
+        }
+
+        private IEnumerator IdleCoroutine(float duration)
+        {
+            m_Axis = Vector2.zero;
+            m_IsMoving = false;
+            m_IsRun = false;
+
+            yield return new WaitForSeconds(duration);
+        }
+
+        private IEnumerator MoveCoroutine(float duration)
+        {
+            Vector3 randomPoint = GetRandomPointInBounds();
+            mCurrentDestination = randomPoint;
+
+            m_Target = randomPoint;
+
+            m_IsRun = Random.value < m_RunChance;
+
+            Vector3 direction = (randomPoint - m_Transform.position).normalized;
+            m_Axis = new Vector2(direction.x, direction.z);
+            m_IsMoving = true;
+
+            float timer = 0f;
+            while (timer < duration)
+            {
+                timer += Time.deltaTime;
+
+                if (Vector3.Distance(m_Transform.position, mCurrentDestination) < 0.5f)
+                {
+                    randomPoint = GetRandomPointInBounds();
+                    mCurrentDestination = randomPoint;
+                    m_Target = randomPoint;
+                    direction = (randomPoint - m_Transform.position).normalized;
+                    m_Axis = new Vector2(direction.x, direction.z);
+                }
+
+                yield return null;
+            }
+        }
+
+        private Vector3 GetRandomPointInBounds()
+        {
+            if (m_MovementArea == null)
+            {
+                return m_Transform.position;
+            }
+
+            Vector3 boundsMin = m_MovementArea.bounds.min;
+            Vector3 boundsMax = m_MovementArea.bounds.max;
+
+            float x = Random.Range(boundsMin.x, boundsMax.x);
+            float z = Random.Range(boundsMin.z, boundsMax.z);
+
+            float y = m_MovementArea.transform.position.y;
+
+            return new Vector3(x, y, z);
+        }
+
+        private void OnDrawGizmos()
+        {
+            if (m_MovementArea != null)
+            {
+                Gizmos.color = new Color(0, 1, 0, 0.3f);
+                Gizmos.matrix = m_MovementArea.transform.localToWorldMatrix;
+                Gizmos.DrawCube(m_MovementArea.center, m_MovementArea.size);
+
+                if (Application.isPlaying)
+                {
+                    Gizmos.color = Color.red;
+                    Gizmos.DrawSphere(mCurrentDestination, 0.2f);
+                }
             }
         }
 

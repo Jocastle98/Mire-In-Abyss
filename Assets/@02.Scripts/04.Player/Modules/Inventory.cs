@@ -19,10 +19,11 @@ public sealed class Inventory : MonoBehaviour
     public readonly Subject<SoulAdded> SoulAdded = new();
     public readonly Subject<SoulSubTracked> SoulSubTracked = new();
 
-    public void Init(int gold, int soul)
+    public void Init(int soul)
     {
-        Gold = gold;
         Soul = soul;
+        GoldAdded.OnNext(new GoldAdded(0, 0));
+        AddSoul(0);
     }
 
     public void AddItem(int id, int addedAmt = 1)
@@ -35,6 +36,10 @@ public sealed class Inventory : MonoBehaviour
         {
             mItems[id] = cur + addedAmt;
         }
+
+        //UserData Item 해금 여부 업데이트
+        UserData.Instance.SetItemUnlock(id);
+
         ItemAdded.OnNext(new ItemAdded(id, addedAmt, mItems[id]));
     }
 
@@ -52,7 +57,10 @@ public sealed class Inventory : MonoBehaviour
 
     public void AddGold(int addedAmt)
     {
-        Gold += addedAmt;
+        float multiplier = GameObject.FindObjectOfType<PlayerStats>().GetGoldMultiplier();
+
+        int adjustAmt = Mathf.RoundToInt(addedAmt * multiplier);
+        Gold += adjustAmt;
         GoldAdded.OnNext(new GoldAdded(addedAmt, Gold));
     }
 
@@ -70,7 +78,14 @@ public sealed class Inventory : MonoBehaviour
 
     public void AddSoul(int addedAmt)
     {
-        Soul += addedAmt;
+        float multiplier = GameObject.FindObjectOfType<PlayerStats>().GetSoulStoneMultiplier();
+
+        int adjustedAmt = Mathf.RoundToInt(addedAmt * multiplier);
+        Soul += adjustedAmt;
+
+        //UserData Soul 업데이트
+        UserData.Instance.Soul += adjustedAmt;
+
         SoulAdded.OnNext(new SoulAdded(addedAmt, Soul));
     }
 
@@ -83,6 +98,14 @@ public sealed class Inventory : MonoBehaviour
             Soul = 0;
         }
 
+        //UserData Soul 업데이트
+        UserData.Instance.Soul -= removedAmt;
+
         SoulSubTracked.OnNext(new SoulSubTracked(removedAmt, Soul));
+    }
+
+    public void ResetItems()
+    {
+        mItems.Clear();
     }
 }

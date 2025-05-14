@@ -65,7 +65,7 @@ public sealed class QuestLog : MonoBehaviour
     {
         if (!mActiveQuests.TryGetValue(id, out var q))
         {
-            Debug.LogError($"Quest {id} is not active");
+            //Debug.LogError($"Quest {id} is not active");
             return;
         }
 
@@ -87,6 +87,9 @@ public sealed class QuestLog : MonoBehaviour
             Debug.LogError($"Quest {id} is not completed");
             return false;
         }
+
+        // 퀘스트 보상 처리
+        PlayerHub.Instance.Inventory.AddSoul(q.RewardSoul);
 
         mCompletedQuests.Remove(id);
         Rewarded.OnNext(new QuestRewarded(id));

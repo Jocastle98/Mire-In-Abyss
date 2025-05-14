@@ -32,8 +32,6 @@ public class SoulStoneShopPanelController : BaseUIPanel
     [SerializeField] private Button mUpgradeApplyButton;            //강화 적용 버튼
     [SerializeField] BackButton mBackButton;
 
-    [Header("참조")] 
-    [SerializeField] private PlayerStats mPlayerStats;
 
     private SoulStoneUpgradeData.UpgradeInfo mSelectedUpgrade;   //현재 선택된 업그레이드
     private int mSoulStones = 0;          //현재 보유 영혼석
@@ -66,14 +64,13 @@ public class SoulStoneShopPanelController : BaseUIPanel
     
     private void Start()
     {
-        if (mPlayerStats == null)
-        {
-            mPlayerStats = FindObjectOfType<PlayerStats>();
-        }
-
+        // UserData 에서 업그레이드 정보 가져오기
         mUpgradeInfos = mUpgradeData.GetAllUpgrades();
+        foreach (var info in mUpgradeInfos)
+        {
+            info.CurrentLevel = UserData.Instance.GetSoulUpgradeLevel(info.UpgradeId);
+        }
         InitializeUI();
-        
     }
 
     private void InitializeUI()
@@ -146,6 +143,9 @@ public class SoulStoneShopPanelController : BaseUIPanel
         
         //현재 레벨 증가
         mSelectedUpgrade.CurrentLevel++;
+
+        // UserData 에 업그레이드 레벨 저장
+        UserData.Instance.SetSoulUpgradeLevel(mSelectedUpgrade.UpgradeId, mSelectedUpgrade.CurrentLevel);
         
         //강화 효과 적용
         ApplyUpgradeEffect();
@@ -226,7 +226,7 @@ public class SoulStoneShopPanelController : BaseUIPanel
 
     private void ApplyUpgradeEffect()
     {
-        if (mPlayerStats == null || mSelectedUpgrade == null) return;
+        if (mSelectedUpgrade == null) return;
 
         int level = mSelectedUpgrade.CurrentLevel;
         if (level <= 0 || level > 5) return;
@@ -234,42 +234,7 @@ public class SoulStoneShopPanelController : BaseUIPanel
         float value = mSelectedUpgrade.Values[level - 1];
         string valueType = mSelectedUpgrade.ValueType;
 
-        switch (mSelectedUpgrade.UpgradeId)
-        {
-            case "maxHP":
-                mPlayerStats.ModifyMaxHP(value, valueType);
-                break;
-            case "attackPower":
-                mPlayerStats.ModifyAttackPower(value, valueType);
-                break;
-            case "moveSpeed":
-                mPlayerStats.ModifyMoveSpeed(value, valueType);
-                break;
-            case "defence":
-                mPlayerStats.ModifyDefence(value, valueType);
-                break;
-            case "critChance":
-                mPlayerStats.ModifyCritChance(value, valueType);
-                break;
-            case "soulStone":
-                //영혼석 획득량 증가
-                break;
-            case "coolDown":
-                //쿨다운 감소 로직
-                break;
-            case "itemDrop":
-                //아이템 드랍률 증가
-                break;
-            case "level":
-                //경험치 획득량 증가
-                break;
-            case "gold":
-                //골드 획득량 증가
-                break;
-            default:
-                Debug.LogWarning($"알수없는 업그레이드 ID : {mSelectedUpgrade.UpgradeId}");
-                break;
-        }
+        SoulStoneUpgradeManager.Instance.ApplyStat(mSelectedUpgrade.UpgradeId, value, valueType);
     }
 
     #region 디버깅 관련

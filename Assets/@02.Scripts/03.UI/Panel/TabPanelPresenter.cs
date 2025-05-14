@@ -2,12 +2,12 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public sealed class TabPanelPresenter : BaseUIPanel
+public class TabPanelPresenter : BaseUIPanel
 {
     [Header("Tab Buttons")]
     [SerializeField] List<TabButtonView> mTabButtonViews;
     [Header("Pages")]
-    [SerializeField] List<GameObject> mPanels;
+    [SerializeField] List<TabPresenterBase> mPages;
 
     private List<Button> mButtons;
 
@@ -16,23 +16,24 @@ public sealed class TabPanelPresenter : BaseUIPanel
         mButtons = new List<Button>();
         for (int i = 0; i < mTabButtonViews.Count; i++)
         {
+            mPages[i].Initialize();
             mButtons.Add(mTabButtonViews[i].GetComponent<Button>());
             int j = i;
-            mButtons[i].onClick.AddListener(() =>
+            mButtons[i].onClick.AddListener(() => 
             {
                 AudioManager.Instance.PlayUi(AudioEnums.EUiType.Click);
-                Show(mPanels[j]);
+                show(mPages[j]);
             });
         }
-        Show(mPanels[0]);                 // 기본 탭 선택
+        show(mPages[0]);                 // 기본 탭 선택
     }
 
-    void Show(GameObject targetPanel)
+    void show(TabPresenterBase targetPanel)
     {
-        for (int i = 0; i < mPanels.Count; i++)
+        for (int i = 0; i < mPages.Count; i++)
         {
-            mTabButtonViews[i].SetSelected(targetPanel == mPanels[i]);
-            mPanels[i].SetActive(targetPanel == mPanels[i]);
+            mTabButtonViews[i].SetSelected(targetPanel == mPages[i]);
+            mPages[i].gameObject.SetActive(targetPanel == mPages[i]);
         }
     }
 }
