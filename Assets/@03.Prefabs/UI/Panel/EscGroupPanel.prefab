@@ -2329,10 +2329,10 @@ MonoBehaviour:
   - {fileID: 2335894229174797844}
   - {fileID: 5818623655282085248}
   - {fileID: 1591083402827641079}
-  mPanels:
-  - {fileID: 8145042011077072215}
-  - {fileID: 7424652182395387782}
-  - {fileID: 7719218335987118094}
+  mPages:
+  - {fileID: 2034940117618888499}
+  - {fileID: 8813708564178577598}
+  - {fileID: 3165459479058501786}
 --- !u!1 &3784183889244534189
 GameObject:
   m_ObjectHideFlags: 0
@@ -4652,7 +4652,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: a2440a8f06e56354582e9b72bbbf8d12, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 983435b8e45a0b5429349c3e917b2334, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -5433,7 +5433,6 @@ MonoBehaviour:
   mBtnSettings: {fileID: 9137088493631967204}
   mBtnMain: {fileID: 275958768476899608}
   mBtnQuit: {fileID: 6630569679526839051}
-  mTownButtonDarkMaskObj: {fileID: 0}
 --- !u!1 &8170632607387216923
 GameObject:
   m_ObjectHideFlags: 0

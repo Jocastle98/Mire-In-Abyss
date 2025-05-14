@@ -88,6 +88,9 @@ public sealed class QuestLog : MonoBehaviour
             return false;
         }
 
+        // 퀘스트 보상 처리
+        PlayerHub.Instance.Inventory.AddSoul(q.RewardSoul);
+
         mCompletedQuests.Remove(id);
         Rewarded.OnNext(new QuestRewarded(id));
         return true;

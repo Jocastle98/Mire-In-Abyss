@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using AchievementStructs;
 using UnityEngine;
 
-public sealed class AchievementPresenter : MonoBehaviour
+public sealed class AchievementPresenter : TabPresenterBase
 {
     [SerializeField] RectTransform mContent;
     [SerializeField] AchievementCardView mCardPrefab;
@@ -15,7 +15,7 @@ public sealed class AchievementPresenter : MonoBehaviour
         mPool = new(mCardPrefab, mContent, 32);
     }
 
-    void OnEnable()
+    public override void Initialize()
     {
         Rebuild();
     }

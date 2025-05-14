@@ -50,6 +50,10 @@ public static class SceneLoader
     { 
         if(CurrentSceneType == newSceneType)
         {
+            if(CurrentSceneType == GameScene.Abyss)
+            {
+                R3EventBus.Instance.Publish(new EnterDeepAbyss());
+            }
             return;
         }
 

@@ -16,7 +16,7 @@ public sealed class AchievementCardView : MonoBehaviour
     /* ────────── Bind API ────────── */
     public void Bind(in Achievement achievement, in UserAchievementData userAchievementData)
     {
-        if(userAchievementData.IsUnlocked)
+        if(userAchievementData.IsCompleted)
         {
             mIconImage.sprite = GetAchievementIconSprite(achievement.Id);
             mTitleText.text = achievement.Title;

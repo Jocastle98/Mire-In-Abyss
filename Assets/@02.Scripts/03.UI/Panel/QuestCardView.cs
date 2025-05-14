@@ -23,14 +23,10 @@ public class QuestCardView : MonoBehaviour
     [SerializeField] private Sprite mCompletedSprite;
     [SerializeField] private Sprite mRewardedSprite;
 
-    private Button mShowDetailButton;
+    [SerializeField] private Button mShowDetailButton;
     private string mQuestId;    //퀘스트 고유 아이디
     public string QuestId => mQuestId;  //외부에서 퀘스트 ID에 접근하기 위한 프로퍼티
 
-    private void Awake()
-    {
-        mShowDetailButton = GetComponent<Button>();
-    }
 
     public void Bind(Quest quest, Action<string> onClickCallback)
     {
