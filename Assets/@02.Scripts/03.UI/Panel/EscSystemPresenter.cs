@@ -4,12 +4,12 @@ using UIPanelEnums;
 using UnityEngine;
 using UnityEngine.UI;
 
-public sealed class EscSystemPresenter : MonoBehaviour
+public sealed class EscSystemPresenter : TabPresenterBase
 {
     [SerializeField] Button mBtnTown, mBtnSettings, mBtnMain, mBtnQuit;
     private bool mbIsInit = false;
 
-    void OnEnable()
+    public override void Initialize()
     {
         if (!mbIsInit)
         {

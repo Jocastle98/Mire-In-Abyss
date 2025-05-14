@@ -17,6 +17,7 @@ namespace Events.Gameplay
         public readonly GameScene NewScene;
         public GameplaySceneChanged(GameScene newScene) => NewScene = newScene;
     }
+    public readonly struct EnterDeepAbyss { } // Abyss -> Abyss
 }
 
 namespace AchievementStructs
@@ -41,6 +42,22 @@ namespace AchievementStructs
     }
 }
 
+namespace Events.UserData
+{
+    public readonly struct AchievementUpdated
+    {
+        public readonly string ID;
+        public readonly int Progress;
+        public AchievementUpdated(string id, int progress)
+            => (ID, Progress) = (id, progress);
+    }
+    public readonly struct AchievementCompleted
+    {
+        public readonly string ID;
+        public AchievementCompleted(string id) => ID = id;
+    }
+}
+
 namespace Events.Player
 {
     public readonly struct PlayerGrounded
@@ -51,10 +68,10 @@ namespace Events.Player
 
     public readonly struct PlayerHpChanged
     {
-        public readonly int Current;
-        public readonly int Max;
+        public readonly float Current;
+        public readonly float Max;
 
-        public PlayerHpChanged(int current, int max)
+        public PlayerHpChanged(float current, float max)
             => (Current, Max) = (current, max);
     }
 

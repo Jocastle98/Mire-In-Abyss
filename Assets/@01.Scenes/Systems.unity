@@ -166,7 +166,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 140d9cc376b40b346bb4d04545b35a2d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Soul: 10000
+  mSoulStoneUpgradeData: {fileID: 11400000, guid: 578899d986a38b04e8b7e2f9dc79c6ce, type: 2}
 --- !u!1 &511208924
 GameObject:
   m_ObjectHideFlags: 0
@@ -265,6 +265,7 @@ GameObject:
   - component: {fileID: 618509346}
   - component: {fileID: 618509345}
   - component: {fileID: 618509344}
+  - component: {fileID: 618509348}
   m_Layer: 0
   m_Name: Managers
   m_TagString: Untagged
@@ -312,7 +313,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mPanelCanvas: {fileID: 1048028299}
-  mSettingPrefab: {fileID: 4892772301156744234, guid: d7cd69c6032d4d94fa4554b6e61e8ade, type: 3}
+  mSettingPrefab: {fileID: 6463089360026004053, guid: d7cd69c6032d4d94fa4554b6e61e8ade, type: 3}
   mCodexPrefab: {fileID: 1087006600799090707, guid: a905aedf37f44374d874f45e92fb8baa, type: 3}
   mQuestBoardPrefab: {fileID: 2358408809830075226, guid: 4f4c914ca50b8424cb99bfb471646e5a, type: 3}
   mEscGroupPrefab: {fileID: 1275060947987298349, guid: 477d8dbc582d5694b952f58160eea7f8, type: 3}
@@ -715,12 +716,7 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 67c8b33e424ccdc4486edf538ab91c5a, type: 3}
   - {fileID: 8300000, guid: 274649b0e221539409070ebf6c18918b, type: 3}
   - {fileID: 8300000, guid: a3194b8bbc96ef84fab1f98f4b7dae3e, type: 3}
-  jumpVoiceAudioClips:
-  - {fileID: 8300000, guid: e03c401494466364885549a06b42778a, type: 3}
-  - {fileID: 8300000, guid: 407eff126444d6b41993548606ff87c1, type: 3}
-  - {fileID: 8300000, guid: 291b56b0a85ad104f873f5638f54fc4d, type: 3}
-  - {fileID: 8300000, guid: 5a220a8fa65664441aa927b18d728e89, type: 3}
-  - {fileID: 8300000, guid: 16b983f9da0ccaf4cb818a9216d3c9aa, type: 3}
+  gruntVoiceAudioClips: []
   landingVoiceAudioClips:
   - {fileID: 8300000, guid: 438796ef560ca6146beaedc1ea75049d, type: 3}
   - {fileID: 8300000, guid: 401b4d2e808dd7a4b8f8d113b67ca3f1, type: 3}
@@ -819,6 +815,18 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 9f9259b5074a2bb45bfc40b9fd08feef, type: 3}
   - {fileID: 8300000, guid: 57219506f5822de43b8c7a9d4e6b1e3d, type: 3}
   - {fileID: 8300000, guid: 2f97a961c2248294b847eb8023e1ee18, type: 3}
+--- !u!114 &618509348
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 618509335}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eef1e77aaaa7d6a4ea65d55b6dbc3d48, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &1048028298
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -8,7 +8,7 @@ using Cysharp.Threading.Tasks;
 using TMPro;
 using QuestEnums;
 
-public class PlayerQuestBoardPanel : MonoBehaviour
+public class PlayerQuestBoardPresenter : TabPresenterBase
 {
     [Header("퀘스트 목록")]
     [SerializeField] private Transform mContent;            //퀘스트 목록이 표시될 parent Transform
@@ -24,7 +24,7 @@ public class PlayerQuestBoardPanel : MonoBehaviour
     private string mNowDetailQuestId;
     private bool mIsInit = false;
 
-    void OnEnable()
+    public override void Initialize()
     {
         if (mQuestViewPrefab == null || mContent == null)
         {

@@ -1392,7 +1392,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         mPlayerStats.TakeDamage(enemyAttackPower, OverrideDamageReduction);
         
         // 체력 UI 업데이트
-        R3EventBus.Instance.Publish(new PlayerHpChanged((int)mPlayerStats.GetCurrentHP(), (int)mPlayerStats.GetMaxHP()));
+        R3EventBus.Instance.Publish(new PlayerHpChanged(mPlayerStats.GetCurrentHP(), mPlayerStats.GetMaxHP()));
         
         if (mPlayerStats.GetCurrentHP() <= 0)
         {

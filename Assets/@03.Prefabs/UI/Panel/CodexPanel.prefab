@@ -1741,7 +1741,7 @@ MonoBehaviour:
   mLargeIcon: {fileID: 6603118019391940444}
   mNameText: {fileID: 2408514165214702015}
   mDescText: {fileID: 4054387094136875318}
-  mSealedSprite: {fileID: 21300000, guid: a2440a8f06e56354582e9b72bbbf8d12, type: 3}
+  mSealedSprite: {fileID: 21300000, guid: 983435b8e45a0b5429349c3e917b2334, type: 3}
 --- !u!1 &6001035303714763287
 GameObject:
   m_ObjectHideFlags: 0
@@ -2201,9 +2201,9 @@ MonoBehaviour:
   mTabButtonViews:
   - {fileID: 59941023899720558}
   - {fileID: 5038817708762732966}
-  mPanels:
-  - {fileID: 5295334623302777637}
-  - {fileID: 5941108262855979231}
+  mPages:
+  - {fileID: 4277733791425645125}
+  - {fileID: 781894687831311310}
 --- !u!1 &6986756727914936584
 GameObject:
   m_ObjectHideFlags: 0
