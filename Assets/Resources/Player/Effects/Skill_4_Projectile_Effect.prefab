@@ -34635,6 +34635,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6979763379319897570}
+  - component: {fileID: -1898495704790420652}
   m_Layer: 0
   m_Name: Skill_4_Projectile_Effect
   m_TagString: Untagged
@@ -34658,3 +34659,16 @@ Transform:
   - {fileID: 6124323403038837695}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &-1898495704790420652
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7229115594664993041}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7b74e07d6aa606f4d8e20e90e86bf38c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  IsUsing: 0
