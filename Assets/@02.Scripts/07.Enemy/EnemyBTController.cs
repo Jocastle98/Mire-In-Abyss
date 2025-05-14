@@ -9,6 +9,7 @@ using UnityEngine.Serialization;
 using Random = UnityEngine.Random;
 using Events.HUD;
 using UIHUDEnums;
+using AudioEnums;
 
 [RequireComponent(typeof(NavMeshAgent))]
 public class EnemyBTController : MonoBehaviour, IHpTrackable, IMapTrackable
@@ -527,7 +528,11 @@ public class EnemyBTController : MonoBehaviour, IHpTrackable, IMapTrackable
     public void SetHit(int damage, int hitType)
     {
         if (mbIsDead || mbIgnoreHits) return;
-
+        if (mEnemyType == EnemyType.Common)
+        {
+            AudioManager.Instance.PlayPoolSfx(ExSfxType.SkeletonHit);
+        }
+        
         switch (hitType)
         {
             case 0: //스턴
