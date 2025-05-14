@@ -1205,6 +1205,37 @@ Transform:
   m_Children: []
   m_Father: {fileID: 9054118496187023329}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &4689556196179623464
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5885228144171259885}
+  m_Layer: 9
+  m_Name: HpBarAnchor
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5885228144171259885
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4689556196179623464}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 3, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 5777042271208980354}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &4920333247874752149
 GameObject:
   m_ObjectHideFlags: 0
@@ -1408,6 +1439,7 @@ Transform:
   m_Children:
   - {fileID: 8891432040702378183}
   - {fileID: 1944341575538301767}
+  - {fileID: 5885228144171259885}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &4786172566773349061
@@ -1432,11 +1464,11 @@ MonoBehaviour:
   mPatrolRadius: 2
   mAttackBehaviorAsset: {fileID: 11400000, guid: 5c66b92f2a3ce7240a25cbb00f7c23a5, type: 2}
   mFirePoint: {fileID: 0}
+  mBreathPoint: {fileID: 0}
   ImpactProjectorPrefab: {fileID: 445203090441399207, guid: 205db9980c8e90b48bb068dd407c43e7, type: 3}
   ImpactHitLayer:
     serializedVersion: 2
     m_Bits: 256
-  mFlightDuration: 10
   mRenderers:
   - {fileID: 4775264756205059350}
   - {fileID: 8464983910157389335}
@@ -1445,7 +1477,16 @@ MonoBehaviour:
   airInterval: 30
   airDuration: 10
   mEnemyType: 1
+  mEnemySubType: 2
   mExpRewardController: {fileID: 2102722839808726814}
+  mStunDuration: 2
+  mAttackDebuffDuration: 10
+  mAttackDebuffAmount: 5
+  mFireDotDuration: 3
+  mFireDotDamagePerSecond: 3
+  mIceDebuffDuration: 8
+  mIceAnimSpeed: 0.2
+  mHpBarAnchor: {fileID: 5885228144171259885}
 --- !u!95 &7874942562687051533
 Animator:
   serializedVersion: 5

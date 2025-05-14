@@ -695,15 +695,19 @@ MonoBehaviour:
   mBgmSource: {fileID: 618509346}
   mSfxSource: {fileID: 618509345}
   mUiSource: {fileID: 618509344}
-  mBgmClips:
-  - {fileID: 8300000, guid: b6cacb1699ba78143a35c66fc48bed6d, type: 3}
-  - {fileID: 8300000, guid: 1d0250e86b226c84cbee6eee7a59926c, type: 3}
-  - {fileID: 8300000, guid: 47d88bdf17cc7034f91b7982d5e5fec0, type: 3}
-  - {fileID: 8300000, guid: 7f561bd72eac78a48916ff515da81e6d, type: 3}
   mUiClips:
   - {fileID: 8300000, guid: 15a002992dc51c24db17eab31b31eaa2, type: 3}
   - {fileID: 8300000, guid: e620d8e6875599c40a87c5adc266006f, type: 3}
   - {fileID: 8300000, guid: ee81d0f068cc4d244b0f4a2e7b1cefae, type: 3}
+  mPooledSfxClips:
+  - {fileID: 8300000, guid: a9f7f2a02e8cc1d49811dc02ecfe8a1d, type: 3}
+  mBgmClips:
+  - {fileID: 8300000, guid: b6cacb1699ba78143a35c66fc48bed6d, type: 3}
+  - {fileID: 8300000, guid: 1d0250e86b226c84cbee6eee7a59926c, type: 3}
+  - {fileID: 8300000, guid: 47d88bdf17cc7034f91b7982d5e5fec0, type: 3}
+  - {fileID: 8300000, guid: 47d88bdf17cc7034f91b7982d5e5fec0, type: 3}
+  mSfxPoolSize: 16
+  mBgmPoolSize: 4
   footstepAudioClips:
   - {fileID: 8300000, guid: 72f526a6a9890f643a88e85a61c86c8a, type: 3}
   - {fileID: 8300000, guid: 85016e0f2b01da248b9663dd49a161b0, type: 3}
@@ -715,12 +719,7 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 67c8b33e424ccdc4486edf538ab91c5a, type: 3}
   - {fileID: 8300000, guid: 274649b0e221539409070ebf6c18918b, type: 3}
   - {fileID: 8300000, guid: a3194b8bbc96ef84fab1f98f4b7dae3e, type: 3}
-  jumpVoiceAudioClips:
-  - {fileID: 8300000, guid: e03c401494466364885549a06b42778a, type: 3}
-  - {fileID: 8300000, guid: 407eff126444d6b41993548606ff87c1, type: 3}
-  - {fileID: 8300000, guid: 291b56b0a85ad104f873f5638f54fc4d, type: 3}
-  - {fileID: 8300000, guid: 5a220a8fa65664441aa927b18d728e89, type: 3}
-  - {fileID: 8300000, guid: 16b983f9da0ccaf4cb818a9216d3c9aa, type: 3}
+  gruntVoiceAudioClips: []
   landingVoiceAudioClips:
   - {fileID: 8300000, guid: 438796ef560ca6146beaedc1ea75049d, type: 3}
   - {fileID: 8300000, guid: 401b4d2e808dd7a4b8f8d113b67ca3f1, type: 3}

@@ -219,6 +219,10 @@ namespace AudioEnums
         InteractionVoice,
     }
 
+    public enum ExSfxType
+    {
+        SkeletonHit =0
+    }
     public enum EUiType    { Open = 0, Close = 1, Click = 2  }
 }
 

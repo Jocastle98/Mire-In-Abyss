@@ -49,7 +49,6 @@ public class AbyssManager : Singleton<AbyssManager>
         Instance.abyssClearLimit = battleAreaClearLimit;
 
         BattleAreaCreate();
-        Debug.Log("Init succeed!");
     }
 
     /// <summary>
@@ -57,8 +56,8 @@ public class AbyssManager : Singleton<AbyssManager>
     /// </summary>
     private static void BattleAreaCreate()
     {
-        if (Instance.abyssClearCount == Instance.abyssClearLimit - 1 ||
-            Instance.abyssClearCount % 2 == 0)
+        int lastAbyss = Instance.abyssClearLimit - 1;
+        if (Instance.abyssClearCount % 2 == lastAbyss % 2)
         {
             SceneLoader.LoadSceneAsync(Constants.AbyssFieldScene).Forget();
         }
@@ -66,8 +65,6 @@ public class AbyssManager : Singleton<AbyssManager>
         {
             SceneLoader.LoadSceneAsync(Constants.AbyssDungeonScene).Forget();
         }
-
-        Debug.Log("Create succeed!");
     }
 
     /// <summary>
@@ -77,7 +74,6 @@ public class AbyssManager : Singleton<AbyssManager>
     {
         levelDesign++;
         abyssClearCount++;
-        Debug.Log("Clear succeed! : " + abyssClearCount);
 
         if (abyssClearCount >= abyssClearLimit)
         {
@@ -96,8 +92,17 @@ public class AbyssManager : Singleton<AbyssManager>
     private static void LetsGoHome()
     {
         //마을 씬로드
-        Debug.Log("LetsGoHome");
-        SceneLoader.LoadSceneAsync(Constants.TownScene).Forget();
+        Instance.abyssClearCount = 0;
+        Instance.levelDesign = 0;
+        
+        SceneLoader.LoadSceneAsync(Constants.TownScene).ContinueWith(() =>
+        {
+            var playerStats = Instance.player.GetComponent<PlayerStats>();
+            if (playerStats != null)
+            {
+                playerStats.ResetStatsExceptSoulStoneUpgrades();
+            }
+        }).Forget();
     }
 
     protected override void OnSceneLoaded(Scene scene, LoadSceneMode mode)

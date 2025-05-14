@@ -13,6 +13,8 @@ public class Skill_4 : MonoBehaviour
     private float mSpeed = 20.0f;
     private float mDuration = 1.0f;
     private float mTimer = 0.0f;
+    private GameObject mProjectile_Effect;
+    private GameObject mProjectile_Explode;
 
     private void FixedUpdate()
     {
@@ -28,6 +30,7 @@ public class Skill_4 : MonoBehaviour
 
             if (mTimer >= mDuration)
             {
+                GameManager.Instance.Resource.Destroy(mProjectile_Explode);
                 GameManager.Instance.Resource.Destroy(gameObject);
             }
         }
@@ -40,6 +43,8 @@ public class Skill_4 : MonoBehaviour
         mRadius = radius;
         mTargetPoint = targetPoint;
         mbHasArrived = false;
+        
+        mProjectile_Effect = GameManager.Instance.Resource.Instantiate("Skill_4_Projectile_Effect", 3, transform);
     }
 
     private void FallToTarget()
@@ -50,6 +55,12 @@ public class Skill_4 : MonoBehaviour
         // 목표 지점까지 거리가 가까워지면 도착 처리
         if (Vector3.Distance(transform.position, mTargetPoint) <= distanceThisFrame)
         {
+            GameManager.Instance.Resource.Destroy(mProjectile_Effect);
+            mProjectile_Explode = GameManager.Instance.Resource.Instantiate("Skill_4_Projectile_Explode");
+            
+            mProjectile_Explode.transform.position = mTargetPoint;
+            mProjectile_Explode.transform.rotation = Quaternion.identity;
+            
             transform.position = mTargetPoint;
             mbHasArrived = true;
 
@@ -71,7 +82,7 @@ public class Skill_4 : MonoBehaviour
             EnemyBTController enemy = hit.GetComponent<EnemyBTController>();
             if (enemy != null)
             {
-                enemy.SetHit((int)(mDamage * mDamageMultiplier),1);
+                enemy.SetHit((int)(mDamage * mDamageMultiplier),- 1);
                 
                 // Todo: 흡혈효과 처리 추가해야함
             }
