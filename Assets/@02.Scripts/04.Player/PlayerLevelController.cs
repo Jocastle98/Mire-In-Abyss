@@ -142,6 +142,19 @@ public class PlayerLevelController : MonoBehaviour
 
             Debug.Log($"레벨업 {mCurrentLevel}");
             //다음 레벨 필요 경험치 갱신
+
+            if (mCurrentLevel == 10)
+            {
+                AchievementManager.Instance.AddProgress("A017", 10);
+            }
+            else if (mCurrentLevel == 20)
+            {
+                AchievementManager.Instance.AddProgress("A016",20);
+            }
+            else if (mCurrentLevel == 30)
+            {
+                AchievementManager.Instance.AddProgress("A018", 30);
+            }
             requiredExp = GetRequiredExpForLevel(mCurrentLevel);
         }
     }

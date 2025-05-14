@@ -102,6 +102,8 @@ public class EnemyBTController : MonoBehaviour, IHpTrackable, IMapTrackable
     public Transform MapAnchor => transform;
 
     public MiniMapIconType IconType { get; private set; }
+    
+    private float mNextLoopTime = 0f;
 
     
     void Awake()
@@ -126,7 +128,7 @@ public class EnemyBTController : MonoBehaviour, IHpTrackable, IMapTrackable
     void Start()
     {
         mCurrentHealth = mMaxHealth;
-        
+        mNextLoopTime = Time.time + 1f;
         var deadSeq = new BTSequence(
             new BTCondition(() => mbIsDead && !mHasTriggeredDead),
             new BTAction(() =>
@@ -134,6 +136,20 @@ public class EnemyBTController : MonoBehaviour, IHpTrackable, IMapTrackable
                 mHasTriggeredDead = true;
                 ClearAllBools();
                 mAnim.SetTrigger("Dead");
+                switch (mEnemyType)
+                {
+                    case EnemyType.Boss:
+                        AudioManager.Instance.StopLoopPoolSfx(ExSfxType.DragonVoice);
+                        break;
+                    case EnemyType.Elite:
+                        AudioManager.Instance.StopLoopPoolSfx(ExSfxType.GolemTrace);
+                        break;
+                    case EnemyType.Common:
+                        AudioManager.Instance.StopLoopPoolSfx(ExSfxType.SkeletonVoice);
+                        break;
+                    default:
+                        break;
+                }
                 if (mAgent != null && mAgent.enabled && mAgent.isOnNavMesh)
                     mAgent.isStopped = true;
                 mAgent.enabled = false;
@@ -146,6 +162,21 @@ public class EnemyBTController : MonoBehaviour, IHpTrackable, IMapTrackable
             {
                 ClearAllBools();
                 mAnim.SetTrigger("Hit");
+                switch (mEnemyType)
+                {
+                    case EnemyType.Boss:
+                        AudioManager.Instance.StopLoopPoolSfx(ExSfxType.DragonVoice);
+                        break;
+                    case EnemyType.Elite:
+                        AudioManager.Instance.StopLoopPoolSfx(ExSfxType.GolemTrace);
+                        break;
+                    case EnemyType.Common:
+                        AudioManager.Instance.StopLoopPoolSfx(ExSfxType.SkeletonVoice);
+                        break;
+                    default:
+                        break;
+                }
+                mNextLoopTime = Time.time + 1f;
                 StartCoroutine(HitColorChange());
                 if (mAgent != null && mAgent.enabled && mAgent.isOnNavMesh)
                     mAgent.isStopped = true;
@@ -191,6 +222,7 @@ public class EnemyBTController : MonoBehaviour, IHpTrackable, IMapTrackable
                 new BTCondition(() => !mbIsAttacking && golem.CanImpact(transform, mTarget)),
                 new BTAction(() =>
                 {
+                    AudioManager.Instance.StopLoopPoolSfx(ExSfxType.GolemTrace);
                     FaceTarget();
                     mbIsAttacking = true;
                     ClearAllBools();
@@ -204,6 +236,7 @@ public class EnemyBTController : MonoBehaviour, IHpTrackable, IMapTrackable
                 new BTCondition(() => !mbIsAttacking && golem.CanSwing(transform, mTarget)),
                 new BTAction(() =>
                 {
+                    AudioManager.Instance.StopLoopPoolSfx(ExSfxType.GolemTrace);
                     FaceTarget();
                     mbIsAttacking = true;
                     ClearAllBools();
@@ -221,6 +254,8 @@ public class EnemyBTController : MonoBehaviour, IHpTrackable, IMapTrackable
                 {
                     ClearAllBools();
                     mAnim.SetBool("Trace", true);
+                    if (Time.time >= mNextLoopTime) 
+                        AudioManager.Instance.PlayLoopPoolSfx(ExSfxType.GolemTrace);
                     if (mAgent != null && mAgent.enabled && mAgent.isOnNavMesh)
                     {
                         mAgent.isStopped = false;
@@ -260,6 +295,11 @@ public class EnemyBTController : MonoBehaviour, IHpTrackable, IMapTrackable
                 {
                     ClearAllBools();
                     mAnim.SetBool("Trace", true);
+                    if (Time.time >= mNextLoopTime)
+                    {
+                        AudioManager.Instance.PlayLoopPoolSfx(ExSfxType.SkeletonVoice);
+                        mNextLoopTime = Time.time + 1f;
+                    }
                     if (mAgent != null && mAgent.enabled && mAgent.isOnNavMesh)
                     {
                         mAgent.isStopped = false;
@@ -291,6 +331,11 @@ public class EnemyBTController : MonoBehaviour, IHpTrackable, IMapTrackable
                 {
                     ClearAllBools();
                     mAnim.SetBool("Trace", true);
+                    if (Time.time >= mNextLoopTime)
+                    {
+                        AudioManager.Instance.PlayLoopPoolSfx(ExSfxType.SkeletonVoice);
+                        mNextLoopTime = Time.time + 1f;
+                    }
                     if (mAgent != null && mAgent.enabled && mAgent.isOnNavMesh)
                     {
                         mAgent.isStopped = false;
@@ -308,6 +353,7 @@ public class EnemyBTController : MonoBehaviour, IHpTrackable, IMapTrackable
                 new BTCondition(() => !mbIsAttacking && mTarget != null && dragon.CanFireball(transform, mTarget)),
                 new BTAction(() =>
                 {
+                    AudioManager.Instance.StopLoopPoolSfx(ExSfxType.DragonVoice);
                     FaceTarget();
                     mbIsAttacking = true;
                     ClearAllBools();
@@ -321,6 +367,7 @@ public class EnemyBTController : MonoBehaviour, IHpTrackable, IMapTrackable
                 new BTCondition(() => !mbIsAttacking && mTarget != null && dragon.CanBreath(transform, mTarget)),
                 new BTAction(() =>
                 {
+                    AudioManager.Instance.StopLoopPoolSfx(ExSfxType.DragonVoice);
                     FaceTarget();
                     mbIsAttacking = true;
                     ClearAllBools();
@@ -334,6 +381,7 @@ public class EnemyBTController : MonoBehaviour, IHpTrackable, IMapTrackable
                 new BTCondition(() => !mbIsAttacking && mTarget != null && dragon.CanTail(transform, mTarget)),
                 new BTAction(() =>
                 {
+                    AudioManager.Instance.StopLoopPoolSfx(ExSfxType.DragonVoice);
                     FaceTarget();
                     mbIsAttacking = true;
                     ClearAllBools();
@@ -351,6 +399,11 @@ public class EnemyBTController : MonoBehaviour, IHpTrackable, IMapTrackable
                 {
                     ClearAllBools();
                     mAnim.SetBool("Trace", true);
+                    if (Time.time >= mNextLoopTime)
+                    {
+                        AudioManager.Instance.PlayLoopPoolSfx(ExSfxType.DragonVoice);
+                        mNextLoopTime = Time.time + 1f;
+                    }
                     if (mAgent != null && mAgent.enabled && mAgent.isOnNavMesh)
                     {
                         mAgent.isStopped = false;
@@ -376,11 +429,17 @@ public class EnemyBTController : MonoBehaviour, IHpTrackable, IMapTrackable
                 return;
 
             if (mAgent.pathPending) return;
+            if (mEnemyType == EnemyType.Elite && Time.time >= mNextLoopTime)
+            {
+                AudioManager.Instance.PlayLoopPoolSfx(ExSfxType.GolemTrace);
+                mNextLoopTime = Time.time + 1f;
+            }
             if (!mPatrolPointAssigned)
             {
                 var rnd = Random.insideUnitSphere * mPatrolRadius + transform.position;
                 if (NavMesh.SamplePosition(rnd, out var hit, mPatrolRadius, NavMesh.AllAreas))
                 {
+                    
                     mAgent.SetDestination(hit.position);
                     mPatrolPointAssigned = true;
                     mPatrolWaitTimer = 0f;
@@ -438,6 +497,7 @@ public class EnemyBTController : MonoBehaviour, IHpTrackable, IMapTrackable
 
     private void ClearAllBools()
     {
+        
         mAnim.SetBool("Patrol", false);
         mAnim.SetBool("Trace", false);
         mAnim.SetBool("Idle", false);
@@ -453,6 +513,7 @@ public class EnemyBTController : MonoBehaviour, IHpTrackable, IMapTrackable
     private IEnumerator FlyAttackRoutine()
     {
         mAnim.SetBool("IsFlying", true);
+        AudioManager.Instance.PlayPoolSfx(ExSfxType.DragonFly);
         yield return new WaitForSeconds(1.5f);
         
 
@@ -528,9 +589,19 @@ public class EnemyBTController : MonoBehaviour, IHpTrackable, IMapTrackable
     public void SetHit(int damage, int hitType)
     {
         if (mbIsDead || mbIgnoreHits) return;
-        if (mEnemyType == EnemyType.Common)
+        switch (mEnemyType)
         {
-            AudioManager.Instance.PlayPoolSfx(ExSfxType.SkeletonHit);
+            case EnemyType.Common:
+                AudioManager.Instance.PlayPoolSfx(ExSfxType.SkeletonHit);
+                break;
+            case EnemyType.Elite:
+                AudioManager.Instance.PlayPoolSfx(ExSfxType.GolemHit);
+                break;
+            case EnemyType.Boss:
+                AudioManager.Instance.PlayPoolSfx(ExSfxType.DragonHit);
+                break;
+            default:
+                break;
         }
         
         switch (hitType)
@@ -564,7 +635,24 @@ public class EnemyBTController : MonoBehaviour, IHpTrackable, IMapTrackable
             PlayerHub.Instance.QuestLog.AddProgress("Q007", 1);
         }
         Debug.Log($"받은 대미지:{damage} 방어력:{mDefense} 최종:{effective} 남은체력:{mCurrentHealth}");
-        if (mCurrentHealth <= 0) mbIsDead = true;
+        if (mCurrentHealth <= 0)
+        {
+            mbIsDead = true;
+            switch (mEnemyType)
+            {
+                case EnemyType.Boss:
+                    AudioManager.Instance.PlayPoolSfx(ExSfxType.DragonDie);
+                    break;
+                case EnemyType.Elite:
+                    AudioManager.Instance.PlayPoolSfx(ExSfxType.GolemDie);
+                    break;
+                case EnemyType.Common:
+                    AudioManager.Instance.PlayPoolSfx(ExSfxType.SkeletonDie);
+                    break;
+                default:
+                    break;
+            }
+        }
         else mbIsHit = true;
 
         R3EventBus.Instance.Publish(new Events.Combat.DamagePopup(transform.position, effective));
@@ -705,6 +793,7 @@ public class EnemyBTController : MonoBehaviour, IHpTrackable, IMapTrackable
 
     private IEnumerator Dissolve()
     {
+       
         TrackableEventHelper.PublishDestroyed(this);
         var block = new MaterialPropertyBlock();
         float alpha = 1f;
@@ -756,10 +845,19 @@ public class EnemyBTController : MonoBehaviour, IHpTrackable, IMapTrackable
             case  EnemySubType.Dragon:
                 PlayerHub.Instance.QuestLog.AddProgress("Q014", 1);
                 PlayerHub.Instance.QuestLog.AddProgress("Q011", 1);
+                AchievementManager.Instance.AddProgress("A004", 1);
+                AchievementManager.Instance.AddProgress("A005", 1);
+                if (PlayerHub.Instance.Inventory.Items == null)
+                {
+                    AchievementManager.Instance.AddProgress("A014", 1);
+                }
                 break;
             
         }
         PlayerHub.Instance.QuestLog.AddProgress("Q009", 1);
+        AchievementManager.Instance.AddProgress("A001", 1);
+        AchievementManager.Instance.AddProgress("A002", 1);
+        AchievementManager.Instance.AddProgress("A003", 1);
         
         monsterDead.Invoke();
         StartCoroutine(Dissolve());
@@ -831,7 +929,7 @@ public class EnemyBTController : MonoBehaviour, IHpTrackable, IMapTrackable
     {
         if (!(mAttackBehaviorAsset is MeleeAttackBehavior melee))
             return;
-
+        AudioManager.Instance.PlayPoolSfx(ExSfxType.MeleeAttack);
         // 플레이어 태그만 필터링
         Collider[] hits = Physics.OverlapSphere(
             transform.position,
@@ -854,7 +952,7 @@ public class EnemyBTController : MonoBehaviour, IHpTrackable, IMapTrackable
         mbIgnoreHits = true;
         if (!(mAttackBehaviorAsset is DragonAttackBehavior dragon)) return;
         if (dragon.BreathProjectorPrefab == null) return;
-
+        AudioManager.Instance.PlayPoolSfx(ExSfxType.DragonBreathStart);
         var go = Instantiate(dragon.BreathProjectorPrefab, mFirePoint);
         go.transform.localPosition = Vector3.up * 0.1f;
         currentProjector = go.GetComponent<Projector>();
@@ -880,6 +978,7 @@ public class EnemyBTController : MonoBehaviour, IHpTrackable, IMapTrackable
     public void OnTailAttack()
     {
         var dragon = mAttackBehavior as DragonAttackBehavior;
+        AudioManager.Instance.PlayPoolSfx(ExSfxType.DragonTail);
         var hits = Physics.OverlapSphere(transform.position, dragon.TailRange, dragon.HitLayer);
         foreach (var col in hits)
             if (col.CompareTag("Player"))
@@ -890,7 +989,7 @@ public class EnemyBTController : MonoBehaviour, IHpTrackable, IMapTrackable
         mbIgnoreHits = false;
         if (currentProjector) Destroy(currentProjector.gameObject);
         currentProjector = null;
-
+        AudioManager.Instance.PlayPoolSfx(ExSfxType.DragonBreath);
         if (mAttackBehaviorAsset is DragonAttackBehavior dragon && dragon.BreathVFXPrefab != null)
         {
             // 1) FirePoint 위치·회전으로 VFX 생성
@@ -952,6 +1051,7 @@ public class EnemyBTController : MonoBehaviour, IHpTrackable, IMapTrackable
         {
             var spawnPos = transform.position;
             var vfx = Instantiate(golem.mImpactVFXPrefab, spawnPos, golem.mImpactVFXPrefab.transform.rotation);
+            AudioManager.Instance.PlayPoolSfx(ExSfxType.GolemImpact);
             Destroy(vfx, golem.mImpactVFXDuration);
         }
 
@@ -971,6 +1071,7 @@ public class EnemyBTController : MonoBehaviour, IHpTrackable, IMapTrackable
     public void OnSwingAttack()
     {
         if (!(mAttackBehaviorAsset is GolemAttackBehavior golem)) return;
+        AudioManager.Instance.PlayPoolSfx(ExSfxType.GolemSwing);
         var hits = Physics.OverlapSphere(transform.position, golem.SwingRange, ImpactHitLayer);
         foreach (var col in hits)
             if (col.CompareTag("Player"))

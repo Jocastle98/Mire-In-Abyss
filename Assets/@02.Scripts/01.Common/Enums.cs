@@ -59,6 +59,7 @@ namespace PlayerEnums
         Sprint,
         Roll,
         Dash,
+        ProjectileFire,
         Skill1,
         Skill2,
         Skill3,
@@ -212,6 +213,7 @@ namespace AudioEnums
         StunVoice,
         DeathVoice,
         SkillVoice,
+        ProjectileFire,
         Skill1Effect,
         Skill2Effect,
         Skill3Effect,
@@ -221,7 +223,24 @@ namespace AudioEnums
 
     public enum ExSfxType
     {
-        SkeletonHit =0
+        SkeletonHit =0,
+        SkeletonVoice =1,
+        SkeletonDie =2,
+        MeleeAttack =3,
+        ArrowStart = 4,
+        DragonHit = 5,
+        DragonVoice = 6,
+        DragonDie =7,
+        DragonBreathStart = 8,
+        DragonBreath = 9,
+        DragonFireBall =10,
+        DragonTail =11,
+        DragonFly =12,
+        GolemHit = 13,
+        GolemTrace =14,
+        GolemDie =15,
+        GolemSwing =16,
+        GolemImpact =17
     }
     public enum EUiType    { Open = 0, Close = 1, Click = 2  }
 }

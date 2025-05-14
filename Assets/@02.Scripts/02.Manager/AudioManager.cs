@@ -16,7 +16,7 @@ public class AudioManager : Singleton<AudioManager>
 
     [Header("오디오 클립")]
     [SerializeField] private AudioClip[] mUiClips;
-
+    
     [Header("오브젝트 풀 클립")]
     [SerializeField] private AudioClip[] mPooledSfxClips;
     [SerializeField] private AudioClip[] mBgmClips; // 0: 인트로, 1: 마을, 2: 필드, 3: 던전
@@ -27,7 +27,12 @@ public class AudioManager : Singleton<AudioManager>
     private AudioSource[] mPooledSources;
     private AudioSource[] mBgmSources;
     private int mNextPool = 0;
+    private int mNextPoolLoop = 0;
     private int mNextBgm = 0;
+
+    // 루프용 식셔너리
+    private Dictionary<ExSfxType, AudioSource> mLoopExSfxSources = new Dictionary<ExSfxType, AudioSource>();
+
 
     #region Player SFX 클립
 
@@ -46,18 +51,19 @@ public class AudioManager : Singleton<AudioManager>
     public AudioClip[] stunVoiceAudioClips;
     public AudioClip[] deathVoiceAudioClips;
     public AudioClip[] skillVoiceAudioClips;
+    public AudioClip[] projectileFireAudioClips;
     public AudioClip[] skill1AudioClips;
     public AudioClip[] skill2AudioClips;
     public AudioClip[] skill3AudioClips;
     public AudioClip[] skill4AudioClips;
     public AudioClip[] interactionVoiceAudioClips;
-
+    
     private Dictionary<ESfxType, AudioClip[]> mSfxClips;
 
     #endregion
-
-
-
+    
+    
+    
     protected override void Awake()
     {
         base.Awake();
@@ -93,7 +99,7 @@ public class AudioManager : Singleton<AudioManager>
     {
         SceneManager.sceneLoaded -= OnSceneLoaded;
     }
-
+  
     /// <summary>
     /// Init volume and mute data from UserData in ManagerHub
     /// </summary>
@@ -125,51 +131,51 @@ public class AudioManager : Singleton<AudioManager>
         subscribeUserAudioData();
     }
 
-private void subscribeUserAudioData()
-{
-    UserData.Instance.ObsMasterVolume.Subscribe(e => AudioListener.volume = e).AddTo(this);
-    UserData.Instance.ObsBgmVolume
-        .Subscribe(e =>
-        {
-            mBgmSource.volume = e;
-            foreach (var src in mBgmSources)
+    private void subscribeUserAudioData()
+    {
+        UserData.Instance.ObsMasterVolume.Subscribe(e => AudioListener.volume = e).AddTo(this);
+        UserData.Instance.ObsBgmVolume
+            .Subscribe(e =>
             {
-                src.volume = e;
-            }
-        }).AddTo(this);
-    UserData.Instance.ObsSeVolume
-        .Subscribe(e =>
-        {
-            mSfxSource.volume = e;
-            foreach (var src in mPooledSources)
+                mBgmSource.volume = e;
+                foreach (var src in mBgmSources)
+                {
+                    src.volume = e;
+                }
+            }).AddTo(this);
+        UserData.Instance.ObsSeVolume
+            .Subscribe(e =>
             {
-                src.volume = e;
-            }
-        }).AddTo(this);
-    UserData.Instance.ObsUiVolume.Subscribe(e => mUiSource.volume = e).AddTo(this);
+                mSfxSource.volume = e;
+                foreach (var src in mPooledSources)
+                {
+                    src.volume = e;
+                }
+            }).AddTo(this);
+        UserData.Instance.ObsUiVolume.Subscribe(e => mUiSource.volume = e).AddTo(this);
 
 
-    UserData.Instance.ObsMasterMuted.Subscribe(e => AudioListener.pause = e).AddTo(this);
-    UserData.Instance.ObsBgmMuted
-        .Subscribe(e =>
-        {
-            mBgmSource.mute = e;
-            foreach (var src in mBgmSources)
+        UserData.Instance.ObsMasterMuted.Subscribe(e => AudioListener.pause = e).AddTo(this);
+        UserData.Instance.ObsBgmMuted
+            .Subscribe(e =>
             {
-                src.mute = e;
-            }
-        }).AddTo(this);
-    UserData.Instance.ObsSeMuted
-        .Subscribe(e =>
-        {
-            mSfxSource.mute = e;
-            foreach (var src in mPooledSources)
+                mBgmSource.mute = e;
+                foreach (var src in mBgmSources)
+                {
+                    src.mute = e;
+                }
+            }).AddTo(this);
+        UserData.Instance.ObsSeMuted
+            .Subscribe(e =>
             {
-                src.mute = e;
-            }
-        }).AddTo(this);
-    UserData.Instance.ObsUiMuted.Subscribe(e => mUiSource.mute = e).AddTo(this);
-}
+                mSfxSource.mute = e;
+                foreach (var src in mPooledSources)
+                {
+                    src.mute = e;
+                }
+            }).AddTo(this);
+        UserData.Instance.ObsUiMuted.Subscribe(e => mUiSource.mute = e).AddTo(this);
+    }
 
     private void InitPlayerSfx()
     {
@@ -188,6 +194,7 @@ private void subscribeUserAudioData()
             { ESfxType.StunVoice, stunVoiceAudioClips },
             { ESfxType.DeathVoice, deathVoiceAudioClips },
             { ESfxType.SkillVoice, skillVoiceAudioClips },
+            { ESfxType.ProjectileFire, projectileFireAudioClips },
             { ESfxType.Skill1Effect, skill1AudioClips },
             { ESfxType.Skill2Effect, skill2AudioClips },
             { ESfxType.Skill3Effect, skill3AudioClips },
@@ -235,8 +242,8 @@ private void subscribeUserAudioData()
         var clip = mPooledSfxClips[idx];
         if (clip == null) return;
         var src = mPooledSources[mNextPool];
-        src.PlayOneShot(clip);
         mNextPool = (mNextPool + 1) % mSfxPoolSize;
+        src.PlayOneShot(mPooledSfxClips[idx]);
     }
     public void PlayUi(EUiType type)
     {
@@ -247,6 +254,36 @@ private void subscribeUserAudioData()
         mUiSource.PlayOneShot(clip);
     }
 
+    // ExSfx에서 특정 SFX 루프
+    public void PlayLoopPoolSfx(ExSfxType type)
+    {
+        if (mLoopExSfxSources.ContainsKey(type))
+            return;
+
+        int idx = (int)type;
+        if (mPooledSfxClips == null || idx < 0 || idx >= mPooledSfxClips.Length) return;
+        var clip = mPooledSfxClips[idx];
+        if (clip == null) return;
+
+        var src = mPooledSources[mNextPoolLoop];
+        mNextPoolLoop = (mNextPoolLoop + 1) % mSfxPoolSize;
+
+        src.clip = mPooledSfxClips[idx];
+        src.loop = true;
+        src.Play();
+        mLoopExSfxSources[type] = src;
+    }
+
+    public void StopLoopPoolSfx(ExSfxType type)
+    {
+        if (!mLoopExSfxSources.TryGetValue(type, out var src))
+            return;
+
+        src.Stop();
+        src.loop = false;
+        src.clip = null;
+        mLoopExSfxSources.Remove(type);
+    }
     protected override void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
         switch (scene.name)
@@ -257,7 +294,7 @@ private void subscribeUserAudioData()
             case Constants.TownScene:
                 PlayBgm(EBgmType.Town);
                 break;
-            case Constants.AbyssFieldScene:
+            case  Constants.AbyssFieldScene:
                 PlayBgm(EBgmType.Field);
                 break;
             case Constants.AbyssDungeonScene:
