@@ -53,17 +53,6 @@ public class PlayerStats : MonoBehaviour
     private float mLastStandValue = 0f;
     private bool mbLastStandActive = false;
     private float mLastStandDuration = 0f;
-
-    private float mSoulStoneMultiplier = 1.0f;
-    private float mCoolDownReduction = 0.0f;
-    private float mItemDropRateBonus = 0.0f;
-    private float mExpMultiplier = 1.0f;
-    private float mGoldMultiplier = 1.0f;
-    
-    //퀘스트 용 변수
-    private bool mIsLowHealthTracking = false;
-    private float mLowHealthStartTime = 0f;
-    private bool mLowHealthQuestCompleted = false;
     
     //스탯 변경 추적을 위한 리스트
     private List<(float value, string type)> mMaxHPModifiers = new List<(float, string)>();
@@ -79,7 +68,6 @@ public class PlayerStats : MonoBehaviour
     //이벤트 
     public event Action OnDeath;
     public event Action<float> OnHealthChanged;
-    public event Action OnReturnToTown;
 
     private void Awake()
     {
@@ -95,7 +83,6 @@ public class PlayerStats : MonoBehaviour
     {
         UpdateBuffDuration();
         UpdateAoeDamageTimer();
-        CheckLowHealthQuest();
     }
 
     private void OnDestroy()
@@ -131,11 +118,6 @@ public class PlayerStats : MonoBehaviour
         if (mCurrentHP > mMaxHP)
             mCurrentHP = mMaxHP;
 
-        if (mMoveSpeed >= 10f)
-        {
-            PlayerHub.Instance.QuestLog.AddProgress("Q010", 1);
-        }
-
         //크리티컬 0~100% 사잇값만 가짐
         mCritChance = Mathf.Clamp01(mCritChance);
         UpdateAttackSpeedToController();
@@ -165,37 +147,6 @@ public class PlayerStats : MonoBehaviour
         }
         
         stat = (baseStat + (baseStat * percentSum) + flatAdd) * mulSum;
-    }
-
-    private void CheckLowHealthQuest()
-    {
-        if (mLowHealthQuestCompleted) return;
-        float healthPercentage = mCurrentHP / mMaxHP;
-
-        if (healthPercentage <= 0.2)
-        {
-            if (!mIsLowHealthTracking)
-            {
-                mIsLowHealthTracking = true;
-                mLowHealthStartTime = Time.time;
-            }
-            else
-            {
-                float timeInLowHealth = Time.time - mLowHealthStartTime;
-                if (timeInLowHealth >= 60f)
-                {
-                    PlayerHub.Instance.QuestLog.AddProgress("Q008", 1);
-                    mLowHealthQuestCompleted = true;
-                }
-            }
-        }
-        else
-        {
-            if (mIsLowHealthTracking)
-            {
-                mIsLowHealthTracking = false;
-            }
-        }
     }
 
     private void UpdateAttackSpeedToController()
@@ -429,8 +380,6 @@ public class PlayerStats : MonoBehaviour
             Debug.Log($"가드 성공, 방어 버프 활성화 {mDefenceBuffValue * 100}%");
             RecalculateAllStats();
         }
-
-        PlayerHub.Instance.QuestLog.AddProgress("Q003", 1);
     }
 
     /// <summary>
@@ -458,7 +407,6 @@ public class PlayerStats : MonoBehaviour
         {
             float healAmount = damage * mLifeStealPercentage;
             Heal(healAmount);
-            PlayerHub.Instance.QuestLog.AddProgress("Q005", (int)healAmount);
             Debug.Log($"흡혈 {healAmount} 회복");
             return healAmount;
         }
@@ -521,7 +469,6 @@ public class PlayerStats : MonoBehaviour
     private void Die()
     {
         Debug.Log("플레이어 사망!");
-        mIsLowHealthTracking = false;
         OnDeath?.Invoke();
     }
     
@@ -611,142 +558,6 @@ public class PlayerStats : MonoBehaviour
         mAttackSpeedModifiers.Add((value, type));
         RecalculateAllStats();
     }
-
-    public void ResetStatsExceptSoulStoneUpgrades()
-    {
-        ResetStats();                   //기본 스탯 초기화
-
-        ResetAllEffects();              //모든 버프, 특수효과 초기화
-
-        //ApplySoulStoneUpgradeOnly();    //영혼석 상점 업그레이드만 다시 적용
-        
-        Heal(GetMaxHP());        //최대 체력으로 회복
-        
-        OnReturnToTown?.Invoke();
-    }
-
-    public void ResetAllEffects()
-    {
-        ResetLifeSteal();
-        DisableRevive();
-        DisableDefenceBuff();
-        DisableMoveSpeedBuff();
-        ResetCritDamageMultiplier();
-        DisableSkillReset();
-        DisableAoeDamage();
-        DisableLastStand();
-        
-        mAttackSpeedModifiers.Clear();
-        mDefenceModifiers.Clear();
-        mAttackPowerModifiers.Clear();
-        mCritChanceModifiers.Clear();
-        mDamageReductionModifiers.Clear();
-        mMoveSpeedModifiers.Clear();
-        mMaxHPModifiers.Clear();
-    }
-
-    /*private void ApplySoulStoneUpgradeOnly()
-    {
-        SoulStoneUpgradeData upgradeData = FindObjectOfType<SoulStoneShopPanelController>()?.UpgradeData; //TODO: UserInfo에서 업그레이드 정보를 받아와야함
-        if (upgradeData == null) return;
-
-        foreach (var upgrade in upgradeData.GetAllUpgrades())
-        {
-            if(upgrade.CurrentLevel <= 0) continue;
-
-            float value = upgrade.Values[upgrade.CurrentLevel - 1];
-            string valueType = upgrade.ValueType;
-            
-            switch (upgrade.UpgradeId)
-            {
-                case "maxHP":
-                    ModifyMaxHP(value, valueType);
-                    break;
-                case "attackPower":
-                    ModifyAttackPower(value, valueType);
-                    break;
-                case "moveSpeed":
-                    ModifyMoveSpeed(value, valueType);
-                    break;
-                case "defence":
-                    ModifyDefence(value, valueType);
-                    break;
-                case "critChance":
-                    ModifyCritChance(value, valueType);
-                    break;
-                case "soulStone":
-                    if (valueType == "percent")
-                    {
-                        SetSoulStoneMultiplier(0);
-                        SetSoulStoneMultiplier(value);
-                    }
-                    break;
-                case "coolDown":
-                    if (valueType == "percent")
-                    {
-                        SetCoolDownReduction(0);
-                        SetCoolDownReduction(value);
-                    }
-                    break;
-                case "itemDrop":
-                    if (valueType == "percent")
-                    {
-                        SetItemDropRateBonus(0);
-                        SetItemDropRateBonus(value);
-                    }
-                    break;
-                case "level":
-                    if (valueType == "percent")
-                    {
-                        SetExpMultiplier(0);
-                        SetExpMultiplier(value);
-                    }
-                    break;
-                case "gold":
-                    if (valueType == "percent")
-                    {
-                        SetGoldMultiplier(0);
-                        SetGoldMultiplier(value);
-                    }
-                    break;
-            }
-        }
-    }*/
-    
-    public void RemoveLevelBonuses()
-    {
-        mMaxHPModifiers.RemoveAll(m => m.type == "level");
-        mAttackPowerModifiers.RemoveAll(m => m.type == "level");
-        mDefenceModifiers.RemoveAll(m => m.type == "level");
-        RecalculateAllStats();
-    }
-    
-    /*public void RemoveStatModifier(string statType, float value, string valueType)
-    {
-        List<(float value, string type)> targetList = statType switch
-        {
-            "maxHP" or "hp" => mMaxHPModifiers,
-            "attackPower" => mAttackPowerModifiers,
-            "moveSpeed" => mMoveSpeedModifiers,
-            "defence" or "damageDefence" => mDefenceModifiers,
-            "critChance" => mCritChanceModifiers,
-            "attackSpeed" => mAttackSpeedModifiers,
-            _ => null
-        };
-
-        if (targetList == null) return;
-
-        for (int i = 0; i < targetList.Count; i++)
-        {
-            if (Mathf.Approximately(targetList[i].value, value) && targetList[i].type == valueType)
-            {
-                targetList.RemoveAt(i);
-                break; // 동일한 효과 하나만 제거
-            }
-        }
-
-        RecalculateAllStats();
-    }*/
     #endregion
 
     #region 특수 효과 활성화/비활성화 메서드
@@ -897,66 +708,6 @@ public class PlayerStats : MonoBehaviour
         mLastStandValue = 0f;
         mbLastStandActive = false;
     }
-    #endregion
-
-    #region 특수 영혼석 강화
-
-    public void SetSoulStoneMultiplier(float multiplier)
-    {
-        mSoulStoneMultiplier = 1.0f + multiplier;
-    }
-
-    public float GetSoulStoneMultiplier()
-    {
-        return mSoulStoneMultiplier;
-    }
-
-    public void SetCoolDownReduction(float reduction)
-    {
-        mCoolDownReduction = reduction;
-    }
-
-    public float GetCoolDownReduction()
-    {
-        return mCoolDownReduction;
-    }
-
-    public void SetItemDropRateBonus(float bonus)
-    {
-        mItemDropRateBonus = bonus;
-    }
-
-    public float GetItemDropRateBonus()
-    {
-        return mItemDropRateBonus;
-    }
-
-    public void SetExpMultiplier(float multiplier)
-    {
-        mExpMultiplier = 1.0f + multiplier;
-
-        var levelController = GetComponent<PlayerLevelController>();
-        if (levelController != null)
-        {
-            levelController.SetExpMultiplier(mExpMultiplier);
-        }
-    }
-
-    public float GetExpMultiplier()
-    {
-        return mExpMultiplier;
-    }
-
-    public void SetGoldMultiplier(float multiplier)
-    {
-        mGoldMultiplier = 1.0f + multiplier;
-    }
-
-    public float GetGoldMultiplier()
-    {
-        return mGoldMultiplier;
-    }
-    
     #endregion
 
     #region 스탯 가져오기 메서드

@@ -52,10 +52,7 @@ public sealed class Inventory : MonoBehaviour
 
     public void AddGold(int addedAmt)
     {
-        float multiplier = GameObject.FindObjectOfType<PlayerStats>().GetGoldMultiplier();
-
-        int adjustAmt = Mathf.RoundToInt(addedAmt * multiplier);
-        Gold += adjustAmt;
+        Gold += addedAmt;
         GoldAdded.OnNext(new GoldAdded(addedAmt, Gold));
     }
 
@@ -73,10 +70,7 @@ public sealed class Inventory : MonoBehaviour
 
     public void AddSoul(int addedAmt)
     {
-        float multiplier = GameObject.FindObjectOfType<PlayerStats>().GetSoulStoneMultiplier();
-
-        int adjustedAmt = Mathf.RoundToInt(addedAmt * multiplier);
-        Soul += adjustedAmt;
+        Soul += addedAmt;
         SoulAdded.OnNext(new SoulAdded(addedAmt, Soul));
     }
 

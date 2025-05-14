@@ -75,13 +75,8 @@ public class ItemDropper : MonoBehaviour
     /// </summary>
     public void DropItemOnDeadth()
     {
-        PlayerStats playerStats = GameObject.FindObjectOfType<PlayerStats>();
-        float dropBonus = playerStats != null ? playerStats.GetItemDropRateBonus() : 0f;
-
-        float adjustedDropChance = itemDropChance * (1.0f + dropBonus);
-        
         //1. 아이템을 드랍할지 여부 결정
-        if (Random.value > adjustedDropChance) return;
+        if (Random.value > itemDropChance) return;
 
         //2. 몬스터 타입에 따라 어떤 등급의 아이템을 드랍할지 결정
         ItemTier selectedTier = DetermineItemTier();

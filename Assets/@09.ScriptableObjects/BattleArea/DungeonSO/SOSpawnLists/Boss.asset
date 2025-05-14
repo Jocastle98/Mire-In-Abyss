@@ -12,5 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8895319a0a549464a901e5d6270713b2, type: 3}
   m_Name: Boss
   m_EditorClassIdentifier: 
-  monsters:
-  - {fileID: 3880147417705801934, guid: b79bb05f1051dfd42b2147fdef87b0ae, type: 3}
+  monsters: []

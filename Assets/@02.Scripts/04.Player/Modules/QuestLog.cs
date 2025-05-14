@@ -65,7 +65,7 @@ public sealed class QuestLog : MonoBehaviour
     {
         if (!mActiveQuests.TryGetValue(id, out var q))
         {
-            //Debug.LogError($"Quest {id} is not active");
+            Debug.LogError($"Quest {id} is not active");
             return;
         }
 

@@ -9,7 +9,6 @@ public class Achievement
     public string Info;                 //해금 전 안내 문구
     public string Description;          //조건 달성 시 안내 팝업 문구
     public string IllustrationComment;  //해금 후 업적 도감 문구
-    public int TargetAmount;
 
     [System.NonSerialized] public bool isUnlocked;
     [System.NonSerialized] public float Progress;

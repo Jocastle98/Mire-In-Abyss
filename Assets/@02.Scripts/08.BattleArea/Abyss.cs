@@ -1,6 +1,5 @@
 using System.Collections;
 using System.Collections.Generic;
-using Events.HUD;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Rendering.PostProcessing;
@@ -23,7 +22,6 @@ public abstract class Abyss : MonoBehaviour
     public void ActivatePortal(GameObject portal,GameObject setPos)
     {
         portal.SetActive(true);
-        TrackableEventHelper.PublishSpawned(portal.gameObject);
         portal.transform.position = setPos.transform.position;
     }
     

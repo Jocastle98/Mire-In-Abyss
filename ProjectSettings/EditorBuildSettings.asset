@@ -20,7 +20,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/@01.Scenes/LoadingOverlay.unity
     guid: 6761f6627e1298a47bdfa379ad5c3e14
-  - enabled: 0
+  - enabled: 1
     path: Assets/@01.Scenes/Jihoon_Town.unity
     guid: ef8c98bb28a5d04478b548f51ea7164e
   - enabled: 1

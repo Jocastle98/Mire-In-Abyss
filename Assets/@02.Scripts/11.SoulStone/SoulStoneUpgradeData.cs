@@ -42,9 +42,9 @@ public class SoulStoneUpgradeData : ScriptableObject
             UpgradeId = "maxHP",
             Title = "최대체력",
             Description = "캐릭터의 최대 체력을 증가시킵니다.",
-            Costs = new int[] { 5, 10, 20, 35, 60 },
+            Costs = new int[] { 50, 100, 200, 350, 600 },
             Values = new float[] { 10f, 20f, 30f, 45f, 60f },
-            ValueType = "flat"
+            ValueType = "add"
         };
         mUpgrades.Add(maxHP);
 
@@ -54,9 +54,9 @@ public class SoulStoneUpgradeData : ScriptableObject
             UpgradeId = "attackPower",
             Title = "공격력",
             Description = "캐릭터의 기본 공격력을 증가시킵니다.",
-            Costs = new int[] { 7, 15, 30, 50, 85 },
+            Costs = new int[] { 70, 150, 300, 500, 850 },
             Values = new float[] { 5f, 10f, 15f, 20f, 30f },
-            ValueType = "flat"
+            ValueType = "add"
         };
         mUpgrades.Add(attackPower);
 
@@ -66,9 +66,9 @@ public class SoulStoneUpgradeData : ScriptableObject
             UpgradeId = "moveSpeed",
             Title = "이동속도",
             Description = "캐릭터의 이동 속도를 증가시킵니다.",
-            Costs = new int[] { 6, 12, 24, 40, 70 },
-            Values = new float[] { 1f, 2f, 3f, 4f, 5f },
-            ValueType = "flat"
+            Costs = new int[] { 60, 120, 240, 400, 700 },
+            Values = new float[] { 0.05f, 0.1f, 0.15f, 0.2f, 0.3f },
+            ValueType = "percent"
         };
         mUpgrades.Add(moveSpeed);
 
@@ -78,9 +78,9 @@ public class SoulStoneUpgradeData : ScriptableObject
             UpgradeId = "defense",
             Title = "방어력",
             Description = "받는 피해를 감소시킵니다.",
-            Costs = new int[] { 6, 13, 26, 45, 75 },
+            Costs = new int[] { 60, 130, 260, 450, 750 },
             Values = new float[] { 1f, 2f, 3f, 4f, 6f },
-            ValueType = "flat"
+            ValueType = "add"
         };
         mUpgrades.Add(defense);
 
@@ -90,9 +90,9 @@ public class SoulStoneUpgradeData : ScriptableObject
             UpgradeId = "critChance",
             Title = "치명타확률",
             Description = "치명타가 발생할 확률을 증가시킵니다.",
-            Costs = new int[] { 10, 20, 40, 70, 120 },
-            Values = new float[] { 0.03f, 0.06f, 0.09f, 0.12f, 0.15f },
-            ValueType = "flat"
+            Costs = new int[] { 100, 200, 400, 700, 1200 },
+            Values = new float[] { 0.02f, 0.04f, 0.06f, 0.08f, 0.1f },
+            ValueType = "add"
         };
         mUpgrades.Add(critChance);
        
@@ -103,7 +103,7 @@ public class SoulStoneUpgradeData : ScriptableObject
             UpgradeId = "soulAcquisition",
             Title = "영혼석",
             Description = "영혼석 획득량이 증가합니다.",
-            Costs = new int[] { 15, 30, 60, 100, 150 },
+            Costs = new int[] { 150, 300, 600, 1000, 1500 },
             Values = new float[] { 0.1f, 0.2f, 0.3f, 0.4f, 0.5f },
             ValueType = "percent"
         };
@@ -115,7 +115,7 @@ public class SoulStoneUpgradeData : ScriptableObject
             UpgradeId = "cooldownReduction",
             Title = "스킬 쿨",
             Description = "모든 스킬의 재사용 대기시간이 감소합니다.",
-            Costs = new int[] { 20, 40, 80, 130, 200 },
+            Costs = new int[] { 200, 400, 800, 1300, 2000 },
             Values = new float[] { 0.04f, 0.08f, 0.12f, 0.16f, 0.2f },
             ValueType = "percent"
         };
@@ -127,7 +127,7 @@ public class SoulStoneUpgradeData : ScriptableObject
             UpgradeId = "itemDropRate",
             Title = "아이템 드랍",
             Description = "아이템 드랍 확률이 증가합니다.",
-            Costs = new int[] { 13, 26, 52, 90, 140 },
+            Costs = new int[] { 130, 260, 520, 900, 1400 },
             Values = new float[] { 0.05f, 0.1f, 0.15f, 0.2f, 0.3f },
             ValueType = "percent"
         };
@@ -139,9 +139,9 @@ public class SoulStoneUpgradeData : ScriptableObject
             UpgradeId = "levelUp",
             Title = "레벨업",
             Description = "경험치 획득량이 증가합니다.",
-            Costs = new int[] { 12, 24, 48, 80, 130 },
-            Values = new float[] { 0.05f, 0.1f, 0.15f, 0.2f, 0.3f },
-            ValueType = "percent"
+            Costs = new int[] { 120, 240, 480, 800, 1300 },
+            Values = new float[] { 0.02f, 0.04f, 0.06f, 0.08f, 0.1f },
+            ValueType = "add"
         };
         mUpgrades.Add(levelUpSpeed);
 
@@ -151,7 +151,7 @@ public class SoulStoneUpgradeData : ScriptableObject
             UpgradeId = "goldAcquisition",
             Title = "골드",
             Description = "골드 획득량이 증가합니다.",
-            Costs = new int[] { 10, 20, 40, 70, 110 },
+            Costs = new int[] { 100, 200, 400, 700, 1100 },
             Values = new float[] { 0.1f, 0.2f, 0.3f, 0.4f, 0.5f },
             ValueType = "percent"
         };

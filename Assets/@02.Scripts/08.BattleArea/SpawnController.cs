@@ -21,7 +21,7 @@ public class SpawnController : MonoBehaviour
             {
                 GameObject spawnObj = Instantiate(obj, hit.point, Quaternion.identity);
                 spawnObj.transform.parent = parent;
-                EnemyBTController monsterDeSpawnTest = spawnObj.GetComponent<EnemyBTController>();
+                MonsterDeSpawnTest monsterDeSpawnTest = spawnObj.GetComponent<MonsterDeSpawnTest>();
                 if (monsterDeSpawnTest != null)
                 {
                     monsterDeSpawnTest.monsterDead = monsterDead;

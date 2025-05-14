@@ -35,11 +35,6 @@ public class ItemEffectSystem : MonoBehaviour
     void Start()
     {
         subscribeEvents();
-        /*PlayerStats playerStats = FindObjectOfType<PlayerStats>();
-        if (playerStats != null)
-        {
-            playerStats.OnReturnToTown += ClearAllItemEffects;
-        }*/
     }
 
     void subscribeEvents()
@@ -180,8 +175,6 @@ public class ItemEffectSystem : MonoBehaviour
     {
         if (mPlayerStats == null) return;
 
-        //mPlayerStats.RemoveStatModifier(item.EffectType, item.Value, item.ValueType);
-        
         switch (item.EffectType)
         {
             // Common 등급 아이템 (1-5)
@@ -272,23 +265,6 @@ public class ItemEffectSystem : MonoBehaviour
         }
     }
 
-    public void ClearAllItemEffects()
-    {
-        Dictionary<int, int> currentItems = new Dictionary<int, int>(PlayerHub.Instance.Inventory.Items);
-        foreach (var item in currentItems)
-        {
-            Item itemData = mItemDatabase.GetItemByID(item.Key);
-            if (itemData != null)
-            {
-                for (int i = 0; i < item.Value; i++)
-                {
-                    RemoveItemEffect(itemData);
-                    PlayerHub.Instance.Inventory.RemoveItem(itemData.ID);
-                }
-            }
-        }
-    }
-
     /// <summary>
     /// 특정 효과 타입의 다른 아이템이 있는지 확인합니다.
     /// </summary>
@@ -337,7 +313,7 @@ public class ItemEffectSystem : MonoBehaviour
             case "multiply":
             case "mul":
                 // 1로 나누는 것은 곱하기의 역연산
-                modifyFunction(1f / (1 + item.Value), "multiply");
+                modifyFunction(1f / item.Value, "multiply");
                 break;
             case "percent":
                 // 퍼센트 증가를 제거

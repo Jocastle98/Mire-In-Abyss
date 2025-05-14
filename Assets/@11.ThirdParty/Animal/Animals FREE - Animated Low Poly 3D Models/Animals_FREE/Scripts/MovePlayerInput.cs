@@ -43,6 +43,7 @@ namespace Controller
         private void Update()
         {
             GatherInput();
+            SetInput();
         }
 
         public void GatherInput()
@@ -61,6 +62,17 @@ namespace Controller
             m_Mover = mover;
         }
 
-        
+        public void SetInput()
+        {
+            if (m_Mover != null)
+            {
+                m_Mover.SetInput(in m_Axis, in m_Target, in m_IsRun, m_IsJump);
+            }
+
+            if (m_Camera != null)
+            {
+                m_Camera.SetInput(in m_MouseDelta, m_Scroll);
+            }
+        }
     }
 }
