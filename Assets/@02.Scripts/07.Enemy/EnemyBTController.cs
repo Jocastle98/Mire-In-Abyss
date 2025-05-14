@@ -453,6 +453,7 @@ public class EnemyBTController : MonoBehaviour, IHpTrackable, IMapTrackable
     private IEnumerator FlyAttackRoutine()
     {
         mAnim.SetBool("IsFlying", true);
+        AudioManager.Instance.PlayPoolSfx(ExSfxType.DragonFly);
         yield return new WaitForSeconds(1.5f);
         
 
@@ -528,9 +529,19 @@ public class EnemyBTController : MonoBehaviour, IHpTrackable, IMapTrackable
     public void SetHit(int damage, int hitType)
     {
         if (mbIsDead || mbIgnoreHits) return;
-        if (mEnemyType == EnemyType.Common)
+        switch (mEnemyType)
         {
-            AudioManager.Instance.PlayPoolSfx(ExSfxType.SkeletonHit);
+            case EnemyType.Common:
+                AudioManager.Instance.PlayPoolSfx(ExSfxType.SkeletonHit);
+                break;
+            case EnemyType.Elite:
+                AudioManager.Instance.PlayPoolSfx(ExSfxType.GolemHit);
+                break;
+            case EnemyType.Boss:
+                AudioManager.Instance.PlayPoolSfx(ExSfxType.DragonHit);
+                break;
+            default:
+                break;
         }
         
         switch (hitType)
@@ -564,7 +575,24 @@ public class EnemyBTController : MonoBehaviour, IHpTrackable, IMapTrackable
             PlayerHub.Instance.QuestLog.AddProgress("Q007", 1);
         }
         Debug.Log($"받은 대미지:{damage} 방어력:{mDefense} 최종:{effective} 남은체력:{mCurrentHealth}");
-        if (mCurrentHealth <= 0) mbIsDead = true;
+        if (mCurrentHealth <= 0)
+        {
+            mbIsDead = true;
+            switch (mEnemyType)
+            {
+                case EnemyType.Boss:
+                    AudioManager.Instance.PlayPoolSfx(ExSfxType.DragonDie);
+                    break;
+                case EnemyType.Elite:
+                    AudioManager.Instance.PlayPoolSfx(ExSfxType.GolemDie);
+                    break;
+                case EnemyType.Common:
+                    AudioManager.Instance.PlayPoolSfx(ExSfxType.SkeletonDie);
+                    break;
+                default:
+                    break;
+            }
+        }
         else mbIsHit = true;
 
         R3EventBus.Instance.Publish(new Events.Combat.DamagePopup(transform.position, effective));
@@ -705,6 +733,7 @@ public class EnemyBTController : MonoBehaviour, IHpTrackable, IMapTrackable
 
     private IEnumerator Dissolve()
     {
+       
         TrackableEventHelper.PublishDestroyed(this);
         var block = new MaterialPropertyBlock();
         float alpha = 1f;
@@ -840,7 +869,7 @@ public class EnemyBTController : MonoBehaviour, IHpTrackable, IMapTrackable
     {
         if (!(mAttackBehaviorAsset is MeleeAttackBehavior melee))
             return;
-
+        AudioManager.Instance.PlayPoolSfx(ExSfxType.MeleeAttack);
         // 플레이어 태그만 필터링
         Collider[] hits = Physics.OverlapSphere(
             transform.position,
@@ -862,12 +891,8 @@ public class EnemyBTController : MonoBehaviour, IHpTrackable, IMapTrackable
     {
         mbIgnoreHits = true;
         if (!(mAttackBehaviorAsset is DragonAttackBehavior dragon)) return;
-        Debug.Log($"[OnBreathIndicator] called! prefab={dragon.BreathProjectorPrefab}", this);
-        if (dragon.BreathProjectorPrefab == null)
-        {
-            Debug.LogWarning("DragonAttackBehavior.BreathProjectorPrefab is NULL!", this);
-            return;
-        }
+        if (dragon.BreathProjectorPrefab == null) return;
+        AudioManager.Instance.PlayPoolSfx(ExSfxType.DragonBreathStart);
         var go = Instantiate(dragon.BreathProjectorPrefab, mFirePoint);
         go.transform.localPosition = Vector3.up * 0.1f;
         currentProjector = go.GetComponent<Projector>();
@@ -893,6 +918,7 @@ public class EnemyBTController : MonoBehaviour, IHpTrackable, IMapTrackable
     public void OnTailAttack()
     {
         var dragon = mAttackBehavior as DragonAttackBehavior;
+        AudioManager.Instance.PlayPoolSfx(ExSfxType.DragonTail);
         var hits = Physics.OverlapSphere(transform.position, dragon.TailRange, dragon.HitLayer);
         foreach (var col in hits)
             if (col.CompareTag("Player"))
@@ -903,7 +929,7 @@ public class EnemyBTController : MonoBehaviour, IHpTrackable, IMapTrackable
         mbIgnoreHits = false;
         if (currentProjector) Destroy(currentProjector.gameObject);
         currentProjector = null;
-
+        AudioManager.Instance.PlayPoolSfx(ExSfxType.DragonBreath);
         if (mAttackBehaviorAsset is DragonAttackBehavior dragon && dragon.BreathVFXPrefab != null)
         {
             // 1) FirePoint 위치·회전으로 VFX 생성
@@ -965,6 +991,7 @@ public class EnemyBTController : MonoBehaviour, IHpTrackable, IMapTrackable
         {
             var spawnPos = transform.position;
             var vfx = Instantiate(golem.mImpactVFXPrefab, spawnPos, golem.mImpactVFXPrefab.transform.rotation);
+            AudioManager.Instance.PlayPoolSfx(ExSfxType.GolemImpact);
             Destroy(vfx, golem.mImpactVFXDuration);
         }
 
@@ -984,6 +1011,7 @@ public class EnemyBTController : MonoBehaviour, IHpTrackable, IMapTrackable
     public void OnSwingAttack()
     {
         if (!(mAttackBehaviorAsset is GolemAttackBehavior golem)) return;
+        AudioManager.Instance.PlayPoolSfx(ExSfxType.GolemSwing);
         var hits = Physics.OverlapSphere(transform.position, golem.SwingRange, ImpactHitLayer);
         foreach (var col in hits)
             if (col.CompareTag("Player"))

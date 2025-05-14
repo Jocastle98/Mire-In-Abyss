@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using AudioEnums;
 using UnityEngine;
 using UnityEngine.Serialization;
 
@@ -105,7 +106,7 @@ public class DragonAttackBehavior : ScriptableObject, IAttackBehavior
         if (dir.sqrMagnitude < 0.01f)
             dir = self.forward;
         dir.Normalize();
-
+        AudioManager.Instance.PlayPoolSfx(ExSfxType.DragonFireBall);
         var proj = Instantiate(FireBallPrefab, fp.position, Quaternion.LookRotation(dir));
         if (proj.TryGetComponent<Projectile>(out var ps))
             ps.Initialize(dir, FireballSpeed, HitLayer, FireballDamage, self);

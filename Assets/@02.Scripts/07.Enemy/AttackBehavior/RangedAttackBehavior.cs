@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using AudioEnums;
 using UnityEngine;
 
 [CreateAssetMenu(menuName = "AI/Attack Behaviors/Ranged")]
@@ -52,7 +53,7 @@ public class RangedAttackBehavior : ScriptableObject, IAttackBehavior
         dir.y = 0;
         if (dir.sqrMagnitude < 0.01f) dir = self.forward;
         dir.Normalize();
-        
+        AudioManager.Instance.PlayPoolSfx(ExSfxType.ArrowStart);
         var proj = Instantiate(ProjectilePrefab, fp.position, Quaternion.LookRotation(dir));
         if (proj.TryGetComponent<Projectile>(out var ps))
             ps.Initialize(dir, ProjectileSpeed, HitLayer, Damage, self);
