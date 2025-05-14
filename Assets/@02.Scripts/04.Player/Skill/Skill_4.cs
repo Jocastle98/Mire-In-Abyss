@@ -9,12 +9,16 @@ public class Skill_4 : MonoBehaviour
     private float mDamageMultiplier;
     private float mRadius;
     private Vector3 mTargetPoint;
+    private GameObject mProjectile_Effect;
+    private Action mFireSoundPlay;
+    private GameObject mProjectile_Explode;
+    private Action mExplodeSoundPlay;
+    
     private bool mbHasArrived = false;
+    
     private float mSpeed = 20.0f;
     private float mDuration = 1.0f;
     private float mTimer = 0.0f;
-    private GameObject mProjectile_Effect;
-    private GameObject mProjectile_Explode;
 
     private void FixedUpdate()
     {
@@ -36,15 +40,19 @@ public class Skill_4 : MonoBehaviour
         }
     }
     
-    public void Init(int damage, float damageMultiplier, float radius, Vector3 targetPoint)
+    public void Init(int damage, float damageMultiplier, float radius, Vector3 targetPoint, Action fireSoundPlay, Action explodeSoundPlay)
     {
         mDamage = damage;
         mDamageMultiplier = damageMultiplier;
         mRadius = radius;
         mTargetPoint = targetPoint;
+        mFireSoundPlay = fireSoundPlay;
+        mExplodeSoundPlay = explodeSoundPlay;
+        
         mbHasArrived = false;
         
         mProjectile_Effect = GameManager.Instance.Resource.Instantiate("Skill_4_Projectile_Effect", 3, transform);
+        mFireSoundPlay?.Invoke();
     }
 
     private void FallToTarget()
@@ -57,6 +65,7 @@ public class Skill_4 : MonoBehaviour
         {
             GameManager.Instance.Resource.Destroy(mProjectile_Effect);
             mProjectile_Explode = GameManager.Instance.Resource.Instantiate("Skill_4_Projectile_Explode");
+            mExplodeSoundPlay?.Invoke();
             
             mProjectile_Explode.transform.position = mTargetPoint;
             mProjectile_Explode.transform.rotation = Quaternion.identity;

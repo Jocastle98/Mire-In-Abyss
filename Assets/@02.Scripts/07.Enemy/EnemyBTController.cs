@@ -862,8 +862,12 @@ public class EnemyBTController : MonoBehaviour, IHpTrackable, IMapTrackable
     {
         mbIgnoreHits = true;
         if (!(mAttackBehaviorAsset is DragonAttackBehavior dragon)) return;
-        if (dragon.BreathProjectorPrefab == null) return;
-
+        Debug.Log($"[OnBreathIndicator] called! prefab={dragon.BreathProjectorPrefab}", this);
+        if (dragon.BreathProjectorPrefab == null)
+        {
+            Debug.LogWarning("DragonAttackBehavior.BreathProjectorPrefab is NULL!", this);
+            return;
+        }
         var go = Instantiate(dragon.BreathProjectorPrefab, mFirePoint);
         go.transform.localPosition = Vector3.up * 0.1f;
         currentProjector = go.GetComponent<Projector>();
