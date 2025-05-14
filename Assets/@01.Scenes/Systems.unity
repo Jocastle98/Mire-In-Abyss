@@ -319,6 +319,7 @@ MonoBehaviour:
   mEscGroupPrefab: {fileID: 1275060947987298349, guid: 477d8dbc582d5694b952f58160eea7f8, type: 3}
   mSoulStoneShopPanelPrefab: {fileID: 6519008536383111261, guid: 6a961b3db45c0914c8150f9ccbd30a50, type: 3}
   mPortalPanelPrefab: {fileID: -8464723387062600712, guid: 7dbacaa03137f1a42971bd2f69cb590a, type: 3}
+  mCreditPrefab: {fileID: 7481342841998275640, guid: a3369e2f1526ac74ab340232c730b3e7, type: 3}
 --- !u!114 &618509339
 MonoBehaviour:
   m_ObjectHideFlags: 0

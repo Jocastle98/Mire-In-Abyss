@@ -21,6 +21,11 @@ public class CollectableItem : MonoBehaviour
         }
     }
 
+    private void Awake()
+    {
+        mItemDatabase = GameDB.Instance.ItemDatabase;
+    }
+
     private void CollectItem(GameObject player)
     {
         PlayerHub.Instance.Inventory.AddItem(mItemID, 1);
@@ -33,7 +38,7 @@ public class CollectableItem : MonoBehaviour
             AchievementManager.Instance.AddProgress("A010", 1);
         }
         
-        mItemDatabase = FindObjectOfType<ItemDatabase>(); //임시 코드
+        //mItemDatabase = FindObjectOfType<ItemDatabase>(); //임시 코드
         
         Item item = mItemDatabase.GetItemByID(mItemID);
 

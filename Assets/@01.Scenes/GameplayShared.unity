@@ -860,7 +860,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6794092508741563573, guid: 04bdf5cc642a1f74c98906f18ec247fc, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 0
+      value: 800
       objectReference: {fileID: 0}
     - target: {fileID: 7444609212171832966, guid: 04bdf5cc642a1f74c98906f18ec247fc, type: 3}
       propertyPath: m_Pivot.x
@@ -1004,7 +1004,7 @@ PrefabInstance:
       objectReference: {fileID: -6377891228338540503, guid: 91971e7e64487a9408615529838f0ad9, type: 3}
     - target: {fileID: 9201487232204580817, guid: 04bdf5cc642a1f74c98906f18ec247fc, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 0
+      value: 800
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -1100,7 +1100,6 @@ GameObject:
   - component: {fileID: 1228572584}
   - component: {fileID: 1228572586}
   - component: {fileID: 1228572588}
-  - component: {fileID: 1228572587}
   m_Layer: 0
   m_Name: Managers
   m_TagString: Untagged
@@ -1150,19 +1149,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mPlayerStats: {fileID: 2030675662}
   mPlayer: {fileID: 2030675663}
---- !u!114 &1228572587
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1228572583}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b4b8e7d112d6f7745b55eec084de2d98, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  itemCsvFile: {fileID: 0}
 --- !u!114 &1228572588
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1175,7 +1161,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3dbd2ae177fbaea468b460ab78542a51, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mItemDatabase: {fileID: 1228572587}
+  mItemDatabase: {fileID: 0}
   mPlayerStats: {fileID: 2030675662}
 --- !u!1 &1679302702
 GameObject:
