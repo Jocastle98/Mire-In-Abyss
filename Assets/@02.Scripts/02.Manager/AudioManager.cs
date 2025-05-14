@@ -3,6 +3,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using AudioEnums;
+using R3;
+using Cysharp.Threading.Tasks;
 using UnityEngine.Serialization;
 
 public class AudioManager : Singleton<AudioManager>
@@ -56,18 +58,9 @@ public class AudioManager : Singleton<AudioManager>
     
     
     
-    private void OnEnable()
+    protected override void Awake()
     {
-        SceneManager.sceneLoaded += OnSceneLoaded;
-    }
-
-    private void OnDisable()
-    {
-        SceneManager.sceneLoaded -= OnSceneLoaded;
-    }
-
-    void Awake()
-    {
+        base.Awake();
         InitPlayerSfx();
         mPooledSources = new AudioSource[mSfxPoolSize];
         for (int i = 0; i < mSfxPoolSize; i++)
@@ -90,6 +83,17 @@ public class AudioManager : Singleton<AudioManager>
             mBgmSources[i] = src;
         }
     }
+
+    private void OnEnable()
+    {
+        SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+
+    private void OnDisable()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+  
     private void Start()
     {
         AudioListener.volume = PlayerPrefs.GetFloat(Constants.MasterVolumeKey, 1f);
@@ -120,34 +124,34 @@ public class AudioManager : Singleton<AudioManager>
     }
 
     /// <summary>
-    /// SoundPresenter에서 슬라이더 할당 
+    /// Init volume and mute data from UserData in ManagerHub
     /// </summary>
-    public void InitSliders(
-        Slider masterSlider,
-        Slider bgmSlider,
-        Slider sfxSlider,
-        Slider uiSlider)
+    public void InitAudioDataFromUserData()
     {
-        if (masterSlider != null)
-        {
-            masterSlider.value = AudioListener.volume;
-            masterSlider.onValueChanged.AddListener(OnMasterVolumeChanged);
-        }
-        if (bgmSlider != null)
-        {
-            bgmSlider.value = mBgmSource.volume;
-            bgmSlider.onValueChanged.AddListener(OnBgmVolumeChanged);
-        }
-        if (sfxSlider != null)
-        {
-            sfxSlider.value = mSfxSource.volume;
-            sfxSlider.onValueChanged.AddListener(OnSfxVolumeChanged);
-        }
-        if (uiSlider != null)
-        {
-            uiSlider.value = mUiSource.volume;
-            uiSlider.onValueChanged.AddListener(OnUIVolumeChanged);
-        }
+        AudioListener.volume = UserData.Instance.MasterVolume;
+        mBgmSource.volume = UserData.Instance.BgmVolume;
+        mSfxSource.volume = UserData.Instance.SeVolume;
+        mUiSource.volume = UserData.Instance.UiVolume;
+
+        AudioListener.pause = UserData.Instance.IsMasterMuted;
+        mBgmSource.mute = UserData.Instance.IsBgmMuted;
+        mSfxSource.mute = UserData.Instance.IsSeMuted;
+        mUiSource.mute = UserData.Instance.IsUiMuted;
+        
+
+        subscribeUserAudioData();
+    }
+
+    private void subscribeUserAudioData()
+    {
+        UserData.Instance.ObsMasterVolume.Subscribe(e => AudioListener.volume = e).AddTo(this);
+        UserData.Instance.ObsBgmVolume.Subscribe(e => mBgmSource.volume = e).AddTo(this);
+        UserData.Instance.ObsSeVolume.Subscribe(e => mSfxSource.volume = e).AddTo(this);
+        UserData.Instance.ObsUiVolume.Subscribe(e => mUiSource.volume = e).AddTo(this);
+        UserData.Instance.ObsMasterMuted.Subscribe(e => AudioListener.pause = e).AddTo(this);
+        UserData.Instance.ObsBgmMuted.Subscribe(e => mBgmSource.mute = e).AddTo(this);
+        UserData.Instance.ObsSeMuted.Subscribe(e => mSfxSource.mute = e).AddTo(this);
+        UserData.Instance.ObsUiMuted.Subscribe(e => mUiSource.mute = e).AddTo(this);
     }
 
     private void InitPlayerSfx()
@@ -174,74 +178,6 @@ public class AudioManager : Singleton<AudioManager>
             { ESfxType.InteractionVoice, interactionVoiceAudioClips }
         };
     }
-
-    #region 슬라이더 변경 값 볼륨 기억
-
-    private void OnMasterVolumeChanged(float v)
-    {
-        AudioListener.volume = v;
-        PlayerPrefs.SetFloat(Constants.MasterVolumeKey, v);
-        PlayerPrefs.Save();
-    }
-
-    private void OnBgmVolumeChanged(float v)
-    {
-        foreach (var src in mBgmSources)
-            src.volume = v;
-        PlayerPrefs.SetFloat(Constants.BGMVolumeKey, v);
-        PlayerPrefs.Save();
-    }
-
-    private void OnSfxVolumeChanged(float v)
-    {
-        mSfxSource.volume = v;
-        PlayerPrefs.SetFloat(Constants.SFXVolumeKey, v);
-        PlayerPrefs.Save();
-    }
-
-    private void OnUIVolumeChanged(float v)
-    {
-        mUiSource.volume = v;
-        PlayerPrefs.SetFloat(Constants.UIVolumeKey, v);
-        PlayerPrefs.Save();
-    }
-
-    #endregion
-    
-
-    #region mute 관련
-
-    public void SetMasterMute(bool isMuted)
-    {
-        AudioListener.pause = isMuted;
-        PlayerPrefs.SetInt(Constants.MasterMuteKey, isMuted ? 1 : 0);
-        PlayerPrefs.Save();
-    }
-
-    public void SetBgmMute(bool isMuted)
-    {
-        foreach (var src in mBgmSources)
-            src.mute = isMuted;
-        PlayerPrefs.SetInt(Constants.BgmMuteKey, isMuted ? 1 : 0);
-        PlayerPrefs.Save();
-    }
-
-    public void SetSeMute(bool isMuted)
-    {
-        mSfxSource.mute = isMuted;
-        PlayerPrefs.SetInt(Constants.SeMuteKey, isMuted ? 1 : 0);
-        PlayerPrefs.Save();
-    }
-
-    public void SetUiMute(bool isMuted)
-    {
-        mUiSource.mute = isMuted;
-        PlayerPrefs.SetInt(Constants.UiMuteKey, isMuted ? 1 : 0);
-        PlayerPrefs.Save();
-    }
-
-    #endregion
-    
 
     public void PlayBgm(EBgmType type)
     {

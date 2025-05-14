@@ -19,10 +19,11 @@ public sealed class Inventory : MonoBehaviour
     public readonly Subject<SoulAdded> SoulAdded = new();
     public readonly Subject<SoulSubTracked> SoulSubTracked = new();
 
-    public void Init(int gold, int soul)
+    public void Init(int soul)
     {
-        Gold = gold;
         Soul = soul;
+        SoulAdded.OnNext(new SoulAdded(soul, Soul));
+        AddSoul(0);
     }
 
     public void AddItem(int id, int addedAmt = 1)
@@ -35,6 +36,10 @@ public sealed class Inventory : MonoBehaviour
         {
             mItems[id] = cur + addedAmt;
         }
+
+        //UserData Item 해금 여부 업데이트
+        UserData.Instance.SetItemUnlock(id);
+
         ItemAdded.OnNext(new ItemAdded(id, addedAmt, mItems[id]));
     }
 
@@ -77,6 +82,10 @@ public sealed class Inventory : MonoBehaviour
 
         int adjustedAmt = Mathf.RoundToInt(addedAmt * multiplier);
         Soul += adjustedAmt;
+
+        //UserData Soul 업데이트
+        UserData.Instance.Soul += adjustedAmt;
+
         SoulAdded.OnNext(new SoulAdded(addedAmt, Soul));
     }
 
@@ -89,6 +98,14 @@ public sealed class Inventory : MonoBehaviour
             Soul = 0;
         }
 
+        //UserData Soul 업데이트
+        UserData.Instance.Soul -= removedAmt;
+
         SoulSubTracked.OnNext(new SoulSubTracked(removedAmt, Soul));
+    }
+
+    public void ResetItems()
+    {
+        mItems.Clear();
     }
 }

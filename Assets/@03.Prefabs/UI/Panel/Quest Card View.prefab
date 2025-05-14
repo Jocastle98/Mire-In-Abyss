@@ -97,7 +97,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 0}
+  m_Sprite: {fileID: 21300000, guid: e28588c2e1e6b984b9acb7bc55fbd90f, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -128,6 +128,7 @@ MonoBehaviour:
   mActiveSprite: {fileID: 73178617, guid: 8b985552c20e3394cadb351159f08bfd, type: 3}
   mCompletedSprite: {fileID: 2120592075, guid: 8b985552c20e3394cadb351159f08bfd, type: 3}
   mRewardedSprite: {fileID: -1722906846, guid: 8b985552c20e3394cadb351159f08bfd, type: 3}
+  mShowDetailButton: {fileID: 6052874253614008762}
 --- !u!114 &6052874253614008762
 MonoBehaviour:
   m_ObjectHideFlags: 0

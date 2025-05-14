@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public sealed class SoundPresenter : MonoBehaviour
+public sealed class SoundPresenter : TabPresenterBase
 {
     [Header("Mute Toggles")]
     [SerializeField] private Toggle mMasterToggle;
@@ -15,23 +15,26 @@ public sealed class SoundPresenter : MonoBehaviour
     [SerializeField] private Slider mSeVol;
     [SerializeField] private Slider mUiVol;
 
-    void Start()
+    public override void Initialize()
     {
-        mMasterToggle.isOn = PlayerPrefs.GetInt(Constants.MasterMuteKey, 0) == 1;
-        mBgmToggle   .isOn = PlayerPrefs.GetInt(Constants.BgmMuteKey,   0) == 1;
-        mSeToggle    .isOn = PlayerPrefs.GetInt(Constants.SeMuteKey,    0) == 1;
-        mUiToggle    .isOn = PlayerPrefs.GetInt(Constants.UiMuteKey,    0) == 1;
+        mMasterToggle.isOn = UserData.Instance.IsMasterMuted;
+        mBgmToggle   .isOn = UserData.Instance.IsBgmMuted;
+        mSeToggle    .isOn = UserData.Instance.IsSeMuted;
+        mUiToggle    .isOn = UserData.Instance.IsUiMuted;
 
-        mMasterToggle.onValueChanged.AddListener(AudioManager.Instance.SetMasterMute);
-        mBgmToggle   .onValueChanged.AddListener(AudioManager.Instance.SetBgmMute);
-        mSeToggle    .onValueChanged.AddListener(AudioManager.Instance.SetSeMute);
-        mUiToggle    .onValueChanged.AddListener(AudioManager.Instance.SetUiMute);
+        mMasterVol.value = UserData.Instance.MasterVolume;
+        mBgmVol.value = UserData.Instance.BgmVolume;
+        mSeVol.value = UserData.Instance.SeVolume;
+        mUiVol.value = UserData.Instance.UiVolume;
 
-        AudioManager.Instance.InitSliders(
-            mMasterVol,
-            mBgmVol,
-            mSeVol,
-            mUiVol
-        );
+        mMasterToggle.onValueChanged.AddListener(e => UserData.Instance.IsMasterMuted = e);
+        mBgmToggle   .onValueChanged.AddListener(e => UserData.Instance.IsBgmMuted = e);
+        mSeToggle    .onValueChanged.AddListener(e => UserData.Instance.IsSeMuted = e);
+        mUiToggle    .onValueChanged.AddListener(e => UserData.Instance.IsUiMuted = e);
+
+        mMasterVol.onValueChanged.AddListener(e => UserData.Instance.MasterVolume = e);
+        mBgmVol.onValueChanged.AddListener(e => UserData.Instance.BgmVolume = e);
+        mSeVol.onValueChanged.AddListener(e => UserData.Instance.SeVolume = e);
+        mUiVol.onValueChanged.AddListener(e => UserData.Instance.UiVolume = e);
     }
 }

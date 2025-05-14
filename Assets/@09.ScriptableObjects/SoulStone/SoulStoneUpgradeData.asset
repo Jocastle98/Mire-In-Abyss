@@ -32,11 +32,11 @@ MonoBehaviour:
     Icon: {fileID: 21300000, guid: 3e624b1d98d6bb441beb15ad65404180, type: 3}
     Costs: 070000000f0000001e0000003200000055000000
     Values:
+    - 3
     - 5
-    - 10
-    - 15
-    - 20
-    - 30
+    - 6
+    - 7
+    - 9
     ValueType: flat
   - UpgradeId: moveSpeed
     Title: "\uC774\uB3D9\uC18D\uB3C4"
@@ -44,13 +44,13 @@ MonoBehaviour:
     Icon: {fileID: 21300000, guid: 57ce49d66494e2542b0ba02a07967684, type: 3}
     Costs: 060000000c000000180000002800000046000000
     Values:
+    - 0.5
     - 1
+    - 1.2
     - 2
-    - 3
-    - 4
-    - 5
+    - 2.3
     ValueType: flat
-  - UpgradeId: defense
+  - UpgradeId: defence
     Title: "\uBC29\uC5B4\uB825"
     Description: "\uBC1B\uB294 \uD53C\uD574\uB97C \uAC10\uC18C\uC2DC\uD0B5\uB2C8\uB2E4."
     Icon: {fileID: 21300000, guid: 37aa04ee62d82d2489d7b8427c8aaf6b, type: 3}
@@ -58,9 +58,9 @@ MonoBehaviour:
     Values:
     - 1
     - 2
+    - 2
     - 3
-    - 4
-    - 6
+    - 5
     ValueType: flat
   - UpgradeId: critChance
     Title: "\uCE58\uBA85\uD0C0\uD655\uB960"
