@@ -89,13 +89,13 @@ public class AbyssManager : Singleton<AbyssManager>
     /// <summary>
     /// 집으로가는 함수
     /// </summary>
-    private static void LetsGoHome()
+    public static void LetsGoHome()
     {
         //마을 씬로드
         Instance.abyssClearCount = 0;
         Instance.levelDesign = 0;
         
-        AchievementManager.Instance.AddProgress("A011", 1);
+        //AchievementManager.Instance.AddProgress("A011", 1); TODO: 게임 클리어에 업적해금하도록 이동예정
         var playerStats = Instance.player.GetComponent<PlayerStats>();
         if (playerStats != null)
         {
