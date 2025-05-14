@@ -125,6 +125,10 @@ public class SoulStoneShopPanelController : BaseUIPanel
         mSelectedUpgrade = mUpgradeInfos[index];
         UpdateDescriptionText();
         UpdateUpgradeApplyButton();
+        if (mUpgradeData.AllUpgradeMaxLevel())
+        {
+            PlayerHub.Instance.QuestLog.AddProgress("Q15",1);
+        }
     }
 
     private void OnUpgradeApplyButtonClicked()
@@ -199,6 +203,12 @@ public class SoulStoneShopPanelController : BaseUIPanel
         string valueFormat = mSelectedUpgrade.ValueType == "percent" ? "{0:P0}" : "{0:F1}";
         string currentValueText = string.Format(valueFormat, currentValue);
         string nextValueText = string.Format(valueFormat, nextValue);
+
+        if (mSelectedUpgrade.UpgradeId == "critChance")
+        {
+            currentValueText = string.Format("{0:P0}", currentValue);
+            nextValueText = string.Format("{0:P0}", nextValue);
+        }
         
         //비용 정보
         int cost = mSelectedUpgrade.Costs[currentLevel];
@@ -251,31 +261,31 @@ public class SoulStoneShopPanelController : BaseUIPanel
             case "critChance":
                 mPlayerStats.ModifyCritChance(value, valueType);
                 break;
-            case "soulStone":
+            case "soulAcquisition":
                 if (valueType == "percent")
                 {
                     mPlayerStats.SetSoulStoneMultiplier(value);
                 }
                 break;
-            case "coolDown":
+            case "cooldownReduction":
                 if (valueType == "percent")
                 {
                     mPlayerStats.SetCoolDownReduction(value);
                 }
                 break;
-            case "itemDrop":
+            case "itemDropRate":
                 if (valueType == "percent")
                 {
                     mPlayerStats.SetItemDropRateBonus(value);
                 }
                 break;
-            case "level":
+            case "levelUp":
                 if (valueType == "percent")
                 {
                     mPlayerStats.SetExpMultiplier(value);
                 }
                 break;
-            case "gold":
+            case "goldAcquisition":
                 if (valueType == "percent")
                 {
                     mPlayerStats.SetGoldMultiplier(value);

@@ -11,12 +11,12 @@ using GameEnums;
 [RequireComponent(typeof(CinemachineVirtualCamera))]
 public class CameraController : MonoBehaviour
 {
-    [SerializeField] private float mRotationSensitivity = 1.0f;
     [SerializeField] private GameObject mCinemachineCameraTarget;
     [SerializeField] private float mCameraAngleOverride = 0.0f;
     [SerializeField] private float mThreshold = 0.01f;
     [SerializeField] private float mGroundedTopClamp = 70.0f;
     [SerializeField] private float mGroundedBottomClamp = -30.0f;
+    private float mRotationSensitivity = 1.0f;
 
     private bool mbAcceptInput = false;
 
@@ -42,6 +42,8 @@ public class CameraController : MonoBehaviour
 
     void eventsubscribe()
     {
+        UserData.Instance.ObsMouseSensitivity.Subscribe(e => mRotationSensitivity = e).AddTo(this);
+
         GameManager.Instance.ObserveState
         .Subscribe(s => mbAcceptInput = (s == GameState.Gameplay))
         .AddTo(this);

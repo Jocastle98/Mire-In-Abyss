@@ -2,9 +2,9 @@ namespace GameEnums
 {
     public enum GameState
     {
-        MainMenu,
+        MainMenu,   // 메인 메뉴 화면
         Gameplay,   // 플레이어 조작 중
-        UI,         // Pause
+        UI,         // Pause 메인 메뉴, Gameplay 화면 중 모두 될 수 있음
         GameplayPause,       
     }
 }
@@ -221,6 +221,10 @@ namespace AudioEnums
         InteractionVoice,
     }
 
+    public enum ExSfxType
+    {
+        SkeletonHit =0
+    }
     public enum EUiType    { Open = 0, Close = 1, Click = 2  }
 }
 
