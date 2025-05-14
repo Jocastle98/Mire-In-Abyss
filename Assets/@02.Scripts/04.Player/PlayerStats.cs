@@ -624,6 +624,8 @@ public class PlayerStats : MonoBehaviour
     {
         ResetAllEffects();              //모든 버프, 특수효과 초기화
         
+        PlayerHub.Instance.Inventory.ResetItems();
+        
         ResetStats();                   //기본 스탯 초기화
         
         Heal(GetMaxHP());        //최대 체력으로 회복
