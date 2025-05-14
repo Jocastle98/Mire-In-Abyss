@@ -96,6 +96,10 @@ namespace Controller
         private void OnCollisionEnter(Collision other)
         {
             GetRandomPointInBounds();
+            if (other.gameObject.CompareTag("Player"))
+            {
+                AchievementManager.Instance.AddProgress("A012", 1);
+            }
         }
 
         private void OnAnimatorIK()

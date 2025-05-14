@@ -11,21 +11,31 @@ public sealed class SoulStoneUpgradeManager : Singleton<SoulStoneUpgradeManager>
         base.Awake();
         SceneManager.sceneLoaded += OnSceneLoaded; // ensure we re‑apply when gameplay scene reloads
     }
-    void Start()
+    void Initialize() // Start였던 것
     {
         mPlayerStats = TempRefManager.Instance.Player.GetComponent<PlayerStats>();
-        
+
         var upgradeInfos = mUpgradeData.GetAllUpgrades();
         foreach (var info in upgradeInfos)
         {
             info.CurrentLevel = UserData.Instance.GetSoulUpgradeLevel(info.UpgradeId);
             int level = info.CurrentLevel - 1;
             if (level < 0 || level >= 5) continue;
-            ApplyStat(info.UpgradeId, info.Values[level], info.ValueType);
+
+            for (int i = 0; i <= level; i++)
+            {
+                ApplyStat(info.UpgradeId, info.Values[i], info.ValueType);
+            }
         }
     }
 
-    protected override void OnSceneLoaded(Scene scene, LoadSceneMode mode) { }
+    protected override void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        if (scene.name == Constants.TownScene)
+        {
+            Initialize();
+        }
+    }
 
     public void ApplyStat(string id, float value, string valueType)
     {

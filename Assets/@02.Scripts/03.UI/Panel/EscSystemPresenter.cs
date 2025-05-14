@@ -17,7 +17,7 @@ public sealed class EscSystemPresenter : TabPresenterBase
             if (SceneLoader.CurrentSceneType == GameScene.Abyss)
             {
                 mBtnTown.interactable = true;
-                mBtnTown.onClick.AddListener(() => SceneLoader.LoadSceneAsync(Constants.TownScene).Forget());
+                mBtnTown.onClick.AddListener(() => AbyssManager.LetsGoHome());
             }
             else
             {
