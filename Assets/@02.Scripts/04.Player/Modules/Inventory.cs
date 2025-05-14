@@ -22,7 +22,7 @@ public sealed class Inventory : MonoBehaviour
     public void Init(int soul)
     {
         Soul = soul;
-        SoulAdded.OnNext(new SoulAdded(soul, Soul));
+        GoldAdded.OnNext(new GoldAdded(0, 0));
         AddSoul(0);
     }
 

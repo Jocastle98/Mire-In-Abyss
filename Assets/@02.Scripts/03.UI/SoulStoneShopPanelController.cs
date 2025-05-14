@@ -32,8 +32,6 @@ public class SoulStoneShopPanelController : BaseUIPanel
     [SerializeField] private Button mUpgradeApplyButton;            //강화 적용 버튼
     [SerializeField] BackButton mBackButton;
 
-    [Header("참조")] 
-    [SerializeField] private PlayerStats mPlayerStats;
 
     private SoulStoneUpgradeData.UpgradeInfo mSelectedUpgrade;   //현재 선택된 업그레이드
     private int mSoulStones = 0;          //현재 보유 영혼석
@@ -66,14 +64,13 @@ public class SoulStoneShopPanelController : BaseUIPanel
     
     private void Start()
     {
-        if (mPlayerStats == null)
-        {
-            mPlayerStats = FindObjectOfType<PlayerStats>();
-        }
-
+        // UserData 에서 업그레이드 정보 가져오기
         mUpgradeInfos = mUpgradeData.GetAllUpgrades();
+        foreach (var info in mUpgradeInfos)
+        {
+            info.CurrentLevel = UserData.Instance.GetSoulUpgradeLevel(info.UpgradeId);
+        }
         InitializeUI();
-        
     }
 
     private void InitializeUI()
@@ -125,10 +122,6 @@ public class SoulStoneShopPanelController : BaseUIPanel
         mSelectedUpgrade = mUpgradeInfos[index];
         UpdateDescriptionText();
         UpdateUpgradeApplyButton();
-        if (mUpgradeData.AllUpgradeMaxLevel())
-        {
-            PlayerHub.Instance.QuestLog.AddProgress("Q15",1);
-        }
     }
 
     private void OnUpgradeApplyButtonClicked()
@@ -150,6 +143,9 @@ public class SoulStoneShopPanelController : BaseUIPanel
         
         //현재 레벨 증가
         mSelectedUpgrade.CurrentLevel++;
+
+        // UserData 에 업그레이드 레벨 저장
+        UserData.Instance.SetSoulUpgradeLevel(mSelectedUpgrade.UpgradeId, mSelectedUpgrade.CurrentLevel);
         
         //강화 효과 적용
         ApplyUpgradeEffect();
@@ -203,12 +199,6 @@ public class SoulStoneShopPanelController : BaseUIPanel
         string valueFormat = mSelectedUpgrade.ValueType == "percent" ? "{0:P0}" : "{0:F1}";
         string currentValueText = string.Format(valueFormat, currentValue);
         string nextValueText = string.Format(valueFormat, nextValue);
-
-        if (mSelectedUpgrade.UpgradeId == "critChance")
-        {
-            currentValueText = string.Format("{0:P0}", currentValue);
-            nextValueText = string.Format("{0:P0}", nextValue);
-        }
         
         //비용 정보
         int cost = mSelectedUpgrade.Costs[currentLevel];
@@ -236,7 +226,7 @@ public class SoulStoneShopPanelController : BaseUIPanel
 
     private void ApplyUpgradeEffect()
     {
-        if (mPlayerStats == null || mSelectedUpgrade == null) return;
+        if (mSelectedUpgrade == null) return;
 
         int level = mSelectedUpgrade.CurrentLevel;
         if (level <= 0 || level > 5) return;
@@ -244,57 +234,7 @@ public class SoulStoneShopPanelController : BaseUIPanel
         float value = mSelectedUpgrade.Values[level - 1];
         string valueType = mSelectedUpgrade.ValueType;
 
-        switch (mSelectedUpgrade.UpgradeId)
-        {
-            case "maxHP":
-                mPlayerStats.ModifyMaxHP(value, valueType);
-                break;
-            case "attackPower":
-                mPlayerStats.ModifyAttackPower(value, valueType);
-                break;
-            case "moveSpeed":
-                mPlayerStats.ModifyMoveSpeed(value, valueType);
-                break;
-            case "defence":
-                mPlayerStats.ModifyDefence(value, valueType);
-                break;
-            case "critChance":
-                mPlayerStats.ModifyCritChance(value, valueType);
-                break;
-            case "soulAcquisition":
-                if (valueType == "percent")
-                {
-                    mPlayerStats.SetSoulStoneMultiplier(value);
-                }
-                break;
-            case "cooldownReduction":
-                if (valueType == "percent")
-                {
-                    mPlayerStats.SetCoolDownReduction(value);
-                }
-                break;
-            case "itemDropRate":
-                if (valueType == "percent")
-                {
-                    mPlayerStats.SetItemDropRateBonus(value);
-                }
-                break;
-            case "levelUp":
-                if (valueType == "percent")
-                {
-                    mPlayerStats.SetExpMultiplier(value);
-                }
-                break;
-            case "goldAcquisition":
-                if (valueType == "percent")
-                {
-                    mPlayerStats.SetGoldMultiplier(value);
-                }
-                break;
-            default:
-                Debug.LogWarning($"알수없는 업그레이드 ID : {mSelectedUpgrade.UpgradeId}");
-                break;
-        }
+        SoulStoneUpgradeManager.Instance.ApplyStat(mSelectedUpgrade.UpgradeId, value, valueType);
     }
 
     #region 디버깅 관련
