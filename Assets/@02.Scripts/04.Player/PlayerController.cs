@@ -852,6 +852,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         yield return new WaitForSeconds(firstDelay);
         
         mPlayerSounds.OnGruntSound();
+        mPlayerSounds.OnSkillSound(SkillType.ProjectileFire);
 
         GameObject dash_Effect_Prefab = GameManager.Instance.Resource.Instantiate("Dash_Effect", 3, transform);
         if (dash_Effect_Prefab == null)
@@ -1560,7 +1561,11 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         
         // 검기 스크립트에 방향 및 속도 설정
         Skill_1 skill_1 = skill_1_Effect_Prefab.GetComponent<Skill_1>();
-        skill_1.Init((int)mPlayerStats.GetAttackDamage(), mSkill_1_DamageMultiplier, mSkill_1_Distance, direction);
+        skill_1.Init((int)mPlayerStats.GetAttackDamage(), 
+            mSkill_1_DamageMultiplier, 
+            mSkill_1_Distance, 
+            direction,
+            () => mPlayerSounds.OnSkillSound(SkillType.ProjectileFire));
 
         mPlayerSounds.OnSkillSound(SkillType.Skill1);
         
@@ -1611,7 +1616,13 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         float startupTime = 0.2f * invAttackSpeed;
         float recoveryTime = 1.0f * invAttackSpeed;
         
+        GameObject range_10_Indicator = GameManager.Instance.Resource.Instantiate("Range_10_Indicator");
+        range_10_Indicator.transform.position = transform.position;
+        range_10_Indicator.transform.rotation = Quaternion.identity;
+        
         yield return new WaitForSeconds(startupTime); // 애니메이션 선딜
+        
+        GameManager.Instance.Resource.Destroy(range_10_Indicator);
         
         // 주변 적에게 데미지 주는 로직
         Collider[] hitColliders = Physics.OverlapSphere(transform.position, mSkill_2_Radius);
@@ -1698,11 +1709,19 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         if (bIsGrounded)
         {
             mbIsLandSucess = true;
+            
+            GameObject range_5_Indicator = GameManager.Instance.Resource.Instantiate("Range_5_Indicator");
+            range_5_Indicator.transform.position = transform.position;
+            range_5_Indicator.transform.rotation = Quaternion.identity;
+            
             yield return new WaitForSeconds(0.3f);
+            
+            GameManager.Instance.Resource.Destroy(range_5_Indicator);
         }
         else
         {
             mFallToGroundCoroutine = StartCoroutine(Skill_3_Stance());
+            mPlayerSounds.OnSkillSound(SkillType.ProjectileFire);
             yield return mFallToGroundCoroutine;
         }
 
@@ -1721,18 +1740,24 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         {
             mbIsLandSucess = true;
             
+            GameObject range_5_Indicator = GameManager.Instance.Resource.Instantiate("Range_5_Indicator");
+            
             float duration = 0.3f; // 떨어지는 시간
             float timer = 0.0f;
             Vector3 startPosition = transform.position;
 
             while (timer < duration)
             {
+                range_5_Indicator.transform.position = hit.point;
+                range_5_Indicator.transform.rotation = Quaternion.identity;
+                
                 transform.position = Vector3.Lerp(startPosition, hit.point, timer / duration);
                 timer += Time.deltaTime;
                 yield return null;
             }
 
             transform.position = hit.point;
+            GameManager.Instance.Resource.Destroy(range_5_Indicator);
         }
         else
         {
@@ -1746,7 +1771,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     {
         float attackSpeed = PlayerAnimator.GetFloat("AttackSpeed");
         float invAttackSpeed = 1.0f / attackSpeed;
-        float startupTime = 0.0f * invAttackSpeed;
+        float startupTime = 0.1f * invAttackSpeed;
         float recoveryTime = 0.5f * invAttackSpeed;
         
         yield return new WaitForSeconds(startupTime); // 애니메이션 선딜
@@ -1943,7 +1968,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     
     private IEnumerator Skill_4_AimAndFire()
     {
-        GameObject rangeIndicatorObject = GameManager.Instance.Resource.Instantiate("Skill_4_RangeIndicator");
+        GameObject range_5_Indicator = GameManager.Instance.Resource.Instantiate("Range_5_Indicator");
 
         float timer = 5.0f;
         bool isAttackCompleted = false;
@@ -1957,7 +1982,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             RaycastHit hit;
             if (Physics.Raycast(ray, out hit, 100.0f, mGroundLayers))
             {
-                rangeIndicatorObject.transform.position = hit.point;
+                range_5_Indicator.transform.position = hit.point;
                 finalTargetPoint = hit.point;
             }
 
@@ -1990,7 +2015,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             yield return null;
         }
         
-        GameManager.Instance.Resource.Destroy(rangeIndicatorObject);
+        GameManager.Instance.Resource.Destroy(range_5_Indicator);
         
         SetCombatState(true);
     }
@@ -2029,9 +2054,12 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         projectilePrefab.transform.rotation = rotation;
         
         Skill_4 skill_4 = projectilePrefab.GetComponent<Skill_4>();
-        skill_4.Init((int)mPlayerStats.GetAttackDamage(), mSkill_4_DamageMultiplier, mSkill_4_Radius, targetPoint);
-
-        mPlayerSounds.OnSkillSound(SkillType.Skill4);
+        skill_4.Init((int)mPlayerStats.GetAttackDamage(), 
+                    mSkill_4_DamageMultiplier, 
+                    mSkill_4_Radius, 
+                    targetPoint, 
+         () => mPlayerSounds.OnSkillSound(SkillType.ProjectileFire), 
+     () => mPlayerSounds.OnSkillSound(SkillType.Skill4));
         
         yield return new WaitForSeconds(recoveryTime); // 애니메이션 후딜
         

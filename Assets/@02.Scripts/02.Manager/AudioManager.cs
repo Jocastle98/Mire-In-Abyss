@@ -31,6 +31,7 @@ public class AudioManager : Singleton<AudioManager>
     public AudioClip[] stunVoiceAudioClips;
     public AudioClip[] deathVoiceAudioClips;
     public AudioClip[] skillVoiceAudioClips;
+    public AudioClip[] projectileFireAudioClips;
     public AudioClip[] skill1AudioClips;
     public AudioClip[] skill2AudioClips;
     public AudioClip[] skill3AudioClips;
@@ -111,6 +112,7 @@ public class AudioManager : Singleton<AudioManager>
             { ESfxType.StunVoice, stunVoiceAudioClips },
             { ESfxType.DeathVoice, deathVoiceAudioClips },
             { ESfxType.SkillVoice, skillVoiceAudioClips },
+            { ESfxType.ProjectileFire, projectileFireAudioClips },
             { ESfxType.Skill1Effect, skill1AudioClips },
             { ESfxType.Skill2Effect, skill2AudioClips },
             { ESfxType.Skill3Effect, skill3AudioClips },
