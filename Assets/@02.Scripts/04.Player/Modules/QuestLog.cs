@@ -90,6 +90,8 @@ public sealed class QuestLog : MonoBehaviour
 
         // 퀘스트 보상 처리
         PlayerHub.Instance.Inventory.AddSoul(q.RewardSoul);
+        AchievementManager.Instance.AddProgress("A013", 1);
+        AchievementManager.Instance.AddProgress("A015", 1);
 
         mCompletedQuests.Remove(id);
         Rewarded.OnNext(new QuestRewarded(id));

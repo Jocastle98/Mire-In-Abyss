@@ -161,8 +161,26 @@ public class SoulStoneShopPanelController : BaseUIPanel
         UpdateDescriptionText();
         //강화 적용 버튼 상태 업데이트
         UpdateUpgradeApplyButton();
+
+        if (AreAllUpgradeMaxed())
+        {
+            PlayerHub.Instance.QuestLog.AddProgress("Q015", 1);
+            AchievementManager.Instance.AddProgress("A006", 1);
+        }
+        
         
         R3EventBus.Instance.Publish(new Events.HUD.ToastPopup($"{mSelectedUpgrade.Title} 강화 완료!", 2f, Color.yellow));
+    }
+
+    private bool AreAllUpgradeMaxed()
+    {
+        foreach (var upgrade in mUpgradeInfos)
+        {
+            int level = UserData.Instance.GetSoulUpgradeLevel(upgrade.UpgradeId);
+            if (level < 5) return false;
+        }
+
+        return true;
     }
 
     private void UpdateLevelImages(UpgradeButton button, int level)

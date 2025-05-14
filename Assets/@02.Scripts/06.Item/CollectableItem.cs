@@ -25,6 +25,13 @@ public class CollectableItem : MonoBehaviour
     {
         PlayerHub.Instance.Inventory.AddItem(mItemID, 1);
         PlayerHub.Instance.QuestLog.AddProgress("Q006", 1);
+        AchievementManager.Instance.AddProgress("A008", 1);
+        AchievementManager.Instance.AddProgress("A009", 1);
+
+        if (mItemID > 10 && mItemID < 15)
+        {
+            AchievementManager.Instance.AddProgress("A010", 1);
+        }
         
         mItemDatabase = FindObjectOfType<ItemDatabase>(); //임시 코드
         

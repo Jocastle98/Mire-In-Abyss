@@ -1,5 +1,7 @@
+using System;
 using UnityEngine;
 using System.Collections;
+using Unity.VisualScripting;
 
 namespace AQUAS_Lite
 {
@@ -129,6 +131,46 @@ namespace AQUAS_Lite
             s_InsideRendering = false;
         }
         #endregion
+
+        private float mTime = 0;
+        private float MaxTime = 30f;
+        private Coroutine timerCoroutine;
+        
+        private void OnTriggerEnter(Collider other)
+        {
+            if (other.CompareTag("Player"))
+            {
+                if (timerCoroutine == null)
+                {
+                    timerCoroutine = StartCoroutine(StartTimer());
+                }
+            }
+        }
+
+        private void OnTriggerExit(Collider other)
+        {
+            if(other.CompareTag("Player"))
+            {
+                if (timerCoroutine != null)
+                {
+                    StopCoroutine(timerCoroutine);
+                    timerCoroutine = null;
+                    mTime = 0;
+                }
+            }
+        }
+
+        IEnumerator StartTimer()
+        {
+            mTime = 0;
+            while (mTime < MaxTime)
+            {
+                mTime += Time.deltaTime;
+                yield return null;
+            }
+            AchievementManager.Instance.AddProgress("A020", 1);
+            Debug.Log("업적 확인");
+        }
 
         //<summary>
         // Cleans up all the objects that were possibly created
