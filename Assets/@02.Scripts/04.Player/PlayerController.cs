@@ -298,15 +298,10 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         mSkill_2_TimeoutDelta = 0.0f;
         mSkill_3_TimeoutDelta = 0.0f;
         mSkill_4_TimeoutDelta = 0.0f;
-        
-        float cooldownReduction = mPlayerStats.GetCoolDownReduction();
-        mRollModifiedTimeout = mRollBaseTimeout * (1.0f - cooldownReduction);
-        mDashModifiedTimeout = mDashBaseTimeout * (1.0f - cooldownReduction);
-        mParryModifiedTimeout = mParryBaseTimeout * (1.0f - cooldownReduction);
-        mSkill_1_ModifiedTimeout = mSkill_1_BaseTimeout * (1.0f - cooldownReduction);
-        mSkill_2_ModifiedTimeout = mSkill_2_BaseTimeout * (1.0f - cooldownReduction);
-        mSkill_3_ModifiedTimeout = mSkill_3_BaseTimeout * (1.0f - cooldownReduction);
-        mSkill_4_ModifiedTimeout = mSkill_4_BaseTimeout * (1.0f - cooldownReduction);
+
+        CalculateFinalTimeout();
+        mPlayerStats.OnCooldownReduced -= CalculateFinalTimeout;
+        mPlayerStats.OnCooldownReduced += CalculateFinalTimeout;
     }
     
     /// <summary>
@@ -458,6 +453,18 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         {
             mVerticalVelocity += mGravity * Time.deltaTime;
         }
+    }
+
+    public void CalculateFinalTimeout()
+    {
+        float cooldownReduction = mPlayerStats.GetCoolDownReduction();
+        mRollModifiedTimeout = mRollBaseTimeout * (1.0f - cooldownReduction);
+        mDashModifiedTimeout = mDashBaseTimeout * (1.0f - cooldownReduction);
+        mParryModifiedTimeout = mParryBaseTimeout * (1.0f - cooldownReduction);
+        mSkill_1_ModifiedTimeout = mSkill_1_BaseTimeout * (1.0f - cooldownReduction);
+        mSkill_2_ModifiedTimeout = mSkill_2_BaseTimeout * (1.0f - cooldownReduction);
+        mSkill_3_ModifiedTimeout = mSkill_3_BaseTimeout * (1.0f - cooldownReduction);
+        mSkill_4_ModifiedTimeout = mSkill_4_BaseTimeout * (1.0f - cooldownReduction);
     }
     
     #endregion
@@ -738,9 +745,6 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             mRollCoroutine = null;
         }
         
-        // 쿨타임 감소율만 적용(초기화X)
-        float cooldownReduction = mPlayerStats.GetCoolDownReduction();
-        mRollModifiedTimeout = mRollBaseTimeout * (1.0f - cooldownReduction);
         mRollTimeoutDelta = mRollModifiedTimeout;
         
         PlayerHub.Instance.Skills.UseSkill(SkillType.Roll);
@@ -862,8 +866,6 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             mDashCoroutine = null;
         }
         
-        float cooldownReduction = mPlayerStats.GetCoolDownReduction();
-        mDashModifiedTimeout = mDashBaseTimeout * (1.0f - cooldownReduction);
         mDashTimeoutDelta = mDashModifiedTimeout;
         
         PlayerHub.Instance.Skills.UseSkill(SkillType.Dash);
@@ -1336,8 +1338,6 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         else
         {
             // 패리 실패 시 재사용대기시간 적용
-            float cooldownReduction = mPlayerStats.GetCoolDownReduction();
-            mParryModifiedTimeout = mParryBaseTimeout * (1.0f - cooldownReduction);
             mParryTimeoutDelta = mParryModifiedTimeout;
         }
         
@@ -1607,8 +1607,6 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         if (!CheckSkillReset())
         {
             // 초기화 실패 - 일반적인 쿨타임 적용
-            float cooldownReduction = mPlayerStats.GetCoolDownReduction();
-            mSkill_1_ModifiedTimeout = mSkill_1_BaseTimeout * (1.0f - cooldownReduction);
             mSkill_1_TimeoutDelta = mSkill_1_ModifiedTimeout;
         }
         else
@@ -1690,8 +1688,6 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         if (!CheckSkillReset())
         {
             // 초기화 실패 - 일반적인 쿨타임 적용
-            float cooldownReduction = mPlayerStats.GetCoolDownReduction();
-            mSkill_2_ModifiedTimeout = mSkill_2_BaseTimeout * (1.0f - cooldownReduction);
             mSkill_2_TimeoutDelta = mSkill_2_ModifiedTimeout;
         }
         else
@@ -1842,8 +1838,6 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         if (!CheckSkillReset())
         {
             // 초기화 실패 - 일반적인 쿨타임 적용
-            float cooldownReduction = mPlayerStats.GetCoolDownReduction();
-            mSkill_3_ModifiedTimeout = mSkill_3_BaseTimeout * (1.0f - cooldownReduction);
             mSkill_3_TimeoutDelta = mSkill_3_ModifiedTimeout;
         }
         else
@@ -2100,8 +2094,6 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         if (!CheckSkillReset())
         {
             // 초기화 실패 - 일반적인 쿨타임 적용
-            float cooldownReduction = mPlayerStats.GetCoolDownReduction();
-            mSkill_4_ModifiedTimeout = mSkill_4_BaseTimeout * (1.0f - cooldownReduction);
             mSkill_4_TimeoutDelta = mSkill_4_ModifiedTimeout;
         }
         else
