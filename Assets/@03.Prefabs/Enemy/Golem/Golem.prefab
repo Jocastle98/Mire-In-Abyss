@@ -1477,6 +1477,7 @@ MonoBehaviour:
   airInterval: 30
   airDuration: 10
   mEnemyType: 1
+  mEnemySubType: 2
   mExpRewardController: {fileID: 2102722839808726814}
   mStunDuration: 2
   mAttackDebuffDuration: 10

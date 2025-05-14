@@ -779,7 +779,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6794092508741563573, guid: 04bdf5cc642a1f74c98906f18ec247fc, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 800
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7444609212171832966, guid: 04bdf5cc642a1f74c98906f18ec247fc, type: 3}
       propertyPath: m_Pivot.x
@@ -923,7 +923,7 @@ PrefabInstance:
       objectReference: {fileID: -6377891228338540503, guid: 91971e7e64487a9408615529838f0ad9, type: 3}
     - target: {fileID: 9201487232204580817, guid: 04bdf5cc642a1f74c98906f18ec247fc, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 800
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -1041,7 +1041,7 @@ MonoBehaviour:
   player: {fileID: 0}
   cellSize: 3
   minDungeonRoomSize: 15
-  eventRoomChance: 15
+  eventRoomChance: 0
   divideLineWidth: 2
   minRoomCount: 6
   portalPrefab: {fileID: 731653145237511377, guid: 2d0c8e17c7dedb64e95f33449af90af8, type: 3}
@@ -1234,6 +1234,10 @@ PrefabInstance:
     - target: {fileID: 3163852201993153681, guid: f1062d26fdeb01b4ab5fd41cbaf09aea, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4749783104172799161, guid: f1062d26fdeb01b4ab5fd41cbaf09aea, type: 3}
+      propertyPath: mBaseAttackPower
+      value: 10
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
