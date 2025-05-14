@@ -77,6 +77,9 @@ public class PlayerSoundController : MonoBehaviour
         
         switch (skillType)
         {
+            case SkillType.ProjectileFire:
+                AudioManager.Instance.PlaySfx(ESfxType.ProjectileFire);
+                break;
             case SkillType.Skill1:
                 AudioManager.Instance.PlaySfx(ESfxType.Skill1Effect);
                 break;
