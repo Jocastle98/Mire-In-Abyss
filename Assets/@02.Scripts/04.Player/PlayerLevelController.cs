@@ -53,6 +53,12 @@ public class PlayerLevelController : MonoBehaviour
         //초기 레벨 및 경험치 정보 UI에 표시
         PublishLevelInfo();
         PublishExpInfo();
+
+        PlayerStats playerStats = GetComponent<PlayerStats>();
+        if (playerStats != null)
+        {
+            playerStats.OnReturnToTown += ResetPlayerLevel;
+        }
     }
 
     /// <summary>
@@ -128,7 +134,7 @@ public class PlayerLevelController : MonoBehaviour
             //레벨업 보너스 적용
             if (mApplyBonusOnLevelUp)
             {
-                //ApplyLevelUpBonus(); //TODO: 수치 계산 수정 필요
+                ApplyLevelUpBonus(); //TODO: 수치 계산 수정 필요
             }
             
             //이벤트
@@ -158,6 +164,8 @@ public class PlayerLevelController : MonoBehaviour
             
             //레벨업 시 최대 체력으로 회복
             mPlayerStats.Heal(mPlayerStats.GetMaxHP());
+            
+            R3EventBus.Instance.Publish(new Events.HUD.ToastPopup($"레벨 업!", 3f, Color.cyan));
         }
     }
 
@@ -184,6 +192,12 @@ public class PlayerLevelController : MonoBehaviour
     private void PublishExpInfo()
     {
         R3EventBus.Instance.Publish(new PlayerExpChanged(mCurrentExp, GetRequiredExpForLevel(mCurrentLevel)));
+    }
+
+    private void ResetPlayerLevel()
+    {
+        SetLevelAndExp(1, 0);
+        mPlayerStats.RemoveLevelBonuses();
     }
 
     public void SetLevelAndExp(int level, int exp)

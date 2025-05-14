@@ -86,7 +86,7 @@ public class AchievementDatabase : MonoBehaviour
         {
             List<string> values = CSVParser(line);
 
-            if (values.Count < 5)
+            if (values.Count < 6)
             {
                 Debug.LogWarning($"CSV라인 형식이 올바르지 않음 {line}");
                 return null;
@@ -99,6 +99,7 @@ public class AchievementDatabase : MonoBehaviour
                 Info = values[2],
                 Description = values[3],
                 IllustrationComment = values[4],
+                TargetAmount = int.Parse(values[5]),
                 isUnlocked = false,
                 Progress = 0f
             };

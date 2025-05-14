@@ -1,41 +1,44 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using AudioEnums;
+using UnityEngine.Serialization;
 
 public class AudioManager : Singleton<AudioManager>
 {
     [Header("오디오 소스")]
     [SerializeField] private AudioSource mBgmSource;
+    [SerializeField] private AudioSource mSfxSource;
     [SerializeField] private AudioSource mUiSource;
 
     [Header("오디오 클립")]
     [SerializeField] private AudioClip[] mBgmClips; // 0: 인트로, 1: 마을, 2: 필드, 3: 던전
-    [SerializeField] private AudioClip[] mSfxClips;
     [SerializeField] private AudioClip[] mUiClips;
-
-    [Header("SFX 풀 세팅")]
-    [SerializeField] private int mSfxPoolSize = 8;
-    private AudioSource[] mSfxSources;
-    private int _nextSfxSrc = 0;
-
-    private void Awake()
-    {
-        mSfxSources = new AudioSource[mSfxPoolSize];
-        for (int i = 0; i < mSfxPoolSize; i++)
-        {
-            GameObject go = new GameObject($"SfxSrc_{i}");
-            go.transform.SetParent(transform);
-            AudioSource src = go.AddComponent<AudioSource>();
-            src.playOnAwake = false;
-            float vol = PlayerPrefs.GetFloat(Constants.SFXVolumeKey, 1f);
-            bool mute = PlayerPrefs.GetInt(Constants.SeMuteKey, 0) == 1;
-            src.volume = vol;
-            src.mute = mute;
-            mSfxSources[i] = src;
-        }
-    }
-
+    
+    [Space(10)]
+    [Header("SFX 클립")]
+    public AudioClip[] footstepAudioClips;
+    public AudioClip[] gruntVoiceAudioClips;
+    public AudioClip[] landingVoiceAudioClips;
+    public AudioClip[] landingAudioClips;
+    public AudioClip[] attackVoiceAudioClips;
+    public AudioClip[] swordSwingAudioClips;
+    public AudioClip[] swordHitAudioClips;
+    public AudioClip[] hitVoiceAudioClips;
+    public AudioClip[] hitAudioClips;
+    public AudioClip[] blockShieldAudioClips;
+    public AudioClip[] stunVoiceAudioClips;
+    public AudioClip[] deathVoiceAudioClips;
+    public AudioClip[] skillVoiceAudioClips;
+    public AudioClip[] skill1AudioClips;
+    public AudioClip[] skill2AudioClips;
+    public AudioClip[] skill3AudioClips;
+    public AudioClip[] skill4AudioClips;
+    public AudioClip[] interactionVoiceAudioClips;
+    
+    private Dictionary<ESfxType, AudioClip[]> mSfxClips;
+    
     private void OnEnable()
     {
         SceneManager.sceneLoaded += OnSceneLoaded;
@@ -45,27 +48,23 @@ public class AudioManager : Singleton<AudioManager>
     {
         SceneManager.sceneLoaded -= OnSceneLoaded;
     }
-
     private void Start()
     {
         AudioListener.volume = PlayerPrefs.GetFloat(Constants.MasterVolumeKey, 1f);
         if (mBgmSource != null) mBgmSource.volume = PlayerPrefs.GetFloat(Constants.BGMVolumeKey, 1f);
-        if (mUiSource  != null) mUiSource.volume  = PlayerPrefs.GetFloat(Constants.UIVolumeKey, 1f);
+        if (mSfxSource != null) mSfxSource.volume = PlayerPrefs.GetFloat(Constants.SFXVolumeKey, 1f);
+        if (mUiSource  != null) mUiSource .volume = PlayerPrefs.GetFloat(Constants.UIVolumeKey, 1f);
+
         AudioListener.pause = PlayerPrefs.GetInt(Constants.MasterMuteKey, 0) == 1;
         if (mBgmSource != null) mBgmSource.mute = PlayerPrefs.GetInt(Constants.BgmMuteKey, 0) == 1;
-        if (mUiSource  != null) mUiSource.mute  = PlayerPrefs.GetInt(Constants.UiMuteKey,  0) == 1;
+        if (mSfxSource != null) mSfxSource.mute = PlayerPrefs.GetInt(Constants.SeMuteKey,  0) == 1;
+        if (mUiSource  != null) mUiSource .mute = PlayerPrefs.GetInt(Constants.UiMuteKey,  0) == 1;
 
-        float sfxVol = PlayerPrefs.GetFloat(Constants.SFXVolumeKey, 1f);
-        bool sfxMute = PlayerPrefs.GetInt(Constants.SeMuteKey, 0) == 1;
-        foreach (var src in mSfxSources)
-        {
-            src.volume = sfxVol;
-            src.mute   = sfxMute;
-        }
+        InitPlayerSfx();
     }
 
     /// <summary>
-    /// SoundPresenter에서 슬라이더 할당
+    /// SoundPresenter에서 슬라이더 할당 
     /// </summary>
     public void InitSliders(
         Slider masterSlider,
@@ -85,7 +84,7 @@ public class AudioManager : Singleton<AudioManager>
         }
         if (sfxSlider != null)
         {
-            sfxSlider.value = mSfxSources[0].volume;
+            sfxSlider.value = mSfxSource.volume;
             sfxSlider.onValueChanged.AddListener(OnSfxVolumeChanged);
         }
         if (uiSlider != null)
@@ -95,6 +94,31 @@ public class AudioManager : Singleton<AudioManager>
         }
     }
 
+    private void InitPlayerSfx()
+    {
+        mSfxClips = new Dictionary<ESfxType, AudioClip[]>
+        {
+            { ESfxType.FootstepEffect, footstepAudioClips },
+            { ESfxType.GruntVoice, gruntVoiceAudioClips },
+            { ESfxType.LandVoice, landingVoiceAudioClips },
+            { ESfxType.LandEffect, landingAudioClips },
+            { ESfxType.AttackVoice, attackVoiceAudioClips },
+            { ESfxType.SwordSwingEffect, swordSwingAudioClips },
+            { ESfxType.EnemyHitEffect, swordHitAudioClips },
+            { ESfxType.PlayerHitVoice, hitVoiceAudioClips },
+            { ESfxType.PlayerHitEffect, hitAudioClips },
+            { ESfxType.ShieldBlockEffect, blockShieldAudioClips },
+            { ESfxType.StunVoice, stunVoiceAudioClips },
+            { ESfxType.DeathVoice, deathVoiceAudioClips },
+            { ESfxType.SkillVoice, skillVoiceAudioClips },
+            { ESfxType.Skill1Effect, skill1AudioClips },
+            { ESfxType.Skill2Effect, skill2AudioClips },
+            { ESfxType.Skill3Effect, skill3AudioClips },
+            { ESfxType.Skill4Effect, skill4AudioClips },
+            { ESfxType.InteractionVoice, interactionVoiceAudioClips }
+        };
+    }
+    
     private void OnMasterVolumeChanged(float v)
     {
         AudioListener.volume = v;
@@ -111,8 +135,7 @@ public class AudioManager : Singleton<AudioManager>
 
     private void OnSfxVolumeChanged(float v)
     {
-        foreach (var src in mSfxSources)
-            src.volume = v;
+        mSfxSource.volume = v;
         PlayerPrefs.SetFloat(Constants.SFXVolumeKey, v);
         PlayerPrefs.Save();
     }
@@ -140,8 +163,7 @@ public class AudioManager : Singleton<AudioManager>
 
     public void SetSeMute(bool isMuted)
     {
-        foreach (var src in mSfxSources)
-            src.mute = isMuted;
+        mSfxSource.mute = isMuted;
         PlayerPrefs.SetInt(Constants.SeMuteKey, isMuted ? 1 : 0);
         PlayerPrefs.Save();
     }
@@ -173,14 +195,10 @@ public class AudioManager : Singleton<AudioManager>
 
     public void PlaySfx(ESfxType type)
     {
-        int idx = (int)type;
-        if (mSfxClips == null || idx < 0 || idx >= mSfxClips.Length) return;
-        var clip = mSfxClips[idx];
+        if (mSfxClips == null || !mSfxClips.TryGetValue(type, out var clips) || clips == null || clips.Length == 0) return;
+        var clip = clips[Random.Range(0, clips.Length)];
         if (clip == null) return;
-
-        var src = mSfxSources[_nextSfxSrc];
-        src.PlayOneShot(clip);
-        _nextSfxSrc = (_nextSfxSrc + 1) % mSfxPoolSize;
+        mSfxSource.PlayOneShot(clip);
     }
 
     public void PlayUi(EUiType type)
@@ -202,7 +220,7 @@ public class AudioManager : Singleton<AudioManager>
             case Constants.TownScene:
                 PlayBgm(EBgmType.Town);
                 break;
-            case Constants.AbyssFieldScene:
+            case  Constants.AbyssFieldScene:
                 PlayBgm(EBgmType.Field);
                 break;
             case Constants.AbyssDungeonScene:

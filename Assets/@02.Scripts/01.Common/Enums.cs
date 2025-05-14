@@ -84,6 +84,15 @@ namespace EnemyEnums
         Elite,
         Boss
     }
+
+    public enum EnemySubType
+    {
+        MeleeSkeleton,
+        RangerSkeleton,
+        Golem,
+        Dragon,
+        Other
+    }
 }
 
 namespace QuestEnums
@@ -187,7 +196,29 @@ namespace BattleAreaEnums
 namespace AudioEnums
 {
     public enum EBgmType { Intro = 0, Town = 1, Field = 2, Dungeon = 3 }
-    public enum ESfxType   { SkeletonHit = 0 }
+
+    public enum ESfxType
+    {
+        FootstepEffect,
+        GruntVoice,
+        LandVoice,
+        LandEffect,
+        AttackVoice,
+        SwordSwingEffect,
+        EnemyHitEffect,
+        PlayerHitVoice,
+        PlayerHitEffect,
+        ShieldBlockEffect,
+        StunVoice,
+        DeathVoice,
+        SkillVoice,
+        Skill1Effect,
+        Skill2Effect,
+        Skill3Effect,
+        Skill4Effect,
+        InteractionVoice,
+    }
+
     public enum EUiType    { Open = 0, Close = 1, Click = 2  }
 }
 

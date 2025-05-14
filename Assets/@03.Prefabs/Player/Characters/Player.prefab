@@ -1466,6 +1466,7 @@ GameObject:
   - component: {fileID: 4297884469358006277}
   - component: {fileID: 4959012575149737574}
   - component: {fileID: 4749783104172799161}
+  - component: {fileID: 8654357758985154194}
   - component: {fileID: 3600470690653789154}
   - component: {fileID: -8871883396230777469}
   m_Layer: 8
@@ -1567,6 +1568,18 @@ MonoBehaviour:
   mBaseAttackPower: 10
   mBaseDefence: 0
   mBaseCritChance: 0.05
+--- !u!114 &8654357758985154194
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3017948563938787297}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4bc881926dbec34c8ef25e910204071, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &3600470690653789154
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1580,6 +1593,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mPlayerStats: {fileID: 4749783104172799161}
+  mPlayerSounds: {fileID: 8654357758985154194}
   mCurrentSpeed: 0
   mSpeedChangeRate: 10
   mRotationSmoothTime: 0.12
@@ -1621,37 +1635,14 @@ MonoBehaviour:
   mSkill_4_TimeoutDelta: 0
   mGroundLayers:
     serializedVersion: 2
-    m_Bits: 8
+    m_Bits: 520
   mGroundedOffset: -0.15
   mGroundedRadius: 0.3
   mInCombatTimeout: 10
   mInCombatTimeoutDelta: 0
   mbInCombat: 0
-  mInteractableLayers:
-    serializedVersion: 2
-    m_Bits: 128
-  mInteractableRadius: 3
-  mDetectedInteractables:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  mActiveInteractables: []
   mRightHandTransform: {fileID: 1561646755167969338}
   mLeftHandTransform: {fileID: 5870613848163703736}
-  footstepAudioClips:
-  - {fileID: 8300000, guid: 72f526a6a9890f643a88e85a61c86c8a, type: 3}
-  - {fileID: 8300000, guid: 85016e0f2b01da248b9663dd49a161b0, type: 3}
-  - {fileID: 8300000, guid: 186de84b3207156479abe98f4958fed0, type: 3}
-  - {fileID: 8300000, guid: 1a91fcd19acf1e54bba0945d9f390849, type: 3}
-  - {fileID: 8300000, guid: 14e8a8d2158bec840b56c54f5266e692, type: 3}
-  - {fileID: 8300000, guid: 29841e7d5bbfb5b419c9ad16ca8bc4c1, type: 3}
-  - {fileID: 8300000, guid: dd1af302b8902684d9381de1f2d3a5af, type: 3}
-  - {fileID: 8300000, guid: 67c8b33e424ccdc4486edf538ab91c5a, type: 3}
-  - {fileID: 8300000, guid: 274649b0e221539409070ebf6c18918b, type: 3}
-  - {fileID: 8300000, guid: a3194b8bbc96ef84fab1f98f4b7dae3e, type: 3}
-  landingAudioClip: {fileID: 8300000, guid: ff697d3070687ce4583faa0561a145a2, type: 3}
 --- !u!114 &-8871883396230777469
 MonoBehaviour:
   m_ObjectHideFlags: 0
