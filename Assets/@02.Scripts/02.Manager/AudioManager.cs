@@ -15,9 +15,22 @@ public class AudioManager : Singleton<AudioManager>
     [SerializeField] private AudioSource mUiSource;
 
     [Header("오디오 클립")]
-    [SerializeField] private AudioClip[] mBgmClips; // 0: 인트로, 1: 마을, 2: 필드, 3: 던전
     [SerializeField] private AudioClip[] mUiClips;
     
+    [Header("오브젝트 풀 클립")]
+    [SerializeField] private AudioClip[] mPooledSfxClips;
+    [SerializeField] private AudioClip[] mBgmClips; // 0: 인트로, 1: 마을, 2: 필드, 3: 던전
+
+    [Header("오브젝트 풀 세팅")]
+    [SerializeField] private int mSfxPoolSize = 16;
+    [SerializeField] private int mBgmPoolSize = 2;
+    private AudioSource[] mPooledSources;
+    private AudioSource[] mBgmSources;
+    private int mNextPool = 0;
+    private int mNextBgm = 0;
+
+    #region Player SFX 클립
+
     [Space(10)]
     [Header("SFX 클립")]
     public AudioClip[] footstepAudioClips;
@@ -40,11 +53,35 @@ public class AudioManager : Singleton<AudioManager>
     public AudioClip[] interactionVoiceAudioClips;
     
     private Dictionary<ESfxType, AudioClip[]> mSfxClips;
+
+    #endregion
+    
+    
     
     protected override void Awake()
     {
         base.Awake();
         InitPlayerSfx();
+        mPooledSources = new AudioSource[mSfxPoolSize];
+        for (int i = 0; i < mSfxPoolSize; i++)
+        {
+            var go = new GameObject($"PooledSfx_{i}");
+            go.transform.SetParent(transform, false);
+            var src = go.AddComponent<AudioSource>();
+            src.playOnAwake = false;
+            mPooledSources[i] = src;
+        }
+        mBgmSources = new AudioSource[mBgmPoolSize];
+        mBgmSources[0] = mBgmSource;
+        for (int i = 1; i < mBgmPoolSize; i++)
+        {
+            var go = new GameObject($"BgmSrc_{i}");
+            go.transform.SetParent(transform, false);
+            var src = go.AddComponent<AudioSource>();
+            src.playOnAwake = false;
+            src.loop = true;
+            mBgmSources[i] = src;
+        }
     }
 
     private void OnEnable()
@@ -55,6 +92,35 @@ public class AudioManager : Singleton<AudioManager>
     private void OnDisable()
     {
         SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+  
+    private void Start()
+    {
+        AudioListener.volume = PlayerPrefs.GetFloat(Constants.MasterVolumeKey, 1f);
+        AudioListener.pause  = PlayerPrefs.GetInt(Constants.MasterMuteKey, 0) == 1;
+
+        float bgmVol  = PlayerPrefs.GetFloat(Constants.BGMVolumeKey, 1f);
+        bool  bgmMute = PlayerPrefs.GetInt(Constants.BgmMuteKey, 0) == 1;
+        foreach (var src in mBgmSources)
+        {
+            src.volume = bgmVol;
+            src.mute   = bgmMute;
+            src.loop   = true;
+        }
+
+        mUiSource.volume = PlayerPrefs.GetFloat(Constants.UIVolumeKey, 1f);
+        mUiSource.mute   = PlayerPrefs.GetInt(Constants.UiMuteKey,  0) == 1;
+        
+        mSfxSource.volume = PlayerPrefs.GetFloat(Constants.SFXVolumeKey, 1f);
+        mSfxSource.mute   = PlayerPrefs.GetInt(Constants.SeMuteKey,    0) == 1;
+
+        float poolVol  = PlayerPrefs.GetFloat(Constants.SFXVolumeKey, 1f);
+        bool poolMute  = PlayerPrefs.GetInt(Constants.SeMuteKey,    0) == 1;
+        foreach (var src in mPooledSources)
+        {
+            src.volume = poolVol;
+            src.mute   = poolMute;
+        }
     }
 
     /// <summary>
@@ -116,19 +182,25 @@ public class AudioManager : Singleton<AudioManager>
     public void PlayBgm(EBgmType type)
     {
         int idx = (int)type;
-        if (mBgmClips == null || idx < 0 || idx >= mBgmClips.Length)
-            return;
+        if (mBgmClips == null || idx < 0 || idx >= mBgmClips.Length) return;
         var clip = mBgmClips[idx];
         if (clip == null) return;
-        mBgmSource.clip = clip;
-        mBgmSource.loop = true;
-        mBgmSource.Play();
+
+        // 이전 BGM 정지
+        int prev = (mNextBgm + mBgmPoolSize - 1) % mBgmPoolSize;
+        mBgmSources[prev].Stop();
+
+        // 다음 풀 소스에서 재생
+        var src = mBgmSources[mNextBgm];
+        src.clip = clip;
+        src.Play();
+        mNextBgm = (mNextBgm + 1) % mBgmPoolSize;
     }
 
     public void StopBgm()
     {
-        if (mBgmSource.isPlaying)
-            mBgmSource.Stop();
+        foreach (var src in mBgmSources)
+            if (src.isPlaying) src.Stop();
     }
 
     public void PlaySfx(ESfxType type)
@@ -139,6 +211,16 @@ public class AudioManager : Singleton<AudioManager>
         mSfxSource.PlayOneShot(clip);
     }
 
+    public void PlayPoolSfx(ExSfxType type)
+    {
+        int idx = (int)type;
+        if (mPooledSfxClips == null || idx < 0 || idx >= mPooledSfxClips.Length) return;
+        var clip = mPooledSfxClips[idx];
+        if (clip == null) return;
+        var src = mPooledSources[mNextPool];
+        src.PlayOneShot(clip);
+        mNextPool = (mNextPool + 1) % mSfxPoolSize;
+    }
     public void PlayUi(EUiType type)
     {
         int idx = (int)type;
