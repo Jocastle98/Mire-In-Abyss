@@ -199,6 +199,12 @@ public class SoulStoneShopPanelController : BaseUIPanel
         string valueFormat = mSelectedUpgrade.ValueType == "percent" ? "{0:P0}" : "{0:F1}";
         string currentValueText = string.Format(valueFormat, currentValue);
         string nextValueText = string.Format(valueFormat, nextValue);
+
+        if (mSelectedUpgrade.UpgradeId == "critChance")
+        {
+            currentValueText = string.Format("{0:P0}", currentValue);
+            nextValueText = string.Format("{0:P0}", nextValue);
+        }
         
         //비용 정보
         int cost = mSelectedUpgrade.Costs[currentLevel];

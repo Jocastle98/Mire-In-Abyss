@@ -55,7 +55,7 @@ public class SoulStoneUpgradeData : ScriptableObject
             Title = "공격력",
             Description = "캐릭터의 기본 공격력을 증가시킵니다.",
             Costs = new int[] { 7, 15, 30, 50, 85 },
-            Values = new float[] { 5f, 10f, 15f, 20f, 30f },
+            Values = new float[] { 3f, 5f, 6f, 7f, 9f },
             ValueType = "flat"
         };
         mUpgrades.Add(attackPower);
@@ -67,7 +67,7 @@ public class SoulStoneUpgradeData : ScriptableObject
             Title = "이동속도",
             Description = "캐릭터의 이동 속도를 증가시킵니다.",
             Costs = new int[] { 6, 12, 24, 40, 70 },
-            Values = new float[] { 1f, 2f, 3f, 4f, 5f },
+            Values = new float[] { 0.5f, 1f, 1.2f, 2f, 2.3f },
             ValueType = "flat"
         };
         mUpgrades.Add(moveSpeed);
@@ -79,7 +79,7 @@ public class SoulStoneUpgradeData : ScriptableObject
             Title = "방어력",
             Description = "받는 피해를 감소시킵니다.",
             Costs = new int[] { 6, 13, 26, 45, 75 },
-            Values = new float[] { 1f, 2f, 3f, 4f, 6f },
+            Values = new float[] { 1f, 2f, 2f, 3f, 5f },
             ValueType = "flat"
         };
         mUpgrades.Add(defense);
