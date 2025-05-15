@@ -18,7 +18,7 @@ public sealed class AchievementCardView : MonoBehaviour
     {
         if(userAchievementData.IsCompleted)
         {
-            mIconImage.sprite = GetAchievementIconSprite(achievement.Id);
+            // mIconImage.sprite = GetAchievementIconSprite(achievement.Id);
             mTitleText.text = achievement.Title;
             mDescText.text  = achievement.Description;
             mClearDateText.text = $"Clear\n{userAchievementData.ClearDate:yyyy-MM-dd}";
