@@ -20,7 +20,7 @@ MonoBehaviour:
   spawnTimeDifficult: 0.1
   monsterKillMaxCount: 3
   uniqueSpawnAmount: 0
-  uniqueSpawnMaxChance: 4
+  uniqueSpawnMaxChance: 40
   treasureSpawnAmount: 10
   treasureDistance: 150
   poissonResearchLimit: 10

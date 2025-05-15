@@ -16,16 +16,21 @@ MonoBehaviour:
   - meleeMonster:
     - {fileID: 11400000, guid: 2c18043a6134d41489472e4a22fc550e, type: 2}
     rangedMonster: []
-    meleeMonsterCount: 03000000
+    meleeMonsterCount: 04000000
     rangedMonsterCount: 
   - meleeMonster:
     - {fileID: 11400000, guid: 2c18043a6134d41489472e4a22fc550e, type: 2}
     rangedMonster:
     - {fileID: 11400000, guid: 5d7bfa40f43571a4b9251b822f7fa34f, type: 2}
-    meleeMonsterCount: 01000000
+    meleeMonsterCount: 02000000
     rangedMonsterCount: 01000000
   - meleeMonster:
     - {fileID: 11400000, guid: 0dd884c9a48a96c43b9fb7be0be723a4, type: 2}
     rangedMonster: []
-    meleeMonsterCount: 01000000
+    meleeMonsterCount: 02000000
+    rangedMonsterCount: 
+  - meleeMonster:
+    - {fileID: 11400000, guid: 0dd884c9a48a96c43b9fb7be0be723a4, type: 2}
+    rangedMonster: []
+    meleeMonsterCount: 02000000
     rangedMonsterCount: 
