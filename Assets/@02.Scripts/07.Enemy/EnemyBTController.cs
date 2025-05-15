@@ -657,6 +657,10 @@ public class EnemyBTController : MonoBehaviour, IHpTrackable, IMapTrackable
 
         R3EventBus.Instance.Publish(new Events.Combat.DamagePopup(transform.position, effective));
         R3EventBus.Instance.Publish(new Events.Combat.EnemyHpChanged(this.GetInstanceID(), mCurrentHealth, mMaxHealth));
+        if(mEnemyType == EnemyType.Boss)
+        {
+            R3EventBus.Instance.Publish(new Events.Combat.BossHpChanged(this.GetInstanceID(), mCurrentHealth, mMaxHealth));
+        }
     }
 
     // 스턴 

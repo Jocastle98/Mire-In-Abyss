@@ -1597,7 +1597,7 @@ MonoBehaviour:
   mCurrentSpeed: 0
   mSpeedChangeRate: 10
   mRotationSmoothTime: 0.12
-  mGravity: -9.81
+  mGravity: -15
   mJumpHeight: 5
   mJumpTimeout: 0.5
   mJumpTimeoutDelta: 0
@@ -1644,14 +1644,15 @@ MonoBehaviour:
   mSkill_4_TimeoutDelta: 0
   mGroundLayers:
     serializedVersion: 2
-    m_Bits: 649
-  mGroundedOffset: -0.15
-  mGroundedRadius: 0.3
+    m_Bits: 713
+  mGroundedOffset: -0.125
+  mGroundedRadius: 0.25
   mInCombatTimeout: 10
   mInCombatTimeoutDelta: 0
   mbInCombat: 0
   mRightHandTransform: {fileID: 1561646755167969338}
   mLeftHandTransform: {fileID: 5870613848163703736}
+  mVerticalVelocity: 0
 --- !u!114 &-8871883396230777469
 MonoBehaviour:
   m_ObjectHideFlags: 0
