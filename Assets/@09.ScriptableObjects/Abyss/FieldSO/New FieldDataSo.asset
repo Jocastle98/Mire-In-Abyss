@@ -24,11 +24,11 @@ MonoBehaviour:
   treasureSpawnAmount: 10
   treasureDistance: 150
   poissonResearchLimit: 10
-  commonMonsters: {fileID: 11400000, guid: a1a724eed2f269c48bb5c6e4254ea82b, type: 2}
-  eliteMonsters: {fileID: 11400000, guid: 6295ec68ff199a84c8f5b464319eb8a8, type: 2}
+  commonMonsters: {fileID: 11400000, guid: 1a4cd1888f664d54f97c41c5ec1e4d63, type: 2}
+  eliteMonsters: {fileID: 11400000, guid: f163edaceefb50e4ba95b9d9fe901e10, type: 2}
   bossMonsters: {fileID: 11400000, guid: f109cf4dfab8c6d48833b0f5c0edcb4f, type: 2}
   battleFields: {fileID: 1020510874646988792, guid: 38a43f5d7113bbe41b5d2ae5b0d20341, type: 3}
-  treasures: {fileID: 11400000, guid: 8489430bfa9ee7c4b9d188658ba371eb, type: 2}
+  treasures: {fileID: 11400000, guid: 4c8b98aee8245844fb7d45bd8fb95233, type: 2}
   playerSpawnZoneName: PlayerSpawnZone
   bossSpawnZoneName: BossSpawnZone
   environmentName: Environment
