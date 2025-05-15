@@ -102,6 +102,7 @@ public class AbyssManager : Singleton<AbyssManager>
         //마을 씬로드
         Instance.abyssClearCount = 0;
         Instance.levelDesign = 0;
+        Instance.tempSoulStone = 0;
         
         //AchievementManager.Instance.AddProgress("A011", 1); TODO: 게임 클리어에 업적해금하도록 이동예정
         var playerStats = Instance.player.GetComponent<PlayerStats>();
