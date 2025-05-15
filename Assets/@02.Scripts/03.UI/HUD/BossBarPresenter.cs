@@ -13,7 +13,7 @@ public sealed class BossBarPresenter : HudPresenterBase
     [SerializeField] TMP_Text mNameText;
     [SerializeField] TMP_Text mSubNameText;
     [SerializeField] TMP_Text mHpText;
-    [SerializeField] ProgressBarUI mHpBarUI;
+    [SerializeField] HpBarUI mHpBarUI;
 
     private int mMaxHp;
     private int mBossID = -1;

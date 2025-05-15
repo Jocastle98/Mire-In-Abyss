@@ -39,6 +39,10 @@ public static class SceneLoader
         SceneManager.SetActiveScene(newScene);
         CurrentGameplayScene = newScene;
 
+        //TODO: 삭제
+        //Temp 영상 촬영을 위한 코드
+        await UniTask.Delay(1500);
+
         /* 4) 오버레이 언로드 */
         if (overlayScene.IsValid() && overlayScene.isLoaded)
         {

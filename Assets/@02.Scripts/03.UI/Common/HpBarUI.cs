@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using DG.Tweening;
 using UIHUDEnums;
 using UnityEditor;
 using UnityEngine;
@@ -12,17 +13,12 @@ public class HpBarUI : MonoBehaviour
     [SerializeField] private RectTransform mFillBarMaskRT;
     [SerializeField] private RectTransform mBackgroundRT;
     [SerializeField] private GameObject mFillBar;
-
-    [Header("Padding (0~1)")]
-     [Range(0f, 1f)]
-    [Tooltip("Background width에서 이 비율만큼 뺀 값으로 FillBar width를 설정합니다.")]
-    [SerializeField] private float mWidthPadding;
-
-    [Range(0f, 1f)]
-    [Tooltip("Background height에서 이 비율만큼 뺀 값으로 FillBar height를 설정합니다.")]
-    [SerializeField] private float mHeightPadding;
+    [SerializeField] private Image mAfterFillBarImage;
     private Image mFillImage;
     private RectTransform mFillBarRT;
+
+    private float mCurrentFillAmount = 1f;
+    private Tween bgTween;
 
 
     private void Awake()
@@ -33,46 +29,33 @@ public class HpBarUI : MonoBehaviour
 
     private void Start()
     {
-        applyPadding();
+    }
+
+    private void OnEnable()
+    {
+        mCurrentFillAmount = 1f;
     }
 
     /// <param name="progress"> 0 ~ 1</param>
     public void SetProgress(float progress)
     {
         mFillImage.fillAmount = Mathf.Clamp01(progress);
-    }
-
-    private void applyPadding()
-    {
-        if (mBackgroundRT == null || mFillBarMaskRT == null)
+        if (progress < mCurrentFillAmount)
         {
-            return;
+            bgTween?.Kill();
+            bgTween = DOTween.To(() => mAfterFillBarImage.fillAmount,
+                                 x => mAfterFillBarImage.fillAmount = x,
+                                 progress,
+                                 0.5f)
+                                 .SetDelay(0.5f)
+                              .SetEase(Ease.OutSine);
         }
-
-        Vector2 newSize = mBackgroundRT.sizeDelta;
-        newSize.x -= mWidthPadding * mBackgroundRT.rect.width;
-        newSize.y -= mHeightPadding * mBackgroundRT.rect.height;
-        mFillBarMaskRT.sizeDelta = newSize;
-        mFillBarRT.sizeDelta = newSize;
+        // 증가 – BG는 즉시 따라잡음
+        else
+        {
+            bgTween?.Kill();
+            mAfterFillBarImage.fillAmount = progress;
+        }
+        mCurrentFillAmount = progress;
     }
-
-
-#if UNITY_EDITOR
-    private void OnValidate()
-{
-    // Awake 이전에도 mFillBarRT/MBackgroundRT를 확보
-    if (mFillBar != null && mFillBarRT == null)
-        mFillBarRT = mFillBar.GetComponent<RectTransform>();
-
-    if (mBackgroundRT == null)
-        mBackgroundRT = GetComponent<RectTransform>();
-
-    // 예약된 호출
-    EditorApplication.delayCall += () =>
-    {
-        if (this != null)
-            applyPadding();
-    };
-}
-#endif
 }
