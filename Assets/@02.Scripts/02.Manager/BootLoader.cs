@@ -25,14 +25,16 @@ public sealed class BootLoader : MonoBehaviour
             ManagersHub.Instance.InitializeAsync(),
             UserData.Instance.InitializeAsync()
         };
-        await WaitWithProgress(initTasks, "전역 초기화 중...(1/2)");   // Progress 값 0~1
+        mProgressText.text = "전역 초기화 중...(1/2)";
+        await WaitWithProgress(initTasks);   // Progress 값 0~1
         R3EventBus.Instance.Publish(new Preloaded());
 
         var userDataInitTasks = new UniTask[]
         {
             ManagersHub.Instance.InitializeUserDataAsync()
         };
-        await WaitWithProgress(userDataInitTasks, "유저 데이터 불러오는 중...(2/2)");
+        mProgressText.text = "유저 데이터 불러오는 중...(2/2)";
+        await WaitWithProgress(userDataInitTasks);
         // UserData의 Display 설정 적용
         applyDisplaySettings();
 
@@ -60,13 +62,18 @@ public sealed class BootLoader : MonoBehaviour
     }
 
     /* 진행률 헬퍼 */
-    static async UniTask WaitWithProgress(UniTask[] tasks, string progressText)
+    static async UniTask WaitWithProgress(UniTask[] tasks)
     {
         int total = tasks.Length, done = 0;
         var wrapped = tasks.Select(async t =>
         {
             await t; Progress = ++done / (float)total;
         });
+
+        //TODO: 삭제
+        //Temp 영상 촬영을 위한 코드
+        await UniTask.Delay(1500);
+
         await UniTask.WhenAll(wrapped);
     }
 

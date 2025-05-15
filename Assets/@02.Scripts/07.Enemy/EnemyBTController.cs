@@ -94,6 +94,7 @@ public class EnemyBTController : MonoBehaviour, IHpTrackable, IMapTrackable
     private ItemDropper itemDropper;
     private GameObject mBreathVFXInstance;
     private bool mbIgnoreHits = false;
+    private bool mbIsBreathing = false;
     
     public System.Action monsterDead;
 
@@ -482,7 +483,7 @@ public class EnemyBTController : MonoBehaviour, IHpTrackable, IMapTrackable
 
     void Update()
     {
-        if (mIsFlying || mHasTriggeredDead || mbIsStunned)
+        if (mIsFlying || mHasTriggeredDead || mbIsStunned || mbIsBreathing)
             return;
         mRoot.Tick();
     }
@@ -992,24 +993,38 @@ public class EnemyBTController : MonoBehaviour, IHpTrackable, IMapTrackable
     public void OnBreathLand()
     {
         mbIgnoreHits = false;
+        mbIsBreathing = true; 
         if (currentProjector) Destroy(currentProjector.gameObject);
         currentProjector = null;
         AudioManager.Instance.PlayPoolSfx(ExSfxType.DragonBreath);
         if (mAttackBehaviorAsset is DragonAttackBehavior dragon && dragon.BreathVFXPrefab != null)
         {
-            // 1) FirePoint 위치·회전으로 VFX 생성
             mBreathVFXInstance = Instantiate(
                 dragon.BreathVFXPrefab,
                 mBreathPoint.position,
                 mBreathPoint.rotation
             );
 
-            // 2) Projectile 연속딜 모드 초기화
             if (mBreathVFXInstance.TryGetComponent<Projectile>(out var proj))
                 proj.InitializeBreath(
                     dragon.BreathHitLayer,
                     dragon.BreathDamage
                 );
+            StartCoroutine(WaitBreathFinish(mBreathVFXInstance));
+        }
+        else
+        {
+            mbIsBreathing = false;
+        }
+    }
+    private IEnumerator WaitBreathFinish(GameObject vfx)
+    {
+        yield return new WaitForSeconds(3.0f); 
+        mbIsBreathing = false;
+        if (mBreathVFXInstance)
+        {
+            Destroy(mBreathVFXInstance);
+            mBreathVFXInstance = null;
         }
     }
     #endregion

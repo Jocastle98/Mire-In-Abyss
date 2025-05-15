@@ -46,7 +46,7 @@ public sealed class DifficultyPresenter : HudPresenterBase
 
     private void tempDifficultyTestProgress()
     {
-        mDifficultyProgress += Time.deltaTime * 0.02f;
+        mDifficultyProgress += Time.deltaTime * 0.007f;
         if (mDifficultyProgress >= 1)
         {
             mDifficultyProgress = 0;
