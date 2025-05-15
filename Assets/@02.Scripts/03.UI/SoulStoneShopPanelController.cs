@@ -218,6 +218,12 @@ public class SoulStoneShopPanelController : BaseUIPanel
         string currentValueText = string.Format(valueFormat, currentValue);
         string nextValueText = string.Format(valueFormat, nextValue);
         
+        if (mSelectedUpgrade.UpgradeId == "critChance")
+        {
+            currentValueText = string.Format("{0:P0}", currentValue);
+            nextValueText = string.Format("{0:P0}", nextValue);
+        }
+        
         //비용 정보
         int cost = mSelectedUpgrade.Costs[currentLevel];
 
