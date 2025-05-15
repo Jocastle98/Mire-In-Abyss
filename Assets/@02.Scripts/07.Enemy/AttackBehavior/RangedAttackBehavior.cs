@@ -44,18 +44,24 @@ public class RangedAttackBehavior : ScriptableObject, IAttackBehavior
         mbReady = true;
     }
 
-    public void FireLastPosition(Transform self, Vector3 targetPosition)
+    public void FireLastPosition(Transform self, Transform target)
     {
         var fp = self.GetComponent<EnemyBTController>().FirePoint;
-        if (fp == null || ProjectilePrefab == null) return;
+        if (fp == null || ProjectilePrefab == null || target == null) return;
 
-        Vector3 dir = targetPosition - fp.position;
-        dir.y = 0;
-        if (dir.sqrMagnitude < 0.01f) dir = self.forward;
+        Vector3 targetPos = target.position + Vector3.up * 1.2f; 
+        Vector3 dir = (targetPos - fp.position);
+        if (dir.sqrMagnitude < 0.01f) dir = fp.forward;
         dir.Normalize();
+
         AudioManager.Instance.PlayPoolSfx(ExSfxType.ArrowStart);
-        var proj = Instantiate(ProjectilePrefab, fp.position, Quaternion.LookRotation(dir));
+        Vector3 spawnPos = fp.position + dir * 0.2f; 
+        var proj = Instantiate(ProjectilePrefab, spawnPos, Quaternion.LookRotation(dir));
         if (proj.TryGetComponent<Projectile>(out var ps))
             ps.Initialize(dir, ProjectileSpeed, HitLayer, Damage, self);
+
+        Debug.DrawRay(spawnPos, dir * 5f, Color.red, 1f);
+        Debug.Log($"[Arrow] SpawnPos: {spawnPos}, Dir: {dir}, TargetPos: {target.position}");
     }
+
 }
