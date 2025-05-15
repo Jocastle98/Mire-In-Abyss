@@ -27,8 +27,7 @@ public class ProgressBarUI : MonoBehaviour
     /// <param name="progress"> 0 ~ 1</param>
     public void SetProgress(float t)
     {
-        if (float.IsNaN(t) || float.IsInfinity(t)) t = 0f;
         t = Mathf.Clamp01(t);
-        mFillBarRT.localScale = new Vector3(t, 1, 1);
+        mFillImage.fillAmount = t;
     }
 }

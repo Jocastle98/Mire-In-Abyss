@@ -63,25 +63,24 @@ public sealed class BossBarPresenter : HudPresenterBase
             mSubNameText.text = "심연의 군주";
             mMaxHp = b.MaxHp;
         }
+
+        if (b.CurrentHp <= 0)
+        {
+            mHpBarUI.SetProgress(currentHp / (float)mMaxHp);
+            mHpText.text = $"{currentHp} / {mMaxHp}";
+            OnDisengage(new BossDisengage(b.ID));
+            return;
+        }
         else
         {
-            if (b.CurrentHp <= 0)
+            mHpBarUI.SetProgress(currentHp / (float)mMaxHp);
+            mHpText.text = $"{currentHp} / {mMaxHp}";
+
+            if (!mIsEngaged)
             {
-                OnDisengage(new BossDisengage(b.ID));
+                mIsEngaged = true;
+                showAsync().Forget();
             }
-        }
-
-        // ─── Divide-by-zero 방지 ───
-        float progress = (mMaxHp > 0) ? b.CurrentHp / (float)mMaxHp : 0f;
-        progress = Mathf.Clamp01(progress);          // 혹시 모를 1 초과/NaN 보호
-
-        mHpBarUI.SetProgress(progress);
-        mHpText.text = $"{b.CurrentHp} / {mMaxHp}";
-
-        if (!mIsEngaged)
-        {
-            mIsEngaged = true;
-            showAsync().Forget();
         }
     }
 
@@ -94,7 +93,7 @@ public sealed class BossBarPresenter : HudPresenterBase
 
         mIsEngaged = false;
         mBossID = -1;
-        hide();
+        hideAsync().Forget();
     }
 
 
@@ -105,9 +104,13 @@ public sealed class BossBarPresenter : HudPresenterBase
         mRootGroup.blocksRaycasts = true;
         await mRootGroup.DOFade(1f, 0.25f).SetEase(Ease.OutSine).ToUniTask();
     }
-    private void hide()
+    private async UniTaskVoid hideAsync()
     {
-        mRootGroup.alpha = 0;
+        Debug.Log("Boss Hide Start");
+        await mRootGroup.DOFade(0f, 0.15f)                // 부드럽게 사라짐
+                     .SetEase(Ease.InSine)
+                     .ToUniTask();
+        Debug.Log("Boss Hide End");
         mRootGroup.interactable = false;
         mRootGroup.blocksRaycasts = false;
         mMaxHp = -1;     // 0 대신 음수로 두어 Divide by zero 원천 차단
