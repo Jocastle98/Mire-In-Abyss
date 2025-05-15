@@ -1542,6 +1542,9 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
 
     #region 스킬 관련 기능
 
+    private GameObject mRange_5_Indicator;
+    private GameObject mRange_10_Indicator;
+    
     #region 스킬 사용 확인
 
     public bool CheckSkillReset()
@@ -1638,6 +1641,12 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             StopCoroutine(mSkill2CCoroutine);
             mSkill2CCoroutine = null;
         }
+
+        if (mRange_10_Indicator != null)
+        {
+            GameManager.Instance.Resource.Destroy(mRange_10_Indicator);
+            mRange_10_Indicator = null;
+        }
     }
     
     private IEnumerator Skill_2()
@@ -1647,13 +1656,17 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         float startupTime = 0.2f * invAttackSpeed;
         float recoveryTime = 1.0f * invAttackSpeed;
         
-        GameObject range_10_Indicator = GameManager.Instance.Resource.Instantiate("Range_10_Indicator");
-        range_10_Indicator.transform.position = transform.position;
-        range_10_Indicator.transform.rotation = Quaternion.identity;
+        mRange_10_Indicator = GameManager.Instance.Resource.Instantiate("Range_10_Indicator");
+        mRange_10_Indicator.transform.position = transform.position;
+        mRange_10_Indicator.transform.rotation = Quaternion.identity;
         
         yield return new WaitForSeconds(startupTime); // 애니메이션 선딜
         
-        GameManager.Instance.Resource.Destroy(range_10_Indicator);
+        if (mRange_10_Indicator != null)
+        {
+            GameManager.Instance.Resource.Destroy(mRange_10_Indicator);
+            mRange_10_Indicator = null;
+        }
         
         // 주변 적에게 데미지 주는 로직
         Collider[] hitColliders = Physics.OverlapSphere(transform.position, mSkill_2_Radius);
@@ -1705,7 +1718,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     #endregion
 
     #region 3번 스킬
-
+    
     private Coroutine mFallToGroundCoroutine;
     private Coroutine mSkill3Coroutine;
     private bool mbIsLandSucess = false;
@@ -1728,6 +1741,12 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             StopCoroutine(mSkill3Coroutine);
             mSkill3Coroutine = null;
         }
+
+        if (mRange_5_Indicator != null)
+        {
+            GameManager.Instance.Resource.Destroy(mRange_5_Indicator);
+            mRange_5_Indicator = null;
+        }
     }
     
     private IEnumerator Skill_3()
@@ -1740,13 +1759,17 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         {
             mbIsLandSucess = true;
             
-            GameObject range_5_Indicator = GameManager.Instance.Resource.Instantiate("Range_5_Indicator");
-            range_5_Indicator.transform.position = transform.position;
-            range_5_Indicator.transform.rotation = Quaternion.identity;
+            mRange_5_Indicator = GameManager.Instance.Resource.Instantiate("Range_5_Indicator");
+            mRange_5_Indicator.transform.position = transform.position;
+            mRange_5_Indicator.transform.rotation = Quaternion.identity;
             
             yield return new WaitForSeconds(0.3f);
             
-            GameManager.Instance.Resource.Destroy(range_5_Indicator);
+            if (mRange_5_Indicator != null)
+            {
+                GameManager.Instance.Resource.Destroy(mRange_5_Indicator);
+                mRange_5_Indicator = null;
+            }
         }
         else
         {
@@ -1770,7 +1793,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
         {
             mbIsLandSucess = true;
             
-            GameObject range_5_Indicator = GameManager.Instance.Resource.Instantiate("Range_5_Indicator");
+            mRange_5_Indicator = GameManager.Instance.Resource.Instantiate("Range_5_Indicator");
             
             float duration = 0.3f; // 떨어지는 시간
             float timer = 0.0f;
@@ -1778,8 +1801,8 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
 
             while (timer < duration)
             {
-                range_5_Indicator.transform.position = hit.point;
-                range_5_Indicator.transform.rotation = Quaternion.identity;
+                mRange_5_Indicator.transform.position = hit.point;
+                mRange_5_Indicator.transform.rotation = Quaternion.identity;
                 
                 transform.position = Vector3.Lerp(startPosition, hit.point, timer / duration);
                 timer += Time.deltaTime;
@@ -1787,7 +1810,11 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             }
 
             transform.position = hit.point;
-            GameManager.Instance.Resource.Destroy(range_5_Indicator);
+            if (mRange_5_Indicator != null)
+            {
+                GameManager.Instance.Resource.Destroy(mRange_5_Indicator);
+                mRange_5_Indicator = null;
+            }
         }
         else
         {
@@ -1894,6 +1921,12 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             StopCoroutine(mProjectileCoroutine);
             mProjectileCoroutine = null;
         }
+
+        if (mRange_5_Indicator != null)
+        {
+            GameManager.Instance.Resource.Destroy(mRange_5_Indicator);
+            mRange_5_Indicator = null;
+        }
     }
     
     private IEnumerator Skill_4()
@@ -1997,7 +2030,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     
     private IEnumerator Skill_4_AimAndFire()
     {
-        GameObject range_5_Indicator = GameManager.Instance.Resource.Instantiate("Range_5_Indicator");
+        mRange_5_Indicator = GameManager.Instance.Resource.Instantiate("Range_5_Indicator");
 
         float timer = 5.0f;
         bool isAttackCompleted = false;
@@ -2011,7 +2044,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             RaycastHit hit;
             if (Physics.Raycast(ray, out hit, 100.0f, mSkillGroundLayers))
             {
-                range_5_Indicator.transform.position = hit.point;
+                mRange_5_Indicator.transform.position = hit.point;
                 finalTargetPoint = hit.point;
             }
 
@@ -2043,8 +2076,12 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             FireProjectile(finalTargetPoint);
             yield return null;
         }
-        
-        GameManager.Instance.Resource.Destroy(range_5_Indicator);
+
+        if (mRange_5_Indicator != null)
+        {
+            GameManager.Instance.Resource.Destroy(mRange_5_Indicator);
+            mRange_5_Indicator = null;
+        }
         
         SetCombatState(true);
     }
