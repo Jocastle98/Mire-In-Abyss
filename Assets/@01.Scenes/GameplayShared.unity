@@ -853,7 +853,7 @@ MonoBehaviour:
   eventRoomChance: 0
   divideLineWidth: 2
   minRoomCount: 6
-  portalPrefab: {fileID: 731653145237511377, guid: 2d0c8e17c7dedb64e95f33449af90af8, type: 3}
+  portalPrefab: {fileID: 731653145237511377, guid: 653d2c6c15539884a8427c3168bbc7a2, type: 3}
   abyssFields:
   - {fileID: 11400000, guid: 8bad1ddf270ec754292ce2aceb5dc52f, type: 2}
   dungeonListSO: {fileID: 11400000, guid: c8aad2f24d6770c47afffb5587dc849f, type: 2}

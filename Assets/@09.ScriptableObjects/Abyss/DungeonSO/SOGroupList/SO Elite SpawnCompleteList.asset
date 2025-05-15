@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   monsterSpawnTypeList:
   - meleeMonster:
-    - {fileID: 11400000, guid: 10e434374810f134e98a8f539a3eef77, type: 2}
+    - {fileID: 11400000, guid: 0dd884c9a48a96c43b9fb7be0be723a4, type: 2}
     rangedMonster: []
-    meleeMonsterCount: 01000000
+    meleeMonsterCount: 02000000
     rangedMonsterCount: 
