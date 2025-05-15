@@ -528,9 +528,17 @@ public class PlayerStats : MonoBehaviour
 
     private void Die()
     {
+        R3EventBus.Instance.Publish(new Events.HUD.ToastPopup("사망. 5초뒤 마을로 이동합니다.", 2f, Color.red));
         Debug.Log("플레이어 사망!");
         mIsLowHealthTracking = false;
         OnDeath?.Invoke();
+        
+        Invoke("GoHome",5f);
+    }
+
+    private void GoHome()
+    {
+        AbyssManager.LetsGoHome();
     }
     
     /// <summary>
