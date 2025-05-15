@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 098610e558b702240b4da292196002f1, type: 3}
+  m_Name: SODungeonCompleteList
+  m_EditorClassIdentifier: 
+  dungeonTileSO: {fileID: 11400000, guid: 57a9dd7f805e5774c836eee65898a347, type: 2}
+  safeDungeon: {fileID: 11400000, guid: a413b529dbc3aef489ba1143a6787351, type: 2}
+  shopRoom: {fileID: 11400000, guid: 99975246ad8830242ad76642e8c04917, type: 2}
+  monsterDungeonList:
+  - {fileID: 11400000, guid: 33587b8b351322b40bbdd6eeae82fef2, type: 2}
+  - {fileID: 11400000, guid: 2a066f41c33d49343a9de83e9debddbe, type: 2}
+  - {fileID: 11400000, guid: 2482bc6047c32d143b5173979805cd19, type: 2}
+  - {fileID: 11400000, guid: 9434ba4bc6988f048a21d587b5c0adc4, type: 2}
+  eventDungeonList:
+  - {fileID: 11400000, guid: 3f81b2b5c631bed4681fcb5206a8add1, type: 2}
+  bossDungeonList:
+  - {fileID: 11400000, guid: dd02c6f1bbaef36429b94d29ec8ceaf1, type: 2}

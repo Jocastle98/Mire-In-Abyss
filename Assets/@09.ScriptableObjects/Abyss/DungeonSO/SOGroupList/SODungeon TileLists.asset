@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7172ce7a0574539428ab04d470464ebd, type: 3}
+  m_Name: SODungeon TileLists
+  m_EditorClassIdentifier: 
+  name: 
+  floorPrefabs:
+  - {fileID: 1847812798085496187, guid: aada038183199a14db811d0e8d755a56, type: 3}
+  - {fileID: 388868398875710567, guid: 802ec3a3dc4dd9b458c08024385b290c, type: 3}
+  - {fileID: 5550769047623132540, guid: 531171011ed88e3469d3df14f41faefa, type: 3}
+  - {fileID: 1029524476740425791, guid: 1110d277edaf5954e94e626b35c45517, type: 3}
+  - {fileID: 8700220136071619041, guid: b5977159a0db0794091ee9940b4397f6, type: 3}
+  - {fileID: 4509931637899678831, guid: 73005c4c929ad924897c9dd426f70d1f, type: 3}
+  - {fileID: 4703502773933022500, guid: 1764c8eebdafc8940b38492dfea5195a, type: 3}
+  - {fileID: 1847812798085496187, guid: aada038183199a14db811d0e8d755a56, type: 3}
+  - {fileID: 1847812798085496187, guid: aada038183199a14db811d0e8d755a56, type: 3}
+  - {fileID: 1847812798085496187, guid: aada038183199a14db811d0e8d755a56, type: 3}
+  wallPrefabs:
+  - {fileID: 9029317363162913102, guid: 74c708bb468f9bf459ff96da31f0d16c, type: 3}
+  - {fileID: 8528044309013666880, guid: 423cba5d144ff3e4ca0c1438af9b84c8, type: 3}
+  - {fileID: 1956354533162161803, guid: e766076dc218ec24eb57c82ff93657d1, type: 3}
+  - {fileID: 2190091394667670248, guid: 9309f1b329dd54c43bcdeff9af973a7d, type: 3}
+  - {fileID: 374464623992895683, guid: 76b0cc368b713e4448d799c6416bb80d, type: 3}
+  - {fileID: 6659226264246430618, guid: 83a93a0f7a4a53c4fa1be436402a2aa3, type: 3}
+  entrancePrefabs:
+  - {fileID: 2534295885627324735, guid: 5c4ac37bb767b9740b2f559a1d201e40, type: 3}
+  trapPrefabs: []
+  torchPrefabs:
+  - {fileID: 522648437939485316, guid: c037af092c19e33469476186216f8381, type: 3}
+  prefabType: 0

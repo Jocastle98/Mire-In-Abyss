@@ -1,0 +1,16 @@
+id,name,tier,description,effect_type,value,value_type,drop_sources,drop_rate_monster,drop_rate_shop
+I001,스테이크,common,최대 체력 25 증가,maxHP,25,flat,"monster, shop",0.14,0.12
+I002,재빠른 깃털,common,이동 속도 0.5 증가,moveSpeed,0.5,flat,"monster, shop",0.14,0.12
+I003,날카로운 단검,common,공격력 5 증가,attackPower,5,flat,"monster, shop",0.14,0.12
+I004,녹슨 갑옷,common,방어력 2 증가,damageDefence,2,flat,"monster, shop",0.14,0.12
+I005,정확한 장궁,common,치명타 확률 +5%,critChance,0.05,flat,"monster, shop",0.14,0.12
+I006,각성 이파리,special,공격력 +20%,attackPower,0.2,mul,"monster, shop",0.04,0.06
+I007,피의 갈고리,special,공격 시 피해의 7% 흡혈,lifeSteal,0.07,flat,"monster, shop",0.04,0.06
+I008,용사의 방패,special,가드 성공 시 피해 감소 + 15% (5초),defenceBuff,0.15,percent,"monster, shop",0.04,0.06
+I009,신속의 주문서,special,적 처치 시 3초간 이동 속도 +10%,moveSpeedBuff,0.1,percent,"monster, shop",0.04,0.06
+I010,시간의 경계,special,부활 1회,revive,1,unique,"monster, shop",0.04,0.06
+I011,용의 심장,epic,"치명타 확률 +50%, 치명타 피해량 3배",critBoost,0.5,mul,"monster, shop",0.02,0.02
+I012,고대 룬,epic,스킬 사용 시 50% 확률로 쿨타임 초기화 (중첩 불가),skillReset,0.5,unique,"monster, shop",0.02,0.02
+I013,다이너마이트,epic,2초마다 주변 적 10 데미지,aoeDamage,10,add,"monster, shop",0.02,0.02
+I014,죽음의 초월서,epic,"방어력 +50%, 최대 체력 +50%",maxHpDefence,0.5,percent,"monster, shop",0.02,0.02
+I015,피의 계약서,epic,HP가 일정 수치 아래로 내려가지 않으며 스킬강화 +50%(5초),lastStand,0.5,unique,"monster, shop",0.02,0.02

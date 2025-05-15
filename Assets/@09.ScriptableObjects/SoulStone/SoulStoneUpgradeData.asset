@@ -1,0 +1,138 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dbcb2d318b4e88448a954ed4f735c924, type: 3}
+  m_Name: SoulStoneUpgradeData
+  m_EditorClassIdentifier: 
+  mUpgrades:
+  - UpgradeId: maxHP
+    Title: "\uCD5C\uB300\uCCB4\uB825"
+    Description: "\uCE90\uB9AD\uD130\uC758 \uCD5C\uB300 \uCCB4\uB825\uC744 \uC99D\uAC00\uC2DC\uD0B5\uB2C8\uB2E4."
+    Icon: {fileID: 21300000, guid: d1978868f9d11234a9d2e618d2ad508a, type: 3}
+    Costs: 050000000a00000014000000230000003c000000
+    Values:
+    - 10
+    - 20
+    - 30
+    - 45
+    - 60
+    ValueType: flat
+  - UpgradeId: attackPower
+    Title: "\uACF5\uACA9\uB825"
+    Description: "\uCE90\uB9AD\uD130\uC758 \uAE30\uBCF8 \uACF5\uACA9\uB825\uC744
+      \uC99D\uAC00\uC2DC\uD0B5\uB2C8\uB2E4."
+    Icon: {fileID: 21300000, guid: 3e624b1d98d6bb441beb15ad65404180, type: 3}
+    Costs: 070000000f0000001e0000003200000055000000
+    Values:
+    - 3
+    - 5
+    - 6
+    - 7
+    - 9
+    ValueType: flat
+  - UpgradeId: moveSpeed
+    Title: "\uC774\uB3D9\uC18D\uB3C4"
+    Description: "\uCE90\uB9AD\uD130\uC758 \uC774\uB3D9 \uC18D\uB3C4\uB97C \uC99D\uAC00\uC2DC\uD0B5\uB2C8\uB2E4."
+    Icon: {fileID: 21300000, guid: 57ce49d66494e2542b0ba02a07967684, type: 3}
+    Costs: 060000000c000000180000002800000046000000
+    Values:
+    - 0.5
+    - 1
+    - 1.2
+    - 2
+    - 2.3
+    ValueType: flat
+  - UpgradeId: defence
+    Title: "\uBC29\uC5B4\uB825"
+    Description: "\uBC1B\uB294 \uD53C\uD574\uB97C \uAC10\uC18C\uC2DC\uD0B5\uB2C8\uB2E4."
+    Icon: {fileID: 21300000, guid: 37aa04ee62d82d2489d7b8427c8aaf6b, type: 3}
+    Costs: 060000000d0000001a0000002d0000004b000000
+    Values:
+    - 1
+    - 2
+    - 2
+    - 3
+    - 5
+    ValueType: flat
+  - UpgradeId: critChance
+    Title: "\uCE58\uBA85\uD0C0\uD655\uB960"
+    Description: "\uCE58\uBA85\uD0C0\uAC00 \uBC1C\uC0DD\uD560 \uD655\uB960\uC744
+      \uC99D\uAC00\uC2DC\uD0B5\uB2C8\uB2E4."
+    Icon: {fileID: 21300000, guid: aa3b61bbbd032294694ac249449cd99f, type: 3}
+    Costs: 0a00000014000000280000004600000078000000
+    Values:
+    - 0.03
+    - 0.06
+    - 0.09
+    - 0.12
+    - 0.15
+    ValueType: flat
+  - UpgradeId: soulAcquisition
+    Title: "\uC601\uD63C\uC11D"
+    Description: "\uC601\uD63C\uC11D \uD68D\uB4DD\uB7C9\uC774 \uC99D\uAC00\uD569\uB2C8\uB2E4."
+    Icon: {fileID: 21300000, guid: bcc38d12bde6e9949af4de6ab74a7f2e, type: 3}
+    Costs: 0f0000001e0000003c0000006400000096000000
+    Values:
+    - 0.1
+    - 0.2
+    - 0.3
+    - 0.4
+    - 0.5
+    ValueType: percent
+  - UpgradeId: cooldownReduction
+    Title: "\uC2A4\uD0AC \uCFE8"
+    Description: "\uBAA8\uB4E0 \uC2A4\uD0AC\uC758 \uC7AC\uC0AC\uC6A9 \uB300\uAE30\uC2DC\uAC04\uC774
+      \uAC10\uC18C\uD569\uB2C8\uB2E4."
+    Icon: {fileID: 21300000, guid: af7ab721ab2133c45beb3f9fbca54e67, type: 3}
+    Costs: 14000000280000005000000082000000c8000000
+    Values:
+    - 0.04
+    - 0.08
+    - 0.12
+    - 0.16
+    - 0.2
+    ValueType: percent
+  - UpgradeId: itemDropRate
+    Title: "\uC544\uC774\uD15C \uB4DC\uB78D"
+    Description: "\uC544\uC774\uD15C \uB4DC\uB78D \uD655\uB960\uC774 \uC99D\uAC00\uD569\uB2C8\uB2E4."
+    Icon: {fileID: 21300000, guid: ffdd25a231d2b9c488e8f3698a0e8b40, type: 3}
+    Costs: 0d0000001a000000340000005a0000008c000000
+    Values:
+    - 0.05
+    - 0.1
+    - 0.15
+    - 0.2
+    - 0.3
+    ValueType: percent
+  - UpgradeId: levelUp
+    Title: "\uB808\uBCA8\uC5C5"
+    Description: "\uACBD\uD5D8\uCE58 \uD68D\uB4DD\uB7C9\uC774 \uC99D\uAC00\uD569\uB2C8\uB2E4."
+    Icon: {fileID: 21300000, guid: 220b1595913bb164197d531cf293a93b, type: 3}
+    Costs: 0c00000018000000300000005000000082000000
+    Values:
+    - 0.05
+    - 0.1
+    - 0.15
+    - 0.2
+    - 0.3
+    ValueType: percent
+  - UpgradeId: goldAcquisition
+    Title: "\uACE8\uB4DC"
+    Description: "\uACE8\uB4DC \uD68D\uB4DD\uB7C9\uC774 \uC99D\uAC00\uD569\uB2C8\uB2E4."
+    Icon: {fileID: 21300000, guid: e6e3161209fa1d14d84a996c7d5ddc1c, type: 3}
+    Costs: 0a0000001400000028000000460000006e000000
+    Values:
+    - 0.1
+    - 0.2
+    - 0.3
+    - 0.4
+    - 0.5
+    ValueType: percent
