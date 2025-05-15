@@ -1785,6 +1785,9 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             mSkill3Coroutine = StartCoroutine(Skill_3_Fire());
             yield return mSkill3Coroutine;
         }
+        
+        yield return null;
+        SetPlayerState(PlayerState.Idle);
     }
 
     private IEnumerator Skill_3_Stance()
