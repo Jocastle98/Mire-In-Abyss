@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Cysharp.Threading.Tasks;
+using EnemyEnums;
 using Events.Gameplay;
 using SceneEnums;
 using UnityEngine.SceneManagement;
@@ -18,6 +19,7 @@ public class AbyssManager : Singleton<AbyssManager>
     public int levelDesign = 1;
     public int abyssClearLimit = 3;
     private int abyssClearCount = 0;
+    private int tempSoulStone = 0;
     
     public GameObject player;
 
@@ -74,7 +76,13 @@ public class AbyssManager : Singleton<AbyssManager>
     {
         levelDesign++;
         abyssClearCount++;
-
+        if (tempSoulStone > 0)
+        {
+            PlayerHub.Instance.Inventory.AddSoul(tempSoulStone);
+            R3EventBus.Instance.Publish(new Events.HUD.ToastPopup($"스테이지 클리어 보상: {tempSoulStone} 영혼석 획득", 3f, Color.magenta));
+            Debug.Log($"스테이지 클리어 보상: {tempSoulStone} 영혼석 획득!");
+            tempSoulStone = 0;
+        }
         if (abyssClearCount >= abyssClearLimit)
         {
             LetsGoHome();
@@ -94,6 +102,7 @@ public class AbyssManager : Singleton<AbyssManager>
         //마을 씬로드
         Instance.abyssClearCount = 0;
         Instance.levelDesign = 0;
+        Instance.tempSoulStone = 0;
         
         //AchievementManager.Instance.AddProgress("A011", 1); TODO: 게임 클리어에 업적해금하도록 이동예정
         var playerStats = Instance.player.GetComponent<PlayerStats>();
@@ -103,6 +112,25 @@ public class AbyssManager : Singleton<AbyssManager>
         }
         
         SceneLoader.LoadSceneAsync(Constants.TownScene).Forget();
+    }
+
+    public void AddSoulStoneFromEnemy(EnemyType enemyType)
+    {
+        int soulAmount = 0;
+        switch (enemyType)
+        {
+            case EnemyType.Common:
+                soulAmount = Random.Range(1, 3);
+                break;
+            case EnemyType.Elite:
+                soulAmount = Random.Range(3, 6);
+                break;
+            case EnemyType.Boss:
+                soulAmount = Random.Range(30, 50);
+                break;
+        }
+
+        tempSoulStone += soulAmount;
     }
 
     protected override void OnSceneLoaded(Scene scene, LoadSceneMode mode)
