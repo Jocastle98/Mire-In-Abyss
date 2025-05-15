@@ -500,7 +500,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     /// <param name="useMoveInput"> 이동 입력을 사용할지 여부 (구르기=O, 돌진=X) </param>
     /// <param name="isGroundOnly"> 지상 전용 동작인지 여부 (구르기=O, 돌진=X) </param>
     /// <returns> 방향 벡터 반환 </returns>
-    public Vector3 GetActionDirection(bool useMoveInput, bool isGroundOnly)
+    public Vector3 GetActionDirection(bool useMoveInput, bool isGroundOnly, bool forceHorizontal = false)
     {
         Vector3 targetDirection = Vector3.zero;
         Vector2 moveInput = GameManager.Instance.Input.MoveInput;
@@ -516,7 +516,14 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             }
             else
             {
-                targetDirection = GetCameraForwardDirection(true);
+                if (mMainCamera.transform.forward.y < 0 || forceHorizontal)
+                {
+                    targetDirection = GetCameraForwardDirection(true);
+                }
+                else
+                {
+                    targetDirection = GetCameraForwardDirection(false);
+                }
             }
         }
         else
@@ -820,6 +827,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
             }
             
             mCharacterController.Move(targetDirection * moveAmount);
+            
             distanceCovered += moveAmount;
             yield return null;
         }
