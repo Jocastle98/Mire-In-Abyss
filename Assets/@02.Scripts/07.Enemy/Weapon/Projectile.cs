@@ -52,6 +52,8 @@ public class Projectile : MonoBehaviour
     {
         if (mIsBreath) return;
 
+        if (ShooterTransform != null && other.transform == ShooterTransform)
+            return;
         int layer = other.gameObject.layer;
 
         // 반사화살인지 구분하기
@@ -81,7 +83,7 @@ public class Projectile : MonoBehaviour
         }
 
         // 패링 포함이라 패링 후에 화살이 몬스터한테 가는 사이 파괴될수있어서 시간조절 잘해야할듯
-        Destroy(gameObject,2.5f);
+        Destroy(gameObject,6f);
     }
 
     private void OnTriggerStay(Collider other)

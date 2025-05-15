@@ -926,8 +926,10 @@ public class EnemyBTController : MonoBehaviour, IHpTrackable, IMapTrackable
 
     public void FireProjectile()
     {
-        if (mAttackBehaviorAsset is RangedAttackBehavior ranged) ranged.FireLastPosition(transform,
-                mTarget != null ? mTarget.position : transform.position + transform.forward * 10f);
+        if (mAttackBehaviorAsset is RangedAttackBehavior ranged)
+        {
+            ranged.FireLastPosition(transform, mTarget);
+        }
         else if (mAttackBehaviorAsset is DragonAttackBehavior dragon) dragon.FireLastPosition(transform);
     }
 
