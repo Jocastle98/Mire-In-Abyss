@@ -21,6 +21,7 @@ public class UIManager : Singleton<UIManager>
     [SerializeField] BaseUIPanel mEscGroupPrefab;
     [SerializeField] BaseUIPanel mSoulStoneShopPanelPrefab;
     [SerializeField] BaseUIPanel mPortalPanelPrefab;
+    [SerializeField] BaseUIPanel mCreditPrefab;
 
     private Dictionary<UIPanelType, BaseUIPanel> mPanels = new();
     protected override void Awake()
@@ -32,6 +33,7 @@ public class UIManager : Singleton<UIManager>
         mPanels.Add(UIPanelType.EscGroup, mEscGroupPrefab);
         mPanels.Add(UIPanelType.SoulStoneShop, mSoulStoneShopPanelPrefab);
         mPanels.Add(UIPanelType.EnterPortal, mPortalPanelPrefab);
+        mPanels.Add(UIPanelType.Credit, mCreditPrefab);
     }
 
     void Update()
