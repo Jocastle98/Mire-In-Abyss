@@ -722,7 +722,7 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 80a04f4eb8c56a24c82b1f4314f0ba78, type: 3}
   mBgmClips:
   - {fileID: 8300000, guid: b6cacb1699ba78143a35c66fc48bed6d, type: 3}
-  - {fileID: 8300000, guid: 20356256038e8274ba57452d079147da, type: 3}
+  - {fileID: 8300000, guid: 87e0e90ee0c82854e9490ea4992b413e, type: 3}
   - {fileID: 8300000, guid: 47d88bdf17cc7034f91b7982d5e5fec0, type: 3}
   - {fileID: 8300000, guid: 47d88bdf17cc7034f91b7982d5e5fec0, type: 3}
   mSfxPoolSize: 16

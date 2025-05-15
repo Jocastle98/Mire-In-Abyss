@@ -5,6 +5,7 @@ using Cinemachine;
 using Events.Player;
 using PlayerEnums;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 [RequireComponent(typeof(Animator))]
 [RequireComponent(typeof(PlayerStats))]
@@ -109,9 +110,11 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     [SerializeField] private float mSkill_4_TimeoutDelta;
     public float Skill_4_TimeoutDelta => mSkill_4_TimeoutDelta;
     
+    [FormerlySerializedAs("mGroundLayers")]
     [Space(10)]
     [Header("Player Surroundings Check")]
-    [SerializeField] private LayerMask mGroundLayers;
+    [SerializeField] private LayerMask mGroundDetectionLayers;
+    [SerializeField] private LayerMask mSkillGroundLayers;
     [SerializeField] private float mGroundedOffset = -0.15f;
     [SerializeField] private float mGroundedRadius = 0.3f;
     public bool bIsGrounded { get; private set; }
@@ -326,7 +329,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     private void GroundedCheck()
     {
         Vector3 spherePosition = new Vector3(transform.position.x, transform.position.y - mGroundedOffset, transform.position.z);
-        bool isGrounded = Physics.CheckSphere(spherePosition, mGroundedRadius, mGroundLayers, QueryTriggerInteraction.Ignore);
+        bool isGrounded = Physics.CheckSphere(spherePosition, mGroundedRadius, mGroundDetectionLayers, QueryTriggerInteraction.Ignore);
 
         if (bIsGrounded != isGrounded)
         {
@@ -1763,7 +1766,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
 
     private IEnumerator Skill_3_Stance()
     {
-        if (Physics.Raycast(transform.position + Vector3.up * 2.0f, Vector3.down, out RaycastHit hit, 100f, mGroundLayers))
+        if (Physics.Raycast(transform.position + Vector3.up * 2.0f, Vector3.down, out RaycastHit hit, 100f, mSkillGroundLayers))
         {
             mbIsLandSucess = true;
             
@@ -1908,7 +1911,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     private IEnumerator Skill_4_Stance()
     {
         Vector3 groundPosition = transform.position;
-        if (Physics.Raycast(transform.position + Vector3.up * 2.0f, Vector3.down, out RaycastHit hit, 100.0f, mGroundLayers))
+        if (Physics.Raycast(transform.position + Vector3.up * 2.0f, Vector3.down, out RaycastHit hit, 100.0f, mSkillGroundLayers))
         {
             groundPosition = hit.point;
         }
@@ -2006,7 +2009,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
 
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
             RaycastHit hit;
-            if (Physics.Raycast(ray, out hit, 100.0f, mGroundLayers))
+            if (Physics.Raycast(ray, out hit, 100.0f, mSkillGroundLayers))
             {
                 range_5_Indicator.transform.position = hit.point;
                 finalTargetPoint = hit.point;

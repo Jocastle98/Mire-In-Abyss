@@ -4,6 +4,7 @@ using R3;
 using UIHUDEnums;
 using Events.HUD;
 using Events.Gameplay;
+using Unity.VisualScripting;
 
 
 public sealed class MiniMapPresenter : HudPresenterBase
@@ -12,7 +13,7 @@ public sealed class MiniMapPresenter : HudPresenterBase
     [SerializeField] RectTransform mOtherIconLayer;
     [SerializeField] RectTransform mPlayerIconLayer;
     [SerializeField] Camera mMiniMapCam;
-    [SerializeField] Transform mPlayer;
+    Transform mPlayer;
     [SerializeField] private List<MiniMapIcon> mIconPrefabs;
 
     private Camera mMainCam;
@@ -40,6 +41,11 @@ public sealed class MiniMapPresenter : HudPresenterBase
         mMainCam = Camera.main;
     }
 
+
+    void Start()
+    {
+        mPlayer = TempRefManager.Instance.Player.transform;
+    }
     public override void Initialize()
     {
         subscribeEvents();
