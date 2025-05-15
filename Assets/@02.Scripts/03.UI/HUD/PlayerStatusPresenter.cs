@@ -8,6 +8,7 @@ using TMPro;
 using UIEnums;
 using UnityEngine;
 using UnityEngine.PlayerLoop;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public sealed class PlayerStatusPresenter : HudPresenterBase
@@ -29,17 +30,38 @@ public sealed class PlayerStatusPresenter : HudPresenterBase
         mPool = new(mBuffSlotPrefab, mBuffRoot, 8);
     }
 
+    void OnEnable()
+    {
+        // 새 씬이 로드된 직후 호출
+        SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+
+    protected override void OnDisable()
+    {
+        base.OnDisable();
+
+        // 이벤트 해제
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+
+        // 버프 슬롯 풀 반환
+        foreach (var v in mBuffSlots.Values)
+            mPool.Return(v);
+        mBuffSlots.Clear();
+    }
+
+
+
     public override void Initialize()
     {
         subscribeEvents();
         mLevelText.text = "1";
         // TODO: Abyss, Town 진입 시 플레이어 HP 정보 받아오기
         mHpText.text = $"{TempRefManager.Instance.PlayerStats.GetCurrentHP()} / {TempRefManager.Instance.PlayerStats.GetMaxHP()}";
-        
+
         mExpBarUI.SetProgress(0);
         mHpBarUI.SetProgress(TempRefManager.Instance.PlayerStats.GetCurrentHP() / TempRefManager.Instance.PlayerStats.GetMaxHP());
     }
-    
+
     private void subscribeEvents()
     {
         /* ─── HP ─── */
@@ -111,13 +133,17 @@ public sealed class PlayerStatusPresenter : HudPresenterBase
         mBuffSlots.Remove(id);
     }
 
-    protected override void OnDisable()
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        base.OnDisable();
-        foreach (var v in mBuffSlots.Values)
+        // 던전 씬 진입 시에만 초기화
+        if (scene.name == Constants.AbyssDungeonScene ||
+            scene.name == Constants.AbyssFieldScene)
         {
-            mPool.Return(v);
+            var stats = TempRefManager.Instance.PlayerStats;
+            var curHp = stats.GetCurrentHP();
+            var maxHp = stats.GetMaxHP();
+            mHpText.text = $"{curHp} / {maxHp}";
+            mHpBarUI.SetProgress(curHp / (float)maxHp);
         }
-        mBuffSlots.Clear();
     }
 }

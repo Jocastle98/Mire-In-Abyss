@@ -235,7 +235,7 @@ public sealed class WorldUIManager : MonoBehaviour
 
     void OnDisable()
     {
-        mCD.Dispose();
         ReturnAllPools();
+        mCD.Dispose();
     }
 }

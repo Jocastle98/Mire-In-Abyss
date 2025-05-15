@@ -1124,7 +1124,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9c45721ce2284fcd8e162061a0a5a2e1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mMaxHealth: 100
+  mMaxHealth: 800
   mDefense: 5
   mDetectRadius: 12
   mDetectAngle: 360
