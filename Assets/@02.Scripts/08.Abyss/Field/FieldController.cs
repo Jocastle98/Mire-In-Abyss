@@ -190,7 +190,8 @@ public class FieldController : Abyss
         
         mMonsterCurrentField += spawnCount;
         
-        int unique = Mathf.Min(mLevelDesign / mFieldData.uniqueSpawnMaxChance, mFieldData.uniqueSpawnMaxChance);
+        //int unique = Mathf.Min(mLevelDesign / mFieldData.uniqueSpawnMaxChance, mFieldData.uniqueSpawnMaxChance);
+        int unique = mFieldData.uniqueSpawnMaxChance;
 
         //일반 , 유니크 확률 소환
         SOSpawnTypeList monsterLists = Random.Range(0, 100) > unique
