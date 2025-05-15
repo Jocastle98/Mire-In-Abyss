@@ -15,7 +15,7 @@ public sealed class MainMenuPresenter : MonoBehaviour
         mBtnPlay    .onClick.AddListener(() => SceneLoader.LoadSceneAsync(Constants.TownScene).Forget());
         mBtnCodex   .onClick.AddListener(() => UIManager.Instance.Push(UIPanelType.Codex).Forget());
         mBtnSettings.onClick.AddListener(() => UIManager.Instance.Push(UIPanelType.Setting).Forget());
-        //mBtnCredit  .onClick.AddListener(() => UIManager.Instance.Push(UIPanelType.Credit).Forget());
+        mBtnCredit  .onClick.AddListener(() => UIManager.Instance.Push(UIPanelType.Credit).Forget());
         mBtnQuit    .onClick.AddListener(QuitGame);
 
         mVersionText.text = $"v{Application.version}";

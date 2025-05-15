@@ -24,7 +24,7 @@ public class ItemEffectSystem : MonoBehaviour
 
         if (mItemDatabase == null)
         {
-            mItemDatabase = GetComponent<ItemDatabase>();
+            mItemDatabase = GameDB.Instance.ItemDatabase;
             if (mItemDatabase == null)
             {
                 mItemDatabase = FindObjectOfType<ItemDatabase>();

@@ -828,6 +828,7 @@ public class EnemyBTController : MonoBehaviour, IHpTrackable, IMapTrackable
     {
         itemDropper.DropItemOnDeadth();
         GiveExpReward();
+        AbyssManager.Instance.AddSoulStoneFromEnemy(EnemyType);
         GameObject player = GameObject.FindGameObjectWithTag("Player");
         if (player != null)
         {
