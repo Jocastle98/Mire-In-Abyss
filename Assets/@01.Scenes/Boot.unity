@@ -215,11 +215,11 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 534169928116471900, guid: f884d260bd2837d46851e8a70a43e87f, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 500
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 534169928116471900, guid: f884d260bd2837d46851e8a70a43e87f, type: 3}
       propertyPath: m_SizeDelta.y
-      value: 30
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1553685841479656505, guid: f884d260bd2837d46851e8a70a43e87f, type: 3}
       propertyPath: mWidthPadding
@@ -231,11 +231,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2779433974074858296, guid: f884d260bd2837d46851e8a70a43e87f, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 500
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2779433974074858296, guid: f884d260bd2837d46851e8a70a43e87f, type: 3}
       propertyPath: m_SizeDelta.y
-      value: 30
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2881650128514527051, guid: f884d260bd2837d46851e8a70a43e87f, type: 3}
       propertyPath: m_Type
