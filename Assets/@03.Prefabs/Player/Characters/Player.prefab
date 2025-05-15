@@ -1642,9 +1642,12 @@ MonoBehaviour:
   mSkill_4_BaseTimeout: 25
   mSkill_4_ModifiedTimeout: 0
   mSkill_4_TimeoutDelta: 0
-  mGroundLayers:
+  mGroundDetectionLayers:
     serializedVersion: 2
     m_Bits: 713
+  mSkillGroundLayers:
+    serializedVersion: 2
+    m_Bits: 8
   mGroundedOffset: -0.125
   mGroundedRadius: 0.25
   mInCombatTimeout: 10
