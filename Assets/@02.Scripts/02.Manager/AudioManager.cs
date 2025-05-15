@@ -27,7 +27,12 @@ public class AudioManager : Singleton<AudioManager>
     private AudioSource[] mPooledSources;
     private AudioSource[] mBgmSources;
     private int mNextPool = 0;
+    private int mNextPoolLoop = 0;
     private int mNextBgm = 0;
+
+    // 루프용 식셔너리
+    private Dictionary<ExSfxType, AudioSource> mLoopExSfxSources = new Dictionary<ExSfxType, AudioSource>();
+
 
     #region Player SFX 클립
 
@@ -237,8 +242,8 @@ public class AudioManager : Singleton<AudioManager>
         var clip = mPooledSfxClips[idx];
         if (clip == null) return;
         var src = mPooledSources[mNextPool];
-        src.PlayOneShot(clip);
         mNextPool = (mNextPool + 1) % mSfxPoolSize;
+        src.PlayOneShot(mPooledSfxClips[idx]);
     }
     public void PlayUi(EUiType type)
     {
@@ -249,6 +254,36 @@ public class AudioManager : Singleton<AudioManager>
         mUiSource.PlayOneShot(clip);
     }
 
+    // ExSfx에서 특정 SFX 루프
+    public void PlayLoopPoolSfx(ExSfxType type)
+    {
+        if (mLoopExSfxSources.ContainsKey(type))
+            return;
+
+        int idx = (int)type;
+        if (mPooledSfxClips == null || idx < 0 || idx >= mPooledSfxClips.Length) return;
+        var clip = mPooledSfxClips[idx];
+        if (clip == null) return;
+
+        var src = mPooledSources[mNextPoolLoop];
+        mNextPoolLoop = (mNextPoolLoop + 1) % mSfxPoolSize;
+
+        src.clip = mPooledSfxClips[idx];
+        src.loop = true;
+        src.Play();
+        mLoopExSfxSources[type] = src;
+    }
+
+    public void StopLoopPoolSfx(ExSfxType type)
+    {
+        if (!mLoopExSfxSources.TryGetValue(type, out var src))
+            return;
+
+        src.Stop();
+        src.loop = false;
+        src.clip = null;
+        mLoopExSfxSources.Remove(type);
+    }
     protected override void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
         switch (scene.name)
