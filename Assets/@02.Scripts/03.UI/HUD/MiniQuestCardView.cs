@@ -16,9 +16,8 @@ public sealed class MiniQuestCardView : MonoBehaviour
     public int Progress { get; private set; }
     public int Target { get; private set; }
 
-    public bool IsCompleted = false;
 
-    public void Bind(string id, int progress, int target)    
+    public void Bind(string id, int progress, int target, bool isCompleted = false)    
     {
         ID = id;
         Target = target;
@@ -28,7 +27,7 @@ public sealed class MiniQuestCardView : MonoBehaviour
         mTitleText.text  = quest.Title;
         mDescText.text   = quest.Goal;
         mProgressText.text = $"{Progress} / {Target}";
-        mBG.color        = IsCompleted ? CompletedColor : ActiveColor;
+        mBG.color        = isCompleted ? CompletedColor : ActiveColor;
     }
 
     public void QuestUpdated(int progress)
@@ -39,7 +38,6 @@ public sealed class MiniQuestCardView : MonoBehaviour
 
     public void QuestCompleted()
     {
-        IsCompleted = true;
         mBG.color = CompletedColor;
     }
 

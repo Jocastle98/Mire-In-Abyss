@@ -38,6 +38,11 @@ public sealed class SkillSlotView : MonoBehaviour
         }
     }
 
+    public void UpdateSkillCoolTime(float cooldownTime)
+    {
+        mSkillCooldownTime = cooldownTime;
+    }
+
     public void SkillUsed()
     {
         mSkillTimer = mSkillCooldownTime;

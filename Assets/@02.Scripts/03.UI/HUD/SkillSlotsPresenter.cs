@@ -3,6 +3,7 @@ using System.Linq;
 using Cysharp.Threading.Tasks;
 using Events.Data;
 using Events.Player;
+using PlayerEnums;
 using R3;
 using UnityEngine;
 
@@ -13,6 +14,7 @@ public sealed class SkillSlotsPresenter : HudPresenterBase
     [SerializeField] List<SkillSlotView> mDefaultSkillSlots = new();
     private readonly Dictionary<int, SkillSlotView> mSlots = new();
     private bool mSkillInfoLoaded = false;
+    private PlayerController mPlayerController;
 
 
     public override void Initialize()
@@ -22,6 +24,7 @@ public sealed class SkillSlotsPresenter : HudPresenterBase
         {
             setSkillSlots();
         }
+        mPlayerController = TempRefManager.Instance.Player.GetComponent<PlayerController>();
     }
 
     private void subscribeEvents()
@@ -32,6 +35,7 @@ public sealed class SkillSlotsPresenter : HudPresenterBase
             {
                 if (mSlots.TryGetValue(e.ID, out var slot))
                 {
+                    slot.UpdateSkillCoolTime(getSkillCooldownTime(e.ID));
                     slot.SkillUsed();
                 }
             })
@@ -77,6 +81,22 @@ public sealed class SkillSlotsPresenter : HudPresenterBase
             mSlots[skillInfos[i].ID] = slot;
         }
 
+    }
+
+    private float getSkillCooldownTime(int id)
+    {
+        float cooldownTime = (SkillType)id switch
+        {
+            SkillType.Parry => mPlayerController.ParryModifiedTimeout,
+            SkillType.Dash => mPlayerController.DashModifiedTimeout,
+            SkillType.Roll => mPlayerController.RollModifiedTimeout,
+            SkillType.Skill1 => mPlayerController.Skill_1_ModifiedTimeout,
+            SkillType.Skill2 => mPlayerController.Skill_2_ModifiedTimeout,
+            SkillType.Skill3 => mPlayerController.Skill_3_ModifiedTimeout,
+            SkillType.Skill4 => mPlayerController.Skill_4_ModifiedTimeout,
+            _ => 0f,
+        };
+        return cooldownTime;
     }
 
     protected override void OnDisable()

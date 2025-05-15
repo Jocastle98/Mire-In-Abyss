@@ -48,21 +48,39 @@ public sealed class BossBarPresenter : HudPresenterBase
 
     private void UpdateHp(BossHpChanged b)
     {
+        int currentHp = b.CurrentHp;
+
+        if (currentHp <= 0)
+        {
+            currentHp = 0;
+        }
+
         if (mBossID != b.ID)
         {
             mBossID = b.ID;
-            mNameText.text = b.Name;
-            mSubNameText.text = b.SubName;
+            //TODO: 보스 이름 정보 가져오기 및 보스 Type struct에 포함시켜 가져오기
+            mNameText.text = "다크 드래곤";
+            mSubNameText.text = "심연의 군주";
             mMaxHp = b.MaxHp;
         }
 
-        mHpBarUI.SetProgress(b.CurrentHp / (float)mMaxHp);
-        mHpText.text = $"{b.CurrentHp} / {mMaxHp}";
-
-        if (!mIsEngaged)
+        if (b.CurrentHp <= 0)
         {
-            mIsEngaged = true;
-            showAsync().Forget();
+            mHpBarUI.SetProgress(currentHp / (float)mMaxHp);
+            mHpText.text = $"{currentHp} / {mMaxHp}";
+            OnDisengage(new BossDisengage(b.ID));
+            return;
+        }
+        else
+        {
+            mHpBarUI.SetProgress(currentHp / (float)mMaxHp);
+            mHpText.text = $"{currentHp} / {mMaxHp}";
+
+            if (!mIsEngaged)
+            {
+                mIsEngaged = true;
+                showAsync().Forget();
+            }
         }
     }
 
@@ -88,10 +106,14 @@ public sealed class BossBarPresenter : HudPresenterBase
     }
     private async UniTaskVoid hideAsync()
     {
-        await mRootGroup.DOFade(0f, 0.25f).SetEase(Ease.InSine).ToUniTask();
+        Debug.Log("Boss Hide Start");
+        await mRootGroup.DOFade(0f, 0.15f)                // 부드럽게 사라짐
+                     .SetEase(Ease.InSine)
+                     .ToUniTask();
+        Debug.Log("Boss Hide End");
         mRootGroup.interactable = false;
         mRootGroup.blocksRaycasts = false;
-        mMaxHp = 0;
+        mMaxHp = -1;     // 0 대신 음수로 두어 Divide by zero 원천 차단
     }
 
     protected override void OnDisable()
