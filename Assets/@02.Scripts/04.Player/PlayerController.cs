@@ -24,7 +24,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     
     [Space(10)]
     [Header("Player Jump Stat")]
-    [SerializeField] private float mGravity = - 9.81f;
+    [SerializeField] private float mGravity = -15.0f /*- 9.81f*/;
     [SerializeField] private float mJumpHeight = 5.0f;
     [SerializeField] private float mJumpTimeout = 0.5f;
     [SerializeField] private float mJumpTimeoutDelta;
@@ -129,7 +129,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     [SerializeField] private Transform mLeftHandTransform;
     
     // Player Internal Calculation Stat
-    private float mVerticalVelocity;
+    public float mVerticalVelocity;
     private float mRotationVelocity;
     private float mTerminalVelocity = 53.0f;
     private float mTargetRotation;
@@ -688,8 +688,7 @@ public class PlayerController : MonoBehaviour, IObserver<GameObject>
     
     public void Jump()
     {
-        mVerticalVelocity = 0.0f;
-        mVerticalVelocity = Mathf.Sqrt(mJumpHeight * -2.0f * mGravity);
+        mVerticalVelocity = Mathf.Sqrt(mJumpHeight * -1.25f * mGravity);
         
         if (GameManager.Instance.Input.MoveInput == Vector2.zero)
         {
